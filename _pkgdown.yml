@@ -15,7 +15,7 @@ reference:
   - title: File Loading
     contents:
       - load_srtr_file
-      - set_srtr_wd
+      - set_SRTR_wd
 
   - title: Variable and Factor Labeling
     contents:
@@ -25,4 +25,3 @@ reference:
   - title: Internal Datasets
     contents:
       - formats
-      - dictionary
