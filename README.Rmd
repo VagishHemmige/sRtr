@@ -24,7 +24,7 @@ The goal of sRtr is to ...
 
 You can install the development version of sRtr from [GitHub](https://github.com/) with:
 
-```{r install}
+```{r install, eval=FALSE}
 # install.packages("devtools")
 devtools::install_github("VagishHemmige/sRtr")
 ```
