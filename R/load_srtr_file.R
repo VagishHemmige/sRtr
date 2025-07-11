@@ -26,14 +26,14 @@ load_srtr_file <- function(file_key,
                            col_select = NULL,
                            ...) {
   # ---- Check registry ----
-  if (is.null(sRtr:::.srtr_env$file_list)) {
+  if (is.null(.srtr_env$file_list)) {
     stop("SRTR file list not initialized. Please set up the file registry.")
   }
 
   # ---- Lookup metadata ----
   file_key_input <- toupper(file_key)
 
-  match <- sRtr:::.srtr_env$file_list |>
+  match <- .srtr_env$file_list |>
     dplyr::filter(toupper(.data$file_root) == file_key_input) |>
     dplyr::slice(1)
 

@@ -27,7 +27,8 @@ Imports:
     labelled,
     rlang, 
     tibble, 
-    tidyselect
+    tidyselect,
+    magrittr
 Suggests: 
     knitr,
     rmarkdown,
