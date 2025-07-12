@@ -19,6 +19,9 @@ Depends:
     R (>= 2.10)
 Imports: 
     arrow,
+    DiagrammeR,
+    DiagrammeRsvg,
+    rsvg,
     dplyr,
     fs,
     haven,

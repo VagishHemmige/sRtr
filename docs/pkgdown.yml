@@ -1,8 +1,9 @@
 pandoc: '3.4'
 pkgdown: 2.0.7
 pkgdown_sha: ~
-articles: {}
-last_built: 2025-07-12T14:24Z
+articles:
+  building-cohort-with-strobe: building-cohort-with-strobe.html
+last_built: 2025-07-12T17:47Z
 urls:
   reference: https://vagishhemmige.github.io/sRtr/reference
   article: https://vagishhemmige.github.io/sRtr/articles

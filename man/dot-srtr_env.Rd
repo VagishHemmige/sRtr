@@ -5,14 +5,14 @@
 \alias{.srtr_env}
 \title{Internal environment for package-level state}
 \format{
-An object of class \code{environment} of length 2.
+An object of class \code{environment} of length 5.
 }
 \usage{
 .srtr_env
 }
 \description{
 This environment is used to store internal session-specific state,
-such as the file list loaded from \code{.map_SRTR_files()}. It is not
-exported and should not be accessed directly by users.
+such as the file list loaded from \code{.map_SRTR_files()} or the STROBE derivation flow.
+It is not exported and should not be accessed directly by users.
 }
 \keyword{internal}

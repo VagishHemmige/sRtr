@@ -1,0 +1,60 @@
+---
+title: "building-cohort-with-strobe"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{building-cohort-with-strobe}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, eval=FALSE}
+library(sRtr)
+
+TX_KI %>%
+  strobe_initialize(inclusion_label = "All kidney transplants") %>%
+  strobe_filter(
+    condition = "DON_AGE > 18",
+    inclusion_label = "Donor over 18 years old",
+    exclusion_reason = "Excluded: Donor age ≤ 18"
+  )%>%
+  strobe_filter(
+    condition = "DON_ABO=='B'",
+    inclusion_label = "Donor blood type B",
+    exclusion_reason = "Excluded: Donor blood type is not B"
+  )
+
+
+get_strobe_log()
+
+# ---- 1. Basic diagram (default sizes) ----
+plot_strobe_diagram()
+
+# ---- 2. Fixed width and height for all boxes ----
+plot_strobe_diagram(
+  incl_width = 3,
+  incl_height = 1,
+  excl_width = 2.5,
+  excl_height = 1
+)
+
+# ---- 3. Larger font sizes for better visibility in slides ----
+plot_strobe_diagram(
+  incl_fontsize = 30,
+  excl_fontsize = 30
+)
+
+# ---- 4. Large font, fixed width, variable height ----
+plot_strobe_diagram(
+  incl_width = 3,
+  excl_width = 2.5,
+  incl_fontsize = 40,
+  excl_fontsize = 40
+)
+```
