@@ -10,3 +10,15 @@
 # Initialize internal fields
 .srtr_env$initialized <- FALSE
 .srtr_env$file_list <- NULL
+
+.srtr_env$strobe_df <- tibble::tibble(
+  id        = character(),
+  parent    = character(),
+  label     = character(),
+  filter    = character(),
+  remaining = integer(),
+  dropped   = integer()
+)
+
+.srtr_env$strobe_step_counter <- 1L
+.srtr_env$strobe_last_id <- "start"
