@@ -27,11 +27,8 @@ dashed boxes to the right, originating from the connecting lines."><meta propert
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/building-cohort-with-strobe.html">building-cohort-with-strobe</a>
-  </div>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/index.html">Articles</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -65,12 +62,14 @@ dashed boxes to the right, originating from the connecting lines.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_strobe_diagram</span><span class="op">(</span></span>
 <span>  export_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  incl_width <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  incl_width_min <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  incl_height <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  excl_width <span class="op">=</span> <span class="fl">2.5</span>,</span>
+<span>  excl_width_min <span class="op">=</span> <span class="fl">2.5</span>,</span>
 <span>  excl_height <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  incl_fontsize <span class="op">=</span> <span class="fl">14</span>,</span>
-<span>  excl_fontsize <span class="op">=</span> <span class="fl">12</span></span>
+<span>  excl_fontsize <span class="op">=</span> <span class="fl">12</span>,</span>
+<span>  lock_width_min <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  lock_height <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -80,35 +79,45 @@ dashed boxes to the right, originating from the connecting lines.</p>
 <dd><p>Optional file path (e.g., "diagram.png" or "diagram.svg") to save the diagram.</p></dd>
 
 
-<dt>incl_width</dt>
-<dd><p>Width of inclusion boxes in inches. If NULL, auto-sizes to content.</p></dd>
+<dt>incl_width_min</dt>
+<dd><p>Width of inclusion boxes in inches. If <code>NULL</code>, auto-sizes to content.</p></dd>
 
 
 <dt>incl_height</dt>
-<dd><p>Height of inclusion boxes in inches. If NULL, auto-sizes to content.</p></dd>
+<dd><p>Height of inclusion boxes in inches. If <code>NULL</code>, auto-sizes to content.</p></dd>
 
 
-<dt>excl_width</dt>
-<dd><p>Width of exclusion boxes in inches. If NULL, auto-sizes to content.</p></dd>
+<dt>excl_width_min</dt>
+<dd><p>Width of exclusion boxes in inches. If <code>NULL</code>, auto-sizes to content.</p></dd>
 
 
 <dt>excl_height</dt>
-<dd><p>Height of exclusion boxes in inches. If NULL, auto-sizes to content.</p></dd>
+<dd><p>Height of exclusion boxes in inches. If <code>NULL</code>, auto-sizes to content.</p></dd>
 
 
 <dt>incl_fontsize</dt>
-<dd><p>Font size for inclusion box text (default 14).</p></dd>
+<dd><p>Font size for inclusion box text (default = 14).</p></dd>
 
 
 <dt>excl_fontsize</dt>
-<dd><p>Font size for exclusion box text (default 12).</p></dd>
+<dd><p>Font size for exclusion box text (default = 12).</p></dd>
+
+
+<dt>lock_width_min</dt>
+<dd><p>Logical. If <code>TRUE</code>, treats <code>incl_width_min</code> and <code>excl_width_min</code>
+as minimum widths. Due to Graphviz limitations, widths are lower bounds only—
+content may still expand boxes beyond these values.</p></dd>
+
+
+<dt>lock_height</dt>
+<dd><p>Logical. If <code>TRUE</code>, enforces exact box heights for all nodes.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>The DiagrammeR graph object.</p>
+<p>A <code>DiagrammeR</code> graph object representing the STROBE diagram.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

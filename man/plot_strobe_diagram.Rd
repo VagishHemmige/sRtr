@@ -6,31 +6,39 @@
 \usage{
 plot_strobe_diagram(
   export_file = NULL,
-  incl_width = 3,
+  incl_width_min = 3,
   incl_height = NULL,
-  excl_width = 2.5,
+  excl_width_min = 2.5,
   excl_height = NULL,
   incl_fontsize = 14,
-  excl_fontsize = 12
+  excl_fontsize = 12,
+  lock_width_min = FALSE,
+  lock_height = FALSE
 )
 }
 \arguments{
 \item{export_file}{Optional file path (e.g., "diagram.png" or "diagram.svg") to save the diagram.}
 
-\item{incl_width}{Width of inclusion boxes in inches. If NULL, auto-sizes to content.}
+\item{incl_width_min}{Width of inclusion boxes in inches. If \code{NULL}, auto-sizes to content.}
 
-\item{incl_height}{Height of inclusion boxes in inches. If NULL, auto-sizes to content.}
+\item{incl_height}{Height of inclusion boxes in inches. If \code{NULL}, auto-sizes to content.}
 
-\item{excl_width}{Width of exclusion boxes in inches. If NULL, auto-sizes to content.}
+\item{excl_width_min}{Width of exclusion boxes in inches. If \code{NULL}, auto-sizes to content.}
 
-\item{excl_height}{Height of exclusion boxes in inches. If NULL, auto-sizes to content.}
+\item{excl_height}{Height of exclusion boxes in inches. If \code{NULL}, auto-sizes to content.}
 
-\item{incl_fontsize}{Font size for inclusion box text (default 14).}
+\item{incl_fontsize}{Font size for inclusion box text (default = 14).}
 
-\item{excl_fontsize}{Font size for exclusion box text (default 12).}
+\item{excl_fontsize}{Font size for exclusion box text (default = 12).}
+
+\item{lock_width_min}{Logical. If \code{TRUE}, treats \code{incl_width_min} and \code{excl_width_min}
+as minimum widths. Due to Graphviz limitations, widths are lower bounds only—
+content may still expand boxes beyond these values.}
+
+\item{lock_height}{Logical. If \code{TRUE}, enforces exact box heights for all nodes.}
 }
 \value{
-The DiagrammeR graph object.
+A \code{DiagrammeR} graph object representing the STROBE diagram.
 }
 \description{
 Creates a STROBE flow diagram from the filtering log recorded via

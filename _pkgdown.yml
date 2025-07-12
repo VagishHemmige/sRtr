@@ -33,3 +33,11 @@ reference:
     contents:
       - formats
       - dictionary
+
+articles:
+  - title: Getting Started
+    contents:
+      - getting-started
+  - title: Cohort Building using the STROBE tools
+    contents:
+      - building-cohort-with-strobe
