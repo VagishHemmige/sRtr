@@ -72,6 +72,8 @@ TX_KI_labelled <-TX_KI%>%
   apply_srtr_factors()
 ```
 
-See [Function Reference](reference/index.html) for full documentation.
+See [Function
+Reference](https://vagishhemmige.github.io/sRtr/reference/index.html)
+for full documentation.
 
 Much more, including help files, vignettes, etc. will be coming soon!
