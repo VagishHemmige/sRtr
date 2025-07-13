@@ -2,44 +2,37 @@ pkgdown:
   title: "A package for working with the UNOS SRTR database in R"
   logo: man/figures/logo.png
   favicon: man/figures/logo.png
-
 url: https://vagishhemmige.github.io/sRtr/
-
 template:
   bootstrap: 5
   includes:
     in_header: |
       <meta name="google-site-verification" content="TBumihuxSFxK8muRvdo69ca7bmvzWmy-3OMfCZ2692A" />
-
 reference:
   - title: File Loading
     contents:
       - load_srtr_file
       - set_SRTR_wd
-
   - title: Variable and Factor Labeling
     contents:
       - apply_srtr_varlabels
       - apply_srtr_factors
-
   - title: STROBE Diagram Tracking
     contents:
       - strobe_initialize
       - strobe_filter
       - get_strobe_log
       - plot_strobe_diagram
-
   - title: Internal Datasets
     contents:
       - formats
       - dictionary
-
 articles:
-  - title: Getting Started
-    navbar: true
-    contents:
-      - getting-started
-  - title: Cohort Building using the STROBE tools
-    navbar: true
-    contents:
-      - building-cohort-with-strobe
+- title: Getting Started
+  navbar: ~
+  contents:
+  - getting-started
+- title: Cohort Building using the STROBE tools
+  navbar: ~
+  contents:
+  - building-cohort-with-strobe

@@ -1,7 +1,5 @@
 ---
 title: "Getting Started with sRtr"
-author: "Vagish Hemmige"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Getting Started with sRtr}
