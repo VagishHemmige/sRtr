@@ -36,8 +36,10 @@ reference:
 
 articles:
   - title: Getting Started
+    navbar: true
     contents:
       - getting-started
   - title: Cohort Building using the STROBE tools
+    navbar: true
     contents:
       - building-cohort-with-strobe
