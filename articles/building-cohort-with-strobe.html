@@ -76,10 +76,11 @@
 <p>The STROBE (Strengthening the Reporting of Observational Studies in
 Epidemiology) statement provides guidelines for reporting observational
 studies. A key component is the flow diagram that shows how the study
-population was selected. The <code>sRtr</code> package provides tools to
-create STROBE-compliant flow diagrams while building your cohort.</p>
-<p>This vignette demonstrates how to use the STROBE functions in
-<code>sRtr</code> to:</p>
+population was selected. We encourage use of the companion
+<code>strobe</code> package, which provides tools to create
+STROBE-compliant flow diagrams while building your cohort.</p>
+<p>This vignette demonstrates how to use the <code>strobe</code>
+functions in <code>sRtr</code> to:</p>
 <ol style="list-style-type: decimal">
 <li>Initialize a cohort with inclusion criteria<br>
 </li>
@@ -89,13 +90,29 @@ create STROBE-compliant flow diagrams while building your cohort.</p>
 </li>
 <li>Review the complete filtering log</li>
 </ol>
+<p>For more details, visit the <a href="https://vagishhemmige.github.io/strobe/" class="external-link"><code>strobe</code>
+package website</a>.</p>
+<div class="section level3">
+<h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h3>
+<p>You can install the development version of the <code>sRtr</code>
+package from GitHub using <a href="https://cran.r-project.org/package=devtools" class="external-link"><code>devtools</code></a>
+or <a href="https://pak.r-lib.org/" class="external-link"><code>pak</code></a>:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install devtools if needed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Install sRtr (and strobe, a suggested package)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"VagishHemmige/sRtr"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/strobe" class="external-link">strobe</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="basic-strobe-workflow">Basic STROBE Workflow<a class="anchor" aria-label="anchor" href="#basic-strobe-workflow"></a>
@@ -104,19 +121,19 @@ create STROBE-compliant flow diagrams while building your cohort.</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Initialize</strong> the cohort with
-<code><a href="../reference/strobe_initialize.html">strobe_initialize()</a></code><br>
+<code><a href="https://rdrr.io/pkg/strobe/man/strobe_initialize.html" class="external-link">strobe_initialize()</a></code><br>
 </li>
 <li>
 <strong>Filter</strong> sequentially with
-<code><a href="../reference/strobe_filter.html">strobe_filter()</a></code><br>
+<code><a href="https://rdrr.io/pkg/strobe/man/strobe_filter.html" class="external-link">strobe_filter()</a></code><br>
 </li>
 <li>
 <strong>Plot</strong> the diagram with
-<code><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram()</a></code><br>
+<code><a href="https://rdrr.io/pkg/strobe/man/plot_strobe_diagram.html" class="external-link">plot_strobe_diagram()</a></code><br>
 </li>
 <li>
 <strong>Review</strong> the log with
-<code><a href="../reference/get_strobe_log.html">get_strobe_log()</a></code>
+<code><a href="https://rdrr.io/pkg/strobe/man/get_strobe_log.html" class="external-link">get_strobe_log()</a></code>
 </li>
 </ol>
 <div class="section level3">
@@ -124,20 +141,20 @@ create STROBE-compliant flow diagrams while building your cohort.</p>
 </h3>
 <p>Let’s build a cohort of kidney transplant recipients with specific
 criteria:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">TX_KI</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_initialize.html">strobe_initialize</a></span><span class="op">(</span>inclusion_label <span class="op">=</span> <span class="st">"All kidney transplants"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
+<span>  <span class="fu">strobe</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/strobe/man/strobe_initialize.html" class="external-link">strobe_initialize</a></span><span class="op">(</span>inclusion_label <span class="op">=</span> <span class="st">"All kidney transplants"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">strobe</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/strobe/man/strobe_filter.html" class="external-link">strobe_filter</a></span><span class="op">(</span></span>
 <span>    condition <span class="op">=</span> <span class="st">"DON_AGE &gt; 18"</span>,</span>
 <span>    inclusion_label <span class="op">=</span> <span class="st">"Donor over 18 years old"</span>,</span>
 <span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: Donor age ≤ 18"</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
+<span>  <span class="fu">strobe</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/strobe/man/strobe_filter.html" class="external-link">strobe_filter</a></span><span class="op">(</span></span>
 <span>    condition <span class="op">=</span> <span class="st">"DON_ABO == 'B'"</span>,</span>
 <span>    inclusion_label <span class="op">=</span> <span class="st">"Donor blood type B"</span>,</span>
 <span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: Donor blood type is not B"</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
+<span>  <span class="fu">strobe</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/strobe/man/strobe_filter.html" class="external-link">strobe_filter</a></span><span class="op">(</span></span>
 <span>    condition <span class="op">=</span> <span class="st">"REC_AGE &gt;= 18 &amp; REC_AGE &lt;= 65"</span>,</span>
 <span>    inclusion_label <span class="op">=</span> <span class="st">"Recipient age 18-65"</span>,</span>
 <span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: Recipient age outside 18-65 range"</span></span>
@@ -146,9 +163,9 @@ criteria:</p>
 <div class="section level3">
 <h3 id="reviewing-the-filtering-log">Reviewing the Filtering Log<a class="anchor" aria-label="anchor" href="#reviewing-the-filtering-log"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># View the complete filtering log</span></span>
-<span><span class="fu"><a href="../reference/get_strobe_log.html">get_strobe_log</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">strobe</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/strobe/man/get_strobe_log.html" class="external-link">get_strobe_log</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The log shows: - Each filtering step - Number of records
 included/excluded at each step - Cumulative counts - Exclusion
 reasons</p>
@@ -157,173 +174,18 @@ reasons</p>
 <div class="section level2">
 <h2 id="creating-strobe-diagrams">Creating STROBE Diagrams<a class="anchor" aria-label="anchor" href="#creating-strobe-diagrams"></a>
 </h2>
-<div class="section level3">
-<h3 id="basic-diagram">Basic Diagram<a class="anchor" aria-label="anchor" href="#basic-diagram"></a>
-</h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="customizing-box-dimensions">Customizing Box Dimensions<a class="anchor" aria-label="anchor" href="#customizing-box-dimensions"></a>
-</h3>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">strobe</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/strobe/man/plot_strobe_diagram.html" class="external-link">plot_strobe_diagram</a></span><span class="op">(</span></span>
 <span>  incl_width_min <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  incl_height <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  excl_width_min <span class="op">=</span> <span class="fl">2.5</span>,</span>
 <span>  excl_height <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  lock_width_min <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  lock_height <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
-<span>  incl_width_min <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  excl_width_min <span class="op">=</span> <span class="fl">2.5</span>,</span>
-<span>  incl_fontsize <span class="op">=</span> <span class="fl">16</span>,</span>
-<span>  excl_fontsize <span class="op">=</span> <span class="fl">14</span>,</span>
-<span>  lock_width_min <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="adjusting-font-sizes">Adjusting Font Sizes<a class="anchor" aria-label="anchor" href="#adjusting-font-sizes"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
+<span>  lock_height <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  incl_fontsize <span class="op">=</span> <span class="fl">16</span>,</span>
 <span>  excl_fontsize <span class="op">=</span> <span class="fl">14</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="publication-ready-diagrams">Publication-Ready Diagrams<a class="anchor" aria-label="anchor" href="#publication-ready-diagrams"></a>
-</h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
-<span>  incl_width_min <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  excl_width_min <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  incl_height <span class="op">=</span> <span class="fl">1.2</span>,</span>
-<span>  excl_height <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  incl_fontsize <span class="op">=</span> <span class="fl">12</span>,</span>
-<span>  excl_fontsize <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  lock_width_min <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  lock_height <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="exporting-diagrams">Exporting Diagrams<a class="anchor" aria-label="anchor" href="#exporting-diagrams"></a>
-</h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
-<span>  export_file <span class="op">=</span> <span class="st">"strobe_diagram.png"</span>,</span>
-<span>  incl_width_min <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  excl_width_min <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  incl_fontsize <span class="op">=</span> <span class="fl">14</span>,</span>
-<span>  excl_fontsize <span class="op">=</span> <span class="fl">12</span></span>
-<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
-<span>  export_file <span class="op">=</span> <span class="st">"strobe_diagram.svg"</span>,</span>
-<span>  incl_width_min <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  excl_width_min <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  incl_fontsize <span class="op">=</span> <span class="fl">14</span>,</span>
-<span>  excl_fontsize <span class="op">=</span> <span class="fl">12</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="advanced-examples">Advanced Examples<a class="anchor" aria-label="anchor" href="#advanced-examples"></a>
-</h2>
-<div class="section level3">
-<h3 id="complex-multi-step-filtering">Complex Multi-Step Filtering<a class="anchor" aria-label="anchor" href="#complex-multi-step-filtering"></a>
-</h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">TX_KI</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_initialize.html">strobe_initialize</a></span><span class="op">(</span>inclusion_label <span class="op">=</span> <span class="st">"All kidney transplants\n(N=XXX)"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
-<span>    condition <span class="op">=</span> <span class="st">"DON_AGE &gt;= 18 &amp; DON_AGE &lt;= 70"</span>,</span>
-<span>    inclusion_label <span class="op">=</span> <span class="st">"Donor age 18-70 years"</span>,</span>
-<span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: Donor age\noutside 18-70 range"</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
-<span>    condition <span class="op">=</span> <span class="st">"REC_AGE &gt;= 18"</span>,</span>
-<span>    inclusion_label <span class="op">=</span> <span class="st">"Adult recipients\n(≥18 years)"</span>,</span>
-<span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: Pediatric\nrecipients"</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
-<span>    condition <span class="op">=</span> <span class="st">"TX_TYPE == 'KIDNEY'"</span>,</span>
-<span>    inclusion_label <span class="op">=</span> <span class="st">"Kidney-only transplants"</span>,</span>
-<span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: Multi-organ\ntransplants"</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
-<span>    condition <span class="op">=</span> <span class="st">"!is.na(GRAFT_STAT) &amp; !is.na(GRAFT_FAIL_DATE)"</span>,</span>
-<span>    inclusion_label <span class="op">=</span> <span class="st">"Complete graft\noutcome data"</span>,</span>
-<span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: Missing graft\noutcome data"</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/strobe_filter.html">strobe_filter</a></span><span class="op">(</span></span>
-<span>    condition <span class="op">=</span> <span class="st">"GRAFT_FAIL_DATE &gt;= 365 | is.na(GRAFT_FAIL_DATE)"</span>,</span>
-<span>    inclusion_label <span class="op">=</span> <span class="st">"≥1 year follow-up\nor event"</span>,</span>
-<span>    exclusion_reason <span class="op">=</span> <span class="st">"Excluded: &lt;1 year\nfollow-up without event"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="presentation-style-diagram">Presentation-Style Diagram<a class="anchor" aria-label="anchor" href="#presentation-style-diagram"></a>
-</h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
-<span>  incl_width_min <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  excl_width_min <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  incl_height <span class="op">=</span> <span class="fl">1.5</span>,</span>
-<span>  excl_height <span class="op">=</span> <span class="fl">1.2</span>,</span>
-<span>  incl_fontsize <span class="op">=</span> <span class="fl">18</span>,</span>
-<span>  excl_fontsize <span class="op">=</span> <span class="fl">16</span>,</span>
-<span>  lock_width_min <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  lock_height <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
-</h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
-<span>  incl_width_min <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  excl_width_min <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  lock_width_min <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/plot_strobe_diagram.html">plot_strobe_diagram</a></span><span class="op">(</span></span>
-<span>  incl_height <span class="op">=</span> <span class="fl">1.5</span>,</span>
-<span>  excl_height <span class="op">=</span> <span class="fl">1.2</span>,</span>
-<span>  lock_height <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
-</h2>
-<p>The STROBE functions in <code>sRtr</code> provide a systematic way
-to:</p>
-<ul>
-<li>Document your cohort selection process</li>
-<li>Create publication-ready flow diagrams</li>
-<li>Ensure transparent reporting of observational studies</li>
-<li>Maintain a complete audit trail of filtering decisions</li>
-</ul>
-<p>Key features:</p>
-<ul>
-<li>Flexible box sizing</li>
-<li>Direct export to PNG/SVG</li>
-<li>Customizable styling</li>
-<li>STROBE-compliant layout</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
-</h2>
-<ul>
-<li><code><a href="../reference/strobe_initialize.html">?strobe_initialize</a></code></li>
-<li><code><a href="../reference/strobe_filter.html">?strobe_filter</a></code></li>
-<li><code><a href="../reference/plot_strobe_diagram.html">?plot_strobe_diagram</a></code></li>
-<li><code><a href="../reference/get_strobe_log.html">?get_strobe_log</a></code></li>
-</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
