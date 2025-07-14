@@ -345,10 +345,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The STROBE (Strengthening the Reporting of Observational Studies in
 Epidemiology) statement provides guidelines for reporting observational
 studies. A key component is the flow diagram that shows how the study
-population was selected. The <code>sRtr</code> package provides tools to
-create STROBE-compliant flow diagrams while building your cohort.</p>
-<p>This vignette demonstrates how to use the STROBE functions in
-<code>sRtr</code> to:</p>
+population was selected. We encourage use of the companion
+<code>strobe</code> package, which provides tools to create
+STROBE-compliant flow diagrams while building your cohort.</p>
+<p>This vignette demonstrates how to use the <code>strobe</code>
+functions in <code>sRtr</code> to:</p>
 <ol style="list-style-type: decimal">
 <li>Initialize a cohort with inclusion criteria<br />
 </li>
@@ -358,11 +359,25 @@ create STROBE-compliant flow diagrams while building your cohort.</p>
 </li>
 <li>Review the complete filtering log</li>
 </ol>
+<p>For more details, visit the <a href="https://vagishhemmige.github.io/strobe/"><code>strobe</code>
+package website</a>.</p>
+<div id="installation" class="section level3">
+<h3>Installation</h3>
+<p>You can install the development version of the <code>sRtr</code>
+package from GitHub using <a href="https://cran.r-project.org/package=devtools"><code>devtools</code></a>
+or <a href="https://pak.r-lib.org/"><code>pak</code></a>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Install devtools if needed</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Install sRtr (and strobe, a suggested package)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;VagishHemmige/sRtr&quot;</span>, <span class="at">dependencies =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
 </div>
 <div id="getting-started" class="section level2">
 <h2>Getting Started</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(sRtr)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(sRtr)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">library</span>(strobe)</span></code></pre></div>
 </div>
 <div id="basic-strobe-workflow" class="section level2">
 <h2>Basic STROBE Workflow</h2>
@@ -384,28 +399,28 @@ create STROBE-compliant flow diagrams while building your cohort.</p>
 <h3>Example: Kidney Transplant Cohort</h3>
 <p>Let’s build a cohort of kidney transplant recipients with specific
 criteria:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>TX_KI <span class="sc">%&gt;%</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">strobe_initialize</span>(<span class="at">inclusion_label =</span> <span class="st">&quot;All kidney transplants&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;DON_AGE &gt; 18&quot;</span>,</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Donor over 18 years old&quot;</span>,</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Donor age ≤ 18&quot;</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;DON_ABO == &#39;B&#39;&quot;</span>,</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Donor blood type B&quot;</span>,</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Donor blood type is not B&quot;</span></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;REC_AGE &gt;= 18 &amp; REC_AGE &lt;= 65&quot;</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Recipient age 18-65&quot;</span>,</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Recipient age outside 18-65 range&quot;</span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>TX_KI <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  strobe<span class="sc">::</span><span class="fu">strobe_initialize</span>(<span class="at">inclusion_label =</span> <span class="st">&quot;All kidney transplants&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  strobe<span class="sc">::</span><span class="fu">strobe_filter</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;DON_AGE &gt; 18&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Donor over 18 years old&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Donor age ≤ 18&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  strobe<span class="sc">::</span><span class="fu">strobe_filter</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;DON_ABO == &#39;B&#39;&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Donor blood type B&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Donor blood type is not B&quot;</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  strobe<span class="sc">::</span><span class="fu">strobe_filter</span>(</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;REC_AGE &gt;= 18 &amp; REC_AGE &lt;= 65&quot;</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Recipient age 18-65&quot;</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Recipient age outside 18-65 range&quot;</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="reviewing-the-filtering-log" class="section level3">
 <h3>Reviewing the Filtering Log</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># View the complete filtering log</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">get_strobe_log</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># View the complete filtering log</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>strobe<span class="sc">::</span><span class="fu">get_strobe_log</span>()</span></code></pre></div>
 <p>The log shows: - Each filtering step - Number of records
 included/excluded at each step - Cumulative counts - Exclusion
 reasons</p>
@@ -413,154 +428,17 @@ reasons</p>
 </div>
 <div id="creating-strobe-diagrams" class="section level2">
 <h2>Creating STROBE Diagrams</h2>
-<div id="basic-diagram" class="section level3">
-<h3>Basic Diagram</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>()</span></code></pre></div>
-</div>
-<div id="customizing-box-dimensions" class="section level3">
-<h3>Customizing Box Dimensions</h3>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>strobe<span class="sc">::</span><span class="fu">plot_strobe_diagram</span>(</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">incl_width_min =</span> <span class="dv">3</span>,</span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">incl_height =</span> <span class="dv">1</span>,</span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">excl_width_min =</span> <span class="fl">2.5</span>,</span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">excl_height =</span> <span class="dv">1</span>,</span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">lock_width_min =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">lock_height =</span> <span class="cn">TRUE</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>)</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="at">incl_width_min =</span> <span class="dv">3</span>,</span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="at">excl_width_min =</span> <span class="fl">2.5</span>,</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="at">incl_fontsize =</span> <span class="dv">16</span>,</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  <span class="at">excl_fontsize =</span> <span class="dv">14</span>,</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="at">lock_width_min =</span> <span class="cn">TRUE</span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-<div id="adjusting-font-sizes" class="section level3">
-<h3>Adjusting Font Sizes</h3>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">incl_fontsize =</span> <span class="dv">16</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">excl_fontsize =</span> <span class="dv">14</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-<div id="publication-ready-diagrams" class="section level3">
-<h3>Publication-Ready Diagrams</h3>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">incl_width_min =</span> <span class="dv">4</span>,</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">excl_width_min =</span> <span class="dv">3</span>,</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">incl_height =</span> <span class="fl">1.2</span>,</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">excl_height =</span> <span class="dv">1</span>,</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">incl_fontsize =</span> <span class="dv">12</span>,</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">excl_fontsize =</span> <span class="dv">10</span>,</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="at">lock_width_min =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">lock_height =</span> <span class="cn">TRUE</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-<div id="exporting-diagrams" class="section level3">
-<h3>Exporting Diagrams</h3>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">export_file =</span> <span class="st">&quot;strobe_diagram.png&quot;</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">incl_width_min =</span> <span class="dv">4</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">excl_width_min =</span> <span class="dv">3</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">incl_fontsize =</span> <span class="dv">14</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">excl_fontsize =</span> <span class="dv">12</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>)</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="at">export_file =</span> <span class="st">&quot;strobe_diagram.svg&quot;</span>,</span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="at">incl_width_min =</span> <span class="dv">4</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="at">excl_width_min =</span> <span class="dv">3</span>,</span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="at">incl_fontsize =</span> <span class="dv">14</span>,</span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="at">excl_fontsize =</span> <span class="dv">12</span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-</div>
-<div id="advanced-examples" class="section level2">
-<h2>Advanced Examples</h2>
-<div id="complex-multi-step-filtering" class="section level3">
-<h3>Complex Multi-Step Filtering</h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>TX_KI <span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">strobe_initialize</span>(<span class="at">inclusion_label =</span> <span class="st">&quot;All kidney transplants</span><span class="sc">\n</span><span class="st">(N=XXX)&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;DON_AGE &gt;= 18 &amp; DON_AGE &lt;= 70&quot;</span>,</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Donor age 18-70 years&quot;</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Donor age</span><span class="sc">\n</span><span class="st">outside 18-70 range&quot;</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;REC_AGE &gt;= 18&quot;</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Adult recipients</span><span class="sc">\n</span><span class="st">(≥18 years)&quot;</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Pediatric</span><span class="sc">\n</span><span class="st">recipients&quot;</span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;TX_TYPE == &#39;KIDNEY&#39;&quot;</span>,</span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Kidney-only transplants&quot;</span>,</span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Multi-organ</span><span class="sc">\n</span><span class="st">transplants&quot;</span></span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;!is.na(GRAFT_STAT) &amp; !is.na(GRAFT_FAIL_DATE)&quot;</span>,</span>
-<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;Complete graft</span><span class="sc">\n</span><span class="st">outcome data&quot;</span>,</span>
-<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: Missing graft</span><span class="sc">\n</span><span class="st">outcome data&quot;</span></span>
-<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>  <span class="fu">strobe_filter</span>(</span>
-<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a>    <span class="at">condition =</span> <span class="st">&quot;GRAFT_FAIL_DATE &gt;= 365 | is.na(GRAFT_FAIL_DATE)&quot;</span>,</span>
-<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>    <span class="at">inclusion_label =</span> <span class="st">&quot;≥1 year follow-up</span><span class="sc">\n</span><span class="st">or event&quot;</span>,</span>
-<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a>    <span class="at">exclusion_reason =</span> <span class="st">&quot;Excluded: &lt;1 year</span><span class="sc">\n</span><span class="st">follow-up without event&quot;</span></span>
-<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a>  )</span></code></pre></div>
-</div>
-<div id="presentation-style-diagram" class="section level3">
-<h3>Presentation-Style Diagram</h3>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="at">incl_width_min =</span> <span class="dv">5</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">excl_width_min =</span> <span class="dv">4</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">incl_height =</span> <span class="fl">1.5</span>,</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="at">excl_height =</span> <span class="fl">1.2</span>,</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">incl_fontsize =</span> <span class="dv">18</span>,</span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="at">excl_fontsize =</span> <span class="dv">16</span>,</span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="at">lock_width_min =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="at">lock_height =</span> <span class="cn">TRUE</span></span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-</div>
-<div id="troubleshooting" class="section level2">
-<h2>Troubleshooting</h2>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="at">incl_width_min =</span> <span class="dv">4</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">excl_width_min =</span> <span class="dv">3</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">lock_width_min =</span> <span class="cn">TRUE</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>)</span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="fu">plot_strobe_diagram</span>(</span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="at">incl_height =</span> <span class="fl">1.5</span>,</span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="at">excl_height =</span> <span class="fl">1.2</span>,</span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="at">lock_height =</span> <span class="cn">TRUE</span></span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-<div id="summary" class="section level2">
-<h2>Summary</h2>
-<p>The STROBE functions in <code>sRtr</code> provide a systematic way
-to:</p>
-<ul>
-<li>Document your cohort selection process</li>
-<li>Create publication-ready flow diagrams</li>
-<li>Ensure transparent reporting of observational studies</li>
-<li>Maintain a complete audit trail of filtering decisions</li>
-</ul>
-<p>Key features:</p>
-<ul>
-<li>Flexible box sizing</li>
-<li>Direct export to PNG/SVG</li>
-<li>Customizable styling</li>
-<li>STROBE-compliant layout</li>
-</ul>
-</div>
-<div id="see-also" class="section level2">
-<h2>See Also</h2>
-<ul>
-<li><code>?strobe_initialize</code></li>
-<li><code>?strobe_filter</code></li>
-<li><code>?plot_strobe_diagram</code></li>
-<li><code>?get_strobe_log</code></li>
-</ul>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">lock_height =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">incl_fontsize =</span> <span class="dv">16</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="at">excl_fontsize =</span> <span class="dv">14</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 
 

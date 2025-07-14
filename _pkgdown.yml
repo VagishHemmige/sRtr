@@ -17,12 +17,6 @@ reference:
     contents:
       - apply_srtr_varlabels
       - apply_srtr_factors
-  - title: STROBE Diagram Tracking
-    contents:
-      - strobe_initialize
-      - strobe_filter
-      - get_strobe_log
-      - plot_strobe_diagram
   - title: Internal Datasets
     contents:
       - formats
@@ -32,7 +26,7 @@ articles:
   navbar: ~
   contents:
   - getting-started
-- title: Cohort Building using the STROBE tools
+- title: Cohort Building using the `strobe` package
   navbar: ~
   contents:
   - building-cohort-with-strobe

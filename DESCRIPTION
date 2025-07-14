@@ -19,16 +19,9 @@ Depends:
     R (>= 2.10)
 Imports: 
     arrow,
-    DiagrammeR,
-    DiagrammeRsvg,
-    rsvg,
     dplyr,
     fs,
     haven,
-    lubridate,
-    parquetize,
-    purrr,
-    readr,
     stringr,
     tidyr,
     labelled,
@@ -39,7 +32,10 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    strobe
+Remotes: 
+    VagishHemmige/strobe
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true
