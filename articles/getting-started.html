@@ -117,7 +117,7 @@ GitHub:</p>
 <h2 id="setting-up-your-srtr-data-directory">Setting Up Your SRTR Data Directory<a class="anchor" aria-label="anchor" href="#setting-up-your-srtr-data-directory"></a>
 </h2>
 <p>Before you can load SRTR files, you need to tell the package where
-your SRTR data files are located. The <code><a href="../reference/set_SRTR_wd.html">set_SRTR_wd()</a></code>
+your SRTR data files are located. The <code><a href="../reference/set_SRTR_wd.html">set_srtr_wd()</a></code>
 function allows you to specify the directory containing your SRTR
 files.</p>
 <div class="section level3">
@@ -127,7 +127,7 @@ files.</p>
 temporarily:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Point to your SRTR data directory for this session only</span></span>
-<span><span class="fu"><a href="../reference/set_SRTR_wd.html">set_SRTR_wd</a></span><span class="op">(</span><span class="st">"path/to/your/srtr/files"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/set_SRTR_wd.html">set_srtr_wd</a></span><span class="op">(</span><span class="st">"path/to/your/srtr/files"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="permanent-setup">Permanent Setup<a class="anchor" aria-label="anchor" href="#permanent-setup"></a>
@@ -136,7 +136,7 @@ temporarily:</p>
 permanently by adding the <code>permanent = TRUE</code> argument:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set the directory permanently across R sessions</span></span>
-<span><span class="fu"><a href="../reference/set_SRTR_wd.html">set_SRTR_wd</a></span><span class="op">(</span><span class="st">"path/to/your/srtr/files"</span>, permanent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/set_SRTR_wd.html">set_srtr_wd</a></span><span class="op">(</span><span class="st">"path/to/your/srtr/files"</span>, permanent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>This will save your preference and automatically load it in future R
 sessions.</p>
 </div>
@@ -403,7 +403,7 @@ correctly:</p>
 <h4 id="file-not-found">File Not Found<a class="anchor" aria-label="anchor" href="#file-not-found"></a>
 </h4>
 <p>If you get a “file not found” error, check: - Is your working
-directory set correctly with <code><a href="../reference/set_SRTR_wd.html">set_SRTR_wd()</a></code>? - Are your
+directory set correctly with <code>set_SRTR_wd()</code>? - Are your
 files in the specified directory? - Are you using the correct file name
 (without extension)?</p>
 </div>
