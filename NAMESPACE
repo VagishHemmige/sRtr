@@ -3,7 +3,7 @@
 export(apply_srtr_factors)
 export(apply_srtr_varlabels)
 export(load_srtr_file)
-export(set_SRTR_wd)
+export(set_srtr_wd)
 importFrom(dplyr,bind_rows)
 importFrom(dplyr,mutate)
 importFrom(fs,path_file)

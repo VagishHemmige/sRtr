@@ -5,7 +5,7 @@
 \alias{.srtr_env}
 \title{Internal environment for package-level state}
 \format{
-An object of class \code{environment} of length 5.
+An object of class \code{environment} of length 2.
 }
 \usage{
 .srtr_env

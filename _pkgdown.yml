@@ -12,7 +12,7 @@ reference:
   - title: File Loading
     contents:
       - load_srtr_file
-      - set_SRTR_wd
+      - set_srtr_wd
   - title: Variable and Factor Labeling
     contents:
       - apply_srtr_varlabels
