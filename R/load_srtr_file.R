@@ -5,6 +5,9 @@
 #' - Variable labels using the `dictionary` dataset
 #'
 #' All variable names are standardized to uppercase after loading.
+#' The returned tibble includes two attributes:
+#' - `source_path`: the full path to the file on disk
+#' - `file_key`: the canonical dataset key used to load it
 #'
 #' @param file_key Character. Canonical dataset key (e.g., "TX_LI", "CAND_KIPA").
 #' @param factor_labels Logical. Whether to apply factor labels. Default = TRUE.
@@ -13,6 +16,7 @@
 #' @param ... Additional arguments passed to the file reader (e.g., `as_factor` for `read_sas()`).
 #'
 #' @return A tibble with the loaded file contents, optionally labeled.
+#'   The tibble includes attributes `source_path` and `file_key`.
 #' @export
 #'
 #' @examples
@@ -22,7 +26,7 @@
 
 load_srtr_file <- function(file_key,
                            factor_labels = TRUE,
-                           var_labels = FALSE,
+                           var_labels = TRUE,
                            col_select = NULL,
                            ...) {
   # ---- Check registry ----
@@ -82,6 +86,10 @@ load_srtr_file <- function(file_key,
   if (var_labels) {
     df <- apply_srtr_varlabels(df, file_key = file_key_input)
   }
+
+  # ---- Attach metadata ----
+  attr(df, "source_path") <- full_path
+  attr(df, "file_key") <- file_key_input
 
   return(df)
 }

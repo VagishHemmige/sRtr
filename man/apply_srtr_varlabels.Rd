@@ -2,7 +2,7 @@
 % Please edit documentation in R/apply_srtr_varlabels.R
 \name{apply_srtr_varlabels}
 \alias{apply_srtr_varlabels}
-\title{Apply SRTR factor labels to a data frame}
+\title{Apply SRTR variable labels to a data frame}
 \usage{
 apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE)
 }
@@ -10,25 +10,35 @@ apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE)
 \item{df}{A data frame loaded from an SRTR SAF file.}
 
 \item{file_key}{Optional. The dataset name (e.g., "CAND_KIPA", "TX_KI").
-If not provided, will be inferred from the object name of \code{df}.}
+If the file was loaded via the \code{load_srtr_file} function, this argument
+should be unnecessary.}
 
 \item{verbose}{Logical. If TRUE, print each variable being labeled.}
 }
 \value{
-A data frame with factor levels applied to coded variables.
+A data frame with variable labels applied.
 }
 \description{
-Converts coded variables in an SRTR dataset into human-readable factors
-using the SRTR data dictionary and associated format tables.
+Adds human-readable variable labels to an SRTR dataset using the SRTR data
+dictionary.
+}
+\details{
+If \code{file_key} is not explicitly provided, the function will first check
+for a \code{file_key} attribute on the data frame. If not found, it will attempt
+to infer it from the object name.
 }
 \examples{
 \dontrun{
 # Explicit file_key
 df <- read_sas("TX_KI.sas7bdat")
-df <- apply_srtr_factors(df, file_key = "TX_KI", verbose = TRUE)
+df <- apply_srtr_varlabels(df, file_key = "TX_KI", verbose = TRUE)
 
-# Implicit file_key inferred from object name
+# Implicit file_key from attribute (if loaded via load_srtr_file)
+df <- load_srtr_file("TX_KI")
+df <- apply_srtr_varlabels(df)
+
+# Fallback to object name inference
 TX_KI <- read_sas("TX_KI.sas7bdat")
-TX_KI <- apply_srtr_factors(TX_KI, verbose = TRUE)
+TX_KI <- apply_srtr_varlabels(TX_KI)
 }
 }

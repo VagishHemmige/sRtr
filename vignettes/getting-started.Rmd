@@ -250,7 +250,7 @@ donors <- load_srtr_file("DONOR", var_labels = TRUE, factor_labels = TRUE)
 
 ## 1. Always Use Labels
 
-Always load your data with both variable and factor labels for the most informative analysis:
+Always load your data with both variable and factor labels for the most informative analysis if the source data set does not automatically load with labels.
 
 ```{r best_practice_labels}
 # Recommended approach

@@ -376,7 +376,8 @@ Here are some commonly used files:</p>
 <h3 id="always-use-labels">1. Always Use Labels<a class="anchor" aria-label="anchor" href="#always-use-labels"></a>
 </h3>
 <p>Always load your data with both variable and factor labels for the
-most informative analysis:</p>
+most informative analysis if the source data set does not automatically
+load with labels.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Recommended approach</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_LI"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>

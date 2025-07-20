@@ -67,7 +67,7 @@ Variable labels using the dictionary dataset
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">load_srtr_file</span><span class="op">(</span></span>
 <span>  <span class="va">file_key</span>,</span>
 <span>  factor_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  var_labels <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  var_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  col_select <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -99,12 +99,15 @@ Variable labels using the dictionary dataset
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A tibble with the loaded file contents, optionally labeled.</p>
+<p>A tibble with the loaded file contents, optionally labeled.
+The tibble includes attributes <code>source_path</code> and <code>file_key</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>All variable names are standardized to uppercase after loading.</p>
-    </div>
+    <p>All variable names are standardized to uppercase after loading.
+The returned tibble includes two attributes:</p><ul><li><p><code>source_path</code>: the full path to the file on disk</p></li>
+<li><p><code>file_key</code>: the canonical dataset key used to load it</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

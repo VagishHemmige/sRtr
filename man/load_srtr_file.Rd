@@ -7,7 +7,7 @@
 load_srtr_file(
   file_key,
   factor_labels = TRUE,
-  var_labels = FALSE,
+  var_labels = TRUE,
   col_select = NULL,
   ...
 )
@@ -25,6 +25,7 @@ load_srtr_file(
 }
 \value{
 A tibble with the loaded file contents, optionally labeled.
+The tibble includes attributes \code{source_path} and \code{file_key}.
 }
 \description{
 Loads a file from the SRTR dataset registry and optionally applies:
@@ -35,6 +36,11 @@ Loads a file from the SRTR dataset registry and optionally applies:
 }
 \details{
 All variable names are standardized to uppercase after loading.
+The returned tibble includes two attributes:
+\itemize{
+\item \code{source_path}: the full path to the file on disk
+\item \code{file_key}: the canonical dataset key used to load it
+}
 }
 \examples{
 \dontrun{
