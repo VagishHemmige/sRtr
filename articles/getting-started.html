@@ -297,6 +297,43 @@ functions.</p>
 <span><span class="va">TX_KI</span> <span class="op">&lt;-</span> <span class="va">TX_KI</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/apply_srtr_factors.html">apply_srtr_factors</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/apply_srtr_varlabels.html">apply_srtr_varlabels</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>#Harmonizing missing data</p>
+<p>SRTR data often uses non-standard codes to represent missingness —
+such as <code>""</code>,<code>"U"</code>, <code>"ND"</code>, or
+<code>"C: Cannot Disclose"</code> — which can vary by variable. The
+<code><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing()</a></code> function helps harmonize these
+values by converting them to <code>NA</code> or a user-specified label
+like <code>"Missing"</code>.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_LI"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Replace common SRTR missing codes (e.g., "U", "", "ND") with NA</span></span>
+<span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Replace missing codes and NAs with an explicit label</span></span>
+<span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span>, replacement <span class="op">=</span> <span class="st">"Missing"</span><span class="op">)</span></span></code></pre></div>
+<p>Internally, this uses a built-in dictionary of variable-specific
+missing codes drawn from the SRTR documentation and known conventions.
+You can also pass a custom list of codes using the
+<code>missing_vals</code> argument.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Load the data</span></span>
+<span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_LI"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Define custom missing codes for specific variables</span></span>
+<span><span class="va">custom_missing_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  REC_HIV_STAT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"U"</span>, <span class="st">""</span><span class="op">)</span>,              <span class="co"># "Unknown" or blank</span></span>
+<span>  REC_HCV_STAT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ND: Not Done"</span>, <span class="st">"U"</span><span class="op">)</span>,  <span class="co"># Custom-labeled values</span></span>
+<span>  REC_CMVD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">999</span><span class="op">)</span>,                  <span class="co"># Numeric codes</span></span>
+<span>  DON_RACE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"99"</span>, <span class="st">"Unknown"</span><span class="op">)</span>           <span class="co"># Other arbitrary codes</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Apply normalization, replacing with NA</span></span>
+<span><span class="va">tx_li_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span>, missing_vals <span class="op">=</span> <span class="va">custom_missing_vals</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Or, replace all with an explicit label</span></span>
+<span><span class="va">tx_li_labeled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span>, missing_vals <span class="op">=</span> <span class="va">custom_missing_vals</span>, replacement <span class="op">=</span> <span class="st">"Missing"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -347,7 +384,7 @@ Here are some commonly used files:</p>
 <li>
 <code>DONOR_LIVING</code> - Living donor information</li>
 </ul>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Examples of loading different file types</span></span>
 <span><span class="va">liver_tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_LI"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">kidney_cand</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"CAND_KIDA"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -363,7 +400,7 @@ Here are some commonly used files:</p>
 <p>Always load your data with both variable and factor labels for the
 most informative analysis if the source data set does not automatically
 load with labels.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Recommended approach</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_LI"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -372,7 +409,7 @@ load with labels.</p>
 </h3>
 <p>Always examine your data after loading to ensure it loaded
 correctly:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check dimensions</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span></span>
@@ -387,7 +424,7 @@ correctly:</p>
 <h3 id="document-your-file-sources">3. Document Your File Sources<a class="anchor" aria-label="anchor" href="#document-your-file-sources"></a>
 </h3>
 <p>Keep track of which SRTR files you’re using and their versions:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Good practice: document your data sources</span></span>
 <span><span class="co"># TX_LI file loaded from SRTR SAF 2024Q1</span></span>
 <span><span class="co"># Contains liver transplant data from 1987-2023</span></span>
