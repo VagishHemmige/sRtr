@@ -27,5 +27,8 @@ dictionary <- html %>%
       })
   })
 
+dictionary <- dictionary %>%
+  mutate(FormatID = str_remove(FormatID, "^\\$"))
+
 # Save as internal package data
 usethis::use_data(dictionary, overwrite = TRUE)

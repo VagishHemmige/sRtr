@@ -16,11 +16,11 @@ knitr::opts_chunk$set(
 
 ## ----temp_setup---------------------------------------------------------------
 # # Point to your SRTR data directory for this session only
-# set_SRTR_wd("path/to/your/srtr/files")
+# set_srtr_wd("path/to/your/srtr/files")
 
 ## ----permanent_setup----------------------------------------------------------
 # # Set the directory permanently across R sessions
-# set_SRTR_wd("path/to/your/srtr/files", permanent = TRUE)
+# set_srtr_wd("path/to/your/srtr/files", permanent = TRUE)
 
 ## ----basic_loading------------------------------------------------------------
 # # Load a transplant file (liver transplants)
@@ -107,6 +107,35 @@ knitr::opts_chunk$set(
 # TX_KI <- TX_KI %>%
 #   apply_srtr_factors() %>%
 #   apply_srtr_varlabels()
+
+## ----eval=FALSE---------------------------------------------------------------
+# tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+# 
+# # Replace common SRTR missing codes (e.g., "U", "", "ND") with NA
+# tx_li <- srtr_normalize_missing(tx_li)
+# 
+# # Replace missing codes and NAs with an explicit label
+# tx_li <- srtr_normalize_missing(tx_li, replacement = "Missing")
+
+## ----eval=FALSE---------------------------------------------------------------
+# 
+# # Load the data
+# tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+# 
+# # Define custom missing codes for specific variables
+# custom_missing_vals <- list(
+#   REC_HIV_STAT = c("U", ""),              # "Unknown" or blank
+#   REC_HCV_STAT = c("ND: Not Done", "U"),  # Custom-labeled values
+#   REC_CMVD = c(-1, 999),                  # Numeric codes
+#   DON_RACE = c("99", "Unknown")           # Other arbitrary codes
+# )
+# 
+# # Apply normalization, replacing with NA
+# tx_li_clean <- srtr_normalize_missing(tx_li, missing_vals = custom_missing_vals)
+# 
+# # Or, replace all with an explicit label
+# tx_li_labeled <- srtr_normalize_missing(tx_li, missing_vals = custom_missing_vals, replacement = "Missing")
+# 
 
 ## ----file_examples------------------------------------------------------------
 # # Examples of loading different file types

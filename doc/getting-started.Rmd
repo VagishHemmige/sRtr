@@ -51,7 +51,7 @@ library(labelled)
 
 # Setting Up Your SRTR Data Directory
 
-Before you can load SRTR files, you need to tell the package where your SRTR data files are located. The `set_SRTR_wd()` function allows you to specify the directory containing your SRTR files.
+Before you can load SRTR files, you need to tell the package where your SRTR data files are located. The `set_srtr_wd()` function allows you to specify the directory containing your SRTR files.
 
 ## Temporary Setup (Session Only)
 
@@ -59,7 +59,7 @@ For a single R session, you can set the working directory temporarily:
 
 ```{r temp_setup}
 # Point to your SRTR data directory for this session only
-set_SRTR_wd("path/to/your/srtr/files")
+set_srtr_wd("path/to/your/srtr/files")
 ```
 
 ## Permanent Setup
@@ -68,7 +68,7 @@ If you frequently work with SRTR data, you can set the directory permanently by 
 
 ```{r permanent_setup}
 # Set the directory permanently across R sessions
-set_SRTR_wd("path/to/your/srtr/files", permanent = TRUE)
+set_srtr_wd("path/to/your/srtr/files", permanent = TRUE)
 ```
 
 This will save your preference and automatically load it in future R sessions.
@@ -216,6 +216,45 @@ TX_KI <- TX_KI %>%
   apply_srtr_varlabels()
 ```
 
+#Harmonizing missing data
+
+SRTR data often uses non-standard codes to represent missingness — such as `""`,`"U"`, `"ND"`, or `"C: Cannot Disclose"` — which can vary by variable. The `srtr_normalize_missing()` function helps harmonize these values by converting them to `NA` 
+or a user-specified label like `"Missing"`.
+
+```{r, eval=FALSE}
+tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+
+# Replace common SRTR missing codes (e.g., "U", "", "ND") with NA
+tx_li <- srtr_normalize_missing(tx_li)
+
+# Replace missing codes and NAs with an explicit label
+tx_li <- srtr_normalize_missing(tx_li, replacement = "Missing")
+```
+
+Internally, this uses a built-in dictionary of variable-specific missing codes drawn from the SRTR documentation and known conventions.  You can also pass a custom list of codes using the `missing_vals` argument.
+
+```{r, eval=FALSE}
+
+# Load the data
+tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+
+# Define custom missing codes for specific variables
+custom_missing_vals <- list(
+  REC_HIV_STAT = c("U", ""),              # "Unknown" or blank
+  REC_HCV_STAT = c("ND: Not Done", "U"),  # Custom-labeled values
+  REC_CMVD = c(-1, 999),                  # Numeric codes
+  DON_RACE = c("99", "Unknown")           # Other arbitrary codes
+)
+
+# Apply normalization, replacing with NA
+tx_li_clean <- srtr_normalize_missing(tx_li, missing_vals = custom_missing_vals)
+
+# Or, replace all with an explicit label
+tx_li_labeled <- srtr_normalize_missing(tx_li, missing_vals = custom_missing_vals, replacement = "Missing")
+
+```
+
+
 # Common SRTR File Types
 
 The `sRtr` package supports all standard SRTR file types. Here are some commonly used files:
@@ -250,7 +289,7 @@ donors <- load_srtr_file("DONOR", var_labels = TRUE, factor_labels = TRUE)
 
 ## 1. Always Use Labels
 
-Always load your data with both variable and factor labels for the most informative analysis:
+Always load your data with both variable and factor labels for the most informative analysis if the source data set does not automatically load with labels.
 
 ```{r best_practice_labels}
 # Recommended approach

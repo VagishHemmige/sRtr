@@ -6,3 +6,4 @@
 #'
 #' @keywords internal
 .srtr_env <- new.env(parent = emptyenv())
+
