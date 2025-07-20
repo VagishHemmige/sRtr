@@ -10,10 +10,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' set_SRTR_wd("C:/Data/SRTR")          # Session only
-#' set_SRTR_wd("C:/Data/SRTR", TRUE)    # Persistent across sessions
+#' set_srtr_wd("C:/Data/SRTR")          # Session only
+#' set_srtr_wd("C:/Data/SRTR", TRUE)    # Persistent across sessions
 #' }
-set_SRTR_wd <- function(path, permanent = FALSE) {
+set_srtr_wd <- function(path, permanent = FALSE) {
   if (!dir.exists(path)) stop("Directory does not exist: ", path)
   normalized <- normalizePath(path, winslash = "/", mustWork = TRUE)
 
@@ -48,7 +48,7 @@ set_SRTR_wd <- function(path, permanent = FALSE) {
 
   # Clear and re-map after setting
   .srtr_env$initialized <- FALSE
-  .map_SRTR_files()
+  .map_srtr_files()
 
   invisible(normalized)
 }

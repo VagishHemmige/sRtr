@@ -51,7 +51,7 @@ library(labelled)
 
 # Setting Up Your SRTR Data Directory
 
-Before you can load SRTR files, you need to tell the package where your SRTR data files are located. The `set_SRTR_wd()` function allows you to specify the directory containing your SRTR files.
+Before you can load SRTR files, you need to tell the package where your SRTR data files are located. The `set_srtr_wd()` function allows you to specify the directory containing your SRTR files.
 
 ## Temporary Setup (Session Only)
 
@@ -59,7 +59,7 @@ For a single R session, you can set the working directory temporarily:
 
 ```{r temp_setup}
 # Point to your SRTR data directory for this session only
-set_SRTR_wd("path/to/your/srtr/files")
+set_srtr_wd("path/to/your/srtr/files")
 ```
 
 ## Permanent Setup
@@ -68,7 +68,7 @@ If you frequently work with SRTR data, you can set the directory permanently by 
 
 ```{r permanent_setup}
 # Set the directory permanently across R sessions
-set_SRTR_wd("path/to/your/srtr/files", permanent = TRUE)
+set_srtr_wd("path/to/your/srtr/files", permanent = TRUE)
 ```
 
 This will save your preference and automatically load it in future R sessions.

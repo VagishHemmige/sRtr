@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 The STROBE (Strengthening the Reporting of Observational Studies in Epidemiology) statement provides guidelines for reporting observational studies. A key component is the flow diagram that shows how the study population was selected. We encourage use of the companion `strobe` package, which provides tools to create STROBE-compliant flow diagrams while building your cohort.
 
-This vignette demonstrates how to use the `strobe` functions in `sRtr` to:
+This vignette demonstrates how to use the `strobe` functions via the standalone `strobe` package to:
 
 1. Initialize a cohort with inclusion criteria  
 2. Apply sequential filters with exclusion tracking  
@@ -52,7 +52,7 @@ library(strobe)
 
 ## Basic STROBE Workflow
 
-The STROBE workflow in `sRtr` follows these steps:
+The STROBE workflow in `strobe` follows these steps:
 
 1. **Initialize** the cohort with `strobe_initialize()`  
 2. **Filter** sequentially with `strobe_filter()`  
@@ -112,3 +112,5 @@ strobe::plot_strobe_diagram(
 )
 
 ```
+
+For more details, see the separate documentation of the `strobe` package.

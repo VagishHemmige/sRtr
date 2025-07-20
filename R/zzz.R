@@ -14,6 +14,6 @@ utils::globalVariables(c(
 #' @importFrom magrittr %>%
 #' @noRd
 .onLoad <- function(libname, pkgname) {
-  try(.map_SRTR_files(), silent = TRUE)
+  try(.map_srtr_files(), silent = TRUE)
   options(arrow.skip_nul = TRUE)
 }

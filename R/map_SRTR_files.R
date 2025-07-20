@@ -13,10 +13,10 @@
 #' @importFrom tidyr separate
 #' @importFrom magrittr %>%
 
-.map_SRTR_files <- function() {
+.map_srtr_files <- function() {
   SRTR_wd <- Sys.getenv("SRTR_WD")
   if (SRTR_wd == "") {
-    warning("SRTR_WD is not set. Use `set_SRTR_wd()` to configure your working directory.")
+    warning("SRTR_WD is not set. Use `set_srtr_wd()` to configure your working directory.")
     return(invisible(NULL))
   }
 
