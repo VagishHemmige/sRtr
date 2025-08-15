@@ -1,8 +1,13 @@
 Package: sRtr
 Title: Tools for Working with UNOS SRTR Transplant Data in R
 Version: 0.0.0.9000
-Authors@R: 
-    person("Vagish", "Hemmige", email = "vahemmig@montefiore.org", role = c("aut", "cre"))
+Authors@R: c(
+    person(given = "Vagish", family = "Hemmige",
+           email = "vahemmig@montefiore.org",
+           role = c("aut", "cre")),
+    person(given = "Jonathan", family = "Czeresnia",
+           email = "j.cz@rutgers.edu",
+           role = "ctb"))
 Description: 
   Provides functions and infrastructure to support reproducible research 
   using the United Network for Organ Sharing (UNOS) Scientific Registry of 
@@ -25,12 +30,13 @@ Imports:
     stringr,
     tidyr,
     labelled,
-    rlang, 
-    tibble, 
+    rlang,
+    tibble,
     tidyselect,
     magrittr
 Suggests: 
     knitr,
+    sf,
     rmarkdown,
     testthat (>= 3.0.0),
     strobe

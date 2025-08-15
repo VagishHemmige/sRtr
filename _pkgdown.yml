@@ -24,6 +24,10 @@ reference:
     contents:
       - formats
       - dictionary
+  - title: Spatial datasets
+    contents:
+      - transplant_centers_sf
+      - UNOS_regions_sf
 articles:
 - title: Getting Started
   navbar: ~
