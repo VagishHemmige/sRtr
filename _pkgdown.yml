@@ -17,6 +17,9 @@ reference:
     contents:
       - apply_srtr_varlabels
       - apply_srtr_factors
+  - title: Risk and Score Calculators
+    contents:
+      - add_pdri
   - title: Missing data
     contents:
       - srtr_normalize_missing

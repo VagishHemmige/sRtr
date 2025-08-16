@@ -19,6 +19,7 @@
 #' terms for the source list of centers prior to public release.
 #'
 #' @examples
+#' \dontrun{
 #' if (requireNamespace("sf", quietly = TRUE)) {
 #'   plot(sf::st_geometry(transplant_centers_sf))
 #'
@@ -32,5 +33,6 @@
 #'     )
 #'     head(centers_with_region)
 #'   }
+#' }
 #' }
 "transplant_centers_sf"

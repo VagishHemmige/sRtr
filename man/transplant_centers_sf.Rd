@@ -30,6 +30,7 @@ and stored in the \code{geometry} column; the original numeric longitude/latitud
 columns are not retained.
 }
 \examples{
+\dontrun{
 if (requireNamespace("sf", quietly = TRUE)) {
   plot(sf::st_geometry(transplant_centers_sf))
 
@@ -43,6 +44,7 @@ if (requireNamespace("sf", quietly = TRUE)) {
     )
     head(centers_with_region)
   }
+}
 }
 }
 \keyword{datasets}
