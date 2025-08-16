@@ -23,6 +23,10 @@ reference:
   - title: Missing data
     contents:
       - srtr_normalize_missing
+  - title: Time-to-event & composite dates
+    desc: Helpers for composing event dates and simple TTE calculations
+    contents:
+      - srtr_composite_death
   - title: Internal Datasets
     contents:
       - formats
