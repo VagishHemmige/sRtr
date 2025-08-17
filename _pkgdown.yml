@@ -27,6 +27,7 @@ reference:
     desc: Helpers for composing event dates and simple TTE calculations
     contents:
       - srtr_composite_death
+      - srtr_time_to_event
   - title: Internal Datasets
     contents:
       - formats

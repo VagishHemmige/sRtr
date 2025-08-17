@@ -7,7 +7,7 @@ Authors@R: c(
            role = c("aut", "cre")),
     person(given = "Jonathan", family = "Czeresnia",
            email = "j.cz@rutgers.edu",
-           role = "ctb"))
+           role = c("aut","ctb")))
 Description: 
   Provides functions and infrastructure to support reproducible research 
   using the United Network for Organ Sharing (UNOS) Scientific Registry of 
