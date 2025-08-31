@@ -6,6 +6,7 @@
 \usage{
 load_srtr_file(
   file_key,
+  trr_id_filter = NULL,
   factor_labels = TRUE,
   var_labels = TRUE,
   col_select = NULL,
@@ -14,6 +15,9 @@ load_srtr_file(
 }
 \arguments{
 \item{file_key}{Character. Canonical dataset key (e.g., "TX_LI", "CAND_KIPA").}
+
+\item{trr_id_filter}{Optional vector of TRR_IDs to keep..
+If not NULL, will filter by `TRR_ID' vector passed to this option.}
 
 \item{factor_labels}{Logical. Whether to apply factor labels. Default = TRUE.}
 

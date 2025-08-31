@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_time_to_event_variables.R
 \name{srtr_time_to_event}
 \alias{srtr_time_to_event}
-\title{Build time-to-event variables for SRTR-style data}
+\title{Helper function to add a time-to-event outcome from a date function}
 \usage{
 srtr_time_to_event(
   df,
@@ -36,7 +36,7 @@ Default 1. Set to 0 to disable. Logical TRUE/FALSE also accepted
 }
 \value{
 \code{df} with added columns:
-\verb{\{prefix\}_CENSOR}, \verb{\{prefix\}_BINARY}, \verb{\{prefix\}_\{units-suffix\}}, \verb{\{prefix\}_NEGATIVE_TIME}.
+\verb{\{prefix\}_CENSOR}, \verb{\{prefix\}_BINARY}, \verb{\{prefix\}_\{units-suffix\}}.
 }
 \description{
 Creates three columns for an outcome defined by an event date and a censor date:
@@ -48,6 +48,6 @@ Creates three columns for an outcome defined by an event date and a censor date:
 }
 \details{
 Units suffix mapping: \code{years -> "_yrs"}, \code{months -> "_months"}, \code{days -> "_days"}.
-Negative times (e.g., when \code{start_date > censor/event}) are flagged in \verb{\{prefix\}_NEGATIVE_TIME},
+Negative times (e.g., when \code{start_date > censor/event}) trigger a warning,
 and the numeric time is set to \code{NA}.#'
 }

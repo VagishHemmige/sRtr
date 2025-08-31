@@ -10,6 +10,8 @@
 #' - `file_key`: the canonical dataset key used to load it
 #'
 #' @param file_key Character. Canonical dataset key (e.g., "TX_LI", "CAND_KIPA").
+#' @param trr_id_filter Optional vector of TRR_IDs to keep..
+#' If not NULL, will filter by `TRR_ID' vector passed to this option.
 #' @param factor_labels Logical. Whether to apply factor labels. Default = TRUE.
 #' @param var_labels Logical. Whether to apply variable labels. Default = FALSE.
 #' @param col_select Optional. Tidyselect expression or character vector for selecting columns.
@@ -25,6 +27,7 @@
 #' }
 
 load_srtr_file <- function(file_key,
+                           trr_id_filter=NULL,
                            factor_labels = TRUE,
                            var_labels = TRUE,
                            col_select = NULL,
@@ -76,6 +79,21 @@ load_srtr_file <- function(file_key,
 
   # ---- Standardize column names ----
   names(df) <- toupper(names(df))
+
+  # ---- Apply TRR_ID filter -----
+  if (!is.null(trr_id_filter)) {
+    df <- dplyr::filter(df, TRR_ID %in% trr_id_filter)
+  }
+
+  # ---- Add TFL_LAFUDATE to KP (which has separate TFL_LAFUDATEKI and TFL_LAFUDATEPA variables) -----
+if (file_key_input=="TX_KP") {
+    df <- df %>%
+    mutate(TFL_LAFUDATE = if_else(
+      is.na(TFL_LAFUDATEPA) | (!is.na(TFL_LAFUDATEKI) & TFL_LAFUDATEKI >= TFL_LAFUDATEPA),
+      TFL_LAFUDATEKI,        # pick date1 when it's >= date2 (or date2 is NA)
+      TFL_LAFUDATEPA         # otherwise pick date2
+    ))
+}
 
   # ---- Apply factor labels ----
   if (factor_labels) {
