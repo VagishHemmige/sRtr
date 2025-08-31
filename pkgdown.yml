@@ -4,7 +4,8 @@ pkgdown_sha: ~
 articles:
   building-cohort-with-strobe: building-cohort-with-strobe.html
   getting-started: getting-started.html
-last_built: 2025-08-31T01:51Z
+  missing-data: missing-data.html
+last_built: 2025-08-31T02:10Z
 urls:
   reference: https://vagishhemmige.github.io/sRtr/reference
   article: https://vagishhemmige.github.io/sRtr/articles
