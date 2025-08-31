@@ -53,6 +53,7 @@ Variable labels using the dictionary dataset
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">load_srtr_file</span><span class="op">(</span></span>
 <span>  <span class="va">file_key</span>,</span>
+<span>  trr_id_filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  factor_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  var_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  col_select <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -66,6 +67,11 @@ Variable labels using the dictionary dataset
 
 <dl><dt id="arg-file-key">file_key<a class="anchor" aria-label="anchor" href="#arg-file-key"></a></dt>
 <dd><p>Character. Canonical dataset key (e.g., "TX_LI", "CAND_KIPA").</p></dd>
+
+
+<dt id="arg-trr-id-filter">trr_id_filter<a class="anchor" aria-label="anchor" href="#arg-trr-id-filter"></a></dt>
+<dd><p>Optional vector of TRR_IDs to keep..
+If not NULL, will filter by `TRR_ID' vector passed to this option.</p></dd>
 
 
 <dt id="arg-factor-labels">factor_labels<a class="anchor" aria-label="anchor" href="#arg-factor-labels"></a></dt>
