@@ -47,3 +47,7 @@ articles:
   navbar: ~
   contents:
   - building-cohort-with-strobe
+- title: Missing data
+  navbar: ~
+  contents:
+  - missing data
