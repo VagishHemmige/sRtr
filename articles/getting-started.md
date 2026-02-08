@@ -1,0 +1,336 @@
+# Getting Started with sRtr
+
+## Introduction
+
+The `sRtr` package provides comprehensive tools for working with
+Scientific Registry of Transplant Recipients (SRTR) Standard Analysis
+Files (SAFs) in R. This vignette will guide you through the essential
+steps of setting up your environment and loading SRTR data files with
+proper labeling.
+
+### What is SRTR?
+
+The Scientific Registry of Transplant Recipients (SRTR) is a
+comprehensive database that tracks transplant data in the United States.
+The SRTR Standard Analysis Files (SAFs) contain de-identified
+patient-level data that researchers can use to study transplant
+outcomes, waiting list dynamics, and donor characteristics.
+
+### Package Overview
+
+The `sRtr` package streamlines the process of:
+
+- Setting up your SRTR data directory
+- Loading SRTR files with automatic format detection
+- Applying official SRTR variable labels and factor conversions
+- Preparing data for analysis with proper documentation
+
+## Installation
+
+You can install the development version of `sRtr` from GitHub:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("VagishHemmige/sRtr")
+```
+
+Load the package:
+
+``` r
+library(sRtr)
+library(dplyr)
+library(labelled)
+```
+
+## Setting Up Your SRTR Data Directory
+
+Before you can load SRTR files, you need to tell the package where your
+SRTR data files are located. The
+[`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_SRTR_wd.md)
+function allows you to specify the directory containing your SRTR files.
+
+### Temporary Setup (Session Only)
+
+For a single R session, you can set the working directory temporarily:
+
+``` r
+# Point to your SRTR data directory for this session only
+set_srtr_wd("path/to/your/srtr/files")
+```
+
+### Permanent Setup
+
+If you frequently work with SRTR data, you can set the directory
+permanently by adding the `permanent = TRUE` argument:
+
+``` r
+# Set the directory permanently across R sessions
+set_srtr_wd("path/to/your/srtr/files", permanent = TRUE)
+```
+
+This will save your preference and automatically load it in future R
+sessions.
+
+### Verifying Your Setup
+
+After setting your working directory, the package will automatically
+detect the available SRTR files in your directory. You can verify that
+your setup is working correctly by checking if your files are
+recognized.
+
+## Loading SRTR Files
+
+The primary function for loading SRTR data is
+[`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md).
+This function can load both SAS (.sas7bdat) and Parquet (.parquet) files
+and automatically applies the appropriate SRTR data dictionary.
+
+### Basic File Loading
+
+``` r
+# Load a transplant file (liver transplants)
+tx_li <- load_srtr_file("TX_LI")
+
+# Load a waiting list file (kidney candidates)
+cand_kida <- load_srtr_file("CAND_KIDA")
+
+# Load a donor file
+donor <- load_srtr_file("DONOR")
+```
+
+### Loading with Labels
+
+One of the key features of `sRtr` is its ability to automatically apply
+variable labels and factor conversions using the official SRTR data
+dictionary.
+
+#### Variable Labels
+
+Variable labels provide descriptive names for each column:
+
+``` r
+# Load with variable labels
+tx_li <- load_srtr_file("TX_LI", var_labels = TRUE)
+
+# View variable labels
+var_label(tx_li$DON_RACE)
+var_label(tx_li$REC_AGE_AT_TX)
+var_label(tx_li$GRAFT_STAT)
+```
+
+#### Factor Labels
+
+Factor labels convert coded values to meaningful categories:
+
+``` r
+# Load with factor labels
+tx_li <- load_srtr_file("TX_LI", factor_labels = TRUE)
+
+# View factor levels
+str(tx_li$DON_RACE)
+levels(tx_li$DON_RACE)
+
+# View factor labels for transplant status
+str(tx_li$GRAFT_STAT)
+```
+
+#### Complete Labeling
+
+For the most informative data, load with both variable and factor
+labels:
+
+``` r
+# Load with both variable and factor labels
+tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+
+# Now you have both descriptive variable names and meaningful factor levels
+str(tx_li$DON_RACE)
+var_label(tx_li$DON_RACE)
+```
+
+## Working with Labeled Data
+
+Once you’ve loaded your SRTR data with labels, you can work with it like
+any other R data frame, but with the added benefit of meaningful
+variable and factor labels.
+
+### Exploring Your Data
+
+``` r
+# Basic data exploration
+dim(tx_li)
+names(tx_li)
+
+# View the first few rows
+head(tx_li)
+
+# Summary statistics with meaningful labels
+summary(tx_li$DON_RACE)
+summary(tx_li$REC_AGE_AT_TX)
+```
+
+### Preserving Labels During Analysis
+
+The `labelled` package helps preserve your variable labels during data
+manipulation:
+
+``` r
+# Filter data while preserving labels
+recent_tx <- tx_li %>%
+  filter(TX_DATE >= as.Date("2020-01-01")) %>%
+  select(TX_DATE, DON_RACE, REC_AGE_AT_TX, GRAFT_STAT)
+
+# Labels are preserved
+var_label(recent_tx$DON_RACE)
+```
+
+## Independent Labeling Functions
+
+If you already have loaded SRTR data (e.g., from another source), you
+can apply labels independently using the dedicated labeling functions.
+
+### Applying Factor Labels
+
+``` r
+# Load raw data
+df <- read_sas("TX_KI.sas7bdat")
+
+# Apply factor labels
+df <- apply_srtr_factors(df, filekey = "TX_KI")
+
+# View the result
+str(df$DON_RACE)
+```
+
+### Applying Variable Labels
+
+``` r
+# Apply variable labels
+df <- apply_srtr_varlabels(df, filekey = "TX_KI")
+
+# View variable labels
+var_label(df$DON_RACE)
+var_label(df$REC_AGE_AT_TX)
+```
+
+### Automatic File Detection
+
+If your data frame name matches the SRTR file name, you can omit the
+`filekey` parameter:
+
+``` r
+# Load data with matching name
+TX_KI <- read_sas("TX_KI.sas7bdat")
+
+# Apply labels without specifying filekey
+TX_KI <- TX_KI %>%
+  apply_srtr_factors() %>%
+  apply_srtr_varlabels()
+```
+
+## Common SRTR File Types
+
+The `sRtr` package supports all standard SRTR file types. Here are some
+commonly used files:
+
+### Transplant Files
+
+- `TX_LI` - Liver transplants
+- `TX_KI` - Kidney transplants
+- `TX_HR` - Heart transplants
+- `TX_LU` - Lung transplants
+- `TX_IN` - Intestine transplants
+- `TX_PA` - Pancreas transplants
+
+### Candidate Files
+
+- `CAND_LIVA` - Liver candidates
+- `CAND_KIDA` - Kidney candidates
+- `CAND_THORA` - Heart candidates
+- `CAND_LUNGA` - Lung candidates
+
+### Other Files
+
+- `DONOR` - Donor information
+- `DONOR_DECEASED` - Deceased donor information
+- `DONOR_LIVING` - Living donor information
+
+``` r
+# Examples of loading different file types
+liver_tx <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+kidney_cand <- load_srtr_file("CAND_KIDA", var_labels = TRUE, factor_labels = TRUE)
+donors <- load_srtr_file("DONOR", var_labels = TRUE, factor_labels = TRUE)
+```
+
+## Best Practices
+
+### 1. Always Use Labels
+
+Always load your data with both variable and factor labels for the most
+informative analysis if the source data set does not automatically load
+with labels.
+
+``` r
+# Recommended approach
+data <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+```
+
+### 2. Check Your Data
+
+Always examine your data after loading to ensure it loaded correctly:
+
+``` r
+# Check dimensions
+dim(data)
+
+# Check variable labels
+var_label(data[1:5])
+
+# Check factor levels for key variables
+str(data$DON_RACE)
+str(data$GRAFT_STAT)
+```
+
+### 3. Document Your File Sources
+
+Keep track of which SRTR files you’re using and their versions:
+
+``` r
+# Good practice: document your data sources
+# TX_LI file loaded from SRTR SAF 2024Q1
+# Contains liver transplant data from 1987-2023
+tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### File Not Found
+
+If you get a “file not found” error, check: - Is your working directory
+set correctly with `set_SRTR_wd()`? - Are your files in the specified
+directory? - Are you using the correct file name (without extension)?
+
+#### Labels Not Applied
+
+If labels aren’t being applied: - Ensure you’re using the correct file
+key - Check that your file name matches the expected SRTR convention -
+Verify you’re using `var_labels = TRUE` and/or `factor_labels = TRUE`
+
+#### Memory Issues
+
+For large files: - Consider loading only the variables you need - Work
+with data in chunks if necessary - Ensure you have sufficient RAM for
+your dataset
+
+## Next Steps
+
+Now that you’ve learned the basics of loading and labeling SRTR data,
+you might want to explore:
+
+- **STROBE Analysis Workflows**: Learn how to create CONSORT/STROBE
+  diagrams for your research
+
+For more advanced functionality, including STROBE diagram generation,
+see the additional vignettes in this package.
