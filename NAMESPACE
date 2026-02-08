@@ -3,6 +3,7 @@
 export(add_txf_outcomes)
 export(apply_srtr_factors)
 export(apply_srtr_varlabels)
+export(get_hrsa_transplant_centers)
 export(load_srtr_file)
 export(set_srtr_wd)
 export(srtr_composite_death)

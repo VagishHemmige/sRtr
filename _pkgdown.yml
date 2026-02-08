@@ -34,6 +34,9 @@ reference:
     contents:
       - formats
       - dictionary
+  - title: Mapping transplant centers
+    contents:
+      - get_hrsa_transplant_centers
   - title: Spatial datasets
     contents:
       - transplant_centers_sf
@@ -51,3 +54,11 @@ articles:
   navbar: ~
   contents:
   - missing-data
+- title: Adding columns
+  navbar: ~
+  contents:
+  - adding-columns
+- title: Mapping
+  navbar: ~
+  contents:
+  - mapping
