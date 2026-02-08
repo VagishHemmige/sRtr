@@ -5,6 +5,9 @@
 
 <!-- badges: start -->
 
+![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 <!-- badges: end -->
 
 The **sRtr** package provides tools to load, label, and work with the

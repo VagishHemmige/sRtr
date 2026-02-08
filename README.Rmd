@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 # sRtr
 
 <!-- badges: start -->
+![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 <!-- badges: end -->
 
 The **sRtr** package provides tools to load, label, and work with the Scientific Registry of Transplant Recipients (SRTR) Standard Analysis Files (SAFs) in R. It supports automatic variable labeling and factor conversion using the official SRTR data dictionary.
