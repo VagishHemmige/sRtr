@@ -10,6 +10,9 @@
     <loc>https://vagishhemmige.github.io/sRtr/articles/building-cohort-with-strobe.html</loc>
   </url>
   <url>
+    <loc>https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html</loc>
+  </url>
+  <url>
     <loc>https://vagishhemmige.github.io/sRtr/articles/getting-started.html</loc>
   </url>
   <url>
@@ -47,6 +50,9 @@
   </url>
   <url>
     <loc>https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.html</loc>
+  </url>
+  <url>
+    <loc>https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.html</loc>
   </url>
   <url>
     <loc>https://vagishhemmige.github.io/sRtr/reference/dictionary.html</loc>

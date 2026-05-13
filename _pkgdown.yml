@@ -37,6 +37,7 @@ reference:
   - title: Mapping transplant centers
     contents:
       - get_hrsa_transplant_centers
+      - calculate_geography_coverage_gain
   - title: Spatial datasets
     contents:
       - transplant_centers_sf
@@ -62,3 +63,8 @@ articles:
   navbar: ~
   contents:
   - mapping
+- title: Geographic calculations
+  navbar: ~
+  contents:
+  - geographic-coverage-gain
+

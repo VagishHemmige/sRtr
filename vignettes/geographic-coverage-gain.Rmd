@@ -1,0 +1,163 @@
+---
+title: "Calculating geographic coverage gain"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calculating geographic coverage gain}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(sRtr)
+library(CDCAtlas)
+library(tidyverse)
+library(sf)
+library(tidycensus)
+```
+
+Create geography objects
+
+```{r}
+
+  Transplant_centers_all_sf<-sRtr::get_hrsa_transplant_centers()%>%
+    filter(OPO_STATE_ABBR != "PR" & OPO_STATE_ABBR!= "HI")%>%
+    select(OTC_NM, OTC_CD, Service_Lst, X, Y) %>%
+    filter(str_detect(Service_Lst, str_to_sentence("Heart")))%>%
+    select(-Service_Lst)%>%
+    distinct()%>%
+    rename(OTCName=OTC_NM, OTCCode=OTC_CD, Latitude=Y, Longitude=X)%>%
+    st_transform(5070)  
+
+
+existing_centers<-Transplant_centers_all_sf%>%
+  filter(OTCCode %in% c("ALUA", "NYMA"))
+
+new_centers<-Transplant_centers_all_sf%>%
+  filter(OTCCode %in% c("NYCP", "TXHI"))
+
+
+Transplant_centers_all_buffer<-st_buffer(Transplant_centers_all_sf,
+                                        dist =80467.2)
+
+existing_centers_buffer<-st_buffer(existing_centers,
+                                   dist =80467.2)
+
+new_centers_buffer<-st_buffer(new_centers,
+                              dist =80467.2)
+
+
+
+  
+```
+
+```{r}
+
+continental_fips <- c(
+  "01", "04", "05", "06", "08", "09", "10", "11", "12", "13", "16",
+  "17", "18", "19", "20", "21", "22", "23", "24", "25", "26",
+  "27", "28", "29", "30", "31", "32", "33", "34", "35", "36",
+  "37", "38", "39", "40", "41", "42", "44", "45", "46", "47",
+  "48", "49", "50", "51", "53", "54", "55", "56"
+)
+
+    us_tracts_population_2022<-get_acs(
+      geography = "tract",
+      variables = "B01003_001",
+      year = 2022,
+      survey = "acs5",
+      geometry = TRUE,
+      state = continental_fips
+    )%>%
+      mutate(county_fips = substr(GEOID, 1, 5))%>%
+      mutate(GEOID=as.numeric(GEOID))%>%
+      mutate(county_fips=as.numeric(county_fips))%>%
+      select(-variable, -moe)%>%
+      rename(tract_population=estimate)
+
+    us_counties_population_2022<-get_acs(
+      geography = "county",
+      variables = "B01003_001",
+      year = 2022,
+      survey = "acs5",
+      geometry = TRUE,
+      state = continental_fips
+    )%>%
+      mutate(GEOID=as.numeric(GEOID))%>%
+      select(-variable, -moe)%>%
+      rename(county_population=estimate)
+
+```
+
+
+```{r}
+
+AtlasPlusTableData_county_totals<-CDCAtlas::get_atlas(disease="hiv",
+                                                      geography="county",
+                                                      year=2022)%>%
+  rename(county_cases=cases)%>%
+  rename(geo_id=fips)%>%
+  rename(county_name=geography)%>%
+  mutate(county_cases=if_else(is.na(county_cases),0, county_cases))%>%
+  mutate(geo_id=as.numeric(geo_id))%>%
+  select(-year)%>%
+  filter(indicator=="HIV prevalence")
+
+
+Merged_counties<-left_join(us_counties_population_2022,
+                           AtlasPlusTableData_county_totals, 
+                           by=join_by(GEOID==geo_id))
+
+
+Merged_counties_nonSF<-Merged_counties%>%
+  st_drop_geometry()
+
+Merged_tracts<-left_join(us_tracts_population_2022, 
+                                Merged_counties_nonSF, 
+                                by=c("county_fips"="GEOID"))%>%
+    select(-NAME.x, -NAME.y)%>%
+    #Estimate census tract HIV population
+    mutate(tract_cases=county_cases*tract_population/county_population)%>%
+    #Estimate HIV-negative population in census tracts
+    mutate(tract_noncases=tract_population-tract_cases)%>%
+    st_transform(5070)
+
+```
+
+
+
+```{r, eval=FALSE}
+
+hiv_tract_data<-get_atlas(
+  disease = "hiv",
+  year = 2022,
+  geography = "county",
+  extrapolate_to_tract = TRUE
+)
+
+```
+
+
+```{r}
+
+calculate_geography_coverage_gain(
+    existing_areas=existing_centers_buffer,
+    added_areas=new_centers_buffer,
+    population_geography=Merged_tracts,
+    coverage_vars="tract_cases",
+    geography_id = NULL,
+    method = "intersection",
+    crs = 5070,
+    output = "wide"
+)
+
+
+
+```
+
