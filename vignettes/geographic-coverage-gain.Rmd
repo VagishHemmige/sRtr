@@ -14,15 +14,24 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+## Introduction
+
+Geography matters greatly in solid organ transplantation.  Donor and recipient practices vary greatly by region, and distance-related barriers can magnify geographic disparities.  In this vignette, we demonstrate how the `calculate_geography_coverage_gain()` function can be used to estimate the number of people living with HIV (PLWH) who gain access to heart transplant centers, defined as residence within a 50-mile radius.
+
+
+```{r setup, message=FALSE}
 library(sRtr)
 library(CDCAtlas)
 library(tidyverse)
 library(sf)
 library(tidycensus)
+library(tigris)
+library(ggplot2)
 ```
 
-Create geography objects
+## Create geography objects
+
+We begin by using the `get_hrsa_transplant_centers()` function from the `sRtr` package to create an `sf` object containing heart transplant centers not in PR or HI.  We subsequently perform a substantial amount of data cleaning
 
 ```{r}
 
@@ -34,122 +43,144 @@ Create geography objects
     distinct()%>%
     rename(OTCName=OTC_NM, OTCCode=OTC_CD, Latitude=Y, Longitude=X)%>%
     st_transform(5070)  
+```
 
+We use the `tigris` package to import a map of states
+
+```{r}
+
+state_geography <- tigris::states(
+  year = 2022,
+  cb = TRUE,
+  class = "sf")%>%  
+  filter(!STUSPS %in% c("AK", "HI", "PR", "GU", "VI", "MP", "AS")) %>%
+  st_transform(5070)
+
+
+```
+
+
+We use ggplot to plot the centers on a map of the United States:
+
+```{r}
+
+ggplot()+
+  geom_sf(data=state_geography)+
+  geom_sf(data = Transplant_centers_all_sf)+
+  theme_minimal()
+
+```
+
+## Define existing centers and additional centers
+
+For the purposes of this analysis, we assume baseline coverage with two centers, *ALUA* (University of Alabama-Birmingham) and *NYMA* (Montefiore Medical Center).
+
+```{r}
 
 existing_centers<-Transplant_centers_all_sf%>%
   filter(OTCCode %in% c("ALUA", "NYMA"))
 
+ggplot()+
+  geom_sf(data=state_geography)+
+  geom_sf(data = existing_centers, color="red")+
+  theme_minimal()
+
+
+```
+
+
+We study the additional coverage for PLWH to add *NYCP* (Columbia-Presbyterian) and *TXHI* (Texas Heart Institute at Baylor St. Luke's Medical Center in Houston, TX).
+
+
+```{r}
+
 new_centers<-Transplant_centers_all_sf%>%
   filter(OTCCode %in% c("NYCP", "TXHI"))
 
+ggplot()+
+  geom_sf(data=state_geography)+
+  geom_sf(data = new_centers, color="red")+
+  theme_minimal()
 
+
+
+```
+
+
+We now create 50-mile buffers (80467.2 meters) around the transplant centers in the previous objects
+
+
+```{r}
 Transplant_centers_all_buffer<-st_buffer(Transplant_centers_all_sf,
                                         dist =80467.2)
 
 existing_centers_buffer<-st_buffer(existing_centers,
                                    dist =80467.2)
 
+ggplot()+
+  geom_sf(data=state_geography)+
+  geom_sf(data = existing_centers_buffer, color="blue")+
+  geom_sf(data = existing_centers, color="red")+
+  theme_minimal()
+
+
 new_centers_buffer<-st_buffer(new_centers,
                               dist =80467.2)
 
+ggplot()+
+  geom_sf(data=state_geography)+
+  geom_sf(data = new_centers_buffer, color="red")+
+  geom_sf(data = new_centers, color="blue")+
+  theme_minimal()
 
 
   
 ```
 
-```{r}
+### Importing HIV data
 
-continental_fips <- c(
-  "01", "04", "05", "06", "08", "09", "10", "11", "12", "13", "16",
-  "17", "18", "19", "20", "21", "22", "23", "24", "25", "26",
-  "27", "28", "29", "30", "31", "32", "33", "34", "35", "36",
-  "37", "38", "39", "40", "41", "42", "44", "45", "46", "47",
-  "48", "49", "50", "51", "53", "54", "55", "56"
-)
-
-    us_tracts_population_2022<-get_acs(
-      geography = "tract",
-      variables = "B01003_001",
-      year = 2022,
-      survey = "acs5",
-      geometry = TRUE,
-      state = continental_fips
-    )%>%
-      mutate(county_fips = substr(GEOID, 1, 5))%>%
-      mutate(GEOID=as.numeric(GEOID))%>%
-      mutate(county_fips=as.numeric(county_fips))%>%
-      select(-variable, -moe)%>%
-      rename(tract_population=estimate)
-
-    us_counties_population_2022<-get_acs(
-      geography = "county",
-      variables = "B01003_001",
-      year = 2022,
-      survey = "acs5",
-      geometry = TRUE,
-      state = continental_fips
-    )%>%
-      mutate(GEOID=as.numeric(GEOID))%>%
-      select(-variable, -moe)%>%
-      rename(county_population=estimate)
-
-```
-
+we use the `CDCAtlas` package to import extrapolated estimates of the census tract-level population of PLWH, merging with tract geography obtained via the `tigris` package
 
 ```{r}
 
-AtlasPlusTableData_county_totals<-CDCAtlas::get_atlas(disease="hiv",
-                                                      geography="county",
-                                                      year=2022)%>%
-  rename(county_cases=cases)%>%
-  rename(geo_id=fips)%>%
-  rename(county_name=geography)%>%
-  mutate(county_cases=if_else(is.na(county_cases),0, county_cases))%>%
-  mutate(geo_id=as.numeric(geo_id))%>%
-  select(-year)%>%
-  filter(indicator=="HIV prevalence")
-
-
-Merged_counties<-left_join(us_counties_population_2022,
-                           AtlasPlusTableData_county_totals, 
-                           by=join_by(GEOID==geo_id))
-
-
-Merged_counties_nonSF<-Merged_counties%>%
-  st_drop_geometry()
-
-Merged_tracts<-left_join(us_tracts_population_2022, 
-                                Merged_counties_nonSF, 
-                                by=c("county_fips"="GEOID"))%>%
-    select(-NAME.x, -NAME.y)%>%
-    #Estimate census tract HIV population
-    mutate(tract_cases=county_cases*tract_population/county_population)%>%
-    #Estimate HIV-negative population in census tracts
-    mutate(tract_noncases=tract_population-tract_cases)%>%
-    st_transform(5070)
-
-```
-
-
-
-```{r, eval=FALSE}
-
-hiv_tract_data<-get_atlas(
+hiv_tract_data<-CDCAtlas::get_atlas(
   disease = "hiv",
   year = 2022,
   geography = "county",
   extrapolate_to_tract = TRUE
-)
+)%>%
+  filter(indicator=="HIV prevalence")
+
+tract_geography <- tigris::tracts(
+  year = 2022,
+  cb = TRUE,
+  class = "sf"
+) %>%
+  select(
+    tract_fips = GEOID,
+    geometry
+  ) %>%
+  st_transform(5070)
+
+hiv_tract_sf <- tract_geography %>%
+  left_join(
+    hiv_tract_data,
+    by = "tract_fips"
+  )
 
 ```
 
+
+### Estimating additional coverage gain
+
+We finally use the `calculate_geography_coverage_gain` function to estimate the number of PLWH who would gain geographic proximity to a transplant center given the additional centers.
 
 ```{r}
 
 calculate_geography_coverage_gain(
     existing_areas=existing_centers_buffer,
     added_areas=new_centers_buffer,
-    population_geography=Merged_tracts,
+    population_geography=hiv_tract_sf,
     coverage_vars="tract_cases",
     geography_id = NULL,
     method = "intersection",
@@ -157,7 +188,6 @@ calculate_geography_coverage_gain(
     output = "wide"
 )
 
-
-
 ```
 
+We see that the additional two centers lead to an improvement from 142,598 PLWH to 177,917, a gain of 35318.  The total number of PLWH in the `hiv_tract_sf` object is 1,099,805. 
