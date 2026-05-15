@@ -38,6 +38,7 @@ reference:
     contents:
       - get_hrsa_transplant_centers
       - calculate_geography_coverage_gain
+      - rank_individual_coverage_gains
   - title: Spatial datasets
     contents:
       - transplant_centers_sf

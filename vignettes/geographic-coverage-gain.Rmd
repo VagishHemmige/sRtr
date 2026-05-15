@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 Geography matters greatly in solid organ transplantation.  Donor and recipient practices vary greatly by region, and distance-related barriers can magnify geographic disparities.  In this vignette, we demonstrate how the `calculate_geography_coverage_gain()` function can be used to estimate the number of people living with HIV (PLWH) who gain access to heart transplant centers, defined as residence within a 50-mile radius.
 
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, warning=FALSE}
 library(sRtr)
 library(CDCAtlas)
 library(tidyverse)
@@ -171,7 +171,7 @@ hiv_tract_sf <- tract_geography %>%
 ```
 
 
-### Estimating additional coverage gain
+## Estimating additional coverage gain
 
 We finally use the `calculate_geography_coverage_gain` function to estimate the number of PLWH who would gain geographic proximity to a transplant center given the additional centers.
 
@@ -181,7 +181,7 @@ calculate_geography_coverage_gain(
     existing_areas=existing_centers_buffer,
     added_areas=new_centers_buffer,
     population_geography=hiv_tract_sf,
-    coverage_vars="tract_cases",
+    coverage_vars=c("tract_cases", "tract_noncases"),
     geography_id = NULL,
     method = "intersection",
     crs = 5070,
@@ -190,4 +190,74 @@ calculate_geography_coverage_gain(
 
 ```
 
-We see that the additional two centers lead to an improvement from 142,598 PLWH to 177,917, a gain of 35318.  The total number of PLWH in the `hiv_tract_sf` object is 1,099,805. 
+We see that the additional two centers lead to an improvement in coverage for PLWH from 142,598 PLWH to 177,917, a gain of 35,318.  The total number of PLWH in the `hiv_tract_sf` object is 1,099,805, consistent with the number of PLWH with known status in the full continental US.
+
+We also see that for people without HIV, an additional 7.3 million people gain geographical proximity with the added centers.
+
+## Starting from a `NULL` base
+
+The `calculate_geography_coverage_gain()` function can take a `NULL` input for `existing_areas`.
+
+```{r}
+
+
+calculate_geography_coverage_gain(
+    existing_areas=NULL,
+    added_areas=new_centers_buffer,
+    population_geography=hiv_tract_sf,
+    coverage_vars=c("tract_noncases", "tract_cases"),
+    geography_id = NULL,
+    method = "intersection",
+    crs = 5070,
+    output = "wide"
+)
+
+```
+
+## Ranking centers by incremental gain
+
+The previous examples estimate the total population covered by a set of candidate geographic areas. In some settings, however, the goal is to compare candidate centers individually and ask which additional center would add the greatest amount of new coverage beyond an existing network.
+
+Here, we evaluate each candidate transplant center not in the existing network one at a time. Candidate centers are defined as transplant centers that are not already included in the existing network. For each candidate center, we create a 50-mile buffer and estimate the number of additional people who would be covered if that center were added to the existing network.
+
+Here, we create the `candidate_centers_buffer` object and then pass it to the `rank_individual_coverage_gains()` function, a convenient wrapper which runs the `calculate_geography_coverage_gain()` function repeatedly to generate the output table. 
+
+```{r}
+
+candidate_centers_buffer <- Transplant_centers_all_sf %>%
+  filter(!(OTCCode %in% c("ALUA", "NYMA")))%>%
+  st_buffer(dist = 50 * 1609.344)
+
+ranked_gains <- rank_individual_coverage_gains(
+  candidate_areas = candidate_centers_buffer,
+  existing_areas = existing_centers_buffer,
+  population_geography = hiv_tract_sf,
+  coverage_vars = c("tract_cases", "tract_noncases"),
+  method = "intersection",
+  crs = 5070
+)
+
+```
+
+
+we examine the centers with the highest additional gain and lowest additional gain.
+
+```{r}
+
+ranked_gains$tract_cases %>%
+  select(OTCName, OTCCode, newly_covered) %>%
+  head(10) %>%
+  gt::gt() %>%
+  gt::fmt_number(
+    columns = newly_covered,
+    decimals = 0
+  ) %>%
+  gt::cols_label(
+    OTCName = "Center",
+    OTCCode = "Code",
+    newly_covered = "Newly covered HIV prevalent cases"
+  )
+
+```
+
+The highest yield centers are in metropolitan areas with high numbers of PLWH not served by the current network.  The lowest yield are centers that are in areas with low numbers of PLWH or centers with extensive overlap with the existing centers in New York and Alabama.

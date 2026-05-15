@@ -80,21 +80,9 @@ calculate_geography_coverage_gain <- function(
     output = c("long", "wide")
 ) {
 
-  existing_united<-
-    existing_areas%>%
-    reframe(
-      catchment_area = "Existing area",
-      geometry = st_union(geometry)
-    )%>%
-    st_as_sf()
+  existing_united <- .union_or_empty(existing_areas, "Existing area", crs)
 
-  added_united<-
-    added_areas%>%
-    reframe(
-      catchment_area = "Added area",
-      geometry = st_union(geometry)
-    )%>%
-    st_as_sf()
+  added_united <- .union_or_empty(added_areas, "Added area", crs)
 
   combined_united <-
     bind_rows(
@@ -183,4 +171,30 @@ calculate_geography_coverage_gain <- function(
     )
 
 
+}
+
+
+
+#' Clean catchment area input
+#'
+#' Internal helper.
+#'
+#' @noRd
+
+.union_or_empty <- function(areas, label, crs) {
+  if (is.null(areas)) {
+    return(
+      st_sf(
+        catchment_area = label,
+        geometry = st_sfc(st_geometrycollection(), crs = crs)
+      )
+    )
+  }
+
+  areas %>%
+    reframe(
+      catchment_area = label,
+      geometry = st_union(geometry)
+    ) %>%
+    st_as_sf()
 }
