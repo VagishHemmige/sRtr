@@ -2,27 +2,34 @@ pkgdown:
   title: "A package for working with the UNOS SRTR database in R"
   logo: man/figures/logo.png
   favicon: man/figures/logo.png
+
 url: https://vagishhemmige.github.io/sRtr/
+
 template:
   bootstrap: 5
   includes:
     in_header: |
       <meta name="google-site-verification" content="TBumihuxSFxK8muRvdo69ca7bmvzWmy-3OMfCZ2692A" />
+
 reference:
   - title: File Loading
     contents:
       - load_srtr_file
       - set_srtr_wd
+
   - title: Variable and Factor Labeling
     contents:
       - apply_srtr_varlabels
       - apply_srtr_factors
+
   - title: Risk and Score Calculators
     contents:
       - add_pdri
+
   - title: Missing data
     contents:
       - srtr_normalize_missing
+
   - title: Time-to-event & composite dates
     desc: Helpers for composing event dates and simple TTE calculations
     contents:
@@ -30,42 +37,52 @@ reference:
       - add_txf_outcomes
       - add_tte_outcomes
       - srtr_time_to_event
-  - title: Internal Datasets
-    contents:
-      - formats
-      - dictionary
-  - title: Mapping transplant centers
+
+  - title: Mapping transplant geography
     contents:
       - get_hrsa_transplant_centers
+      - get_hrsa_optn_regions
+      - get_hrsa_opo_service_areas
       - calculate_geography_coverage_gain
       - rank_individual_coverage_gains
+
   - title: Spatial datasets
     contents:
       - transplant_centers_sf
       - UNOS_regions_sf
-articles:
-- title: Getting Started
-  navbar: ~
-  contents:
-  - getting-started
-- title: Cohort Building using the `strobe` package
-  navbar: ~
-  contents:
-  - building-cohort-with-strobe
-- title: Missing data
-  navbar: ~
-  contents:
-  - missing-data
-- title: Adding columns
-  navbar: ~
-  contents:
-  - adding-columns
-- title: Mapping
-  navbar: ~
-  contents:
-  - mapping
-- title: Geographic calculations
-  navbar: ~
-  contents:
-  - geographic-coverage-gain
 
+  - title: Package data
+    contents:
+      - formats
+      - dictionary
+
+articles:
+  - title: Getting Started
+    navbar: ~
+    contents:
+      - getting-started
+
+  - title: Cohort Building using the `strobe` package
+    navbar: ~
+    contents:
+      - building-cohort-with-strobe
+
+  - title: Missing data
+    navbar: ~
+    contents:
+      - missing-data
+
+  - title: Adding columns
+    navbar: ~
+    contents:
+      - adding-columns
+
+  - title: Mapping
+    navbar: ~
+    contents:
+      - mapping
+
+  - title: Geographic calculations
+    navbar: ~
+    contents:
+      - geographic-coverage-gain
