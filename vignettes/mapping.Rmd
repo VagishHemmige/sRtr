@@ -1,19 +1,178 @@
 ---
-title: "mapping"
+
+title: "Mapping transplant geography"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{mapping}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+%\VignetteIndexEntry{Mapping transplant geography}
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteEncoding{UTF-8}
+-------------------------
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
 )
 ```
 
 ```{r setup}
 library(sRtr)
+library(sf)
+library(dplyr)
 ```
+
+## Overview
+
+The `sRtr` package includes helper functions and spatial datasets for working with transplant geography in R.
+
+This vignette introduces basic mapping of:
+
+* HRSA transplant center locations
+* OPO service areas
+* UNOS/OPTN regions
+
+The examples use `sf`, which is the standard R package for working with vector geographic data in R.
+
+## Coordinate reference systems
+
+Spatial objects in `sRtr` are returned as `sf` objects. For many transplant geography tasks, a projected coordinate reference system is preferable to longitude/latitude because it allows more appropriate distance, area, and overlay calculations.
+
+The package commonly uses NAD83 / Conus Albers, EPSG:5070, for U.S. mapping workflows.
+
+```{r crs-example}
+sf::st_crs(UNOS_regions_sf)
+```
+
+## Built-in spatial datasets
+
+The package includes state-level UNOS/OPTN region geometries and transplant center point locations.
+
+```{r built-in-data}
+UNOS_regions_sf
+transplant_centers_sf
+```
+
+## Plotting UNOS/OPTN regions
+
+The object `UNOS_regions_sf` contains state-level geometries with a `Region` field. These can be plotted directly.
+
+```{r plot-unos-regions}
+plot(UNOS_regions_sf["Region"])
+```
+
+To plot dissolved region boundaries, use `get_hrsa_optn_regions()`.
+
+```{r plot-dissolved-unos-regions}
+optn_regions <- get_hrsa_optn_regions()
+
+plot(optn_regions["Region"])
+```
+
+## Plotting transplant centers
+
+The package can download transplant center locations from the HRSA ArcGIS REST service.
+
+```{r get-centers, eval=FALSE}
+centers <- get_hrsa_transplant_centers()
+```
+
+For a vignette, it is often better to use the built-in example data rather than requiring an internet connection.
+
+```{r plot-centers}
+plot(sf::st_geometry(UNOS_regions_sf), border = "grey70")
+plot(sf::st_geometry(transplant_centers_sf), add = TRUE, pch = 16, cex = 0.5)
+```
+
+## Downloading current HRSA transplant center locations
+
+To retrieve the current HRSA transplant center layer:
+
+```{r current-centers, eval=FALSE}
+centers <- get_hrsa_transplant_centers()
+
+centers |>
+  dplyr::select(OTC_NM, OTC_CITY, STATE_ABBR, OPO_PROVIDER_NM, Service_Lst)
+```
+
+A simple map:
+
+```{r current-centers-map, eval=FALSE}
+plot(sf::st_geometry(optn_regions), border = "grey70")
+plot(sf::st_geometry(centers), add = TRUE, pch = 16, cex = 0.5)
+```
+
+## Plotting OPO service areas
+
+The HRSA service also includes Organ Procurement Organization service area geography.
+
+The detailed OPO service-area layer can be downloaded with:
+
+```{r get-opo-service-areas, eval=FALSE}
+opo_areas <- get_hrsa_opo_service_areas()
+```
+
+A basic plot:
+
+```{r plot-opo-service-areas, eval=FALSE}
+plot(opo_areas["OPO_PROVIDER_NM"])
+```
+
+For a less cluttered map, draw only the boundaries and overlay transplant centers.
+
+```{r plot-opo-with-centers, eval=FALSE}
+plot(sf::st_geometry(opo_areas), border = "grey70")
+plot(sf::st_geometry(centers), add = TRUE, pch = 16, cex = 0.4)
+```
+
+
+## Adding state outlines with tigris
+
+The `tigris` package is useful for adding Census boundary layers, such as states or counties.
+
+```{r tigris-example, eval=FALSE}
+library(tigris)
+
+states <- tigris::states(cb = TRUE, year = 2023) |>
+  sf::st_transform(sf::st_crs(optn_regions))
+
+plot(sf::st_geometry(states), border = "grey80")
+plot(sf::st_geometry(optn_regions), add = TRUE, border = "black", lwd = 2)
+plot(sf::st_geometry(transplant_centers_sf), add = TRUE, pch = 16, cex = 0.4)
+```
+
+## Filtering by organ or service list
+
+The HRSA transplant center layer includes a `Service_Lst` field. Depending on the analysis, this can be used to identify centers that list specific transplant services.
+
+```{r filter-service-list, eval=FALSE}
+kidney_centers <- centers |>
+  dplyr::filter(grepl("Kidney", Service_Lst, ignore.case = TRUE))
+
+plot(sf::st_geometry(optn_regions), border = "grey70")
+plot(sf::st_geometry(kidney_centers), add = TRUE, pch = 16, cex = 0.5)
+```
+
+## Working with geometries
+
+Because these are `sf` objects, they can be used with standard spatial operations.
+
+For example, you can check which transplant centers fall within a UNOS/OPTN region.
+
+```{r spatial-join, eval=FALSE}
+centers_with_region <- sf::st_join(
+  centers,
+  optn_regions |> dplyr::select(Region)
+)
+
+centers_with_region |>
+  sf::st_drop_geometry() |>
+  dplyr::count(Region, sort = TRUE)
+```
+
+## Notes
+
+The HRSA transplant center and OPO functions download public GIS layers from HRSA. These layers may change over time as HRSA updates the source data.
+
+The built-in `UNOS_regions_sf` object is included with the package and is useful for reproducible examples and basic region mapping.
