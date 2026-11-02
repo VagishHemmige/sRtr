@@ -1,22 +1,20 @@
 ---
 title: "Calculating geographic coverage gain"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Calculating geographic coverage gain}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = nzchar(Sys.getenv("CENSUS_API_KEY"))
 )
 ```
 
 ## Introduction
 
-Geography matters greatly in solid organ transplantation.  Donor and recipient practices vary greatly by region, and distance-related barriers can magnify geographic disparities.  In this vignette, we demonstrate how the `calculate_geography_coverage_gain()` function can be used to estimate the number of people living with HIV (PLWH) who gain access to heart transplant centers, defined as residence within a 50-mile radius.
+Geography matters greatly in solid organ transplantation.  Donor and recipient practices vary greatly by region, and distance-related barriers can magnify geographic disparities.  In this article, we demonstrate how the `calculate_geography_coverage_gain()` function can be used to estimate the number of people living with HIV (PLWH) who gain access to heart transplant centers, defined as residence within a 50-mile radius.
+
+The code in this article downloads data from HRSA, CDC AtlasPlus, the Census API and the Census Bureau's TIGER/Line files, and needs a Census API key in the `CENSUS_API_KEY` environment variable. It runs only when that key is set, so the copy on the package website shows the code without its output.
 
 
 ```{r setup, message=FALSE, warning=FALSE}
@@ -139,17 +137,18 @@ ggplot()+
 
 ### Importing HIV data
 
-we use the `CDCAtlas` package to import extrapolated estimates of the census tract-level population of PLWH, merging with tract geography obtained via the `tigris` package
+We use the `CDCAtlas` package to estimate the number of PLWH in each census tract. `get_atlas()` downloads county-level HIV data, `impute_suppressed()` fills in suppressed county counts, and `extrapolate_from_county()` shares each county's count across its census tracts in proportion to each tract's American Community Survey (ACS) population aged 13 and older. `extrapolate_from_county()` downloads ACS estimates through the Census API, so it needs a Census API key in the `CENSUS_API_KEY` environment variable. By default, cases CDC reports with no county of residence are left out, with a message giving the total; `no_county = "spread"` shares them across counties instead. We then merge the estimates with tract geography obtained via the `tigris` package.
 
 ```{r}
 
-hiv_tract_data<-CDCAtlas::get_atlas(
+hiv_tract_data <- CDCAtlas::get_atlas(
   disease = "hiv",
-  year = 2022,
   geography = "county",
-  extrapolate_to_tract = TRUE
-)%>%
-  filter(indicator=="HIV prevalence")
+  year = 2022
+) %>%
+  CDCAtlas::impute_suppressed() %>%
+  CDCAtlas::extrapolate_from_county(to = "tract") %>%
+  filter(indicator == "HIV prevalence")
 
 tract_geography <- tigris::tracts(
   year = 2022,
@@ -157,7 +156,7 @@ tract_geography <- tigris::tracts(
   class = "sf"
 ) %>%
   select(
-    tract_fips = GEOID,
+    geoid = GEOID,
     geometry
   ) %>%
   st_transform(5070)
@@ -165,7 +164,7 @@ tract_geography <- tigris::tracts(
 hiv_tract_sf <- tract_geography %>%
   left_join(
     hiv_tract_data,
-    by = "tract_fips"
+    by = "geoid"
   )
 
 ```
@@ -181,7 +180,7 @@ calculate_geography_coverage_gain(
     existing_areas=existing_centers_buffer,
     added_areas=new_centers_buffer,
     population_geography=hiv_tract_sf,
-    coverage_vars=c("tract_cases", "tract_noncases"),
+    coverage_vars=c("area_cases", "area_noncases"),
     geography_id = NULL,
     method = "intersection",
     crs = 5070,
@@ -205,7 +204,7 @@ calculate_geography_coverage_gain(
     existing_areas=NULL,
     added_areas=new_centers_buffer,
     population_geography=hiv_tract_sf,
-    coverage_vars=c("tract_noncases", "tract_cases"),
+    coverage_vars=c("area_noncases", "area_cases"),
     geography_id = NULL,
     method = "intersection",
     crs = 5070,
@@ -232,7 +231,7 @@ ranked_gains <- rank_individual_coverage_gains(
   candidate_areas = candidate_centers_buffer,
   existing_areas = existing_centers_buffer,
   population_geography = hiv_tract_sf,
-  coverage_vars = c("tract_cases", "tract_noncases"),
+  coverage_vars = c("area_cases", "area_noncases"),
   method = "intersection",
   crs = 5070
 )
@@ -244,7 +243,7 @@ we examine the centers with the highest additional gain and lowest additional ga
 
 ```{r}
 
-ranked_gains$tract_cases %>%
+ranked_gains$area_cases %>%
   select(OTCName, OTCCode, newly_covered) %>%
   head(10) %>%
   gt::gt() %>%
