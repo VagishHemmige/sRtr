@@ -56,7 +56,7 @@ The same code number means different things in different formats (code 4
 is "Unknown", "N/A", "Not tested" or "Yes, but CAD unknown" depending on the
 format). Kinds found in the codebook: unknown, not applicable, not done,
 pending, cannot disclose, indeterminate, partly known, and SAS missing.
-See #27 for the draft classification of every format value.
+Classifying every format value by kind is tracked in #27.
 
 ## Label format
 
