@@ -85,4 +85,4 @@ articles:
   - title: Geographic calculations
     navbar: ~
     contents:
-      - geographic-coverage-gain
+      - articles/geographic-coverage-gain
