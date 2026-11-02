@@ -52,6 +52,23 @@ are worked.
   after graft failure, and dates events by the form date.
 - **Issues:** #10, #16, #21, #22
 
+## Joining files
+
+- **SRTR:** keys and grain are not documented reliably; the dictionary labels
+  `TRR_ID` a "unique key" in `TXF_KI`/`TXF_KP`, which have many rows per
+  recipient. Keys are numeric in every file. `TX_ID` is shared across organ
+  files for multi-organ transplants; `TX_KP` has `TRR_ID` and `TRR_ID_PA`.
+- **Repeated columns:** files share many non-key columns (50 between `TX_KI`
+  and `CAND_KIPA`; 240 between `TX_KI` and `TX_LI`), so a join without `by`
+  silently drops rows and a join with `by` makes `.x`/`.y` pairs.
+- **Others:** the kidney calculator avoids joins by using columns repeated in
+  `CAND_KIPA`; Wood et al. copy only needed columns by `px_id` lookup; the
+  data_clean_up notebook intersects ID sets across three files and reports
+  the counts lost.
+- **sRtr:** two joins, both in `add_txf_outcomes()`, without `by`.
+  `load_srtr_file()` can only filter on `TRR_ID`.
+- **Issues:** #3, #34, #35, #36, #37, #38, #39, #40
+
 ## Missing values
 
 - **SRTR:** "Unknown" is missing. Missing values are multiply imputed
