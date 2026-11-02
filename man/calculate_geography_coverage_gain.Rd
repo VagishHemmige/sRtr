@@ -87,8 +87,8 @@ calculate_geography_coverage_gain(
   existing_areas = existing_buffers,
   added_areas = added_buffers,
   population_geography = tract_data,
-  coverage_vars = c("tract_cases", "tract_noncases", "total_population"),
-  geography_id = "GEOID",
+  coverage_vars = c("area_cases", "area_noncases"),
+  geography_id = "geoid",
   method = "areal"
 )
 }
