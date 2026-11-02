@@ -21,4 +21,10 @@
 
 ### Mapping
 
-- [mapping](https://vagishhemmige.github.io/sRtr/articles/mapping.md):
+- [UNKNOWN
+  TITLE](https://vagishhemmige.github.io/sRtr/articles/mapping.md):
+
+### Geographic calculations
+
+- [Calculating geographic coverage
+  gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.md):

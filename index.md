@@ -15,6 +15,7 @@ You can install the development version of **sRtr** from
 [GitHub](https://github.com/VagishHemmige/sRtr) with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("VagishHemmige/sRtr")
 ```
@@ -26,6 +27,7 @@ Before using
 you must initialize the file registry using your local file paths:
 
 ``` r
+
 library(sRtr)
 
 # Example: point to a folder of .sas7bdat or .parquet files for the session only
@@ -42,6 +44,7 @@ The primary function is
 which loads and (optionally) labels SRTR files:
 
 ``` r
+
 # Load the TX_LI file with factor and variable labels
 tx_li <- load_srtr_file("TX_LI", factor_labels = TRUE, var_labels = TRUE)
 
@@ -55,6 +58,7 @@ labelled::var_label(tx_li$DON_RACE)
 You can also use the labeling functions independently:
 
 ``` r
+
 df <- read_sas("TX_KI.sas7bdat")
 
 df <- apply_srtr_factors(df, filekey="TX_KI")
@@ -65,6 +69,7 @@ If the name of the data frame corresponds to the name of the underlying
 file, then the filekey option can be omitted:
 
 ``` r
+
 TX_KI <- read_sas("TX_KI.sas7bdat")
 
 TX_KI_labelled <-TX_KI%>% 

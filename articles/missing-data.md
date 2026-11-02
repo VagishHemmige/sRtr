@@ -10,6 +10,7 @@ function helps harmonize these values by converting them to `NA` or a
 user-specified label like `"Missing"`.
 
 ``` r
+
 tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
 
 # Replace common SRTR missing codes (e.g., "U", "", "ND") with NA
@@ -24,6 +25,7 @@ codes drawn from the SRTR documentation and known conventions. You can
 also pass a custom list of codes using the `missing_vals` argument.
 
 ``` r
+
 
 # Load the data
 tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)

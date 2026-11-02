@@ -27,6 +27,7 @@ GitHub using [`devtools`](https://cran.r-project.org/package=devtools)
 or [`pak`](https://pak.r-lib.org/):
 
 ``` r
+
 # Install devtools if needed
 install.packages("devtools")
 
@@ -37,6 +38,7 @@ devtools::install_github("VagishHemmige/sRtr", dependencies = TRUE)
 ## Getting Started
 
 ``` r
+
 library(sRtr)
 library(dplyr)
 library(strobe)
@@ -61,6 +63,7 @@ Let’s build a cohort of kidney transplant recipients with specific
 criteria:
 
 ``` r
+
 TX_KI %>%
   strobe::strobe_initialize(inclusion_label = "All kidney transplants") %>%
   strobe::strobe_filter(
@@ -83,6 +86,7 @@ TX_KI %>%
 ### Reviewing the Filtering Log
 
 ``` r
+
 # View the complete filtering log
 strobe::get_strobe_log()
 ```
@@ -93,6 +97,7 @@ included/excluded at each step - Cumulative counts - Exclusion reasons
 ## Creating STROBE Diagrams
 
 ``` r
+
 strobe::plot_strobe_diagram(
   incl_width_min = 3,
   incl_height = 1,

@@ -38,17 +38,19 @@ Helpers for composing event dates and simple TTE calculations
 - [`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)
   : Helper function to add a time-to-event outcome from a date function
 
-## Internal Datasets
-
-- [`formats`](https://vagishhemmige.github.io/sRtr/reference/formats.md)
-  : SRTR Format Lookup Table
-- [`dictionary`](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
-  : SRTR Variable Dictionary
-
-## Mapping transplant centers
+## Mapping transplant geography
 
 - [`get_hrsa_transplant_centers()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_transplant_centers.md)
   : Download HRSA Organ Procurement & Transplantation Center Locations
+- [`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md)
+  : Get OPTN/UNOS Region Boundaries
+- [`get_hrsa_opo_service_areas()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_opo_service_areas.md)
+  : Download HRSA OPO Service Area Boundaries
+- [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
+  : Calculate net geographic coverage gain from adding new coverage
+  areas to an existing coverage base
+- [`rank_individual_coverage_gains()`](https://vagishhemmige.github.io/sRtr/reference/rank_individual_coverage_gains.md)
+  : Rank individual candidate areas by marginal coverage gain
 
 ## Spatial datasets
 
@@ -56,3 +58,10 @@ Helpers for composing event dates and simple TTE calculations
   : U.S. Transplant Centers (sf), EPSG:5070
 - [`UNOS_regions_sf`](https://vagishhemmige.github.io/sRtr/reference/UNOS_regions_sf.md)
   : UNOS Regions by State (sf), EPSG:5070
+
+## Package data
+
+- [`formats`](https://vagishhemmige.github.io/sRtr/reference/formats.md)
+  : SRTR Format Lookup Table
+- [`dictionary`](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
+  : SRTR Variable Dictionary

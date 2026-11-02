@@ -30,6 +30,7 @@ The `sRtr` package streamlines the process of:
 You can install the development version of `sRtr` from GitHub:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("VagishHemmige/sRtr")
 ```
@@ -37,6 +38,7 @@ devtools::install_github("VagishHemmige/sRtr")
 Load the package:
 
 ``` r
+
 library(sRtr)
 library(dplyr)
 library(labelled)
@@ -54,6 +56,7 @@ function allows you to specify the directory containing your SRTR files.
 For a single R session, you can set the working directory temporarily:
 
 ``` r
+
 # Point to your SRTR data directory for this session only
 set_srtr_wd("path/to/your/srtr/files")
 ```
@@ -64,6 +67,7 @@ If you frequently work with SRTR data, you can set the directory
 permanently by adding the `permanent = TRUE` argument:
 
 ``` r
+
 # Set the directory permanently across R sessions
 set_srtr_wd("path/to/your/srtr/files", permanent = TRUE)
 ```
@@ -88,6 +92,7 @@ and automatically applies the appropriate SRTR data dictionary.
 ### Basic File Loading
 
 ``` r
+
 # Load a transplant file (liver transplants)
 tx_li <- load_srtr_file("TX_LI")
 
@@ -109,6 +114,7 @@ dictionary.
 Variable labels provide descriptive names for each column:
 
 ``` r
+
 # Load with variable labels
 tx_li <- load_srtr_file("TX_LI", var_labels = TRUE)
 
@@ -123,6 +129,7 @@ var_label(tx_li$GRAFT_STAT)
 Factor labels convert coded values to meaningful categories:
 
 ``` r
+
 # Load with factor labels
 tx_li <- load_srtr_file("TX_LI", factor_labels = TRUE)
 
@@ -140,6 +147,7 @@ For the most informative data, load with both variable and factor
 labels:
 
 ``` r
+
 # Load with both variable and factor labels
 tx_li <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
 
@@ -157,6 +165,7 @@ variable and factor labels.
 ### Exploring Your Data
 
 ``` r
+
 # Basic data exploration
 dim(tx_li)
 names(tx_li)
@@ -175,6 +184,7 @@ The `labelled` package helps preserve your variable labels during data
 manipulation:
 
 ``` r
+
 # Filter data while preserving labels
 recent_tx <- tx_li %>%
   filter(TX_DATE >= as.Date("2020-01-01")) %>%
@@ -192,6 +202,7 @@ can apply labels independently using the dedicated labeling functions.
 ### Applying Factor Labels
 
 ``` r
+
 # Load raw data
 df <- read_sas("TX_KI.sas7bdat")
 
@@ -205,6 +216,7 @@ str(df$DON_RACE)
 ### Applying Variable Labels
 
 ``` r
+
 # Apply variable labels
 df <- apply_srtr_varlabels(df, filekey = "TX_KI")
 
@@ -219,6 +231,7 @@ If your data frame name matches the SRTR file name, you can omit the
 `filekey` parameter:
 
 ``` r
+
 # Load data with matching name
 TX_KI <- read_sas("TX_KI.sas7bdat")
 
@@ -256,6 +269,7 @@ commonly used files:
 - `DONOR_LIVING` - Living donor information
 
 ``` r
+
 # Examples of loading different file types
 liver_tx <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
 kidney_cand <- load_srtr_file("CAND_KIDA", var_labels = TRUE, factor_labels = TRUE)
@@ -271,6 +285,7 @@ informative analysis if the source data set does not automatically load
 with labels.
 
 ``` r
+
 # Recommended approach
 data <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
 ```
@@ -280,6 +295,7 @@ data <- load_srtr_file("TX_LI", var_labels = TRUE, factor_labels = TRUE)
 Always examine your data after loading to ensure it loaded correctly:
 
 ``` r
+
 # Check dimensions
 dim(data)
 
@@ -296,6 +312,7 @@ str(data$GRAFT_STAT)
 Keep track of which SRTR files you’re using and their versions:
 
 ``` r
+
 # Good practice: document your data sources
 # TX_LI file loaded from SRTR SAF 2024Q1
 # Contains liver transplant data from 1987-2023
