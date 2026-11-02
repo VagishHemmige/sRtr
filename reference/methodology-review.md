@@ -69,6 +69,28 @@ are worked.
   `load_srtr_file()` can only filter on `TRR_ID`.
 - **Issues:** #3, #34, #35, #36, #37, #38, #39, #40
 
+## Cohort workflow: nest, then join, then unnest
+
+- **Problem:** flowchart tools (`flowchart`, `strobe`) count rows, so a
+  one-to-many join (transplant → follow-up forms) changes the unit from
+  people to forms. `flowchart`'s `fc_merge()`/`fc_stack()` combine diagrams,
+  not data.
+- **Order:** load → join parents flat (many-to-one) → nest children under
+  the unit (`TXF_*` under `TX_*`, `STATHIST_*` under `CAND_*`) → derive flags
+  → flowchart, tables, models → unnest only at the end for long-format
+  analyses.
+- **Rules:** joins never exclude; filters do (labelled exclusion boxes).
+  Changing the unit (listings → persons) is a new stacked chart, not an
+  exclusion. Excluding transplants with no follow-up suits visit-based
+  outcomes, not survival outcomes.
+- **Diagnostics:** reconcile child rows (nested + outside cohort + true
+  orphans + NA keys); most child rows are outside the cohort when a whole
+  file is nested, which is expected. Report empty nests by transplant year,
+  children per parent, duplicates and impossible dates. Counts only.
+- **Outcome functions:** compute once on long data; accept nested, long or
+  file input with identical output.
+- **Issues:** #41, #42, #43, #44 (with #3, #34, #40)
+
 ## Missing values
 
 - **SRTR:** "Unknown" is missing. Missing values are multiply imputed
