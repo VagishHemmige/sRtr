@@ -99,3 +99,78 @@ patient-level data; outputs and data files were checked for shape only.
 - **Pitfalls:** `ffill()` without grouping copies one recipient's values
   into the next recipient's missing cells.
 - **Issues:** #7, #10
+
+## Found, not yet reviewed
+
+Found on 2026-11-02 by GitHub code search for SAF column and file names
+(`REC_TX_DT`, `CAN_LISTING_DT`, `TFL_DEATH_DT`, `PERS_OPTN_DEATH_DT`,
+`CAN_REM_CD`, `REC_CTR_CD`, `tx_ki.sas7bdat`, `cand_kipa`). Not read yet and
+**not** checked for patient-level data; the statement at the top of this file
+does not cover them. Move an entry into a full section above once reviewed.
+
+### R / R Markdown
+
+- https://github.com/dyjohnson/opo_survival — data prep for kidney, liver,
+  heart and lung from `TX_*` and `CAND_*`; death and censoring logic.
+- https://github.com/dyjohnson/opo_survival_analysis — survival-benefit
+  analyses by organ (2022).
+- https://github.com/dyjohnson/heart_transplant_exceptions — heart exception
+  requests; Cox models.
+- https://github.com/dyjohnson/psr_heart — heart program-specific outcomes.
+- https://github.com/08wparker/KDPI_decision_curve_analysis — KDPI decision
+  curve analysis.
+- https://github.com/08wparker/mixed_effects_survival_benefit_heart_tx —
+  mixed-effects survival benefit, heart.
+- https://github.com/08wparker/new_heart_allocation_policy — 2018 heart
+  allocation policy.
+- https://github.com/Healthcare-Allocation-Lab/survival_benefit_kidney —
+  kidney survival benefit.
+- https://github.com/kevinz1194/Kidney-Transplant-Disparities — candidate and
+  recipient prep; `KDPI_for_EPTS.Rmd`.
+- https://github.com/kevinz1194/Heart-Continuous-Score — 6-week waitlist
+  death.
+- https://github.com/danieljaechulahn/LVAD — LVAD candidates.
+- https://github.com/danieljaechulahn/Adult-Nonstandardized-MELD-Exceptions —
+  MELD exceptions; `NLRBCensoring.R`.
+- https://github.com/mollywhite19/US-CRS-2.0 — heart candidate risk score.
+- https://github.com/juliagegeran/geo_var_heart_tx_list — geographic
+  variation in heart listing.
+- https://github.com/ochristensen628/Kidney-Transplant-and-Place-Based-Disadvantage
+  — kidney access and area deprivation.
+- https://github.com/the-markup/investigation-organs — journalism project;
+  R cleaning script and Python notebooks.
+- https://github.com/bowang-lab/Transplant_Time_Series — liver data prep.
+- https://github.com/petergraffy/environment_transplant_survival —
+  environmental exposures and waitlist survival.
+- https://github.com/ronirg/liver-rsf-waitlist-mortality — random survival
+  forest, liver waitlist mortality.
+- https://github.com/rziemba/SRTR_transplant_trends — kidney transplant time
+  series.
+
+### Reference implementations to cross-check derived variables
+
+- https://github.com/CU-Anschutz-DOS-CORP/sas-macros — `ukdcdrisk.sas`, a SAS
+  donor risk macro.
+- https://github.com/akhan390/KDRI — KDRI re-estimated without race.
+- https://github.com/akhan390/decision-curve-analysis-kdri — decision curves
+  for KDRI.
+- https://github.com/pairs-jh/beta — Stata `.do` files defining patient
+  survival, graft survival and transplant date.
+- https://github.com/lgragert/srtr-impute-pubsaf2306 — outcome variables
+  (`construct_outcomes_vars_9loc.py`) and HLA imputation.
+
+### Python, Julia, Stata
+
+- https://github.com/adi2809/A-Data-Driven-Approach-towards-Improving-Deceased-Donor-Kidney-Utilization
+  — links match-run data to SAFs.
+- https://github.com/uclamii/liver_allocation_simulation — liver allocation
+  simulation.
+- https://github.com/jojal5/KidneyAllocation.jl — kidney allocation
+  simulation (Julia).
+- https://github.com/Anivader/LDLT_survival_benefit_ML_tool — living-donor
+  liver survival benefit.
+- https://github.com/criticalml-uw/DeepMASH — deep learning, MASH liver.
+- https://github.com/Afarzindar/deep-survival — deep survival models.
+- https://github.com/ceharvs/transplant2mongo — loads OPTN STAR files into
+  MongoDB.
+- https://github.com/rjcc/ic_v_ex — STAR data, Stata.
