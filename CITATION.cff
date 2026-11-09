@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "sRtr: Tools for Working with UNOS SRTR Transplant Data in R"
+type: software
+authors:
+  - family-names: Hemmige
+    given-names: Vagish
+    orcid: "https://orcid.org/0009-0006-6346-1826"
+  - family-names: Czeresnia
+    given-names: Jonathan
+version: "0.0.0.9000"
+license: MIT
+abstract: "Tools to load, label and work with the Scientific Registry of Transplant Recipients (SRTR) Standard Analysis Files in R."
+repository-code: "https://github.com/VagishHemmige/sRtr"
+url: "https://vagishhemmige.github.io/sRtr/"

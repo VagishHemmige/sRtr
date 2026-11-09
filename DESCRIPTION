@@ -3,8 +3,9 @@ Title: Tools for Working with UNOS SRTR Transplant Data in R
 Version: 0.0.0.9000
 Authors@R: c(
     person(given = "Vagish", family = "Hemmige",
-           email = "vahemmig@montefiore.org",
-           role = c("aut", "cre")),
+           email = "vagish.hemmige@gmail.com",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0006-6346-1826")),
     person(given = "Jonathan", family = "Czeresnia",
            email = "j.cz@rutgers.edu",
            role = c("aut","ctb")))
