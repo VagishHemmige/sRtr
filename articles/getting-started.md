@@ -48,7 +48,7 @@ library(labelled)
 
 Before you can load SRTR files, you need to tell the package where your
 SRTR data files are located. The
-[`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_SRTR_wd.md)
+[`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md)
 function allows you to specify the directory containing your SRTR files.
 
 ### Temporary Setup (Session Only)

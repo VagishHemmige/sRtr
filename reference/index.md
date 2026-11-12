@@ -4,7 +4,7 @@
 
 - [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
   : Load an SRTR file and optionally apply labels
-- [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_SRTR_wd.md)
+- [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md)
   : Set the SRTR working directory
 
 ## Variable and Factor Labeling

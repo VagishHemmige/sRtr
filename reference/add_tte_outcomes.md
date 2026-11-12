@@ -15,3 +15,12 @@ by an event date and a censor date:
 ``` r
 add_tte_outcomes(df)
 ```
+
+## Arguments
+
+- df:
+
+  A transplant data frame from
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md).
+  Its `file_key` attribute decides which follow-up file and outcome
+  columns are used.

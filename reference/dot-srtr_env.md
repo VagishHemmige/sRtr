@@ -10,7 +10,3 @@ by users.
 ``` r
 .srtr_env
 ```
-
-## Format
-
-An object of class `environment` of length 2.
