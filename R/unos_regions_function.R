@@ -34,7 +34,7 @@
 #' @export
 get_hrsa_optn_regions <- function() {
 
-  regions <- UNOS_regions_sf |>
+  regions <- sRtr::UNOS_regions_sf |>
     sf::st_make_valid() |>
     dplyr::group_by(.data$Region) |>
     dplyr::summarise(

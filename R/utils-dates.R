@@ -17,7 +17,7 @@
   # Numeric/integer like 20240131
   if (is.numeric(x)) {
     nx  <- suppressWarnings(as.integer(x))
-    out <- rep(NA_Date_, length(nx))
+    out <- rep(as.Date(NA), length(nx))
     ok  <- !is.na(nx) & !(nx %in% c(0L, 99999999L))
     if (any(ok)) {
       s <- sprintf("%08d", nx[ok])
@@ -34,7 +34,7 @@
 
     # Strip non-digits to catch "YYYY-MM-DD" or "YYYY/MM/DD"
     d <- gsub("[^0-9]", "", s)
-    out <- rep(NA_Date_, length(s))
+    out <- rep(as.Date(NA), length(s))
 
     eight <- which(!is.na(d) & nchar(d) == 8L)
     if (length(eight)) {

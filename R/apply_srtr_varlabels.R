@@ -16,8 +16,6 @@
 #' @return A data frame with variable labels applied.
 #' @export
 #'
-#' @importFrom stats setNames
-#'
 #' @examples
 #' \dontrun{
 #' # Explicit file_key

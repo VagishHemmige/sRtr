@@ -15,8 +15,6 @@
 #' @return A data frame with factor levels applied to coded variables.
 #' @export
 #'
-#' @importFrom stats setNames
-#'
 #' @examples
 #' \dontrun{
 #' # Explicit file_key

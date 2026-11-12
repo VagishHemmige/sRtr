@@ -42,10 +42,9 @@ if (requireNamespace("sf", quietly = TRUE)) {
   plot(sf::st_geometry(UNOS_regions_sf))
 
   # build dissolved region polygons if needed
-  library(dplyr)
-  unos_regions_poly <- UNOS_regions_sf \%>\%
-    group_by(Region) \%>\%
-    summarise(geometry = sf::st_union(geometry), .groups = "drop") \%>\%
+  unos_regions_poly <- UNOS_regions_sf |>
+    dplyr::group_by(Region) |>
+    dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop") |>
     sf::st_make_valid()
   plot(sf::st_geometry(unos_regions_poly))
 }
