@@ -64,6 +64,26 @@ KP behavior).
 ## Examples
 
 ``` r
+# Two made-up donors
+donors <- data.frame(
+  DON_GENDER = c("F", "M"),
+  DON_AGE_IN_MONTHS = c(300, 540),
+  DON_CREAT = c(0.9, 2.8),
+  DON_RACE = c(8L, 16L),
+  DON_BMI = c(24, 31),
+  DON_HGT_CM = c(165, 180),
+  DON_COD_DON_STROKE = c(0L, 1L),
+  REC_PA_PRESERV_TM = c(10, 14),
+  DON_NON_HR_BEAT = c("N", "Y")
+)
+add_pdri(donors, variant = "KP")
+#>   DON_GENDER DON_AGE_IN_MONTHS DON_CREAT DON_RACE DON_BMI DON_HGT_CM
+#> 1          F               300       0.9        8      24        165
+#> 2          M               540       2.8       16      31        180
+#>   DON_COD_DON_STROKE REC_PA_PRESERV_TM DON_NON_HR_BEAT      PDRI
+#> 1                  0                10               N 0.8210823
+#> 2                  1                14               Y 4.9551202
+
 if (FALSE) { # \dontrun{
 # Default: auto-detect PA vs KP
 kp |>
