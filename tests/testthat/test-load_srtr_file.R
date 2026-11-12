@@ -27,3 +27,95 @@ test_that("load_srtr_file loads expected data and attaches metadata", {
   expect_type(attr(result, "source_path"), "character")
   expect_true(file.exists(attr(result, "source_path")))
 })
+
+# Offline tests below: empty placeholder files in a temporary folder, with the
+# file readers mocked. No real or realistic SAF is read or written.
+
+local_srtr_folder <- function(files, env = parent.frame()) {
+  dir <- withr::local_tempdir(.local_envir = env)
+  file.create(file.path(dir, files))
+  withr::local_envvar(SRTR_WD = dir, .local_envir = env)
+  saved <- as.list(.srtr_env, all.names = TRUE)
+  rm(list = ls(.srtr_env, all.names = TRUE), envir = .srtr_env)
+  withr::defer(
+    {
+      rm(list = ls(.srtr_env, all.names = TRUE), envir = .srtr_env)
+      list2env(saved, envir = .srtr_env)
+    },
+    envir = env
+  )
+  dir
+}
+
+fake_read_sas <- function(data_file, ...) {
+  tibble::tibble(trr_id = 900001, source = basename(data_file))
+}
+
+load_fake <- function(file_key) {
+  load_srtr_file(file_key, factor_labels = FALSE, var_labels = FALSE)
+}
+
+test_that("the folder is scanned on first use, without set_srtr_wd()", {
+  local_srtr_folder("TX_KI.sas7bdat")
+  local_mocked_bindings(read_sas = fake_read_sas, .package = "haven")
+
+  out <- load_fake("TX_KI")
+
+  expect_equal(out$SOURCE, "TX_KI.sas7bdat")
+  expect_equal(attr(out, "file_key"), "TX_KI")
+})
+
+test_that("a file added after the first scan is found", {
+  dir <- local_srtr_folder("TX_KI.sas7bdat")
+  local_mocked_bindings(read_sas = fake_read_sas, .package = "haven")
+  load_fake("TX_KI")
+
+  file.create(file.path(dir, "TX_LI.sas7bdat"))
+  out <- load_fake("TX_LI")
+
+  expect_equal(out$SOURCE, "TX_LI.sas7bdat")
+})
+
+test_that("changing SRTR_WD switches to the new folder", {
+  local_srtr_folder("TX_KI.sas7bdat")
+  local_mocked_bindings(read_sas = fake_read_sas, .package = "haven")
+  load_fake("TX_KI")
+
+  new_dir <- withr::local_tempdir()
+  file.create(file.path(new_dir, "TX_KI.sas7bdat"))
+  withr::local_envvar(SRTR_WD = new_dir)
+  out <- load_fake("TX_KI")
+
+  expect_equal(attr(out, "source_path"), file.path(new_dir, "TX_KI.sas7bdat"))
+})
+
+test_that("an unset SRTR_WD gives an error that says what to do", {
+  local_srtr_folder(character())
+  withr::local_envvar(SRTR_WD = NA)
+  expect_snapshot(error = TRUE, load_fake("TX_KI"))
+})
+
+test_that("an unknown file key names the folder searched", {
+  dir <- local_srtr_folder("TX_KI.sas7bdat")
+  expect_snapshot(
+    error = TRUE,
+    load_fake("TX_LI"),
+    transform = function(x) gsub(dir, "<SRTR_WD>", x, fixed = TRUE)
+  )
+})
+
+test_that("arrow.skip_nul is set only while a parquet file is read", {
+  local_srtr_folder("TX_KI.parquet")
+  withr::local_options(arrow.skip_nul = NULL)
+  local_mocked_bindings(
+    read_parquet = function(file, ...) {
+      tibble::tibble(skip_nul = getOption("arrow.skip_nul", FALSE))
+    },
+    .package = "arrow"
+  )
+
+  out <- load_fake("TX_KI")
+
+  expect_equal(out$SKIP_NUL, TRUE)
+  expect_null(getOption("arrow.skip_nul"))
+})

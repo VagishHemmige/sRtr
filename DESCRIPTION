@@ -47,9 +47,11 @@ Suggests:
     sf,
     rmarkdown,
     testthat (>= 3.0.0),
-    flowchart
+    flowchart,
+    withr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true
 NeedsCompilation: no
 Config/roxygen2/version: 8.1.1
+RoxygenNote: 7.3.1

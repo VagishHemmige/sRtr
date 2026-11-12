@@ -39,6 +39,11 @@ Loads a file from the SRTR dataset registry and optionally applies:
 }
 }
 \details{
+Files are looked up in the folder set with \code{\link[=set_srtr_wd]{set_srtr_wd()}} (the \code{SRTR_WD}
+environment variable). The folder is scanned the first time a file is
+loaded, and again if a file is not found, so files added during the session
+are picked up.
+
 All variable names are standardized to uppercase after loading.
 The returned tibble includes two attributes:
 \itemize{
