@@ -11,9 +11,10 @@
 <url><loc>https://vagishhemmige.github.io/sRtr/articles/missing-data.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/authors.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/index.html</loc></url>
+<url><loc>https://vagishhemmige.github.io/sRtr/news/index.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/UNOS_regions_sf.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/add_pdri.html</loc></url>
-<url><loc>https://vagishhemmige.github.io/sRtr/reference/add_tte_outcomes.html</loc></url>
+<url><loc>https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.html</loc></url>
@@ -21,7 +22,6 @@
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/dictionary.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/dot-map_srtr_files.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/dot-srtr_env.html</loc></url>
-<url><loc>https://vagishhemmige.github.io/sRtr/reference/figures/dataDictionary.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/formats.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/get_hrsa_opo_service_areas.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.html</loc></url>

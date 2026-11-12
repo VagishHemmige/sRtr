@@ -110,15 +110,16 @@ Much more, including help files, vignettes, etc. will be coming soon!
 
 ## Time-to-event & composite dates
 
-Helpers for composing event dates and simple TTE calculations
+Helpers for composing event dates and simple time-to-event calculations
 
 - [`srtr_composite_death()`](https://vagishhemmige.github.io/sRtr/reference/srtr_composite_death.md)
   : Composite death date (OPTN \> SSA \> TFL)
 - [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
-  : Add time-to-event (TTE) follow-up outcomes to a transplant cohort
-- [`add_tte_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_tte_outcomes.md)
-  : Add appropriate TTE outcome variables to a data frame based on the
-  df attributes, if the file was loaded using a load function.
+  : Add time-to-event follow-up outcomes to a transplant cohort
+- [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
+  : Add appropriate time-to-event outcome variables to a data frame
+  based on the df attributes, if the file was loaded using a load
+  function.
 - [`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)
   : Helper function to add a time-to-event outcome from a date function
 

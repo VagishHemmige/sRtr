@@ -1,4 +1,4 @@
-# Add time-to-event (TTE) follow-up outcomes to a transplant cohort
+# Add time-to-event follow-up outcomes to a transplant cohort
 
 Uses the cohort's `file_key` attribute (as set by your SRTR load
 helpers) to locate and load the corresponding follow-up table, then
@@ -83,8 +83,9 @@ This helper:
   column `FIRST_FU_REJ_DATE_HL`. If you prefer to split into heart/lung,
   duplicate those rows before pivoting.
 
-- This function only derives event *dates*. To build full TTE variables
-  (censor date, indicator, elapsed time), pass these dates to your
+- This function only derives event *dates*. To build full time-to-event
+  variables (censor date, indicator, elapsed time), pass these dates to
+  your
   [`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)
   helper along with transplant and last-follow-up dates.
 

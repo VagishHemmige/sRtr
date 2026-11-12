@@ -1,4 +1,4 @@
-# Add appropriate TTE outcome variables to a data frame based on the df attributes, if the file was loaded using a load function.
+# Add appropriate time-to-event outcome variables to a data frame based on the df attributes, if the file was loaded using a load function.
 
 Uses the helper functions to create three columns for an outcome defined
 by an event date and a censor date:
@@ -13,7 +13,7 @@ by an event date and a censor date:
 ## Usage
 
 ``` r
-add_tte_outcomes(df)
+add_time_to_event_outcomes(df)
 ```
 
 ## Arguments
