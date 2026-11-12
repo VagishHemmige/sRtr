@@ -102,7 +102,11 @@ The tibble includes attributes <code>source_path</code> and <code>file_key</code
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>All variable names are standardized to uppercase after loading.
+    <p>Files are looked up in the folder set with <code><a href="set_srtr_wd.html">set_srtr_wd()</a></code> (the <code>SRTR_WD</code>
+environment variable). The folder is scanned the first time a file is
+loaded, and again if a file is not found, so files added during the session
+are picked up.</p>
+<p>All variable names are standardized to uppercase after loading.
 The returned tibble includes two attributes:</p><ul><li><p><code>source_path</code>: the full path to the file on disk</p></li>
 <li><p><code>file_key</code>: the canonical dataset key used to load it</p></li>
 </ul></div>

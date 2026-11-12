@@ -186,8 +186,8 @@ manipulation:
 ``` r
 
 # Filter data while preserving labels
-recent_tx <- tx_li %>%
-  filter(TX_DATE >= as.Date("2020-01-01")) %>%
+recent_tx <- tx_li |>
+  filter(TX_DATE >= as.Date("2020-01-01")) |>
   select(TX_DATE, DON_RACE, REC_AGE_AT_TX, GRAFT_STAT)
 
 # Labels are preserved
@@ -204,7 +204,7 @@ can apply labels independently using the dedicated labeling functions.
 ``` r
 
 # Load raw data
-df <- read_sas("TX_KI.sas7bdat")
+df <- haven::read_sas("TX_KI.sas7bdat")
 
 # Apply factor labels
 df <- apply_srtr_factors(df, filekey = "TX_KI")
@@ -233,11 +233,11 @@ If your data frame name matches the SRTR file name, you can omit the
 ``` r
 
 # Load data with matching name
-TX_KI <- read_sas("TX_KI.sas7bdat")
+TX_KI <- haven::read_sas("TX_KI.sas7bdat")
 
 # Apply labels without specifying filekey
-TX_KI <- TX_KI %>%
-  apply_srtr_factors() %>%
+TX_KI <- TX_KI |>
+  apply_srtr_factors() |>
   apply_srtr_varlabels()
 ```
 

@@ -59,7 +59,7 @@ You can also use the labeling functions independently:
 
 ``` r
 
-df <- read_sas("TX_KI.sas7bdat")
+df <- haven::read_sas("TX_KI.sas7bdat")
 
 df <- apply_srtr_factors(df, filekey="TX_KI")
 df <- apply_srtr_varlabels(df, filekey="TX_KI")
@@ -70,9 +70,9 @@ file, then the filekey option can be omitted:
 
 ``` r
 
-TX_KI <- read_sas("TX_KI.sas7bdat")
+TX_KI <- haven::read_sas("TX_KI.sas7bdat")
 
-TX_KI_labelled <-TX_KI%>% 
+TX_KI_labelled <- TX_KI |>
   apply_srtr_factors()
 ```
 

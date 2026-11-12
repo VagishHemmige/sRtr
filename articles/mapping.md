@@ -8,8 +8,6 @@ vignette: \> % % % ————————-
 ``` r
 
 library(sRtr)
-#> Warning in .map_srtr_files(): SRTR_WD is not set. Use `set_srtr_wd()` to
-#> configure your working directory.
 library(sf)
 #> Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE
 library(dplyr)

@@ -55,6 +55,12 @@ includes attributes `source_path` and `file_key`.
 
 ## Details
 
+Files are looked up in the folder set with
+[`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md)
+(the `SRTR_WD` environment variable). The folder is scanned the first
+time a file is loaded, and again if a file is not found, so files added
+during the session are picked up.
+
 All variable names are standardized to uppercase after loading. The
 returned tibble includes two attributes:
 

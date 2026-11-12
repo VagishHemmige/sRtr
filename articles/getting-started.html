@@ -251,8 +251,8 @@ variable and factor labels.</p>
 during data manipulation:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Filter data while preserving labels</span></span>
-<span><span class="va">recent_tx</span> <span class="op">&lt;-</span> <span class="va">tx_li</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TX_DATE</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-01-01"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">recent_tx</span> <span class="op">&lt;-</span> <span class="va">tx_li</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TX_DATE</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-01-01"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">TX_DATE</span>, <span class="va">DON_RACE</span>, <span class="va">REC_AGE_AT_TX</span>, <span class="va">GRAFT_STAT</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Labels are preserved</span></span>
@@ -270,7 +270,7 @@ functions.</p>
 </h3>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load raw data</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">read_sas</span><span class="op">(</span><span class="st">"TX_KI.sas7bdat"</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">haven</span><span class="fu">::</span><span class="fu"><a href="https://haven.tidyverse.org/reference/read_sas.html" class="external-link">read_sas</a></span><span class="op">(</span><span class="st">"TX_KI.sas7bdat"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Apply factor labels</span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/apply_srtr_factors.html">apply_srtr_factors</a></span><span class="op">(</span><span class="va">df</span>, filekey <span class="op">=</span> <span class="st">"TX_KI"</span><span class="op">)</span></span>
@@ -296,11 +296,11 @@ functions.</p>
 <code>filekey</code> parameter:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load data with matching name</span></span>
-<span><span class="va">TX_KI</span> <span class="op">&lt;-</span> <span class="fu">read_sas</span><span class="op">(</span><span class="st">"TX_KI.sas7bdat"</span><span class="op">)</span></span>
+<span><span class="va">TX_KI</span> <span class="op">&lt;-</span> <span class="fu">haven</span><span class="fu">::</span><span class="fu"><a href="https://haven.tidyverse.org/reference/read_sas.html" class="external-link">read_sas</a></span><span class="op">(</span><span class="st">"TX_KI.sas7bdat"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Apply labels without specifying filekey</span></span>
-<span><span class="va">TX_KI</span> <span class="op">&lt;-</span> <span class="va">TX_KI</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/apply_srtr_factors.html">apply_srtr_factors</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">TX_KI</span> <span class="op">&lt;-</span> <span class="va">TX_KI</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/apply_srtr_factors.html">apply_srtr_factors</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/apply_srtr_varlabels.html">apply_srtr_varlabels</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
