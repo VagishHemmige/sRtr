@@ -48,24 +48,24 @@ rank_individual_coverage_gains <- function(
 ) {
   method <- match.arg(method)
 
-  candidate_areas <- candidate_areas %>%
-    sf::st_transform(crs) %>%
+  candidate_areas <- candidate_areas |>
+    sf::st_transform(crs) |>
     dplyr::mutate(.candidate_id = dplyr::row_number())
 
-  population_geography <- population_geography %>%
+  population_geography <- population_geography |>
     sf::st_transform(crs)
 
   if (!is.null(existing_areas)) {
-    existing_areas <- existing_areas %>%
+    existing_areas <- existing_areas |>
       sf::st_transform(crs)
   }
 
-  results <- candidate_areas %>%
-    dplyr::group_split(.candidate_id) %>%
+  results <- candidate_areas |>
+    dplyr::group_split(.candidate_id) |>
     purrr::map_dfr(function(candidate_area) {
 
-      candidate_metadata <- candidate_area %>%
-        sf::st_drop_geometry() %>%
+      candidate_metadata <- candidate_area |>
+        sf::st_drop_geometry() |>
         dplyr::select(-.candidate_id)
 
       calculate_geography_coverage_gain(
@@ -77,12 +77,12 @@ rank_individual_coverage_gains <- function(
         method = method,
         crs = crs,
         output = "wide"
-      ) %>%
+      ) |>
         dplyr::bind_cols(candidate_metadata)
-    }) %>%
-    dplyr::group_by(coverage_var) %>%
-    dplyr::arrange(dplyr::desc(newly_covered), .by_group = TRUE) %>%
-    dplyr::mutate(rank = dplyr::row_number()) %>%
+    }) |>
+    dplyr::group_by(coverage_var) |>
+    dplyr::arrange(dplyr::desc(newly_covered), .by_group = TRUE) |>
+    dplyr::mutate(rank = dplyr::row_number()) |>
     dplyr::ungroup()
 
   if (length(coverage_vars) == 1) {
