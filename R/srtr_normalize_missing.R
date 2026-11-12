@@ -50,7 +50,10 @@ srtr_normalize_missing <- function(
   for (col in names(missing_vals)) {
     if (!col %in% names(df)) {
       if (verbose) {
-        message("Skipping column not found: ", col)
+        srtr_inform(
+          "Skipping {.field {col}}: not in the data.",
+          class = "column_skipped"
+        )
       }
       next
     }
@@ -59,7 +62,7 @@ srtr_normalize_missing <- function(
     vec <- df[[col]]
 
     if (verbose) {
-      message("Processing column: ", col)
+      srtr_inform("Processing {.field {col}}.", class = "column_processed")
     }
 
     # Factor support: add replacement level if needed

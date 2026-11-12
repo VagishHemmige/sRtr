@@ -1,15 +1,26 @@
 # The SRTR file list, scanning SRTR_WD when needed: on first use, when SRTR_WD
 # has changed since the last scan, or when `refresh = TRUE`.
-.srtr_file_list <- function(refresh = FALSE) {
+.srtr_file_list <- function(refresh = FALSE, call = rlang::caller_env()) {
   SRTR_wd <- Sys.getenv("SRTR_WD")
   if (!nzchar(SRTR_wd)) {
-    stop(
-      "SRTR_WD is not set. Call `set_srtr_wd(\"path/to/your/SAFs\")` first.",
-      call. = FALSE
+    srtr_abort(
+      c(
+        "{.envvar SRTR_WD} is not set.",
+        "i" = "Call {.code set_srtr_wd(\"path/to/your/SAFs\")} first."
+      ),
+      class = "srtr_wd_unset",
+      call = call
     )
   }
   if (!dir.exists(SRTR_wd)) {
-    stop("The SRTR_WD folder does not exist: ", SRTR_wd, call. = FALSE)
+    srtr_abort(
+      c(
+        "The {.envvar SRTR_WD} folder does not exist:",
+        " " = "{.path {SRTR_wd}}"
+      ),
+      class = "srtr_wd_missing",
+      call = call
+    )
   }
 
   stale <- is.null(.srtr_env$file_list) ||

@@ -63,10 +63,10 @@
     if (!quiet) {
       n_bad <- sum(!is.na(s) & is.na(out))
       if (n_bad > 0) {
-        warning(sprintf(
-          ".srtr_as_date: %d values could not be parsed; set to NA",
-          n_bad
-        ))
+        srtr_warn(
+          "{n_bad} date value{?s} could not be read; set to {.val {NA}}.",
+          class = "date_unparsed"
+        )
       }
     }
     return(out)

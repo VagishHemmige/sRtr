@@ -212,6 +212,10 @@ test_that("add_time_to_event_outcomes() runs on a single-organ cohort with no re
 test_that("a missing follow-up date column is a clear error", {
   kp <- fake_cohort("TX_KP")
   kp$TFL_LAFUDATEPA <- NULL
+  expect_error(
+    add_time_to_event_outcomes(kp),
+    class = "sRtr_error_missing_columns"
+  )
   expect_snapshot(error = TRUE, add_time_to_event_outcomes(kp))
 
   ki <- fake_cohort("TX_KI")
@@ -222,6 +226,10 @@ test_that("a missing follow-up date column is a clear error", {
 test_that("TX_KP warns when follow-up rows are coded neither KI nor PA", {
   # WLORG also allows "KP"; such rows cannot be assigned to one organ.
   local_mocked_bindings(load_srtr_file = function(...) fake_txf("KP"))
+  expect_warning(
+    add_txf_outcomes(fake_tx("TX_KP")),
+    class = "sRtr_warning_kp_unknown_organ"
+  )
   expect_snapshot(out <- add_txf_outcomes(fake_tx("TX_KP")))
   expect_equal(out$FIRST_FU_REJ_DATE_KI, rep(as.Date(NA), 3))
   expect_equal(out$FIRST_FU_REJ_DATE_PA, rep(as.Date(NA), 3))

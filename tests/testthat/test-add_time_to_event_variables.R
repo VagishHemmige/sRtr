@@ -87,6 +87,10 @@ test_that("a recipient with no last follow-up date has no death time by default"
 
 test_that("death_window = 'ascertainment' needs one valid ascertainment_date", {
   local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  expect_error(
+    add_time_to_event_outcomes(death_cohort(), death_window = "ascertainment"),
+    class = "sRtr_error_ascertainment_date_missing"
+  )
   expect_snapshot(
     error = TRUE,
     add_time_to_event_outcomes(death_cohort(), death_window = "ascertainment")
@@ -127,4 +131,26 @@ test_that("ascertainment_date can be given as text", {
   )
 
   expect_equal(out$REC_DEATH_DT_COMPOSITE_CENSOR[1], as.Date("2007-01-01"))
+})
+
+test_that("srtr_time_to_event() warns about negative times and sets them to NA", {
+  df <- tibble::tibble(
+    start = as.Date(c("2001-01-10", "2001-01-10")),
+    event = as.Date(c("2001-01-01", NA)),
+    censor = as.Date(c("2001-01-01", "2002-01-10"))
+  )
+  expect_snapshot(
+    out <- srtr_time_to_event(
+      df, event, start, censor,
+      prefix = "FAKE", units = "days", add_epsilon = 0
+    )
+  )
+  expect_warning(
+    srtr_time_to_event(
+      df, event, start, censor,
+      prefix = "FAKE", units = "days", add_epsilon = 0
+    ),
+    class = "sRtr_warning_negative_time"
+  )
+  expect_equal(out$FAKE_days, c(NA, 365))
 })

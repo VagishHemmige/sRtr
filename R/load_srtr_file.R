@@ -54,13 +54,14 @@ load_srtr_file <- function(
     match <- find_file(.srtr_file_list(refresh = TRUE))
   }
   if (nrow(match) == 0) {
-    stop(
-      "File key '",
-      file_key,
-      "' not found in SRTR_WD (",
-      Sys.getenv("SRTR_WD"),
-      ").",
-      call. = FALSE
+    srtr_wd <- Sys.getenv("SRTR_WD")
+    srtr_abort(
+      c(
+        "No file for {.arg file_key} {.val {file_key}}.",
+        "i" = "Looked for a {.file .sas7bdat} or {.file .parquet} file in {.envvar SRTR_WD}:",
+        " " = "{.path {srtr_wd}}"
+      ),
+      class = "file_not_found"
     )
   }
 
@@ -94,7 +95,10 @@ load_srtr_file <- function(
         arrow::read_parquet(full_path, columns = selected_names, ...)
       }
     },
-    stop("Unsupported file type: ", suffix)
+    srtr_abort(
+      "Can't read {.file .{suffix}} files; only {.file .sas7bdat} and {.file .parquet}.",
+      class = "unsupported_file_type"
+    )
   )
 
   # ---- Standardize column names ----
