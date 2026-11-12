@@ -25,6 +25,20 @@
 #' @return `df` with a new `pdri_col` column; grouping is preserved.
 #'
 #' @examplesIf requireNamespace("dplyr", quietly = TRUE)
+#' # Two made-up donors
+#' donors <- data.frame(
+#'   DON_GENDER = c("F", "M"),
+#'   DON_AGE_IN_MONTHS = c(300, 540),
+#'   DON_CREAT = c(0.9, 2.8),
+#'   DON_RACE = c(8L, 16L),
+#'   DON_BMI = c(24, 31),
+#'   DON_HGT_CM = c(165, 180),
+#'   DON_COD_DON_STROKE = c(0L, 1L),
+#'   REC_PA_PRESERV_TM = c(10, 14),
+#'   DON_NON_HR_BEAT = c("N", "Y")
+#' )
+#' add_pdri(donors, variant = "KP")
+#'
 #' \dontrun{
 #' # Default: auto-detect PA vs KP
 #' kp |>
@@ -39,6 +53,7 @@
 #' # res <- add_pdri(tmp, return_terms = TRUE)
 #' # res$PDRI_terms[[1]]  # additive components for the first row
 #' }
+#' @export
 add_pdri <- function(df,
                      variant = NULL,
                      mean_impute = FALSE,

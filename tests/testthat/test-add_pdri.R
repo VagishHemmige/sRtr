@@ -110,3 +110,7 @@ testthat::test_that("Groupwise mean-impute works; grouping preserved; source col
   # Imputation allowed PDRI to compute (no NA solely due to those imputed fields)
   testthat::expect_true(all(!is.na(out$PDRI)))
 })
+
+testthat::test_that("add_pdri() is exported", {
+  testthat::expect_true("add_pdri" %in% getNamespaceExports("sRtr"))
+})
