@@ -5,7 +5,6 @@
 # utils::globalVariables() list: a name listed there would also hide a missing
 # column or a missing pkg:: prefix from R CMD check.
 
-
 # No .onLoad(): loading sRtr does not scan SRTR_WD or change options. The
 # folder is scanned when load_srtr_file() first needs it (.srtr_file_list()).
 

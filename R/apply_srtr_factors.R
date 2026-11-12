@@ -36,17 +36,29 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     attr_key <- attr(df, "file_key")
     if (!is.null(attr_key)) {
       file_key <- toupper(attr_key)
-      if (verbose) message("Inferred file_key = '", file_key, "' from data frame attribute.")
+      if (verbose) {
+        message(
+          "Inferred file_key = '",
+          file_key,
+          "' from data frame attribute."
+        )
+      }
     } else {
       file_key <- toupper(deparse(substitute(df)))
-      if (verbose) message("Inferred file_key = '", file_key, "' from object name.")
+      if (verbose) {
+        message("Inferred file_key = '", file_key, "' from object name.")
+      }
     }
   }
 
   # ---- Check dictionary and formats availability ----
-  if (!exists("dictionary", envir = asNamespace("sRtr")) ||
-      !exists("formats", envir = asNamespace("sRtr"))) {
-    stop("Both `dictionary` and `formats` datasets must be available in the sRtr package.")
+  if (
+    !exists("dictionary", envir = asNamespace("sRtr")) ||
+      !exists("formats", envir = asNamespace("sRtr"))
+  ) {
+    stop(
+      "Both `dictionary` and `formats` datasets must be available in the sRtr package."
+    )
   }
 
   dictionary <- get("dictionary", envir = asNamespace("sRtr"))
@@ -54,8 +66,8 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     dplyr::rename_with(tolower) |>
     dplyr::rename(
       Format = "format",
-      Value  = "code",
-      Label  = "meaning"
+      Value = "code",
+      Label = "meaning"
     )
 
   # ---- Normalize variable names ----
@@ -63,7 +75,11 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
 
   # ---- Lookup variables to convert ----
   vars_to_factor <- dictionary |>
-    dplyr::filter(.data$Dataset == file_key, !is.na(.data$FormatID), .data$FormatID != "") |>
+    dplyr::filter(
+      .data$Dataset == file_key,
+      !is.na(.data$FormatID),
+      .data$FormatID != ""
+    ) |>
     dplyr::mutate(
       format_clean = stringr::str_remove(.data$FormatID, "^fmt_"),
       variable_upper = toupper(.data$Variable)
@@ -71,7 +87,9 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     dplyr::filter(.data$variable_upper %in% df_names_upper)
 
   if (nrow(vars_to_factor) == 0) {
-    if (verbose) message("No variables to convert to factor for ", file_key)
+    if (verbose) {
+      message("No variables to convert to factor for ", file_key)
+    }
     return(df)
   }
 
@@ -85,15 +103,25 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
       dplyr::filter(.data$Format == fmt)
 
     if (nrow(fmt_map) == 0) {
-      if (verbose) message("No mapping found for format: ", fmt, " (variable: ", var_match, ")")
+      if (verbose) {
+        message(
+          "No mapping found for format: ",
+          fmt,
+          " (variable: ",
+          var_match,
+          ")"
+        )
+      }
       next
     }
 
     code_vec <- stats::setNames(fmt_map$Label, fmt_map$Value)
 
-    df[[var_match]] <- factor(as.character(df[[var_match]]),
-                              levels = names(code_vec),
-                              labels = code_vec)
+    df[[var_match]] <- factor(
+      as.character(df[[var_match]]),
+      levels = names(code_vec),
+      labels = code_vec
+    )
 
     if (verbose) {
       message("Labeled variable: ", var_match, " using format: ", fmt)

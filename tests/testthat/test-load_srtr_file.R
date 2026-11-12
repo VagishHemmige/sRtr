@@ -9,7 +9,6 @@
 # These tests need real SAF files: they run only when SRTR_LIVE_TESTS=true and
 # SRTR_WD are set (see helper-srtr.R).
 
-
 test_that("load_srtr_file loads expected data and attaches metadata", {
   skip_if_no_srtr_data()
 
@@ -18,7 +17,7 @@ test_that("load_srtr_file loads expected data and attaches metadata", {
   # Check return type and content
   expect_s3_class(result, "data.frame")
   expect_gt(nrow(result), 0)
-  expect_true("PX_ID" %in% names(result))  # Adjust to match a known column
+  expect_true("PX_ID" %in% names(result)) # Adjust to match a known column
 
   # Check attached attributes
   expect_true(!is.null(attr(result, "source_path")))

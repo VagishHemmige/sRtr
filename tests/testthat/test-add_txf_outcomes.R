@@ -17,7 +17,12 @@ fake_txf <- function(org_ty) {
       "3: No",
       "1: Yes, at least one episode treated with anti-rejection agent"
     ),
-    TFL_PX_STAT_DT = as.Date(c("2001-01-01", "2002-01-01", "2001-06-01", "2003-01-01"))
+    TFL_PX_STAT_DT = as.Date(c(
+      "2001-01-01",
+      "2002-01-01",
+      "2001-06-01",
+      "2003-01-01"
+    ))
   )
 }
 
@@ -30,7 +35,10 @@ test_that("add_txf_outcomes() runs for a single-organ file without dplyr attache
   expect_named(out, c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE"))
   expect_equal(nrow(out), 3)
   expect_equal(out$FIRST_FU_MALIG_DATE, as.Date(c("2002-01-01", NA, NA)))
-  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2001-01-01", NA, "2003-01-01")))
+  expect_equal(
+    out$FIRST_FU_REJ_DATE,
+    as.Date(c("2001-01-01", NA, "2003-01-01"))
+  )
 })
 
 test_that("add_time_to_event_outcomes() builds rejection dates without dplyr attached", {
@@ -94,9 +102,17 @@ test_that("TX_KP keeps _KI and _PA columns when only kidney rejections occur", {
   out <- add_txf_outcomes(fake_tx("TX_KP"))
   expect_named(
     out,
-    c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE_KI", "FIRST_FU_REJ_DATE_PA")
+    c(
+      "TRR_ID",
+      "FIRST_FU_MALIG_DATE",
+      "FIRST_FU_REJ_DATE_KI",
+      "FIRST_FU_REJ_DATE_PA"
+    )
   )
-  expect_equal(out$FIRST_FU_REJ_DATE_KI, as.Date(c("2001-01-01", NA, "2003-01-01")))
+  expect_equal(
+    out$FIRST_FU_REJ_DATE_KI,
+    as.Date(c("2001-01-01", NA, "2003-01-01"))
+  )
   expect_equal(out$FIRST_FU_REJ_DATE_PA, rep(as.Date(NA), 3))
 })
 
@@ -153,19 +169,32 @@ test_that("add_time_to_event_outcomes() runs on a TX_KP cohort", {
   # Death is patient-level: censored at the later of the kidney and pancreas
   # follow-up dates (900001: 2005-01-01), or at death (900002: 2004-01-01).
   expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY, c(0L, 1L))
-  expect_equal(out$REC_DEATH_DT_COMPOSITE_CENSOR, as.Date(c("2005-01-01", "2004-01-01")))
+  expect_equal(
+    out$REC_DEATH_DT_COMPOSITE_CENSOR,
+    as.Date(c("2005-01-01", "2004-01-01"))
+  )
 
   # Kidney rejection is censored at kidney follow-up.
   expect_equal(out$FIRST_REJ_DATE_BINARY, c(1L, 0L))
-  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2001-01-01", "2004-01-01")))
+  expect_equal(
+    out$FIRST_REJ_DATE_CENSOR,
+    as.Date(c("2001-01-01", "2004-01-01"))
+  )
 
   # Pancreas columns use the FIRST_REJ_DATE_PA prefix (was FIRST_REJ_DATEPA).
   expect_contains(
     names(out),
-    c("FIRST_REJ_DATE_PA_CENSOR", "FIRST_REJ_DATE_PA_BINARY", "FIRST_REJ_DATE_PA_days")
+    c(
+      "FIRST_REJ_DATE_PA_CENSOR",
+      "FIRST_REJ_DATE_PA_BINARY",
+      "FIRST_REJ_DATE_PA_days"
+    )
   )
   expect_equal(grep("^FIRST_REJ_DATEPA", names(out), value = TRUE), character())
-  expect_equal(out$FIRST_REJ_DATE_PA_CENSOR, as.Date(c("2005-01-01", "2002-01-01")))
+  expect_equal(
+    out$FIRST_REJ_DATE_PA_CENSOR,
+    as.Date(c("2005-01-01", "2002-01-01"))
+  )
 })
 
 test_that("add_time_to_event_outcomes() runs on a single-organ cohort with no rejections", {
@@ -174,7 +203,10 @@ test_that("add_time_to_event_outcomes() runs on a single-organ cohort with no re
   local_mocked_bindings(load_srtr_file = function(...) txf)
   out <- add_time_to_event_outcomes(fake_cohort("TX_KI"))
   expect_equal(out$FIRST_REJ_DATE_BINARY, c(0L, 0L))
-  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2005-01-01", "2004-01-01")))
+  expect_equal(
+    out$FIRST_REJ_DATE_CENSOR,
+    as.Date(c("2005-01-01", "2004-01-01"))
+  )
 })
 
 test_that("a missing follow-up date column is a clear error", {

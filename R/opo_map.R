@@ -48,7 +48,6 @@
 #'
 #' @export
 get_hrsa_opo_service_areas <- function(quiet = TRUE) {
-
   url <- paste0(
     "https://gisportal.hrsa.gov/server/rest/services/",
     "Organs/OrganProcurementAndTransplantation_FS/",
@@ -67,29 +66,31 @@ get_hrsa_opo_service_areas <- function(quiet = TRUE) {
 
   # Attach human-readable variable labels
   var_labels <- c(
-    X                                = "Longitude",
-    Y                                = "Latitude",
-    OBJECTID                         = "HRSA Object ID",
-    OPO_PROVIDER_ID                  = "OPO Provider ID",
-    OPO_PROVIDER_NUM                 = "OPO Provider Number",
-    OPO_PROVIDER_NM                  = "Organ Procurement Organization Name",
-    OPO_ADDRESS                      = "OPO Address",
-    OPO_CITY                         = "OPO City",
-    OPO_STATE_ABBR                   = "OPO State Abbreviation",
-    OPO_ZIP_CD                       = "OPO ZIP Code",
-    OPO_PHONE_NUM                    = "OPO Phone Number",
-    OPO_URL                          = "OPO Website",
-    OPO_US_MEXICO_BORDER_100KM_IND   = "OPO Within 100km of US\u2013Mexico Border Indicator",
-    RURAL_IND                        = "Rural Indicator",
-    DW_RECORD_CREATE_DT              = "Record Creation Date",
-    DW_RECORD_CREATE_DT_TXT          = "Record Creation Date (Text)",
-    DW_RECORD_UPDATE_DT              = "Record Update Date"
+    X = "Longitude",
+    Y = "Latitude",
+    OBJECTID = "HRSA Object ID",
+    OPO_PROVIDER_ID = "OPO Provider ID",
+    OPO_PROVIDER_NUM = "OPO Provider Number",
+    OPO_PROVIDER_NM = "Organ Procurement Organization Name",
+    OPO_ADDRESS = "OPO Address",
+    OPO_CITY = "OPO City",
+    OPO_STATE_ABBR = "OPO State Abbreviation",
+    OPO_ZIP_CD = "OPO ZIP Code",
+    OPO_PHONE_NUM = "OPO Phone Number",
+    OPO_URL = "OPO Website",
+    OPO_US_MEXICO_BORDER_100KM_IND = "OPO Within 100km of US\u2013Mexico Border Indicator",
+    RURAL_IND = "Rural Indicator",
+    DW_RECORD_CREATE_DT = "Record Creation Date",
+    DW_RECORD_CREATE_DT_TXT = "Record Creation Date (Text)",
+    DW_RECORD_UPDATE_DT = "Record Update Date"
   )
 
   common_vars <- intersect(names(var_labels), names(opo_areas))
 
   suppressWarnings(
-    labelled::var_label(opo_areas[common_vars]) <- as.list(var_labels[common_vars])
+    labelled::var_label(opo_areas[common_vars]) <- as.list(var_labels[
+      common_vars
+    ])
   )
 
   return(opo_areas)

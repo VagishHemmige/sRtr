@@ -31,12 +31,14 @@
 #' df <- load_srtr_file("TX_LI", factor_labels = TRUE, var_labels = TRUE)
 #' }
 
-load_srtr_file <- function(file_key,
-                           trr_id_filter=NULL,
-                           factor_labels = TRUE,
-                           var_labels = TRUE,
-                           col_select = NULL,
-                           ...) {
+load_srtr_file <- function(
+  file_key,
+  trr_id_filter = NULL,
+  factor_labels = TRUE,
+  var_labels = TRUE,
+  col_select = NULL,
+  ...
+) {
   # ---- Lookup metadata ----
   # Scans SRTR_WD on first use; rescans once if the file is not in the list
   # or has gone, so files added or moved during the session are found.
@@ -53,8 +55,11 @@ load_srtr_file <- function(file_key,
   }
   if (nrow(match) == 0) {
     stop(
-      "File key '", file_key, "' not found in SRTR_WD (",
-      Sys.getenv("SRTR_WD"), ").",
+      "File key '",
+      file_key,
+      "' not found in SRTR_WD (",
+      Sys.getenv("SRTR_WD"),
+      ").",
       call. = FALSE
     )
   }
@@ -81,7 +86,11 @@ load_srtr_file <- function(file_key,
         arrow::read_parquet(full_path, ...)
       } else {
         dummy <- arrow::open_dataset(full_path)$head(1) |> as.data.frame()
-        selected_names <- tidyselect::eval_select(rlang::enquo(col_select), dummy) |> names()
+        selected_names <- tidyselect::eval_select(
+          rlang::enquo(col_select),
+          dummy
+        ) |>
+          names()
         arrow::read_parquet(full_path, columns = selected_names, ...)
       }
     },
@@ -97,14 +106,18 @@ load_srtr_file <- function(file_key,
   }
 
   # ---- Add TFL_LAFUDATE to KP (which has separate TFL_LAFUDATEKI and TFL_LAFUDATEPA variables) -----
-if (file_key_input=="TX_KP") {
+  if (file_key_input == "TX_KP") {
     df <- df |>
-    dplyr::mutate(TFL_LAFUDATE = dplyr::if_else(
-      is.na(.data$TFL_LAFUDATEPA) | (!is.na(.data$TFL_LAFUDATEKI) & .data$TFL_LAFUDATEKI >= .data$TFL_LAFUDATEPA),
-      .data$TFL_LAFUDATEKI,        # pick date1 when it's >= date2 (or date2 is NA)
-      .data$TFL_LAFUDATEPA         # otherwise pick date2
-    ))
-}
+      dplyr::mutate(
+        TFL_LAFUDATE = dplyr::if_else(
+          is.na(.data$TFL_LAFUDATEPA) |
+            (!is.na(.data$TFL_LAFUDATEKI) &
+              .data$TFL_LAFUDATEKI >= .data$TFL_LAFUDATEPA),
+          .data$TFL_LAFUDATEKI, # pick date1 when it's >= date2 (or date2 is NA)
+          .data$TFL_LAFUDATEPA # otherwise pick date2
+        )
+      )
+  }
 
   # ---- Apply factor labels ----
   if (factor_labels) {

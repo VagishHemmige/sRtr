@@ -39,7 +39,10 @@ test_that("by default, deaths after last follow-up are censored there (#18)", {
     as.Date(c("2004-01-01", "2003-01-01", "2004-01-01"))
   )
   # The composite death date itself still reports every source.
-  expect_equal(out$REC_DEATH_DT_COMPOSITE, as.Date(c(NA, "2003-01-01", "2006-01-01")))
+  expect_equal(
+    out$REC_DEATH_DT_COMPOSITE,
+    as.Date(c(NA, "2003-01-01", "2006-01-01"))
+  )
 })
 
 test_that("death_window = 'ascertainment' follows everyone to one closing date", {
