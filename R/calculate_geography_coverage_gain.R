@@ -142,17 +142,17 @@ calculate_geography_coverage_gain <- function(
     combined_covered = unname(combined)
   ) |>
     dplyr::mutate(
-      pct_existing_covered = existing_covered / total,
-      pct_added_covered = added_covered / total,
-      pct_newly_covered = newly_covered / total,
-      pct_combined_covered = combined_covered / total
+      pct_existing_covered = .data$existing_covered / .data$total,
+      pct_added_covered = .data$added_covered / .data$total,
+      pct_newly_covered = .data$newly_covered / .data$total,
+      pct_combined_covered = .data$combined_covered / .data$total
     )
 
   if (output == "wide") {
     out <- out |>
       tidyr::pivot_wider(
-        names_from = coverage_var,
-        values_from = -coverage_var,
+        names_from = "coverage_var",
+        values_from = -"coverage_var",
         names_glue = "{coverage_var}_{.value}",
         names_vary = "slowest"
       )

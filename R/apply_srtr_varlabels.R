@@ -61,9 +61,9 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
   df_names_upper <- toupper(names(df))
 
   vars_to_label <- dict |>
-    dplyr::filter(Dataset == file_key) |>
-    dplyr::mutate(variable_upper = toupper(Variable)) |>
-    dplyr::filter(variable_upper %in% df_names_upper)
+    dplyr::filter(.data$Dataset == file_key) |>
+    dplyr::mutate(variable_upper = toupper(.data$Variable)) |>
+    dplyr::filter(.data$variable_upper %in% df_names_upper)
 
   if (nrow(vars_to_label) == 0) {
     if (verbose) message("No variable labels applied for ", file_key)

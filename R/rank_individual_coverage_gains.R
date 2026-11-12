@@ -62,12 +62,12 @@ rank_individual_coverage_gains <- function(
   }
 
   results <- candidate_areas |>
-    dplyr::group_split(.candidate_id) |>
+    dplyr::group_split(.data$.candidate_id) |>
     purrr::map_dfr(function(candidate_area) {
 
       candidate_metadata <- candidate_area |>
         sf::st_drop_geometry() |>
-        dplyr::select(-.candidate_id)
+        dplyr::select(-".candidate_id")
 
       calculate_geography_coverage_gain(
         existing_areas = existing_areas,
@@ -81,8 +81,8 @@ rank_individual_coverage_gains <- function(
       ) |>
         dplyr::bind_cols(candidate_metadata)
     }) |>
-    dplyr::group_by(coverage_var) |>
-    dplyr::arrange(dplyr::desc(newly_covered), .by_group = TRUE) |>
+    dplyr::group_by(.data$coverage_var) |>
+    dplyr::arrange(dplyr::desc(.data$newly_covered), .by_group = TRUE) |>
     dplyr::mutate(rank = dplyr::row_number()) |>
     dplyr::ungroup()
 
