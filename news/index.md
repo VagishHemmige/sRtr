@@ -7,6 +7,14 @@
   `pkg::fun()`
   ([\#55](https://github.com/VagishHemmige/sRtr/issues/55)).
 
+- The cohort-building vignette now uses the CRAN package flowchart
+  instead of strobe, and is renamed “Building Cohorts with Flow
+  Diagrams” ([\#69](https://github.com/VagishHemmige/sRtr/issues/69)).
+
+- [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
+  is now exported
+  ([\#50](https://github.com/VagishHemmige/sRtr/issues/50)).
+
 - [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
   no longer fails unless dplyr is attached
   ([\#17](https://github.com/VagishHemmige/sRtr/issues/17)).
