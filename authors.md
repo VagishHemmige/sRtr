@@ -2,22 +2,22 @@
 
 ## Authors
 
-- **Vagish Hemmige**. Author, maintainer.
+- **Vagish Hemmige**. Author, maintainer, copyright holder.
   [](https://orcid.org/0009-0006-6346-1826)
 
-- **Jonathan Czeresnia**. Author, contributor.
+- **Jonathan Czeresnia**. Author.
 
 ## Citation
 
 Source:
 [`DESCRIPTION`](https://github.com/VagishHemmige/sRtr/blob/master/DESCRIPTION)
 
-Hemmige V, Czeresnia J (2026). *sRtr: Tools for Working with UNOS SRTR
-Transplant Data in R*. R package version 0.0.0.9000,
+Hemmige V, Czeresnia J (2026). *sRtr: Work with Scientific Registry of
+Transplant Recipients Data*. R package version 0.0.0.9000,
 <https://github.com/VagishHemmige/sRtr>.
 
     @Manual{,
-      title = {sRtr: Tools for Working with UNOS SRTR Transplant Data in R},
+      title = {sRtr: Work with Scientific Registry of Transplant Recipients Data},
       author = {Vagish Hemmige and Jonathan Czeresnia},
       year = {2026},
       note = {R package version 0.0.0.9000},

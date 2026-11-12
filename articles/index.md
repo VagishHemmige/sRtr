@@ -5,10 +5,10 @@
 - [Getting Started with
   sRtr](https://vagishhemmige.github.io/sRtr/articles/getting-started.md):
 
-### Cohort Building using the `strobe` package
+### Cohort Building
 
-- [Building Cohorts with STROBE
-  Diagrams](https://vagishhemmige.github.io/sRtr/articles/building-cohort-with-strobe.md):
+- [Building Cohorts with Flow
+  Diagrams](https://vagishhemmige.github.io/sRtr/articles/building-cohort-with-flowchart.md):
 
 ### Missing data
 
