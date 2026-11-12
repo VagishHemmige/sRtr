@@ -28,7 +28,7 @@ Imports:
     fs,
     haven,
     stringr,
-    tidyr,
+    tidyr (>= 1.2.0),
     labelled,
     rlang,
     tibble,
