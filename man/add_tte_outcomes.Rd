@@ -7,6 +7,10 @@ loaded using a load function.}
 \usage{
 add_tte_outcomes(df)
 }
+\arguments{
+\item{df}{A transplant data frame from \code{\link[=load_srtr_file]{load_srtr_file()}}. Its \code{file_key}
+attribute decides which follow-up file and outcome columns are used.}
+}
 \description{
 Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:
 \itemize{

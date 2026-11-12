@@ -244,6 +244,8 @@ add_txf_outcomes <- function(
 #' - {prefix}_BINARY: 1 if event date present, else 0
 #' - {prefix}_{unit}: numeric time from start_date to {prefix}_CENSOR in chosen units
 #'
+#' @param df A transplant data frame from [load_srtr_file()]. Its `file_key`
+#'   attribute decides which follow-up file and outcome columns are used.
 #'
 add_tte_outcomes <- function(
     df)

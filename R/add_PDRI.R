@@ -229,7 +229,7 @@ add_pdri <- function(df,
         length(inf_idx), pdri_nm
       ),
       "Validate inputs for those rows (possible unit/coding errors or extreme values). ",
-      sprintf("Examples — rows: [%s]; linear predictors: [%s].", ex_rows, ex_lp),
+      sprintf("Examples \u2014 rows: [%s]; linear predictors: [%s].", ex_rows, ex_lp),
       call. = FALSE
     )
   }
