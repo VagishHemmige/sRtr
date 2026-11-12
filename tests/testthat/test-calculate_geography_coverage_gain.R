@@ -8,7 +8,11 @@
 fake_grid <- function() {
   sq <- function(x0, y0) {
     sf::st_polygon(list(rbind(
-      c(x0, y0), c(x0 + 1, y0), c(x0 + 1, y0 + 1), c(x0, y0 + 1), c(x0, y0)
+      c(x0, y0),
+      c(x0 + 1, y0),
+      c(x0 + 1, y0 + 1),
+      c(x0, y0 + 1),
+      c(x0, y0)
     )))
   }
   sf::st_sf(
@@ -22,7 +26,9 @@ fake_circles <- function(x, y, name) {
   sf::st_sf(
     name = name,
     geometry = sf::st_sfc(
-      lapply(seq_along(x), function(i) sf::st_buffer(sf::st_point(c(x[i], y[i])), 0.6)),
+      lapply(seq_along(x), function(i) {
+        sf::st_buffer(sf::st_point(c(x[i], y[i])), 0.6)
+      }),
       crs = 5070
     )
   )
@@ -41,8 +47,12 @@ test_that("calculate_geography_coverage_gain() runs without dplyr or sf attached
   added <- fake_circles(c(1.5, 1.5), c(0.5, 1.5), c("candA", "candB"))
 
   out <- calculate_geography_coverage_gain(
-    existing, added, fake_grid(), "area_cases",
-    geography_id = "geoid", method = "intersection"
+    existing,
+    added,
+    fake_grid(),
+    "area_cases",
+    geography_id = "geoid",
+    method = "intersection"
   )
 
   expect_equal(out$total, 100)
@@ -58,13 +68,20 @@ test_that("rank_individual_coverage_gains() runs without dplyr or sf attached", 
   candidates <- fake_circles(c(1.5, 1.5), c(0.5, 1.5), c("candA", "candB"))
 
   out <- rank_individual_coverage_gains(
-    candidates, existing, fake_grid(), "area_cases",
-    geography_id = "geoid", method = "intersection"
+    candidates,
+    existing,
+    fake_grid(),
+    "area_cases",
+    geography_id = "geoid",
+    method = "intersection"
   )
 
   # Each candidate adds only G4 (40) beyond the existing area.
   expect_setequal(out$name, c("candA", "candB"))
-  expect_equal(out$added_covered[match(c("candA", "candB"), out$name)], c(70, 90))
+  expect_equal(
+    out$added_covered[match(c("candA", "candB"), out$name)],
+    c(70, 90)
+  )
   expect_equal(out$newly_covered, c(40, 40))
 })
 
@@ -77,7 +94,11 @@ fake_rect <- function(xmin, xmax, ymin, ymax, name) {
     name = name,
     geometry = sf::st_sfc(
       sf::st_polygon(list(rbind(
-        c(xmin, ymin), c(xmax, ymin), c(xmax, ymax), c(xmin, ymax), c(xmin, ymin)
+        c(xmin, ymin),
+        c(xmax, ymin),
+        c(xmax, ymax),
+        c(xmin, ymax),
+        c(xmin, ymin)
       ))),
       crs = 5070
     )
@@ -88,8 +109,13 @@ rect_added <- function() fake_rect(1.2, 2, 0, 2, "added")
 
 coverage <- function(method, ...) {
   calculate_geography_coverage_gain(
-    rect_existing(), rect_added(), fake_grid(), "area_cases",
-    geography_id = "geoid", method = method, ...
+    rect_existing(),
+    rect_added(),
+    fake_grid(),
+    "area_cases",
+    geography_id = "geoid",
+    method = method,
+    ...
   )
 }
 
@@ -136,8 +162,12 @@ test_that("catchments in another CRS are transformed to `crs` first", {
   skip_if_not_installed("sf")
   existing_4326 <- sf::st_transform(rect_existing(), 4326)
   out <- calculate_geography_coverage_gain(
-    existing_4326, rect_added(), fake_grid(), "area_cases",
-    geography_id = "geoid", method = "areal"
+    existing_4326,
+    rect_added(),
+    fake_grid(),
+    "area_cases",
+    geography_id = "geoid",
+    method = "areal"
   )
   expect_equal(out$existing_covered, 10.8, tolerance = 1e-6)
 })
@@ -145,12 +175,18 @@ test_that("catchments in another CRS are transformed to `crs` first", {
 test_that("the default method is areal for both functions", {
   skip_if_not_installed("sf")
   default <- calculate_geography_coverage_gain(
-    rect_existing(), rect_added(), fake_grid(), "area_cases"
+    rect_existing(),
+    rect_added(),
+    fake_grid(),
+    "area_cases"
   )
   expect_equal(default$existing_covered, 10.8)
 
   ranked <- rank_individual_coverage_gains(
-    rect_added(), rect_existing(), fake_grid(), "area_cases"
+    rect_added(),
+    rect_existing(),
+    fake_grid(),
+    "area_cases"
   )
   expect_equal(ranked$newly_covered, 45.6)
 })
@@ -161,12 +197,20 @@ test_that("output = 'wide' gives one row with var_measure columns", {
   grid$area_noncases <- grid$area_cases * 10
 
   long <- calculate_geography_coverage_gain(
-    rect_existing(), rect_added(), grid, c("area_cases", "area_noncases"),
-    method = "areal", output = "long"
+    rect_existing(),
+    rect_added(),
+    grid,
+    c("area_cases", "area_noncases"),
+    method = "areal",
+    output = "long"
   )
   wide <- calculate_geography_coverage_gain(
-    rect_existing(), rect_added(), grid, c("area_cases", "area_noncases"),
-    method = "areal", output = "wide"
+    rect_existing(),
+    rect_added(),
+    grid,
+    c("area_cases", "area_noncases"),
+    method = "areal",
+    output = "wide"
   )
 
   expect_equal(nrow(long), 2)
@@ -184,31 +228,49 @@ test_that("geography_id returns the IDs counted in each set", {
 
   expect_equal(
     ids("intersection"),
-    list(existing = c("G1", "G2"), added = c("G2", "G4"),
-         combined = c("G1", "G2", "G4"), newly = "G4")
+    list(
+      existing = c("G1", "G2"),
+      added = c("G2", "G4"),
+      combined = c("G1", "G2", "G4"),
+      newly = "G4"
+    )
   )
   expect_equal(
     ids("centroid"),
-    list(existing = "G1", added = c("G2", "G4"),
-         combined = c("G1", "G2", "G4"), newly = c("G2", "G4"))
+    list(
+      existing = "G1",
+      added = c("G2", "G4"),
+      combined = c("G1", "G2", "G4"),
+      newly = c("G2", "G4")
+    )
   )
   # Areal: "newly" is every unit whose covered share went up (G2 0.24 -> 0.92).
   expect_equal(
     ids("areal"),
-    list(existing = c("G1", "G2"), added = c("G2", "G4"),
-         combined = c("G1", "G2", "G4"), newly = c("G2", "G4"))
+    list(
+      existing = c("G1", "G2"),
+      added = c("G2", "G4"),
+      combined = c("G1", "G2", "G4"),
+      newly = c("G2", "G4")
+    )
   )
 })
 
 test_that("no covered_ids attribute without geography_id; a missing column errors", {
   skip_if_not_installed("sf")
   out <- calculate_geography_coverage_gain(
-    rect_existing(), rect_added(), fake_grid(), "area_cases"
+    rect_existing(),
+    rect_added(),
+    fake_grid(),
+    "area_cases"
   )
   expect_null(attr(out, "covered_ids"))
   expect_error(
     calculate_geography_coverage_gain(
-      rect_existing(), rect_added(), fake_grid(), "area_cases",
+      rect_existing(),
+      rect_added(),
+      fake_grid(),
+      "area_cases",
       geography_id = "tract_id"
     ),
     "tract_id"
@@ -220,7 +282,11 @@ test_that("areal treats point geographies as all-or-nothing, not NaN", {
   points <- fake_grid()
   sf::st_geometry(points) <- sf::st_centroid(sf::st_geometry(points))
   out <- calculate_geography_coverage_gain(
-    rect_existing(), rect_added(), points, "area_cases", method = "areal"
+    rect_existing(),
+    rect_added(),
+    points,
+    "area_cases",
+    method = "areal"
   )
   # Same as the centroid rule on the grid.
   expect_equal(out$existing_covered, 10)

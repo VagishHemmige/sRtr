@@ -22,20 +22,24 @@
 #' \dontrun{
 #' df <- srtr_composite_death(df)
 #' }
-srtr_composite_death <- function(df,
-                                 optn = "PERS_OPTN_DEATH_DT",
-                                 ssa  = "PERS_SSA_DEATH_DT",
-                                 tfl  = "TFL_DEATH_DT",
-                                 out  = "REC_DEATH_DT_COMPOSITE",
-                                 parse = TRUE,
-                                 keep_source = TRUE,
-                                 add_conflict_flag = TRUE,
-                                 prefer_earliest = FALSE) {
+srtr_composite_death <- function(
+  df,
+  optn = "PERS_OPTN_DEATH_DT",
+  ssa = "PERS_SSA_DEATH_DT",
+  tfl = "TFL_DEATH_DT",
+  out = "REC_DEATH_DT_COMPOSITE",
+  parse = TRUE,
+  keep_source = TRUE,
+  add_conflict_flag = TRUE,
+  prefer_earliest = FALSE
+) {
   cols <- c(optn, ssa, tfl)
   stopifnot(all(cols %in% names(df)))
 
   vals <- lapply(cols, function(nm) df[[nm]])
-  if (parse) vals <- lapply(vals, .srtr_as_date)
+  if (parse) {
+    vals <- lapply(vals, .srtr_as_date)
+  }
 
   n <- NROW(df)
 
@@ -64,7 +68,10 @@ srtr_composite_death <- function(df,
     } else {
       # choose the source whose date equals the selected earliest date (first tie wins by order)
       for (k in seq_along(vals)) {
-        take <- is.na(src) & !is.na(vals[[k]]) & !is.na(comp) & vals[[k]] == comp
+        take <- is.na(src) &
+          !is.na(vals[[k]]) &
+          !is.na(comp) &
+          vals[[k]] == comp
         src[take] <- cols[k]
       }
     }

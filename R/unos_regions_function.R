@@ -33,7 +33,6 @@
 #'
 #' @export
 get_hrsa_optn_regions <- function() {
-
   regions <- sRtr::UNOS_regions_sf |>
     sf::st_make_valid() |>
     dplyr::group_by(.data$Region) |>
@@ -49,9 +48,9 @@ get_hrsa_optn_regions <- function() {
     sf::st_transform(4326)
 
   var_labels <- c(
-    Region           = "OPTN/UNOS Region",
+    Region = "OPTN/UNOS Region",
     n_state_features = "Number of State-Level Features Included",
-    states_included  = "States Included in Region"
+    states_included = "States Included in Region"
   )
 
   common_vars <- intersect(names(var_labels), names(regions))

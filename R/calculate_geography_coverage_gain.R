@@ -90,21 +90,24 @@
 #'
 #' @export
 calculate_geography_coverage_gain <- function(
-    existing_areas,
-    added_areas,
-    population_geography,
-    coverage_vars,
-    geography_id = NULL,
-    method = c("areal", "centroid", "intersection"),
-    crs = 5070,
-    output = c("long", "wide")
+  existing_areas,
+  added_areas,
+  population_geography,
+  coverage_vars,
+  geography_id = NULL,
+  method = c("areal", "centroid", "intersection"),
+  crs = 5070,
+  output = c("long", "wide")
 ) {
   method <- match.arg(method)
   output <- match.arg(output)
 
-  if (!is.null(geography_id) && !geography_id %in% names(population_geography)) {
+  if (
+    !is.null(geography_id) && !geography_id %in% names(population_geography)
+  ) {
     stop(
-      "`geography_id` column '", geography_id,
+      "`geography_id` column '",
+      geography_id,
       "' is not in `population_geography`.",
       call. = FALSE
     )
@@ -126,7 +129,11 @@ calculate_geography_coverage_gain <- function(
 
   values <- sf::st_drop_geometry(population_geography)[coverage_vars]
   weighted_sum <- function(w) {
-    vapply(coverage_vars, function(v) sum(values[[v]] * w, na.rm = TRUE), numeric(1))
+    vapply(
+      coverage_vars,
+      function(v) sum(values[[v]] * w, na.rm = TRUE),
+      numeric(1)
+    )
   }
   total <- weighted_sum(rep(1, nrow(values)))
   existing <- weighted_sum(w_existing)
@@ -173,7 +180,6 @@ calculate_geography_coverage_gain <- function(
 }
 
 
-
 #' Clean catchment area input
 #'
 #' Internal helper: transforms `areas` to `crs` and dissolves them into one
@@ -211,14 +217,18 @@ calculate_geography_coverage_gain <- function(
 
 .coverage_weights <- function(population, catchment, method) {
   n <- nrow(population)
-  if (all(sf::st_is_empty(sf::st_geometry(catchment)))) return(rep(0, n))
+  if (all(sf::st_is_empty(sf::st_geometry(catchment)))) {
+    return(rep(0, n))
+  }
 
   units <- sf::st_geometry(population)
   area <- sf::st_geometry(catchment)
   switch(
     method,
     intersection = as.numeric(lengths(sf::st_intersects(units, area)) > 0),
-    centroid = as.numeric(lengths(sf::st_intersects(sf::st_centroid(units), area)) > 0),
+    centroid = as.numeric(
+      lengths(sf::st_intersects(sf::st_centroid(units), area)) > 0
+    ),
     areal = .area_share(units, area)
   )
 }
@@ -235,7 +245,9 @@ calculate_geography_coverage_gain <- function(
 .area_share <- function(units, area) {
   share <- rep(0, length(units))
   hits <- which(lengths(sf::st_intersects(units, area)) > 0)
-  if (length(hits) == 0) return(share)
+  if (length(hits) == 0) {
+    return(share)
+  }
 
   unit_area <- as.numeric(sf::st_area(units[hits]))
   overlap <- sf::st_intersection(

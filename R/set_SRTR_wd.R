@@ -14,7 +14,9 @@
 #' set_srtr_wd("C:/Data/SRTR", TRUE)    # Persistent across sessions
 #' }
 set_srtr_wd <- function(path, permanent = FALSE) {
-  if (!dir.exists(path)) stop("Directory does not exist: ", path)
+  if (!dir.exists(path)) {
+    stop("Directory does not exist: ", path)
+  }
   normalized <- normalizePath(path, winslash = "/", mustWork = TRUE)
 
   # Set for current session

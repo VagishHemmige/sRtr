@@ -39,13 +39,13 @@
 #' @export
 
 rank_individual_coverage_gains <- function(
-    candidate_areas,
-    existing_areas = NULL,
-    population_geography,
-    coverage_vars,
-    geography_id = NULL,
-    method = c("areal", "centroid", "intersection"),
-    crs = 5070
+  candidate_areas,
+  existing_areas = NULL,
+  population_geography,
+  coverage_vars,
+  geography_id = NULL,
+  method = c("areal", "centroid", "intersection"),
+  crs = 5070
 ) {
   method <- match.arg(method)
 
@@ -64,7 +64,6 @@ rank_individual_coverage_gains <- function(
   results <- candidate_areas |>
     dplyr::group_split(.data$.candidate_id) |>
     purrr::map_dfr(function(candidate_area) {
-
       candidate_metadata <- candidate_area |>
         sf::st_drop_geometry() |>
         dplyr::select(-".candidate_id")

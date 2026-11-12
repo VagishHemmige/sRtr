@@ -46,8 +46,12 @@
     list_and_clean("sas7bdat$"),
     list_and_clean("parquet$")
   ) |>
-    tidyr::separate("file_name", c("file_root", "file_suffix"),
-                    sep = "\\.(?=[^.]+$)", remove = FALSE)
+    tidyr::separate(
+      "file_name",
+      c("file_root", "file_suffix"),
+      sep = "\\.(?=[^.]+$)",
+      remove = FALSE
+    )
 
   .srtr_env$file_list <- File_List_clean
   .srtr_env$scanned_wd <- SRTR_wd

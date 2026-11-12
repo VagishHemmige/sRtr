@@ -37,10 +37,18 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
     attr_key <- attr(df, "file_key")
     if (!is.null(attr_key)) {
       file_key <- toupper(attr_key)
-      if (verbose) message("Inferred file_key = '", file_key, "' from data frame attribute.")
+      if (verbose) {
+        message(
+          "Inferred file_key = '",
+          file_key,
+          "' from data frame attribute."
+        )
+      }
     } else {
       file_key <- toupper(deparse(substitute(df)))
-      if (verbose) message("Inferred file_key = '", file_key, "' from object name.")
+      if (verbose) {
+        message("Inferred file_key = '", file_key, "' from object name.")
+      }
     }
   }
 
@@ -51,7 +59,9 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
   dict <- get("dictionary", envir = asNamespace("sRtr"))
 
   # ---- Check if already labeled ----
-  already_labelled <- any(!vapply(df, function(x) is.null(labelled::var_label(x)), logical(1)))
+  already_labelled <- any(
+    !vapply(df, function(x) is.null(labelled::var_label(x)), logical(1))
+  )
   if (already_labelled) {
     warning("Some variables already have labels. Skipping re-labeling.")
     return(df)
@@ -66,7 +76,9 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
     dplyr::filter(.data$variable_upper %in% df_names_upper)
 
   if (nrow(vars_to_label) == 0) {
-    if (verbose) message("No variable labels applied for ", file_key)
+    if (verbose) {
+      message("No variable labels applied for ", file_key)
+    }
     return(df)
   }
 

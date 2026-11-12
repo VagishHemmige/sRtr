@@ -36,11 +36,12 @@
 #' )
 #' srtr_normalize_missing(df, missing_vals, replacement = "Missing")
 #' }
-srtr_normalize_missing <- function(df,
-                                   missing_vals = NULL,
-                                   replacement = NA,
-                                   verbose = FALSE) {
-
+srtr_normalize_missing <- function(
+  df,
+  missing_vals = NULL,
+  replacement = NA,
+  verbose = FALSE
+) {
   if (is.null(missing_vals)) {
     # Internal default — deferred until runtime
     missing_vals <- default_missing_vars
@@ -48,14 +49,18 @@ srtr_normalize_missing <- function(df,
 
   for (col in names(missing_vals)) {
     if (!col %in% names(df)) {
-      if (verbose) message("Skipping column not found: ", col)
+      if (verbose) {
+        message("Skipping column not found: ", col)
+      }
       next
     }
 
     values_to_replace <- missing_vals[[col]]
     vec <- df[[col]]
 
-    if (verbose) message("Processing column: ", col)
+    if (verbose) {
+      message("Processing column: ", col)
+    }
 
     # Factor support: add replacement level if needed
     if (is.factor(vec) && !is.na(replacement)) {
@@ -73,7 +78,11 @@ srtr_normalize_missing <- function(df,
     }
 
     # Assign back
-    df[[col]] <- if (is.factor(df[[col]])) factor(vec, levels = unique(vec)) else vec
+    df[[col]] <- if (is.factor(df[[col]])) {
+      factor(vec, levels = unique(vec))
+    } else {
+      vec
+    }
   }
 
   df

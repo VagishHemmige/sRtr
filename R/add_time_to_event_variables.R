@@ -25,34 +25,33 @@
 #' and the numeric time is set to `NA`.#'
 #' @export
 srtr_time_to_event <- function(
-    df,
-    event_date,
-    start_date,
-    censor_date,
-    prefix,
-    units = c("years", "months", "days"),
-    add_epsilon = 1,
-    warn_negative = TRUE
+  df,
+  event_date,
+  start_date,
+  censor_date,
+  prefix,
+  units = c("years", "months", "days"),
+  add_epsilon = 1,
+  warn_negative = TRUE
 ) {
   units <- match.arg(units)
-  event_q  <- rlang::enquo(event_date)
-  start_q  <- rlang::enquo(start_date)
+  event_q <- rlang::enquo(event_date)
+  start_q <- rlang::enquo(start_date)
   censor_q <- rlang::enquo(censor_date)
 
   # Output names
   censor_col <- paste0(prefix, "_CENSOR")
   status_col <- paste0(prefix, "_BINARY")
-  time_suffix <- switch(units,
-                        "years"  = "yrs",
-                        "months" = "months",
-                        "days"   = "days")
-  time_col  <- paste0(prefix, "_", time_suffix)
+  time_suffix <- switch(
+    units,
+    "years" = "yrs",
+    "months" = "months",
+    "days" = "days"
+  )
+  time_col <- paste0(prefix, "_", time_suffix)
 
   # Unit conversion
-  denom_days <- switch(units,
-                       "years"  = 365.25,
-                       "months" = 30.4375,
-                       "days"   = 1)
+  denom_days <- switch(units, "years" = 365.25, "months" = 30.4375, "days" = 1)
 
   out <- df |>
     dplyr::mutate(
@@ -61,9 +60,11 @@ srtr_time_to_event <- function(
     )
 
   # Compute days
-  time_days <- as.numeric(difftime(out[[censor_col]],
-                                   rlang::eval_tidy(start_q, out),
-                                   units = "days"))
+  time_days <- as.numeric(difftime(
+    out[[censor_col]],
+    rlang::eval_tidy(start_q, out),
+    units = "days"
+  ))
 
   # Back-compat: accept logical for add_epsilon
   eps_days <- if (is.logical(add_epsilon)) {
@@ -71,13 +72,21 @@ srtr_time_to_event <- function(
   } else {
     as.numeric(add_epsilon)
   }
-  if (!is.finite(eps_days) || is.na(eps_days)) eps_days <- 0
-  if (eps_days != 0) time_days <- time_days + eps_days
+  if (!is.finite(eps_days) || is.na(eps_days)) {
+    eps_days <- 0
+  }
+  if (eps_days != 0) {
+    time_days <- time_days + eps_days
+  }
 
   # Negative times
   neg <- is.finite(time_days) & (time_days < 0)
   if (isTRUE(warn_negative) && any(neg, na.rm = TRUE)) {
-    warning(sprintf("%d rows had negative %s times; setting to NA.", sum(neg, na.rm = TRUE), prefix))
+    warning(sprintf(
+      "%d rows had negative %s times; setting to NA.",
+      sum(neg, na.rm = TRUE),
+      prefix
+    ))
   }
   time_days[neg] <- NA_real_
 
@@ -85,7 +94,6 @@ srtr_time_to_event <- function(
 
   out
 }
-
 
 
 #' Add time-to-event follow-up outcomes to a transplant cohort
@@ -173,48 +181,71 @@ srtr_time_to_event <- function(
 #' @export
 
 add_txf_outcomes <- function(
-    df)
-{
+  df
+) {
   #Save the key of the file passed to the function as well as the key of the appropriate follow-up file
-  file_key<-attr(df, "file_key")
-  follow_up_key<-paste0(substr(file_key, 1, 2), "F", substring(file_key, 3L))
+  file_key <- attr(df, "file_key")
+  follow_up_key <- paste0(substr(file_key, 1, 2), "F", substring(file_key, 3L))
   #Create a vector of follow-up IDs to limit the size of the follow up file uploaded
-  filter_vector<-df|>
-    dplyr::distinct(.data$TRR_ID)|>
+  filter_vector <- df |>
+    dplyr::distinct(.data$TRR_ID) |>
     dplyr::pull()
 
   #Create follow up data set with malignancy and acute rejection episode variables
-  follow_up_df<-load_srtr_file(follow_up_key, trr_id_filter = filter_vector)|>
-    dplyr::mutate(ORG_TYPE=stringr::str_sub(.data$ORG_TY, 1, 2))|>
+  follow_up_df <- load_srtr_file(
+    follow_up_key,
+    trr_id_filter = filter_vector
+  ) |>
+    dplyr::mutate(ORG_TYPE = stringr::str_sub(.data$ORG_TY, 1, 2)) |>
     #Choose ID, date of follow up, whether or not had malignancy
-    dplyr::select("TRR_ID", "TFL_MALIG", "TFL_ACUTE_REJ_EPISODE", "TFL_PX_STAT_DT", "ORG_TYPE")|>
+    dplyr::select(
+      "TRR_ID",
+      "TFL_MALIG",
+      "TFL_ACUTE_REJ_EPISODE",
+      "TFL_PX_STAT_DT",
+      "ORG_TYPE"
+    ) |>
     dplyr::arrange(.data$TRR_ID, .data$TFL_PX_STAT_DT)
 
   #First form date per TRR_ID among `rows`, matched to the cohort's rows.
   #NA where a recipient has no such form (no warning when `rows` is empty).
   first_date <- function(rows) {
-    if (nrow(rows) == 0) return(rep(as.Date(NA), nrow(df)))
-    dates <- rows|>
-      dplyr::group_by(.data$TRR_ID)|>
-      dplyr::summarise(date = min(.data$TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")
+    if (nrow(rows) == 0) {
+      return(rep(as.Date(NA), nrow(df)))
+    }
+    dates <- rows |>
+      dplyr::group_by(.data$TRR_ID) |>
+      dplyr::summarise(
+        date = min(.data$TFL_PX_STAT_DT, na.rm = TRUE),
+        .groups = "drop"
+      )
     dates$date[match(df$TRR_ID, dates$TRR_ID)]
   }
 
   out <- df
 
   #Add first malignancy variable
-  out$FIRST_FU_MALIG_DATE <- first_date(dplyr::filter(follow_up_df, .data$TFL_MALIG == "Y"))
+  out$FIRST_FU_MALIG_DATE <- first_date(dplyr::filter(
+    follow_up_df,
+    .data$TFL_MALIG == "Y"
+  ))
 
   #Add first rejection date. The output columns depend on the file, not on
   #which organs happen to have rejections (#16): TX_KP gets one column per
   #organ, every other file gets a single FIRST_FU_REJ_DATE.
-  rejections<-follow_up_df|>
-    dplyr::filter(.data$TFL_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent")
+  rejections <- follow_up_df |>
+    dplyr::filter(
+      .data$TFL_ACUTE_REJ_EPISODE ==
+        "1: Yes, at least one episode treated with anti-rejection agent"
+    )
 
   if (identical(file_key, "TX_KP")) {
     #ORG_TY uses the WLORG format, which also allows "KP". Rows coded
     #anything other than KI or PA cannot be assigned to one organ.
-    other <- setdiff(unique(stats::na.omit(follow_up_df$ORG_TYPE)), c("KI", "PA"))
+    other <- setdiff(
+      unique(stats::na.omit(follow_up_df$ORG_TYPE)),
+      c("KI", "PA")
+    )
     if (length(other) > 0) {
       warning(
         "TXF_KP follow-up rows with ORG_TY ",
@@ -231,14 +262,11 @@ add_txf_outcomes <- function(
     out$FIRST_FU_REJ_DATE <- first_date(rejections)
   }
 
-
-#In future, consider use of nested join for other values such as hospitalization counts
-#  df<-df |>
-#  nest_join(follow_up_df, by="TRR_ID", name = "follow_up")
-
+  #In future, consider use of nested join for other values such as hospitalization counts
+  #  df<-df |>
+  #  nest_join(follow_up_df, by="TRR_ID", name = "follow_up")
 
   return(out)
-
 }
 
 #' Add appropriate time-to-event outcome variables to a data frame based on the df attributes, if the file was
@@ -270,14 +298,17 @@ add_txf_outcomes <- function(
 #' mortality (#18).
 #'
 add_time_to_event_outcomes <- function(
-    df,
-    death_window = c("follow_up", "ascertainment"),
-    ascertainment_date = NULL)
-{
+  df,
+  death_window = c("follow_up", "ascertainment"),
+  ascertainment_date = NULL
+) {
   death_window <- match.arg(death_window)
   if (death_window == "ascertainment") {
-    if (is.null(ascertainment_date) || length(ascertainment_date) != 1 ||
-        is.na(suppressWarnings(as.Date(ascertainment_date)))) {
+    if (
+      is.null(ascertainment_date) ||
+        length(ascertainment_date) != 1 ||
+        is.na(suppressWarnings(as.Date(ascertainment_date)))
+    ) {
       stop(
         "`death_window = \"ascertainment\"` needs `ascertainment_date`: ",
         "one date up to which deaths are ascertained in the SAF release.",
@@ -311,7 +342,7 @@ add_time_to_event_outcomes <- function(
   #Kidney (or single-organ) rejection is censored at that graft's follow-up.
   df$.graft_lafu <- if (is_kp) df$TFL_LAFUDATEKI else df$TFL_LAFUDATE
 
-#Add composite death
+  #Add composite death
   df <- srtr_composite_death(df)
 
   #Deaths count only inside the window survivors are followed for (#18).
@@ -323,128 +354,123 @@ add_time_to_event_outcomes <- function(
     rep(ascertainment_date, nrow(df))
   }
   death <- df$REC_DEATH_DT_COMPOSITE
-  in_window <- !is.na(death) & !is.na(df$.death_censor) & death <= df$.death_censor
+  in_window <- !is.na(death) &
+    !is.na(df$.death_censor) &
+    death <= df$.death_censor
   df$.death_event <- dplyr::if_else(in_window, death, as.Date(NA))
 
-#Death added here
-  df<-df|>
+  #Death added here
+  df <- df |>
     srtr_time_to_event(
-      event_date=.data$.death_event,
-      start_date=.data$REC_TX_DT,
-      censor_date=.data$.death_censor,
-      prefix="REC_DEATH_DT_COMPOSITE",
+      event_date = .data$.death_event,
+      start_date = .data$REC_TX_DT,
+      censor_date = .data$.death_censor,
+      prefix = "REC_DEATH_DT_COMPOSITE",
       units = "days",
     )
 
-#Death-censored graft failure added here:
+  #Death-censored graft failure added here:
   if ("TFL_GRAFT_DT_KI" %in% names(df)) {
-    df<-df|>
+    df <- df |>
       srtr_time_to_event(
-        event_date=.data$TFL_GRAFT_DT_KI,
-        start_date=.data$REC_TX_DT,
-        censor_date=.data$TFL_LAFUDATEKI,
-        prefix="TFL_GRAFT_DT_KI",
+        event_date = .data$TFL_GRAFT_DT_KI,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$TFL_LAFUDATEKI,
+        prefix = "TFL_GRAFT_DT_KI",
         units = "days",
       )
-
   }
 
   if ("TFL_GRAFT_DT_PA" %in% names(df)) {
-    df<-df|>
+    df <- df |>
       srtr_time_to_event(
-        event_date=.data$TFL_GRAFT_DT_PA,
-        start_date=.data$REC_TX_DT,
-        censor_date=.data$TFL_LAFUDATEPA,
-        prefix="TFL_GRAFT_DT_PA",
+        event_date = .data$TFL_GRAFT_DT_PA,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$TFL_LAFUDATEPA,
+        prefix = "TFL_GRAFT_DT_PA",
         units = "days",
       )
-
   }
 
   if ("TFL_GRAFT_DT" %in% names(df)) {
-    df<-df|>
+    df <- df |>
       srtr_time_to_event(
-        event_date=.data$TFL_GRAFT_DT,
-        start_date=.data$REC_TX_DT,
-        censor_date=.data$TFL_LAFUDATE,
-        prefix="TFL_GRAFT_DT",
+        event_date = .data$TFL_GRAFT_DT,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$TFL_LAFUDATE,
+        prefix = "TFL_GRAFT_DT",
         units = "days",
       )
-
   }
 
-
   #Add rejection and malignancy from follow up database
-  df<-add_txf_outcomes(df)
+  df <- add_txf_outcomes(df)
 
   #Rejection can be both in acute admission as well as in follow up.  So we create a rejection date variable:
 
-  if (is_kp){
-    df<-df|>
+  if (is_kp) {
+    df <- df |>
       dplyr::mutate(
-        FIRST_REJ_DATE=
-          dplyr::case_when(
-            .data$REC_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent"~
-              .data$REC_TX_DT+.data$REC_POSTX_LOS,
-            TRUE~.data$FIRST_FU_REJ_DATE_KI)
-      )|>
-      dplyr::mutate(
-        FIRST_REJ_DATE_PA=
-          dplyr::case_when(
-            .data$REC_ACUTE_REJ_EPISODE_PA=="1: Yes, at least one episode treated with anti-rejection agent"~
-              .data$REC_TX_DT+.data$REC_POSTX_LOS,
-            TRUE~.data$FIRST_FU_REJ_DATE_PA)
-      )
-
-  }
-
-  if (!is_kp){
-    df<-df|>
-      dplyr::mutate(
-        FIRST_REJ_DATE=
-          dplyr::case_when(
-            .data$REC_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent"~.data$REC_TX_DT+.data$REC_POSTX_LOS,
-            TRUE~.data$FIRST_FU_REJ_DATE)
+        FIRST_REJ_DATE = dplyr::case_when(
+          .data$REC_ACUTE_REJ_EPISODE ==
+            "1: Yes, at least one episode treated with anti-rejection agent" ~
+            .data$REC_TX_DT + .data$REC_POSTX_LOS,
+          TRUE ~ .data$FIRST_FU_REJ_DATE_KI
         )
+      ) |>
+      dplyr::mutate(
+        FIRST_REJ_DATE_PA = dplyr::case_when(
+          .data$REC_ACUTE_REJ_EPISODE_PA ==
+            "1: Yes, at least one episode treated with anti-rejection agent" ~
+            .data$REC_TX_DT + .data$REC_POSTX_LOS,
+          TRUE ~ .data$FIRST_FU_REJ_DATE_PA
+        )
+      )
   }
 
-
-
+  if (!is_kp) {
+    df <- df |>
+      dplyr::mutate(
+        FIRST_REJ_DATE = dplyr::case_when(
+          .data$REC_ACUTE_REJ_EPISODE ==
+            "1: Yes, at least one episode treated with anti-rejection agent" ~ .data$REC_TX_DT +
+            .data$REC_POSTX_LOS,
+          TRUE ~ .data$FIRST_FU_REJ_DATE
+        )
+      )
+  }
 
   if ("FIRST_FU_MALIG_DATE" %in% names(df)) {
-    df<-df|>
+    df <- df |>
       srtr_time_to_event(
-        event_date=.data$FIRST_FU_MALIG_DATE,
-        start_date=.data$REC_TX_DT,
-        censor_date=.data$.patient_lafu,
-        prefix="FIRST_FU_MALIG_DATE",
+        event_date = .data$FIRST_FU_MALIG_DATE,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$.patient_lafu,
+        prefix = "FIRST_FU_MALIG_DATE",
         units = "days",
       )
-
   }
 
   if ("FIRST_REJ_DATE" %in% names(df)) {
-    df<-df|>
+    df <- df |>
       srtr_time_to_event(
-        event_date=.data$FIRST_REJ_DATE,
-        start_date=.data$REC_TX_DT,
-        censor_date=.data$.graft_lafu,
-        prefix="FIRST_REJ_DATE",
+        event_date = .data$FIRST_REJ_DATE,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$.graft_lafu,
+        prefix = "FIRST_REJ_DATE",
         units = "days",
       )
-
   }
 
   if ("FIRST_REJ_DATE_PA" %in% names(df)) {
-    df<-df|>
+    df <- df |>
       srtr_time_to_event(
-        event_date=.data$FIRST_REJ_DATE_PA,
-        start_date=.data$REC_TX_DT,
-        censor_date=.data$TFL_LAFUDATEPA,
-        prefix="FIRST_REJ_DATE_PA",
+        event_date = .data$FIRST_REJ_DATE_PA,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$TFL_LAFUDATEPA,
+        prefix = "FIRST_REJ_DATE_PA",
         units = "days",
       )
-
   }
 
   df$.patient_lafu <- NULL
