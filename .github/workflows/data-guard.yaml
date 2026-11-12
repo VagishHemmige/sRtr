@@ -1,0 +1,20 @@
+# Fails any push or pull request that would commit SRTR patient-level data.
+# The check itself is .github/scripts/check-no-patient-data.sh, which can also
+# be run locally from the repository root.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+name: data-guard.yaml
+
+permissions: read-all
+
+jobs:
+  data-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check for patient-level data
+        run: bash .github/scripts/check-no-patient-data.sh
