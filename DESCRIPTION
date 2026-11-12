@@ -1,19 +1,27 @@
 Package: sRtr
-Title: Tools for Working with UNOS SRTR Transplant Data in R
+Title: Work with Scientific Registry of Transplant Recipients Data
 Version: 0.0.0.9000
 Authors@R: c(
     person(given = "Vagish", family = "Hemmige",
            email = "vagish.hemmige@gmail.com",
-           role = c("aut", "cre"),
+           role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0009-0006-6346-1826")),
     person(given = "Jonathan", family = "Czeresnia",
            email = "j.cz@rutgers.edu",
-           role = c("aut","ctb")))
-Description: 
-  Provides functions and infrastructure to support reproducible research 
-  using the United Network for Organ Sharing (UNOS) Scientific Registry of 
-  Transplant Recipients (SRTR) data. The package facilitates standardized 
-  data loading, cleaning, labeling, and analysis workflows.
+           role = "aut"))
+Description: Load, label and prepare the Scientific Registry of
+    Transplant Recipients (SRTR) Standard Analysis Files (SAFs) for
+    reproducible research. Applies variable labels and factor levels from
+    the SRTR data dictionary, standardizes missing values, and derives
+    analysis variables such as the Pancreas Donor Risk Index (PDRI),
+    composite death and time-to-event outcomes. Downloads public Health
+    Resources and Services Administration (HRSA) maps of transplant
+    centers, organ procurement organization service areas and Organ
+    Procurement and Transplantation Network (OPTN) regions, and calculates
+    how much of a population or case count falls within transplant center
+    catchment areas. The SAFs
+    themselves are not included; users obtain them from SRTR under their
+    own data use agreement.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en
