@@ -39,13 +39,13 @@ substantial amount of data cleaning
 ``` r
 
 
-  Transplant_centers_all_sf<-sRtr::get_hrsa_transplant_centers()%>%
-    filter(OPO_STATE_ABBR != "PR" & OPO_STATE_ABBR!= "HI")%>%
-    select(OTC_NM, OTC_CD, Service_Lst, X, Y) %>%
-    filter(str_detect(Service_Lst, str_to_sentence("Heart")))%>%
-    select(-Service_Lst)%>%
-    distinct()%>%
-    rename(OTCName=OTC_NM, OTCCode=OTC_CD, Latitude=Y, Longitude=X)%>%
+  Transplant_centers_all_sf<-sRtr::get_hrsa_transplant_centers()|>
+    filter(OPO_STATE_ABBR != "PR" & OPO_STATE_ABBR!= "HI")|>
+    select(OTC_NM, OTC_CD, Service_Lst, X, Y) |>
+    filter(str_detect(Service_Lst, str_to_sentence("Heart")))|>
+    select(-Service_Lst)|>
+    distinct()|>
+    rename(OTCName=OTC_NM, OTCCode=OTC_CD, Latitude=Y, Longitude=X)|>
     st_transform(5070)  
 ```
 
@@ -57,8 +57,8 @@ We use the `tigris` package to import a map of states
 state_geography <- tigris::states(
   year = 2022,
   cb = TRUE,
-  class = "sf")%>%  
-  filter(!STUSPS %in% c("AK", "HI", "PR", "GU", "VI", "MP", "AS")) %>%
+  class = "sf")|>  
+  filter(!STUSPS %in% c("AK", "HI", "PR", "GU", "VI", "MP", "AS")) |>
   st_transform(5070)
 ```
 
@@ -82,7 +82,7 @@ centers, *ALUA* (University of Alabama-Birmingham) and *NYMA*
 ``` r
 
 
-existing_centers<-Transplant_centers_all_sf%>%
+existing_centers<-Transplant_centers_all_sf|>
   filter(OTCCode %in% c("ALUA", "NYMA"))
 
 ggplot()+
@@ -98,7 +98,7 @@ St. Luke’s Medical Center in Houston, TX).
 ``` r
 
 
-new_centers<-Transplant_centers_all_sf%>%
+new_centers<-Transplant_centers_all_sf|>
   filter(OTCCode %in% c("NYCP", "TXHI"))
 
 ggplot()+
@@ -160,23 +160,23 @@ hiv_tract_data <- CDCAtlas::get_atlas(
   disease = "hiv",
   geography = "county",
   year = 2022
-) %>%
-  CDCAtlas::impute_suppressed() %>%
-  CDCAtlas::extrapolate_from_county(to = "tract") %>%
+) |>
+  CDCAtlas::impute_suppressed() |>
+  CDCAtlas::extrapolate_from_county(to = "tract") |>
   filter(indicator == "HIV prevalence")
 
 tract_geography <- tigris::tracts(
   year = 2022,
   cb = TRUE,
   class = "sf"
-) %>%
+) |>
   select(
     geoid = GEOID,
     geometry
-  ) %>%
+  ) |>
   st_transform(5070)
 
-hiv_tract_sf <- tract_geography %>%
+hiv_tract_sf <- tract_geography |>
   left_join(
     hiv_tract_data,
     by = "geoid"
@@ -260,8 +260,8 @@ function repeatedly to generate the output table.
 ``` r
 
 
-candidate_centers_buffer <- Transplant_centers_all_sf %>%
-  filter(!(OTCCode %in% c("ALUA", "NYMA")))%>%
+candidate_centers_buffer <- Transplant_centers_all_sf |>
+  filter(!(OTCCode %in% c("ALUA", "NYMA")))|>
   st_buffer(dist = 50 * 1609.344)
 
 ranked_gains <- rank_individual_coverage_gains(
@@ -280,14 +280,14 @@ additional gain.
 ``` r
 
 
-ranked_gains$area_cases %>%
-  select(OTCName, OTCCode, newly_covered) %>%
-  head(10) %>%
-  gt::gt() %>%
+ranked_gains$area_cases |>
+  select(OTCName, OTCCode, newly_covered) |>
+  head(10) |>
+  gt::gt() |>
   gt::fmt_number(
     columns = newly_covered,
     decimals = 0
-  ) %>%
+  ) |>
   gt::cols_label(
     OTCName = "Center",
     OTCCode = "Code",

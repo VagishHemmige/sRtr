@@ -108,13 +108,13 @@ object containing heart transplant centers not in PR or HI. We
 subsequently perform a substantial amount of data cleaning</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span>  <span class="va">Transplant_centers_all_sf</span><span class="op">&lt;-</span><span class="fu">sRtr</span><span class="fu">::</span><span class="fu"><a href="../reference/get_hrsa_transplant_centers.html">get_hrsa_transplant_centers</a></span><span class="op">(</span><span class="op">)</span><span class="op">%&gt;%</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">OPO_STATE_ABBR</span> <span class="op">!=</span> <span class="st">"PR"</span> <span class="op">&amp;</span> <span class="va">OPO_STATE_ABBR</span><span class="op">!=</span> <span class="st">"HI"</span><span class="op">)</span><span class="op">%&gt;%</span></span>
-<span>    <span class="fu">select</span><span class="op">(</span><span class="va">OTC_NM</span>, <span class="va">OTC_CD</span>, <span class="va">Service_Lst</span>, <span class="va">X</span>, <span class="va">Y</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">Service_Lst</span>, <span class="fu">str_to_sentence</span><span class="op">(</span><span class="st">"Heart"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">%&gt;%</span></span>
-<span>    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">Service_Lst</span><span class="op">)</span><span class="op">%&gt;%</span></span>
-<span>    <span class="fu">distinct</span><span class="op">(</span><span class="op">)</span><span class="op">%&gt;%</span></span>
-<span>    <span class="fu">rename</span><span class="op">(</span>OTCName<span class="op">=</span><span class="va">OTC_NM</span>, OTCCode<span class="op">=</span><span class="va">OTC_CD</span>, Latitude<span class="op">=</span><span class="va">Y</span>, Longitude<span class="op">=</span><span class="va">X</span><span class="op">)</span><span class="op">%&gt;%</span></span>
+<span>  <span class="va">Transplant_centers_all_sf</span><span class="op">&lt;-</span><span class="fu">sRtr</span><span class="fu">::</span><span class="fu"><a href="../reference/get_hrsa_transplant_centers.html">get_hrsa_transplant_centers</a></span><span class="op">(</span><span class="op">)</span><span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">OPO_STATE_ABBR</span> <span class="op">!=</span> <span class="st">"PR"</span> <span class="op">&amp;</span> <span class="va">OPO_STATE_ABBR</span><span class="op">!=</span> <span class="st">"HI"</span><span class="op">)</span><span class="op">|&gt;</span></span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="va">OTC_NM</span>, <span class="va">OTC_CD</span>, <span class="va">Service_Lst</span>, <span class="va">X</span>, <span class="va">Y</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">Service_Lst</span>, <span class="fu">str_to_sentence</span><span class="op">(</span><span class="st">"Heart"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">|&gt;</span></span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">Service_Lst</span><span class="op">)</span><span class="op">|&gt;</span></span>
+<span>    <span class="fu">distinct</span><span class="op">(</span><span class="op">)</span><span class="op">|&gt;</span></span>
+<span>    <span class="fu">rename</span><span class="op">(</span>OTCName<span class="op">=</span><span class="va">OTC_NM</span>, OTCCode<span class="op">=</span><span class="va">OTC_CD</span>, Latitude<span class="op">=</span><span class="va">Y</span>, Longitude<span class="op">=</span><span class="va">X</span><span class="op">)</span><span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fl">5070</span><span class="op">)</span>  </span></code></pre></div>
 <p>We use the <code>tigris</code> package to import a map of states</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -122,8 +122,8 @@ subsequently perform a substantial amount of data cleaning</p>
 <span><span class="va">state_geography</span> <span class="op">&lt;-</span> <span class="fu">tigris</span><span class="fu">::</span><span class="fu">states</span><span class="op">(</span></span>
 <span>  year <span class="op">=</span> <span class="fl">2022</span>,</span>
 <span>  cb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  class <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span><span class="op">%&gt;%</span>  </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="va">STUSPS</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AK"</span>, <span class="st">"HI"</span>, <span class="st">"PR"</span>, <span class="st">"GU"</span>, <span class="st">"VI"</span>, <span class="st">"MP"</span>, <span class="st">"AS"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  class <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span><span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="va">STUSPS</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AK"</span>, <span class="st">"HI"</span>, <span class="st">"PR"</span>, <span class="st">"GU"</span>, <span class="st">"VI"</span>, <span class="st">"MP"</span>, <span class="st">"AS"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fl">5070</span><span class="op">)</span></span></code></pre></div>
 <p>We use ggplot to plot the centers on a map of the United States:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -141,7 +141,7 @@ two centers, <em>ALUA</em> (University of Alabama-Birmingham) and
 <em>NYMA</em> (Montefiore Medical Center).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">existing_centers</span><span class="op">&lt;-</span><span class="va">Transplant_centers_all_sf</span><span class="op">%&gt;%</span></span>
+<span><span class="va">existing_centers</span><span class="op">&lt;-</span><span class="va">Transplant_centers_all_sf</span><span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">OTCCode</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ALUA"</span>, <span class="st">"NYMA"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
@@ -153,7 +153,7 @@ two centers, <em>ALUA</em> (University of Alabama-Birmingham) and
 Baylor St. Luke’s Medical Center in Houston, TX).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">new_centers</span><span class="op">&lt;-</span><span class="va">Transplant_centers_all_sf</span><span class="op">%&gt;%</span></span>
+<span><span class="va">new_centers</span><span class="op">&lt;-</span><span class="va">Transplant_centers_all_sf</span><span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">OTCCode</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NYCP"</span>, <span class="st">"TXHI"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
@@ -209,23 +209,23 @@ the <code>tigris</code> package.</p>
 <span>  disease <span class="op">=</span> <span class="st">"hiv"</span>,</span>
 <span>  geography <span class="op">=</span> <span class="st">"county"</span>,</span>
 <span>  year <span class="op">=</span> <span class="fl">2022</span></span>
-<span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">CDCAtlas</span><span class="fu">::</span><span class="fu">impute_suppressed</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">CDCAtlas</span><span class="fu">::</span><span class="fu">extrapolate_from_county</span><span class="op">(</span>to <span class="op">=</span> <span class="st">"tract"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">CDCAtlas</span><span class="fu">::</span><span class="fu">impute_suppressed</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">CDCAtlas</span><span class="fu">::</span><span class="fu">extrapolate_from_county</span><span class="op">(</span>to <span class="op">=</span> <span class="st">"tract"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">indicator</span> <span class="op">==</span> <span class="st">"HIV prevalence"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">tract_geography</span> <span class="op">&lt;-</span> <span class="fu">tigris</span><span class="fu">::</span><span class="fu">tracts</span><span class="op">(</span></span>
 <span>  year <span class="op">=</span> <span class="fl">2022</span>,</span>
 <span>  cb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  class <span class="op">=</span> <span class="st">"sf"</span></span>
-<span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span></span>
 <span>    geoid <span class="op">=</span> <span class="va">GEOID</span>,</span>
 <span>    <span class="va">geometry</span></span>
-<span>  <span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fl">5070</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">hiv_tract_sf</span> <span class="op">&lt;-</span> <span class="va">tract_geography</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">hiv_tract_sf</span> <span class="op">&lt;-</span> <span class="va">tract_geography</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">left_join</span><span class="op">(</span></span>
 <span>    <span class="va">hiv_tract_data</span>,</span>
 <span>    by <span class="op">=</span> <span class="st">"geoid"</span></span>
@@ -298,8 +298,8 @@ function, a convenient wrapper which runs the
 generate the output table.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">candidate_centers_buffer</span> <span class="op">&lt;-</span> <span class="va">Transplant_centers_all_sf</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="op">(</span><span class="va">OTCCode</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ALUA"</span>, <span class="st">"NYMA"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">%&gt;%</span></span>
+<span><span class="va">candidate_centers_buffer</span> <span class="op">&lt;-</span> <span class="va">Transplant_centers_all_sf</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="op">(</span><span class="va">OTCCode</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ALUA"</span>, <span class="st">"NYMA"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html" class="external-link">st_buffer</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fl">50</span> <span class="op">*</span> <span class="fl">1609.344</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ranked_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rank_individual_coverage_gains.html">rank_individual_coverage_gains</a></span><span class="op">(</span></span>
@@ -314,14 +314,14 @@ generate the output table.</p>
 additional gain.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">ranked_gains</span><span class="op">$</span><span class="va">area_cases</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">OTCName</span>, <span class="va">OTCCode</span>, <span class="va">newly_covered</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">ranked_gains</span><span class="op">$</span><span class="va">area_cases</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">OTCName</span>, <span class="va">OTCCode</span>, <span class="va">newly_covered</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu">fmt_number</span><span class="op">(</span></span>
 <span>    columns <span class="op">=</span> <span class="va">newly_covered</span>,</span>
 <span>    decimals <span class="op">=</span> <span class="fl">0</span></span>
-<span>  <span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu">cols_label</span><span class="op">(</span></span>
 <span>    OTCName <span class="op">=</span> <span class="st">"Center"</span>,</span>
 <span>    OTCCode <span class="op">=</span> <span class="st">"Code"</span>,</span>
