@@ -91,11 +91,24 @@ test_that("changing SRTR_WD switches to the new folder", {
 test_that("an unset SRTR_WD gives an error that says what to do", {
   local_srtr_folder(character())
   withr::local_envvar(SRTR_WD = NA)
+  expect_error(load_fake("TX_KI"), class = "sRtr_error_srtr_wd_unset")
+  expect_snapshot(error = TRUE, load_fake("TX_KI"))
+})
+
+test_that("an SRTR_WD folder that does not exist gives an error", {
+  dir <- local_srtr_folder(character())
+  # A short relative path keeps the snapshot the same on every OS.
+  withr::local_dir(dir)
+  withr::local_envvar(SRTR_WD = "no-such-folder")
+  expect_error(load_fake("TX_KI"), class = "sRtr_error_srtr_wd_missing")
   expect_snapshot(error = TRUE, load_fake("TX_KI"))
 })
 
 test_that("an unknown file key names the folder searched", {
   dir <- local_srtr_folder("TX_KI.sas7bdat")
+  expect_error(load_fake("TX_LI"), class = "sRtr_error_file_not_found")
+  # The path sits on its own line of the message, so a long temporary
+  # folder (macOS, Windows) cannot change where the text wraps.
   expect_snapshot(
     error = TRUE,
     load_fake("TX_LI"),

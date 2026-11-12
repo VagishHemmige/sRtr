@@ -69,3 +69,44 @@ test_that("apply_srtr_factors outputs verbose messages", {
 
   expect_true(any(grepl("Labeled variable:", output)))
 })
+
+# ---- Offline tests: a tiny made-up table, no SAF needed ----
+
+fake_tx_ki <- function() {
+  tibble::tibble(CAN_ABO = c("A", "A2"), FAKE_COLUMN = c(1, 2))
+}
+
+test_that("coded columns become factors with labels from formats", {
+  out <- apply_srtr_factors(fake_tx_ki(), file_key = "TX_KI")
+  expect_s3_class(out$CAN_ABO, "factor")
+  expect_equal(as.character(out$CAN_ABO), c("A: A", "A2: A2"))
+  expect_equal(out$FAKE_COLUMN, c(1, 2))
+})
+
+test_that("verbose = FALSE is silent", {
+  expect_no_message(apply_srtr_factors(fake_tx_ki(), file_key = "TX_KI"))
+})
+
+test_that("verbose = TRUE reports each labeled variable", {
+  expect_message(
+    apply_srtr_factors(fake_tx_ki(), file_key = "TX_KI", verbose = TRUE),
+    class = "sRtr_message_variable_labeled"
+  )
+  expect_snapshot(
+    out <- apply_srtr_factors(fake_tx_ki(), file_key = "TX_KI", verbose = TRUE)
+  )
+})
+
+test_that("verbose = TRUE says where an inferred file_key came from", {
+  df <- fake_tx_ki()
+  attr(df, "file_key") <- "tx_ki"
+  expect_snapshot(out <- apply_srtr_factors(df, verbose = TRUE))
+})
+
+test_that("verbose = TRUE says when nothing is converted", {
+  df <- tibble::tibble(FAKE_COLUMN = 1)
+  expect_message(
+    apply_srtr_factors(df, file_key = "TX_KI", verbose = TRUE),
+    class = "sRtr_message_nothing_to_label"
+  )
+})

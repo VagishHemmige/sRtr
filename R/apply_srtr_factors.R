@@ -37,16 +37,18 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     if (!is.null(attr_key)) {
       file_key <- toupper(attr_key)
       if (verbose) {
-        message(
-          "Inferred file_key = '",
-          file_key,
-          "' from data frame attribute."
+        srtr_inform(
+          "Using {.arg file_key} {.val {file_key}} from the data frame's attribute.",
+          class = "file_key_inferred"
         )
       }
     } else {
       file_key <- toupper(deparse(substitute(df)))
       if (verbose) {
-        message("Inferred file_key = '", file_key, "' from object name.")
+        srtr_inform(
+          "Using {.arg file_key} {.val {file_key}} from the object name.",
+          class = "file_key_inferred"
+        )
       }
     }
   }
@@ -56,8 +58,9 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     !exists("dictionary", envir = asNamespace("sRtr")) ||
       !exists("formats", envir = asNamespace("sRtr"))
   ) {
-    stop(
-      "Both `dictionary` and `formats` datasets must be available in the sRtr package."
+    srtr_abort(
+      "The {.pkg sRtr} {.code dictionary} and {.code formats} datasets are not available.",
+      class = "internal_data_missing"
     )
   }
 
@@ -88,7 +91,10 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
 
   if (nrow(vars_to_factor) == 0) {
     if (verbose) {
-      message("No variables to convert to factor for ", file_key)
+      srtr_inform(
+        "No variables to convert to factors for {.val {file_key}}.",
+        class = "nothing_to_label"
+      )
     }
     return(df)
   }
@@ -104,12 +110,9 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
 
     if (nrow(fmt_map) == 0) {
       if (verbose) {
-        message(
-          "No mapping found for format: ",
-          fmt,
-          " (variable: ",
-          var_match,
-          ")"
+        srtr_inform(
+          "No codes found for format {.val {fmt}}; {.var {var_match}} left as is.",
+          class = "format_not_found"
         )
       }
       next
@@ -124,7 +127,10 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     )
 
     if (verbose) {
-      message("Labeled variable: ", var_match, " using format: ", fmt)
+      srtr_inform(
+        c("v" = "Labeled variable: {.var {var_match}} (format {.val {fmt}})."),
+        class = "variable_labeled"
+      )
     }
   }
 
