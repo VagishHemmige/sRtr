@@ -1,0 +1,32 @@
+# TEMPORARY (PR #85): runs air on GitHub and uploads the result as a patch,
+# because air cannot be installed in Claude's workspace. Remove before merging.
+# Based on https://github.com/posit-dev/setup-air
+on:
+  pull_request:
+    branches: [master]
+
+name: air-patch.yaml
+
+permissions: read-all
+
+jobs:
+  air-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: posit-dev/setup-air@v1
+
+      - name: Format R/ and tests/ (default line width 80)
+        run: |
+          air --version
+          air format R tests
+          git diff --stat
+          git diff > air.patch
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: air-patch
+          path: air.patch
