@@ -1,9 +1,4 @@
-# 
-
-------------------------------------------------------------------------
-
-title: “Mapping transplant geography” output: rmarkdown::html_vignette
-vignette: \> % % % ————————-
+# Mapping transplant geography
 
 ``` r
 

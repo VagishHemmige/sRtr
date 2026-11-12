@@ -207,7 +207,7 @@ can apply labels independently using the dedicated labeling functions.
 df <- haven::read_sas("TX_KI.sas7bdat")
 
 # Apply factor labels
-df <- apply_srtr_factors(df, filekey = "TX_KI")
+df <- apply_srtr_factors(df, file_key = "TX_KI")
 
 # View the result
 str(df$DON_RACE)
@@ -218,7 +218,7 @@ str(df$DON_RACE)
 ``` r
 
 # Apply variable labels
-df <- apply_srtr_varlabels(df, filekey = "TX_KI")
+df <- apply_srtr_varlabels(df, file_key = "TX_KI")
 
 # View variable labels
 var_label(df$DON_RACE)
@@ -228,14 +228,14 @@ var_label(df$REC_AGE_AT_TX)
 ### Automatic File Detection
 
 If your data frame name matches the SRTR file name, you can omit the
-`filekey` parameter:
+`file_key` argument:
 
 ``` r
 
 # Load data with matching name
 TX_KI <- haven::read_sas("TX_KI.sas7bdat")
 
-# Apply labels without specifying filekey
+# Apply labels without specifying file_key
 TX_KI <- TX_KI |>
   apply_srtr_factors() |>
   apply_srtr_varlabels()

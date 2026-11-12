@@ -21,8 +21,8 @@
 
 ### Mapping
 
-- [UNKNOWN
-  TITLE](https://vagishhemmige.github.io/sRtr/articles/mapping.md):
+- [Mapping transplant
+  geography](https://vagishhemmige.github.io/sRtr/articles/mapping.md):
 
 ### Geographic calculations
 

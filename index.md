@@ -1,9 +1,5 @@
 # sRtr
 
-![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)![License:
-MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-
 The **sRtr** package provides tools to load, label, and work with the
 Scientific Registry of Transplant Recipients (SRTR) Standard Analysis
 Files (SAFs) in R. It supports automatic variable labeling and factor
@@ -61,12 +57,12 @@ You can also use the labeling functions independently:
 
 df <- haven::read_sas("TX_KI.sas7bdat")
 
-df <- apply_srtr_factors(df, filekey="TX_KI")
-df <- apply_srtr_varlabels(df, filekey="TX_KI")
+df <- apply_srtr_factors(df, file_key = "TX_KI")
+df <- apply_srtr_varlabels(df, file_key = "TX_KI")
 ```
 
 If the name of the data frame corresponds to the name of the underlying
-file, then the filekey option can be omitted:
+file, then the `file_key` argument can be omitted:
 
 ``` r
 

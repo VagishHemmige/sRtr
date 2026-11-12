@@ -94,13 +94,13 @@ kidney_fc |>
 [`fc_draw()`](https://bruigtp.github.io/flowchart/reference/fc_draw.html)
 and
 [`fc_filter()`](https://bruigtp.github.io/flowchart/reference/fc_filter.html)
-have many arguments for box size, text and colour; see the [`flowchart`
+have many arguments for box size, text and color; see the [`flowchart`
 reference](https://bruigtp.github.io/flowchart/reference/index.html).
 
 ## Getting the cohort back
 
 The flowchart object keeps the filtered data in its `data` element, so
-the cohort used in the diagram is the cohort you analyse:
+the cohort used in the diagram is the cohort you analyze:
 
 ``` r
 

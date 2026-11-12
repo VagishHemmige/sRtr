@@ -10,14 +10,14 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/VagishHemmige/sRtr/blob/master/DESCRIPTION)
+[`inst/CITATION`](https://github.com/VagishHemmige/sRtr/blob/master/inst/CITATION)
 
 Hemmige V, Czeresnia J (2026). *sRtr: Work with Scientific Registry of
 Transplant Recipients Data*. R package version 0.0.0.9000,
 <https://github.com/VagishHemmige/sRtr>.
 
     @Manual{,
-      title = {sRtr: Work with Scientific Registry of Transplant Recipients Data},
+      title = {{sRtr}: Work with Scientific Registry of Transplant Recipients Data},
       author = {Vagish Hemmige and Jonathan Czeresnia},
       year = {2026},
       note = {R package version 0.0.0.9000},
