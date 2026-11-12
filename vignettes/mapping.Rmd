@@ -1,12 +1,11 @@
 ---
-
 title: "Mapping transplant geography"
 output: rmarkdown::html_vignette
 vignette: >
-%\VignetteIndexEntry{Mapping transplant geography}
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteEncoding{UTF-8}
--------------------------
+  %\VignetteIndexEntry{Mapping transplant geography}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
