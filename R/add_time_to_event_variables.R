@@ -190,36 +190,46 @@ add_txf_outcomes <- function(
     dplyr::select(TRR_ID, TFL_MALIG, TFL_ACUTE_REJ_EPISODE, TFL_PX_STAT_DT, ORG_TYPE)|>
     dplyr::arrange(TRR_ID, TFL_PX_STAT_DT)
 
-  #Add first malignancy variable
-  follow_up_malignancy_dates<-follow_up_df|>
-    dplyr::filter(TFL_MALIG == "Y") |>
-    dplyr::group_by(TRR_ID) |>
-    dplyr::summarise(FIRST_FU_MALIG_DATE = min(TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")
-
-  #Add first rejection variable for each organ
-  follow_up_rejection_dates<-follow_up_df|>
-    dplyr::filter(TFL_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent")|>
-    dplyr::group_by(TRR_ID, ORG_TYPE)|>
-    dplyr::summarise(FIRST_FU_REJ_DATE = min(TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")|>
-    tidyr::pivot_wider(
-      id_cols    = TRR_ID,
-      names_from = ORG_TYPE,
-      values_from = FIRST_FU_REJ_DATE,
-      names_glue = "FIRST_FU_REJ_DATE_{ORG_TYPE}",  # e.g., FIRST_FU_REJ_DATE_KI, _PA, ...
-      values_fill = NA
-    )
-
-  #Get rid of _ORG_TYPE part if not needed in rej date
-  if (length(grep("^FIRST_FU_REJ_DATE", names(follow_up_rejection_dates))) == 1) {
-    oldname <- grep("^FIRST_FU_REJ_DATE", names(follow_up_rejection_dates), value = TRUE)
-
-    follow_up_rejection_dates <- follow_up_rejection_dates |>
-      dplyr::rename(FIRST_FU_REJ_DATE = dplyr::all_of(oldname))
+  #First form date per TRR_ID among `rows`, matched to the cohort's rows.
+  #NA where a recipient has no such form (no warning when `rows` is empty).
+  first_date <- function(rows) {
+    if (nrow(rows) == 0) return(rep(as.Date(NA), nrow(df)))
+    dates <- rows|>
+      dplyr::group_by(TRR_ID)|>
+      dplyr::summarise(date = min(TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")
+    dates$date[match(df$TRR_ID, dates$TRR_ID)]
   }
 
-  out<-df|>
-    dplyr::left_join(follow_up_malignancy_dates)|>
-    dplyr::left_join(follow_up_rejection_dates)
+  out <- df
+
+  #Add first malignancy variable
+  out$FIRST_FU_MALIG_DATE <- first_date(dplyr::filter(follow_up_df, TFL_MALIG == "Y"))
+
+  #Add first rejection date. The output columns depend on the file, not on
+  #which organs happen to have rejections (#16): TX_KP gets one column per
+  #organ, every other file gets a single FIRST_FU_REJ_DATE.
+  rejections<-follow_up_df|>
+    dplyr::filter(TFL_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent")
+
+  if (identical(file_key, "TX_KP")) {
+    #ORG_TY uses the WLORG format, which also allows "KP". Rows coded
+    #anything other than KI or PA cannot be assigned to one organ.
+    other <- setdiff(unique(stats::na.omit(follow_up_df$ORG_TYPE)), c("KI", "PA"))
+    if (length(other) > 0) {
+      warning(
+        "TXF_KP follow-up rows with ORG_TY ",
+        paste0("'", other, "'", collapse = ", "),
+        " are not KI or PA; their rejections are not assigned to an organ.",
+        call. = FALSE
+      )
+    }
+    for (organ in c("KI", "PA")) {
+      out[[paste0("FIRST_FU_REJ_DATE_", organ)]] <-
+        first_date(dplyr::filter(rejections, ORG_TYPE == organ))
+    }
+  } else {
+    out$FIRST_FU_REJ_DATE <- first_date(rejections)
+  }
 
 
 #In future, consider use of nested join for other values such as hospitalization counts
@@ -245,6 +255,29 @@ add_txf_outcomes <- function(
 add_tte_outcomes <- function(
     df)
 {
+  is_kp <- identical(attr(df, "file_key"), "TX_KP")
+
+  needed <- if (is_kp) c("TFL_LAFUDATEKI", "TFL_LAFUDATEPA") else "TFL_LAFUDATE"
+  missing <- setdiff(needed, names(df))
+  if (length(missing) > 0) {
+    stop(
+      "`df` is missing the follow-up date column(s) ",
+      paste0("`", missing, "`", collapse = ", "),
+      " needed to censor outcomes.",
+      call. = FALSE
+    )
+  }
+
+  #Patient-level outcomes (death, malignancy) are censored at the patient's
+  #last follow-up. TX_KP has no TFL_LAFUDATE, only one date per graft, so use
+  #the later of the two: the last date the patient was known to be followed.
+  df$.patient_lafu <- if (is_kp) {
+    pmax(df$TFL_LAFUDATEKI, df$TFL_LAFUDATEPA, na.rm = TRUE)
+  } else {
+    df$TFL_LAFUDATE
+  }
+  #Kidney (or single-organ) rejection is censored at that graft's follow-up.
+  df$.graft_lafu <- if (is_kp) df$TFL_LAFUDATEKI else df$TFL_LAFUDATE
 
 #Add composite death
   df <- srtr_composite_death(df)
@@ -254,7 +287,7 @@ add_tte_outcomes <- function(
     srtr_time_to_event(
       event_date=REC_DEATH_DT_COMPOSITE,
       start_date=REC_TX_DT,
-      censor_date=TFL_LAFUDATE,
+      censor_date=.patient_lafu,
       prefix="REC_DEATH_DT_COMPOSITE",
       units = "days",
     )
@@ -302,7 +335,7 @@ add_tte_outcomes <- function(
 
   #Rejection can be both in acute admission as well as in follow up.  So we create a rejection date variable:
 
-  if (attr(df, "file_key")=="TX_KP"){
+  if (is_kp){
     df<-df|>
       dplyr::mutate(
         FIRST_REJ_DATE=
@@ -321,7 +354,7 @@ add_tte_outcomes <- function(
 
   }
 
-  if (attr(df, "file_key")!="TX_KP"){
+  if (!is_kp){
     df<-df|>
       dplyr::mutate(
         FIRST_REJ_DATE=
@@ -339,7 +372,7 @@ add_tte_outcomes <- function(
       srtr_time_to_event(
         event_date=FIRST_FU_MALIG_DATE,
         start_date=REC_TX_DT,
-        censor_date=TFL_LAFUDATE,
+        censor_date=.patient_lafu,
         prefix="FIRST_FU_MALIG_DATE",
         units = "days",
       )
@@ -351,7 +384,7 @@ add_tte_outcomes <- function(
       srtr_time_to_event(
         event_date=FIRST_REJ_DATE,
         start_date=REC_TX_DT,
-        censor_date=TFL_LAFUDATE,
+        censor_date=.graft_lafu,
         prefix="FIRST_REJ_DATE",
         units = "days",
       )
@@ -364,12 +397,13 @@ add_tte_outcomes <- function(
         event_date=FIRST_REJ_DATE_PA,
         start_date=REC_TX_DT,
         censor_date=TFL_LAFUDATEPA,
-        prefix="FIRST_REJ_DATEPA",
+        prefix="FIRST_REJ_DATE_PA",
         units = "days",
       )
 
   }
 
-  out<-df
-  out
+  df$.patient_lafu <- NULL
+  df$.graft_lafu <- NULL
+  df
 }

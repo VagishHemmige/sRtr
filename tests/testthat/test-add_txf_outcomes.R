@@ -51,11 +51,142 @@ test_that("add_tte_outcomes() builds rejection dates without dplyr attached", {
     REC_ACUTE_REJ_EPISODE = c(
       "1: Yes, at least one episode treated with anti-rejection agent",
       "3: No"
-    )
+    ),
+    TFL_LAFUDATE = as.Date(c("2006-01-01", "2006-01-01"))
   )
   attr(df, "file_key") <- "TX_KI"
 
   out <- add_tte_outcomes(df)
 
   expect_equal(out$FIRST_REJ_DATE, as.Date(c("2000-01-11", "2005-01-01")))
+})
+
+# ---- #16: output columns come from the file type, not the data ------------
+
+no_rejection_txf <- function(org_ty) {
+  txf <- fake_txf(org_ty)
+  txf$TFL_ACUTE_REJ_EPISODE <- "3: No"
+  txf
+}
+
+test_that("a single-organ cohort with no rejections still gets FIRST_FU_REJ_DATE", {
+  local_mocked_bindings(load_srtr_file = function(...) no_rejection_txf("KI"))
+  out <- add_txf_outcomes(fake_tx("TX_KI"))
+  expect_named(out, c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE"))
+  expect_true(all(is.na(out$FIRST_FU_REJ_DATE)))
+  expect_s3_class(out$FIRST_FU_REJ_DATE, "Date")
+})
+
+test_that("a cohort with no malignancy still gets FIRST_FU_MALIG_DATE", {
+  txf <- fake_txf("KI")
+  txf$TFL_MALIG <- "N"
+  local_mocked_bindings(load_srtr_file = function(...) txf)
+  out <- add_txf_outcomes(fake_tx("TX_KI"))
+  expect_true("FIRST_FU_MALIG_DATE" %in% names(out))
+  expect_true(all(is.na(out$FIRST_FU_MALIG_DATE)))
+  expect_s3_class(out$FIRST_FU_MALIG_DATE, "Date")
+})
+
+test_that("TX_KP keeps _KI and _PA columns when only kidney rejections occur", {
+  local_mocked_bindings(load_srtr_file = function(...) fake_txf("KI"))
+  out <- add_txf_outcomes(fake_tx("TX_KP"))
+  expect_named(
+    out,
+    c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE_KI", "FIRST_FU_REJ_DATE_PA")
+  )
+  expect_equal(out$FIRST_FU_REJ_DATE_KI, as.Date(c("2001-01-01", NA, "2003-01-01")))
+  expect_true(all(is.na(out$FIRST_FU_REJ_DATE_PA)))
+})
+
+test_that("TX_KP splits rejections by organ", {
+  txf <- fake_txf(c("KI", "KI", "PA", "PA"))
+  local_mocked_bindings(load_srtr_file = function(...) txf)
+  out <- add_txf_outcomes(fake_tx("TX_KP"))
+  # Rows 1 (KI, 2001-01-01) and 4 (PA, 2003-01-01) are the rejections.
+  expect_equal(out$FIRST_FU_REJ_DATE_KI, as.Date(c("2001-01-01", NA, NA)))
+  expect_equal(out$FIRST_FU_REJ_DATE_PA, as.Date(c(NA, NA, "2003-01-01")))
+})
+
+# ---- add_tte_outcomes(): whole pipeline on made-up cohorts ----------------
+# Only the follow-up file loader is replaced; the outcome helpers run for real.
+
+fake_cohort <- function(file_key) {
+  df <- tibble::tibble(
+    TRR_ID = c(900001, 900002),
+    REC_TX_DT = as.Date("2000-01-01"),
+    REC_POSTX_LOS = 10,
+    REC_ACUTE_REJ_EPISODE = "3: No",
+    PERS_OPTN_DEATH_DT = as.Date(c(NA, "2004-01-01")),
+    PERS_SSA_DEATH_DT = as.Date(NA),
+    TFL_DEATH_DT = as.Date(NA)
+  )
+  if (file_key == "TX_KP") {
+    df$REC_ACUTE_REJ_EPISODE_PA <- "3: No"
+    df$TFL_GRAFT_DT_KI <- as.Date(NA)
+    df$TFL_GRAFT_DT_PA <- as.Date(NA)
+    df$TFL_LAFUDATEKI <- as.Date(c("2003-01-01", "2004-01-01"))
+    df$TFL_LAFUDATEPA <- as.Date(c("2005-01-01", "2002-01-01"))
+  } else {
+    df$TFL_GRAFT_DT <- as.Date(NA)
+    df$TFL_LAFUDATE <- as.Date(c("2005-01-01", "2004-01-01"))
+  }
+  attr(df, "file_key") <- file_key
+  df
+}
+
+fake_cohort_txf <- function(org_ty) {
+  tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = org_ty,
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date("2001-01-01")
+  )
+}
+
+test_that("add_tte_outcomes() runs on a TX_KP cohort", {
+  local_mocked_bindings(load_srtr_file = function(...) fake_cohort_txf("KI"))
+  out <- add_tte_outcomes(fake_cohort("TX_KP"))
+
+  # Death is patient-level: censored at the later of the kidney and pancreas
+  # follow-up dates (900001: 2005-01-01), or at death (900002: 2004-01-01).
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY, c(0L, 1L))
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_CENSOR, as.Date(c("2005-01-01", "2004-01-01")))
+
+  # Kidney rejection is censored at kidney follow-up.
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(1L, 0L))
+  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2001-01-01", "2004-01-01")))
+
+  # Pancreas columns use the FIRST_REJ_DATE_PA prefix (was FIRST_REJ_DATEPA).
+  expect_true(all(c("FIRST_REJ_DATE_PA_CENSOR", "FIRST_REJ_DATE_PA_BINARY",
+                    "FIRST_REJ_DATE_PA_days") %in% names(out)))
+  expect_false(any(startsWith(names(out), "FIRST_REJ_DATEPA")))
+  expect_equal(out$FIRST_REJ_DATE_PA_CENSOR, as.Date(c("2005-01-01", "2002-01-01")))
+})
+
+test_that("add_tte_outcomes() runs on a single-organ cohort with no rejections", {
+  txf <- fake_cohort_txf("KI")
+  txf$TFL_ACUTE_REJ_EPISODE <- "3: No"
+  local_mocked_bindings(load_srtr_file = function(...) txf)
+  out <- add_tte_outcomes(fake_cohort("TX_KI"))
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(0L, 0L))
+  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2005-01-01", "2004-01-01")))
+})
+
+test_that("a missing follow-up date column is a clear error", {
+  kp <- fake_cohort("TX_KP")
+  kp$TFL_LAFUDATEPA <- NULL
+  expect_error(add_tte_outcomes(kp), "TFL_LAFUDATEPA")
+
+  ki <- fake_cohort("TX_KI")
+  ki$TFL_LAFUDATE <- NULL
+  expect_error(add_tte_outcomes(ki), "TFL_LAFUDATE")
+})
+
+test_that("TX_KP warns when follow-up rows are coded neither KI nor PA", {
+  # WLORG also allows "KP"; such rows cannot be assigned to one organ.
+  local_mocked_bindings(load_srtr_file = function(...) fake_txf("KP"))
+  expect_warning(out <- add_txf_outcomes(fake_tx("TX_KP")), "ORG_TY")
+  expect_true(all(is.na(out$FIRST_FU_REJ_DATE_KI)))
+  expect_true(all(is.na(out$FIRST_FU_REJ_DATE_PA)))
 })
