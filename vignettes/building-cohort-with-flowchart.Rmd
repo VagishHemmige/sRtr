@@ -100,12 +100,12 @@ kidney_fc |>
 ```
 
 `fc_draw()` and `fc_filter()` have many arguments for box size, text and
-colour; see the [`flowchart` reference](https://bruigtp.github.io/flowchart/reference/index.html).
+color; see the [`flowchart` reference](https://bruigtp.github.io/flowchart/reference/index.html).
 
 ## Getting the cohort back
 
 The flowchart object keeps the filtered data in its `data` element, so the
-cohort used in the diagram is the cohort you analyse:
+cohort used in the diagram is the cohort you analyze:
 
 ```{r cohort, eval=FALSE}
 kidney_cohort <- kidney_fc$data

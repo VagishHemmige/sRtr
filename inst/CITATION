@@ -1,0 +1,11 @@
+bibentry(
+  bibtype = "Manual",
+  title = "{sRtr}: Work with Scientific Registry of Transplant Recipients Data",
+  author = c(
+    person("Vagish", "Hemmige"),
+    person("Jonathan", "Czeresnia")
+  ),
+  year = "2026",
+  note = paste("R package version", meta$Version),
+  url = "https://github.com/VagishHemmige/sRtr"
+)

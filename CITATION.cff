@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "sRtr: Tools for Working with UNOS SRTR Transplant Data in R"
+title: "sRtr: Work with Scientific Registry of Transplant Recipients Data"
 type: software
 authors:
   - family-names: Hemmige

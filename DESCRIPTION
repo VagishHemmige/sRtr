@@ -24,7 +24,7 @@ Description: Load, label and prepare the Scientific Registry of
     own data use agreement.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Language: en
+Language: en-US
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/VagishHemmige/sRtr
 BugReports: https://github.com/VagishHemmige/sRtr/issues
@@ -46,6 +46,7 @@ Suggests:
     knitr,
     sf,
     rmarkdown,
+    spelling,
     testthat (>= 3.0.0),
     flowchart,
     withr
