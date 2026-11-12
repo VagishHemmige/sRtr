@@ -49,7 +49,7 @@ if (requireNamespace("sf", quietly = TRUE)) {
   if (exists("UNOS_regions_sf")) {
     centers_with_region <- sf::st_join(
       transplant_centers_sf,
-      UNOS_regions_sf %>% dplyr::group_by(Region) %>%
+      UNOS_regions_sf |> dplyr::group_by(Region) |>
         dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop"),
       join = sf::st_within, left = TRUE
     )
