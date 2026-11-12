@@ -23,9 +23,10 @@
 #'   `population_geography` to summarize.
 #' @param geography_id Optional character string naming an identifier column in
 #'   `population_geography`. Passed to [calculate_geography_coverage_gain()].
-#' @param method Character string specifying how geographic coverage should be
-#'   calculated. One of `"intersection"`, `"centroid"`, or `"areal"`.
-#' @param crs Coordinate reference system to use for spatial calculations.
+#' @param method How a geography counts as covered: `"areal"` (default),
+#'   `"centroid"` or `"intersection"`. See
+#'   [calculate_geography_coverage_gain()].
+#' @param crs Coordinate reference system for the spatial calculations.
 #'   Defaults to EPSG:5070.
 #'
 #' @return If `coverage_vars` has length 1, a tibble with one row per candidate
@@ -43,7 +44,7 @@ rank_individual_coverage_gains <- function(
     population_geography,
     coverage_vars,
     geography_id = NULL,
-    method = c("intersection", "centroid", "areal"),
+    method = c("areal", "centroid", "intersection"),
     crs = 5070
 ) {
   method <- match.arg(method)
@@ -76,7 +77,7 @@ rank_individual_coverage_gains <- function(
         geography_id = geography_id,
         method = method,
         crs = crs,
-        output = "wide"
+        output = "long"
       ) |>
         dplyr::bind_cols(candidate_metadata)
     }) |>

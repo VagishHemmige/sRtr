@@ -10,7 +10,7 @@ rank_individual_coverage_gains(
   population_geography,
   coverage_vars,
   geography_id = NULL,
-  method = c("intersection", "centroid", "areal"),
+  method = c("areal", "centroid", "intersection"),
   crs = 5070
 )
 }
@@ -31,10 +31,11 @@ geography to summarize. This object should contain the columns named in
 \item{geography_id}{Optional character string naming an identifier column in
 \code{population_geography}. Passed to \code{\link[=calculate_geography_coverage_gain]{calculate_geography_coverage_gain()}}.}
 
-\item{method}{Character string specifying how geographic coverage should be
-calculated. One of \code{"intersection"}, \code{"centroid"}, or \code{"areal"}.}
+\item{method}{How a geography counts as covered: \code{"areal"} (default),
+\code{"centroid"} or \code{"intersection"}. See
+\code{\link[=calculate_geography_coverage_gain]{calculate_geography_coverage_gain()}}.}
 
-\item{crs}{Coordinate reference system to use for spatial calculations.
+\item{crs}{Coordinate reference system for the spatial calculations.
 Defaults to EPSG:5070.}
 }
 \value{
