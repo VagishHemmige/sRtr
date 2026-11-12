@@ -1,4 +1,5 @@
 test_that("srtr_normalize_missing replaces expected values", {
+  skip_if_no_srtr_data()
   # Load real data
   df <- load_srtr_file("TX_LI", factor_labels = TRUE, var_labels = FALSE)
 
