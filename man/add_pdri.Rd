@@ -48,6 +48,20 @@ interaction is skipped (equivalent to KP behavior).
 }
 \examples{
 \dontshow{if (requireNamespace("dplyr", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# Two made-up donors
+donors <- data.frame(
+  DON_GENDER = c("F", "M"),
+  DON_AGE_IN_MONTHS = c(300, 540),
+  DON_CREAT = c(0.9, 2.8),
+  DON_RACE = c(8L, 16L),
+  DON_BMI = c(24, 31),
+  DON_HGT_CM = c(165, 180),
+  DON_COD_DON_STROKE = c(0L, 1L),
+  REC_PA_PRESERV_TM = c(10, 14),
+  DON_NON_HR_BEAT = c("N", "Y")
+)
+add_pdri(donors, variant = "KP")
+
 \dontrun{
 # Default: auto-detect PA vs KP
 kp |>
