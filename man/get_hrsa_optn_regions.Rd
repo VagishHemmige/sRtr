@@ -36,6 +36,6 @@ plot(regions["Region"])
 
 }
 \seealso{
-\code{\link[sf:valid]{sf::st_make_valid()}}, \code{\link[dplyr:summarise]{dplyr::summarise()}},
+\code{\link[sf:st_make_valid]{sf::st_make_valid()}}, \code{\link[dplyr:summarise]{dplyr::summarise()}},
 \code{\link[=get_hrsa_transplant_centers]{get_hrsa_transplant_centers()}}
 }

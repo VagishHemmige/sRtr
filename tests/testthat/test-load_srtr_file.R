@@ -6,12 +6,12 @@
 #   - Loads expected columns
 #   - Handles missing or invalid input gracefully
 #
-# These tests require the SRTR_WD environment variable to be set and
-# relevant SRTR SAS or Parquet files to be available in the expected directory structure.
+# These tests need real SAF files: they run only when SRTR_LIVE_TESTS=true and
+# SRTR_WD are set (see helper-srtr.R).
 
 
 test_that("load_srtr_file loads expected data and attaches metadata", {
-  skip_if(Sys.getenv("SRTR_WD") == "", "SRTR_WD not set")
+  skip_if_no_srtr_data()
 
   result <- load_srtr_file("TX_HR", factor_labels = TRUE, var_labels = TRUE)
 

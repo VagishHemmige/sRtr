@@ -8,7 +8,7 @@
 
 # ---- Test 1: Basic functionality with inferred file_key ----
 test_that("apply_srtr_factors applies factor levels correctly", {
-  skip_if(Sys.getenv("SRTR_WD") == "", "SRTR_WD not set")
+  skip_if_no_srtr_data()
 
   df <- load_srtr_file("TX_KI", factor_labels = FALSE)
   df_factored <- apply_srtr_factors(df)
@@ -24,7 +24,7 @@ test_that("apply_srtr_factors applies factor levels correctly", {
 
 # ---- Test 2: Explicit file_key argument overrides attribute ----
 test_that("apply_srtr_factors works with explicit file_key", {
-  skip_if(Sys.getenv("SRTR_WD") == "", "SRTR_WD not set")
+  skip_if_no_srtr_data()
 
   df <- load_srtr_file("TX_KI", factor_labels = FALSE)
   attr(df, "file_key") <- NULL  # Remove attribute to test explicit key
@@ -36,7 +36,7 @@ test_that("apply_srtr_factors works with explicit file_key", {
 
 # ---- Test 3: Works with other datasets ----
 test_that("apply_srtr_factors works with TX_HR and CAND_KIPA", {
-  skip_if(Sys.getenv("SRTR_WD") == "", "SRTR_WD not set")
+  skip_if_no_srtr_data()
 
   keys <- c("TX_HR", "CAND_KIPA")
 
@@ -49,7 +49,7 @@ test_that("apply_srtr_factors works with TX_HR and CAND_KIPA", {
 
 # ---- Test 4: Verbose output shows expected messages ----
 test_that("apply_srtr_factors outputs verbose messages", {
-  skip_if(Sys.getenv("SRTR_WD") == "", "SRTR_WD not set")
+  skip_if_no_srtr_data()
 
   df <- load_srtr_file("TX_KI", factor_labels = FALSE)
 

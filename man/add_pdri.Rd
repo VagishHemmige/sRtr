@@ -47,7 +47,7 @@ PA additionally uses \code{REC_PREV_KI} for an interaction term; if absent, the
 interaction is skipped (equivalent to KP behavior).
 }
 \examples{
-\dontshow{if (requireNamespace("dplyr", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("dplyr", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 \dontrun{
 # Default: auto-detect PA vs KP
 kp |>

@@ -13,5 +13,7 @@ export(set_srtr_wd)
 export(srtr_composite_death)
 export(srtr_normalize_missing)
 export(srtr_time_to_event)
-importFrom(rlang,":=")
-importFrom(rlang,.data)
+importFrom(rlang,
+  ":=",
+  .data
+)

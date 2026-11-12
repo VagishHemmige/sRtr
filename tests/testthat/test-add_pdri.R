@@ -45,8 +45,11 @@ testthat::test_that("PDRI matches literal formulas (PA vs KP)", {
       0.33172*(DON_NON_HR_BEAT=="Y")
   ))
 
-  testthat::expect_equal(add_pdri(df, variant="PA")$PDRI, pa_manual, tolerance = 1e-12)
-  testthat::expect_equal(add_pdri(df, variant="KP")$PDRI, kp_manual, tolerance = 1e-12)
+  pa <- add_pdri(df, variant="PA")$PDRI
+  kp <- add_pdri(df, variant="KP")$PDRI
+  testthat::expect_equal(pa, pa_manual, tolerance = 1e-12, ignore_attr = "label")
+  testthat::expect_equal(kp, kp_manual, tolerance = 1e-12, ignore_attr = "label")
+  testthat::expect_identical(attr(pa, "label"), "Pancreas Donor Risk Index")
 })
 
 testthat::test_that("Auto-detect defaults to KP and respects file_key", {
