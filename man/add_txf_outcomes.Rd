@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_time_to_event_variables.R
 \name{add_txf_outcomes}
 \alias{add_txf_outcomes}
-\title{Add time-to-event (TTE) follow-up outcomes to a transplant cohort}
+\title{Add time-to-event follow-up outcomes to a transplant cohort}
 \usage{
 add_txf_outcomes(df)
 }
@@ -68,7 +68,7 @@ Adjust the filter if your coding differs.
 \item Combined organ codes (e.g., \code{"HL"}) are not split; they will produce a
 column \code{FIRST_FU_REJ_DATE_HL}. If you prefer to split into heart/lung,
 duplicate those rows before pivoting.
-\item This function only derives event \emph{dates}. To build full TTE variables
+\item This function only derives event \emph{dates}. To build full time-to-event variables
 (censor date, indicator, elapsed time), pass these dates to your
 \code{srtr_time_to_event()} helper along with transplant and last-follow-up dates.
 }
