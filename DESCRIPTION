@@ -39,9 +39,7 @@ Suggests:
     sf,
     rmarkdown,
     testthat (>= 3.0.0),
-    strobe
-Remotes: 
-    VagishHemmige/strobe
+    flowchart
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true
