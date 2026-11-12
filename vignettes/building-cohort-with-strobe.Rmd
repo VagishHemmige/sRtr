@@ -1,8 +1,8 @@
 ---
-title: "Building Cohorts with STROBE Diagrams"
+title: "Building Cohorts with Flowcharts"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Building Cohorts with STROBE Diagrams}
+  %\VignetteIndexEntry{Building Cohorts with Flowcharts}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,16 +18,16 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The STROBE (Strengthening the Reporting of Observational Studies in Epidemiology) statement provides guidelines for reporting observational studies. A key component is the flow diagram that shows how the study population was selected. We encourage use of the companion `strobe` package, which provides tools to create STROBE-compliant flow diagrams while building your cohort.
+The STROBE (Strengthening the Reporting of Observational Studies in Epidemiology) statement provides guidelines for reporting observational studies. A key component is the flow diagram that shows how the study population was selected. We encourage use of the companion `flowchart` package, which provides tools to create STROBE-compliant flow diagrams while building your cohort.
 
-This vignette demonstrates how to use the `strobe` functions via the standalone `strobe` package to:
+This vignette demonstrates how to use the `flowchart` functions via the standalone `flowchart` package to:
 
 1. Initialize a cohort with inclusion criteria  
 2. Apply sequential filters with exclusion tracking  
-3. Generate and customize STROBE flow diagrams  
+3. Generate and customize flowchart diagrams  
 4. Review the complete filtering log
 
-For more details, visit the [`strobe` package website](https://vagishhemmige.github.io/strobe/).
+For more details, visit the [`flowchart` package website](https://vagishhemmige.github.io/strobe/).
 
 ### Installation
 
@@ -38,7 +38,7 @@ You can install the development version of the `sRtr` package from GitHub using 
 # Install devtools if needed
 install.packages("devtools")
 
-# Install sRtr (and strobe, a suggested package)
+# Install sRtr (and flowchart, a suggested package)
 devtools::install_github("VagishHemmige/sRtr", dependencies = TRUE)
 ```
 
@@ -47,12 +47,12 @@ devtools::install_github("VagishHemmige/sRtr", dependencies = TRUE)
 ```{r setup, eval=FALSE}
 library(sRtr)
 library(dplyr)
-library(strobe)
+library(flowchart)
 ```
 
 ## Basic STROBE Workflow
 
-The STROBE workflow in `strobe` follows these steps:
+The STROBE workflow in `flowchart` follows these steps:
 
 1. **Initialize** the cohort with `strobe_initialize()`  
 2. **Filter** sequentially with `strobe_filter()`  
@@ -65,18 +65,18 @@ Let's build a cohort of kidney transplant recipients with specific criteria:
 
 ```{r basic_example, eval=FALSE}
 TX_KI %>%
-  strobe::strobe_initialize(inclusion_label = "All kidney transplants") %>%
-  strobe::strobe_filter(
+  flowchart::fc_initialize(inclusion_label = "All kidney transplants") %>%
+  flowchart::fc_filter(
     condition = "DON_AGE > 18",
     inclusion_label = "Donor over 18 years old",
     exclusion_reason = "Excluded: Donor age ≤ 18"
   ) %>%
-  strobe::strobe_filter(
+  flowchart::fc_filter(
     condition = "DON_ABO == 'B'",
     inclusion_label = "Donor blood type B",
     exclusion_reason = "Excluded: Donor blood type is not B"
   ) %>%
-  strobe::strobe_filter(
+  flowchart::fc_filter(
     condition = "REC_AGE >= 18 & REC_AGE <= 65",
     inclusion_label = "Recipient age 18-65",
     exclusion_reason = "Excluded: Recipient age outside 18-65 range"
@@ -87,7 +87,7 @@ TX_KI %>%
 
 ```{r review_log, eval=FALSE}
 # View the complete filtering log
-strobe::get_strobe_log()
+flowchart::fc_log()
 ```
 
 The log shows:
@@ -99,7 +99,7 @@ The log shows:
 ## Creating STROBE Diagrams
 
 ```{r custom_dimensions, eval=FALSE}
-strobe::plot_strobe_diagram(
+flowchart::fc_plot(
   incl_width_min = 3,
   incl_height = 1,
   excl_width_min = 2.5,
@@ -113,4 +113,4 @@ strobe::plot_strobe_diagram(
 
 ```
 
-For more details, see the separate documentation of the `strobe` package.
+For more details, see the separate documentation of the `flowchart` package.

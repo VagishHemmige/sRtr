@@ -39,9 +39,9 @@ Suggests:
     sf,
     rmarkdown,
     testthat (>= 3.0.0),
-    strobe
+    flowchart
 Remotes: 
-    VagishHemmige/strobe
+    VagishHemmige/flowchart
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true
