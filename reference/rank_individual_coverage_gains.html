@@ -55,7 +55,7 @@ adding each candidate area to an existing coverage network one at a time.</p>
 <span>  <span class="va">population_geography</span>,</span>
 <span>  <span class="va">coverage_vars</span>,</span>
 <span>  geography_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"intersection"</span>, <span class="st">"centroid"</span>, <span class="st">"areal"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"areal"</span>, <span class="st">"centroid"</span>, <span class="st">"intersection"</span><span class="op">)</span>,</span>
 <span>  crs <span class="op">=</span> <span class="fl">5070</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -91,12 +91,13 @@ geography to summarize. This object should contain the columns named in
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>Character string specifying how geographic coverage should be
-calculated. One of <code>"intersection"</code>, <code>"centroid"</code>, or <code>"areal"</code>.</p></dd>
+<dd><p>How a geography counts as covered: <code>"areal"</code> (default),
+<code>"centroid"</code> or <code>"intersection"</code>. See
+<code><a href="calculate_geography_coverage_gain.html">calculate_geography_coverage_gain()</a></code>.</p></dd>
 
 
 <dt id="arg-crs">crs<a class="anchor" aria-label="anchor" href="#arg-crs"></a></dt>
-<dd><p>Coordinate reference system to use for spatial calculations.
+<dd><p>Coordinate reference system for the spatial calculations.
 Defaults to EPSG:5070.</p></dd>
 
 </dl></div>

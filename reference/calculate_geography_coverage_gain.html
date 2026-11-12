@@ -88,39 +88,50 @@ and combined catchment areas.</p></dd>
 
 
 <dt id="arg-geography-id">geography_id<a class="anchor" aria-label="anchor" href="#arg-geography-id"></a></dt>
-<dd><p>Optional character string naming an identifier column in
-<code>population_geography</code>. If supplied, this may be used to track which
-geographic units contribute to coverage estimates.</p></dd>
+<dd><p>Optional name of an identifier column in
+<code>population_geography</code>. If supplied, the result has a <code>covered_ids</code>
+attribute (see Value).</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>Character string specifying how geographic coverage should be
-calculated. One of <code>"areal"</code>, <code>"centroid"</code>, or <code>"intersection"</code>.
-<code>"areal"</code> uses proportional area allocation for polygon geographies;
-<code>"centroid"</code> counts a geography if its centroid falls inside the catchment;
-and <code>"intersection"</code> counts a geography if it intersects the catchment.</p></dd>
+<dd><p>How a geography counts as covered. One of:</p><ul><li><p><code>"areal"</code> (default): each geography contributes the share of its area
+inside the catchment. This assumes the counts are spread evenly over
+each geography.</p></li>
+<li><p><code>"centroid"</code>: a geography counts in full if its centroid lies inside
+the catchment (or on its edge), otherwise not at all.</p></li>
+<li><p><code>"intersection"</code>: a geography counts in full if any part of it, even
+only an edge, touches the catchment. This gives the largest estimates.</p></li>
+</ul></dd>
 
 
 <dt id="arg-crs">crs<a class="anchor" aria-label="anchor" href="#arg-crs"></a></dt>
-<dd><p>Coordinate reference system to use for spatial calculations.
-Defaults to EPSG:5070, a projected CRS commonly used for national-scale
-analyses of the contiguous United States.</p></dd>
+<dd><p>Coordinate reference system for the spatial calculations. All
+three geography inputs are transformed to it first. Defaults to
+EPSG:5070, a projected equal-area CRS for the contiguous United States.
+Use a projected CRS: areas and centroids are computed in it.</p></dd>
 
 
 <dt id="arg-output">output<a class="anchor" aria-label="anchor" href="#arg-output"></a></dt>
-<dd><p>Character string specifying the output format. One of <code>"long"</code>
-or <code>"wide"</code>.</p></dd>
+<dd><p><code>"long"</code> (default): one row per variable in <code>coverage_vars</code>.
+<code>"wide"</code>: one row, with columns named <code>&lt;variable&gt;_&lt;measure&gt;</code>, for example
+<code>area_cases_newly_covered</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble summarizing baseline coverage, coverage from the added group,
-newly covered population or burden, and post-addition coverage for each
-variable in <code>coverage_vars</code>.</p>
+    <p>A tibble summarizing, for each variable in <code>coverage_vars</code>, the
+total, baseline coverage (<code>existing_covered</code>), coverage from the added
+group (<code>added_covered</code>), newly covered population or burden
+(<code>newly_covered</code>), post-addition coverage (<code>combined_covered</code>), and each
+as a share of the total (<code>pct_*</code>).</p>
+<p>If <code>geography_id</code> is supplied, the attribute <code>covered_ids</code> is a list of the
+IDs of geographies counted (in full or in part) in the <code>existing</code>, <code>added</code>
+and <code>combined</code> areas, and the <code>newly</code> covered ones: those whose covered
+share went up when <code>added_areas</code> were added.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function is used to calculate the total additional population or or total sub-populations covered by a group of
+    <p>The function is used to calculate the total additional population, or total sub-populations, covered by a group of
 geographies in <code>added_areas</code> not covered by the geographies in <code>existing areas</code>.</p>
 <p>This function does not create buffers or travel-time isochrones. The
 <code>existing_areas</code> and <code>added_areas</code> arguments should already contain the
@@ -128,9 +139,8 @@ catchment geometries to be compared.</p>
 <p>The function accounts for overlap between centers and therefore does not calculate the gain for each geography
 in the <code>existing_areas</code> object individually.</p>
 <p>This function is best used for analyses requiring repeated analysis in order to avoid recreating geographic objects
-multiple times.  For a single calculation using transplant centers, <code>calculate_centers_coverage_gain()</code> is typically more
-convenient as it generates the geographic objects internally and only requires the transplant centers,
-organ, year, and type of geography as input.</p>
+multiple times. To compare candidate areas one at a time, see
+<code><a href="rank_individual_coverage_gains.html">rank_individual_coverage_gains()</a></code>.</p>
 <p>The main quantity of interest is the net newly covered population or burden:</p>
 <p><code>newly_covered = coverage(added_areas union) - coverage(existing_areas union overlap)</code></p>
 <p>More precisely, the function compares the union of <code>added_areas</code> with the
@@ -150,6 +160,15 @@ overlap with each other or with existing ones.</p>
 <span class="r-in"><span>  geography_id <span class="op">=</span> <span class="st">"geoid"</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"areal"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># One row, and the tract IDs behind each figure</span></span></span>
+<span class="r-in"><span><span class="va">gain</span> <span class="op">&lt;-</span> <span class="fu">calculate_geography_coverage_gain</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">existing_buffers</span>, <span class="va">added_buffers</span>, <span class="va">tract_data</span>,</span></span>
+<span class="r-in"><span>  coverage_vars <span class="op">=</span> <span class="st">"area_cases"</span>,</span></span>
+<span class="r-in"><span>  geography_id <span class="op">=</span> <span class="st">"geoid"</span>,</span></span>
+<span class="r-in"><span>  output <span class="op">=</span> <span class="st">"wide"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">gain</span>, <span class="st">"covered_ids"</span><span class="op">)</span><span class="op">$</span><span class="va">newly</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

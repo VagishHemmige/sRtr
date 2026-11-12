@@ -200,7 +200,7 @@ calculate_geography_coverage_gain(
     geography_id = NULL,
     method = "intersection",
     crs = 5070,
-    output = "wide"
+    output = "long"
 )
 ```
 
@@ -231,7 +231,7 @@ calculate_geography_coverage_gain(
     geography_id = NULL,
     method = "intersection",
     crs = 5070,
-    output = "wide"
+    output = "long"
 )
 ```
 

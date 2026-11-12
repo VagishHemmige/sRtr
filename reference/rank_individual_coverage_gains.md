@@ -13,7 +13,7 @@ rank_individual_coverage_gains(
   population_geography,
   coverage_vars,
   geography_id = NULL,
-  method = c("intersection", "centroid", "areal"),
+  method = c("areal", "centroid", "intersection"),
   crs = 5070
 )
 ```
@@ -49,13 +49,14 @@ rank_individual_coverage_gains(
 
 - method:
 
-  Character string specifying how geographic coverage should be
-  calculated. One of `"intersection"`, `"centroid"`, or `"areal"`.
+  How a geography counts as covered: `"areal"` (default), `"centroid"`
+  or `"intersection"`. See
+  [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md).
 
 - crs:
 
-  Coordinate reference system to use for spatial calculations. Defaults
-  to EPSG:5070.
+  Coordinate reference system for the spatial calculations. Defaults to
+  EPSG:5070.
 
 ## Value
 

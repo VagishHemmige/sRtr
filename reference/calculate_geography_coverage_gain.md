@@ -45,41 +45,55 @@ calculate_geography_coverage_gain(
 
 - geography_id:
 
-  Optional character string naming an identifier column in
-  `population_geography`. If supplied, this may be used to track which
-  geographic units contribute to coverage estimates.
+  Optional name of an identifier column in `population_geography`. If
+  supplied, the result has a `covered_ids` attribute (see Value).
 
 - method:
 
-  Character string specifying how geographic coverage should be
-  calculated. One of `"areal"`, `"centroid"`, or `"intersection"`.
-  `"areal"` uses proportional area allocation for polygon geographies;
-  `"centroid"` counts a geography if its centroid falls inside the
-  catchment; and `"intersection"` counts a geography if it intersects
-  the catchment.
+  How a geography counts as covered. One of:
+
+  - `"areal"` (default): each geography contributes the share of its
+    area inside the catchment. This assumes the counts are spread evenly
+    over each geography.
+
+  - `"centroid"`: a geography counts in full if its centroid lies inside
+    the catchment (or on its edge), otherwise not at all.
+
+  - `"intersection"`: a geography counts in full if any part of it, even
+    only an edge, touches the catchment. This gives the largest
+    estimates.
 
 - crs:
 
-  Coordinate reference system to use for spatial calculations. Defaults
-  to EPSG:5070, a projected CRS commonly used for national-scale
-  analyses of the contiguous United States.
+  Coordinate reference system for the spatial calculations. All three
+  geography inputs are transformed to it first. Defaults to EPSG:5070, a
+  projected equal-area CRS for the contiguous United States. Use a
+  projected CRS: areas and centroids are computed in it.
 
 - output:
 
-  Character string specifying the output format. One of `"long"` or
-  `"wide"`.
+  `"long"` (default): one row per variable in `coverage_vars`. `"wide"`:
+  one row, with columns named `<variable>_<measure>`, for example
+  `area_cases_newly_covered`.
 
 ## Value
 
-A tibble summarizing baseline coverage, coverage from the added group,
-newly covered population or burden, and post-addition coverage for each
-variable in `coverage_vars`.
+A tibble summarizing, for each variable in `coverage_vars`, the total,
+baseline coverage (`existing_covered`), coverage from the added group
+(`added_covered`), newly covered population or burden (`newly_covered`),
+post-addition coverage (`combined_covered`), and each as a share of the
+total (`pct_*`).
+
+If `geography_id` is supplied, the attribute `covered_ids` is a list of
+the IDs of geographies counted (in full or in part) in the `existing`,
+`added` and `combined` areas, and the `newly` covered ones: those whose
+covered share went up when `added_areas` were added.
 
 ## Details
 
-The function is used to calculate the total additional population or or
-total sub-populations covered by a group of geographies in `added_areas`
-not covered by the geographies in `existing areas`.
+The function is used to calculate the total additional population, or
+total sub-populations, covered by a group of geographies in
+`added_areas` not covered by the geographies in `existing areas`.
 
 This function does not create buffers or travel-time isochrones. The
 `existing_areas` and `added_areas` arguments should already contain the
@@ -90,11 +104,9 @@ calculate the gain for each geography in the `existing_areas` object
 individually.
 
 This function is best used for analyses requiring repeated analysis in
-order to avoid recreating geographic objects multiple times. For a
-single calculation using transplant centers,
-`calculate_centers_coverage_gain()` is typically more convenient as it
-generates the geographic objects internally and only requires the
-transplant centers, organ, year, and type of geography as input.
+order to avoid recreating geographic objects multiple times. To compare
+candidate areas one at a time, see
+[`rank_individual_coverage_gains()`](https://vagishhemmige.github.io/sRtr/reference/rank_individual_coverage_gains.md).
 
 The main quantity of interest is the net newly covered population or
 burden:
@@ -118,5 +130,14 @@ calculate_geography_coverage_gain(
   geography_id = "geoid",
   method = "areal"
 )
+
+# One row, and the tract IDs behind each figure
+gain <- calculate_geography_coverage_gain(
+  existing_buffers, added_buffers, tract_data,
+  coverage_vars = "area_cases",
+  geography_id = "geoid",
+  output = "wide"
+)
+attr(gain, "covered_ids")$newly
 } # }
 ```
