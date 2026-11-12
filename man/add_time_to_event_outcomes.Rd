@@ -5,11 +5,29 @@
 \title{Add appropriate time-to-event outcome variables to a data frame based on the df attributes, if the file was
 loaded using a load function.}
 \usage{
-add_time_to_event_outcomes(df)
+add_time_to_event_outcomes(
+  df,
+  death_window = c("follow_up", "ascertainment"),
+  ascertainment_date = NULL
+)
 }
 \arguments{
 \item{df}{A transplant data frame from \code{\link[=load_srtr_file]{load_srtr_file()}}. Its \code{file_key}
 attribute decides which follow-up file and outcome columns are used.}
+
+\item{death_window}{Which deaths count as events, and where recipients
+without one are censored:
+\itemize{
+\item \code{"follow_up"} (default): deaths on or before the recipient's last
+follow-up date count; everyone else is censored at last follow-up.
+\item \code{"ascertainment"}: the SRTR program-specific report method for patient
+survival. Deaths from any source on or before \code{ascertainment_date}
+count; everyone else is assumed alive and censored at that date.
+}}
+
+\item{ascertainment_date}{One date up to which deaths are ascertained in
+your SAF release, from its release notes. Required when
+\code{death_window = "ascertainment"}.}
 }
 \description{
 Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:
@@ -18,4 +36,11 @@ Uses the helper functions to create three columns for an outcome defined by an e
 \item {prefix}_BINARY: 1 if event date present, else 0
 \item {prefix}_{unit}: numeric time from start_date to {prefix}_CENSOR in chosen units
 }
+}
+\details{
+\code{REC_DEATH_DT_COMPOSITE} keeps every death date from every source. Only the
+event and censoring columns (\code{REC_DEATH_DT_COMPOSITE_BINARY}, \verb{_CENSOR},
+\verb{_days}) depend on \code{death_window}. Counting deaths found after last
+follow-up while censoring survivors at last follow-up would overstate
+mortality (#18).
 }
