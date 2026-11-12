@@ -221,8 +221,8 @@ add_pdri <- function(df,
   inf_idx <- which(is.infinite(df2[[pdri_nm]]))
   if (length(inf_idx)) {
     # Show up to 5 example row numbers and their linear predictors
-    ex_rows <- paste(head(inf_idx, 5), collapse = ", ")
-    ex_lp   <- paste(round(head(df2$.linpred[inf_idx], 5), 3), collapse = ", ")
+    ex_rows <- paste(utils::head(inf_idx, 5), collapse = ", ")
+    ex_lp   <- paste(round(utils::head(df2$.linpred[inf_idx], 5), 3), collapse = ", ")
     warning(
       sprintf(
         "add_pdri(): %d row(s) produced Inf in %s (exp(linear predictor) overflow). ",

@@ -85,71 +85,71 @@ calculate_geography_coverage_gain <- function(
   added_united <- .union_or_empty(added_areas, "Added area", crs)
 
   combined_united <-
-    bind_rows(
+    dplyr::bind_rows(
       existing_united,
       added_united
-    ) %>%
-    reframe(
+    ) |>
+    dplyr::reframe(
       catchment_area = "United area",
-      geometry = st_union(geometry)
-    ) %>%
-    st_as_sf()
+      geometry = sf::st_union(geometry)
+    ) |>
+    sf::st_as_sf()
 
 
   existing_joined<-
-    st_join(population_geography,
+    sf::st_join(population_geography,
             existing_united,
-            join = st_intersects)
+            join = sf::st_intersects)
 
   added_joined<-
-    st_join(population_geography,
+    sf::st_join(population_geography,
             added_united,
-            join = st_intersects)
+            join = sf::st_intersects)
 
   combined_joined<-
-    st_join(population_geography,
+    sf::st_join(population_geography,
             combined_united,
-            join = st_intersects)
+            join = sf::st_intersects)
 
   existing_summary <-
-    existing_joined %>%
-    filter(!is.na(catchment_area)) %>%
-    st_drop_geometry() %>%
-    summarise(
-      across(
-        all_of(coverage_vars),
+    existing_joined |>
+    dplyr::filter(!is.na(catchment_area)) |>
+    sf::st_drop_geometry() |>
+    dplyr::summarise(
+      dplyr::across(
+        dplyr::all_of(coverage_vars),
         ~ sum(.x, na.rm = TRUE)
       )
     )
 
   added_summary <-
-    added_joined %>%
-    filter(!is.na(catchment_area)) %>%
-    st_drop_geometry() %>%
-    summarise(
-      across(
-        all_of(coverage_vars),
+    added_joined |>
+    dplyr::filter(!is.na(catchment_area)) |>
+    sf::st_drop_geometry() |>
+    dplyr::summarise(
+      dplyr::across(
+        dplyr::all_of(coverage_vars),
         ~ sum(.x, na.rm = TRUE)
       )
     )
 
   combined_summary <-
-    combined_joined %>%
-    filter(!is.na(catchment_area)) %>%
-    st_drop_geometry() %>%
-    summarise(
-      across(
-        all_of(coverage_vars),
+    combined_joined |>
+    dplyr::filter(!is.na(catchment_area)) |>
+    sf::st_drop_geometry() |>
+    dplyr::summarise(
+      dplyr::across(
+        dplyr::all_of(coverage_vars),
         ~ sum(.x, na.rm = TRUE)
       )
     )
 
   total_summary <-
-    population_geography %>%
-    st_drop_geometry() %>%
-    summarise(
-      across(
-        all_of(coverage_vars),
+    population_geography |>
+    sf::st_drop_geometry() |>
+    dplyr::summarise(
+      dplyr::across(
+        dplyr::all_of(coverage_vars),
         ~ sum(.x, na.rm = TRUE)
       )
     )
@@ -162,8 +162,8 @@ calculate_geography_coverage_gain <- function(
     newly_covered = as.numeric(combined_summary[coverage_vars]) -
       as.numeric(existing_summary[coverage_vars]),
     combined_covered = as.numeric(combined_summary[coverage_vars])
-  ) %>%
-    mutate(
+  ) |>
+    dplyr::mutate(
       pct_existing_covered = existing_covered / total,
       pct_added_covered = added_covered / total,
       pct_newly_covered = newly_covered / total,
@@ -184,17 +184,17 @@ calculate_geography_coverage_gain <- function(
 .union_or_empty <- function(areas, label, crs) {
   if (is.null(areas)) {
     return(
-      st_sf(
+      sf::st_sf(
         catchment_area = label,
-        geometry = st_sfc(st_geometrycollection(), crs = crs)
+        geometry = sf::st_sfc(sf::st_geometrycollection(), crs = crs)
       )
     )
   }
 
-  areas %>%
-    reframe(
+  areas |>
+    dplyr::reframe(
       catchment_area = label,
-      geometry = st_union(geometry)
-    ) %>%
-    st_as_sf()
+      geometry = sf::st_union(geometry)
+    ) |>
+    sf::st_as_sf()
 }

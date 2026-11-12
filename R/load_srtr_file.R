@@ -87,8 +87,8 @@ load_srtr_file <- function(file_key,
 
   # ---- Add TFL_LAFUDATE to KP (which has separate TFL_LAFUDATEKI and TFL_LAFUDATEPA variables) -----
 if (file_key_input=="TX_KP") {
-    df <- df %>%
-    mutate(TFL_LAFUDATE = if_else(
+    df <- df |>
+    dplyr::mutate(TFL_LAFUDATE = dplyr::if_else(
       is.na(TFL_LAFUDATEPA) | (!is.na(TFL_LAFUDATEKI) & TFL_LAFUDATEKI >= TFL_LAFUDATEPA),
       TFL_LAFUDATEKI,        # pick date1 when it's >= date2 (or date2 is NA)
       TFL_LAFUDATEPA         # otherwise pick date2

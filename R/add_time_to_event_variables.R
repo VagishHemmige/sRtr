@@ -23,8 +23,6 @@
 #' Units suffix mapping: `years -> "_yrs"`, `months -> "_months"`, `days -> "_days"`.
 #' Negative times (e.g., when `start_date > censor/event`) trigger a warning,
 #' and the numeric time is set to `NA`.#'
-#' @importFrom dplyr mutate if_else
-#' @importFrom rlang enquo .data
 #' @export
 srtr_time_to_event <- function(
     df,
@@ -56,7 +54,7 @@ srtr_time_to_event <- function(
                        "months" = 30.4375,
                        "days"   = 1)
 
-  out <- df %>%
+  out <- df |>
     dplyr::mutate(
       !!censor_col := dplyr::if_else(is.na(!!event_q), !!censor_q, !!event_q),
       !!status_col := dplyr::if_else(is.na(!!event_q), 0L, 1L)
@@ -172,9 +170,6 @@ srtr_time_to_event <- function(
 #' )
 #' }
 #'
-#' @importFrom dplyr distinct pull mutate select arrange filter group_by summarise left_join
-#' @importFrom tidyr pivot_wider
-#' @importFrom stringr str_sub
 #' @export
 
 add_txf_outcomes <- function(
@@ -184,29 +179,29 @@ add_txf_outcomes <- function(
   file_key<-attr(df, "file_key")
   follow_up_key<-paste0(substr(file_key, 1, 2), "F", substring(file_key, 3L))
   #Create a vector of follow-up IDs to limit the size of the follow up file uploaded
-  filter_vector<-df%>%
-    distinct(TRR_ID)%>%
-    pull()
+  filter_vector<-df|>
+    dplyr::distinct(TRR_ID)|>
+    dplyr::pull()
 
   #Create follow up data set with malignancy and acute rejection episode variables
-  follow_up_df<-load_srtr_file(follow_up_key, trr_id_filter = filter_vector)%>%
-    mutate(ORG_TYPE=stringr::str_sub(ORG_TY, 1, 2))%>%
+  follow_up_df<-load_srtr_file(follow_up_key, trr_id_filter = filter_vector)|>
+    dplyr::mutate(ORG_TYPE=stringr::str_sub(ORG_TY, 1, 2))|>
     #Choose ID, date of follow up, whether or not had malignancy
-    select(TRR_ID, TFL_MALIG, TFL_ACUTE_REJ_EPISODE, TFL_PX_STAT_DT, ORG_TYPE)%>%
-    arrange(TRR_ID, TFL_PX_STAT_DT)
+    dplyr::select(TRR_ID, TFL_MALIG, TFL_ACUTE_REJ_EPISODE, TFL_PX_STAT_DT, ORG_TYPE)|>
+    dplyr::arrange(TRR_ID, TFL_PX_STAT_DT)
 
   #Add first malignancy variable
-  follow_up_malignancy_dates<-follow_up_df%>%
-    filter(TFL_MALIG == "Y") %>%
-    group_by(TRR_ID) %>%
-    summarise(FIRST_FU_MALIG_DATE = min(TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")
+  follow_up_malignancy_dates<-follow_up_df|>
+    dplyr::filter(TFL_MALIG == "Y") |>
+    dplyr::group_by(TRR_ID) |>
+    dplyr::summarise(FIRST_FU_MALIG_DATE = min(TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")
 
   #Add first rejection variable for each organ
-  follow_up_rejection_dates<-follow_up_df%>%
-    filter(TFL_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent")%>%
-    group_by(TRR_ID, ORG_TYPE)%>%
-    summarise(FIRST_FU_REJ_DATE = min(TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")%>%
-    pivot_wider(
+  follow_up_rejection_dates<-follow_up_df|>
+    dplyr::filter(TFL_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent")|>
+    dplyr::group_by(TRR_ID, ORG_TYPE)|>
+    dplyr::summarise(FIRST_FU_REJ_DATE = min(TFL_PX_STAT_DT, na.rm = TRUE), .groups = "drop")|>
+    tidyr::pivot_wider(
       id_cols    = TRR_ID,
       names_from = ORG_TYPE,
       values_from = FIRST_FU_REJ_DATE,
@@ -218,17 +213,17 @@ add_txf_outcomes <- function(
   if (length(grep("^FIRST_FU_REJ_DATE", names(follow_up_rejection_dates))) == 1) {
     oldname <- grep("^FIRST_FU_REJ_DATE", names(follow_up_rejection_dates), value = TRUE)
 
-    follow_up_rejection_dates <- follow_up_rejection_dates %>%
-      rename(FIRST_FU_REJ_DATE = all_of(oldname))
+    follow_up_rejection_dates <- follow_up_rejection_dates |>
+      dplyr::rename(FIRST_FU_REJ_DATE = dplyr::all_of(oldname))
   }
 
-  out<-df%>%
-    left_join(follow_up_malignancy_dates)%>%
-    left_join(follow_up_rejection_dates)
+  out<-df|>
+    dplyr::left_join(follow_up_malignancy_dates)|>
+    dplyr::left_join(follow_up_rejection_dates)
 
 
 #In future, consider use of nested join for other values such as hospitalization counts
-#  df<-df%>%
+#  df<-df |>
 #  nest_join(follow_up_df, by="TRR_ID", name = "follow_up")
 
 
@@ -253,7 +248,7 @@ add_tte_outcomes <- function(
   df <- srtr_composite_death(df)
 
 #Death added here
-  df<-df%>%
+  df<-df|>
     srtr_time_to_event(
       event_date=REC_DEATH_DT_COMPOSITE,
       start_date=REC_TX_DT,
@@ -264,7 +259,7 @@ add_tte_outcomes <- function(
 
 #Death-censored graft failure added here:
   if ("TFL_GRAFT_DT_KI" %in% names(df)) {
-    df<-df%>%
+    df<-df|>
       srtr_time_to_event(
         event_date=TFL_GRAFT_DT_KI,
         start_date=REC_TX_DT,
@@ -276,7 +271,7 @@ add_tte_outcomes <- function(
   }
 
   if ("TFL_GRAFT_DT_PA" %in% names(df)) {
-    df<-df%>%
+    df<-df|>
       srtr_time_to_event(
         event_date=TFL_GRAFT_DT_PA,
         start_date=REC_TX_DT,
@@ -288,7 +283,7 @@ add_tte_outcomes <- function(
   }
 
   if ("TFL_GRAFT_DT" %in% names(df)) {
-    df<-df%>%
+    df<-df|>
       srtr_time_to_event(
         event_date=TFL_GRAFT_DT,
         start_date=REC_TX_DT,
@@ -306,17 +301,17 @@ add_tte_outcomes <- function(
   #Rejection can be both in acute admission as well as in follow up.  So we create a rejection date variable:
 
   if (attr(df, "file_key")=="TX_KP"){
-    df<-df%>%
-      mutate(
+    df<-df|>
+      dplyr::mutate(
         FIRST_REJ_DATE=
-          case_when(
+          dplyr::case_when(
             REC_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent"~
               REC_TX_DT+REC_POSTX_LOS,
             TRUE~FIRST_FU_REJ_DATE_KI)
-      )%>%
-      mutate(
+      )|>
+      dplyr::mutate(
         FIRST_REJ_DATE_PA=
-          case_when(
+          dplyr::case_when(
             REC_ACUTE_REJ_EPISODE_PA=="1: Yes, at least one episode treated with anti-rejection agent"~
               REC_TX_DT+REC_POSTX_LOS,
             TRUE~FIRST_FU_REJ_DATE_PA)
@@ -325,10 +320,10 @@ add_tte_outcomes <- function(
   }
 
   if (attr(df, "file_key")!="TX_KP"){
-    df<-df%>%
-      mutate(
+    df<-df|>
+      dplyr::mutate(
         FIRST_REJ_DATE=
-          case_when(
+          dplyr::case_when(
             REC_ACUTE_REJ_EPISODE=="1: Yes, at least one episode treated with anti-rejection agent"~REC_TX_DT+REC_POSTX_LOS,
             TRUE~FIRST_FU_REJ_DATE)
         )
@@ -338,7 +333,7 @@ add_tte_outcomes <- function(
 
 
   if ("FIRST_FU_MALIG_DATE" %in% names(df)) {
-    df<-df%>%
+    df<-df|>
       srtr_time_to_event(
         event_date=FIRST_FU_MALIG_DATE,
         start_date=REC_TX_DT,
@@ -350,7 +345,7 @@ add_tte_outcomes <- function(
   }
 
   if ("FIRST_REJ_DATE" %in% names(df)) {
-    df<-df%>%
+    df<-df|>
       srtr_time_to_event(
         event_date=FIRST_REJ_DATE,
         start_date=REC_TX_DT,
@@ -362,7 +357,7 @@ add_tte_outcomes <- function(
   }
 
   if ("FIRST_REJ_DATE_PA" %in% names(df)) {
-    df<-df%>%
+    df<-df|>
       srtr_time_to_event(
         event_date=FIRST_REJ_DATE_PA,
         start_date=REC_TX_DT,
