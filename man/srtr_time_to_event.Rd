@@ -41,9 +41,9 @@ Default 1. Set to 0 to disable. Logical TRUE/FALSE also accepted
 \description{
 Creates three columns for an outcome defined by an event date and a censor date:
 \itemize{
-\item {prefix}_CENSOR: event date if present, otherwise censor date
-\item {prefix}_BINARY: 1 if event date present, else 0
-\item {prefix}_{unit}: numeric time from start_date to {prefix}_CENSOR in chosen units
+\item \verb{\{prefix\}_CENSOR}: event date if present, otherwise censor date
+\item \verb{\{prefix\}_BINARY}: 1 if event date present, else 0
+\item \verb{\{prefix\}_\{unit\}}: numeric time from start_date to \verb{\{prefix\}_CENSOR} in chosen units
 }
 }
 \details{
