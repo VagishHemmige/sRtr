@@ -93,16 +93,16 @@ load_srtr_file <- function(file_key,
 
   # ---- Apply TRR_ID filter -----
   if (!is.null(trr_id_filter)) {
-    df <- dplyr::filter(df, TRR_ID %in% trr_id_filter)
+    df <- dplyr::filter(df, .data$TRR_ID %in% trr_id_filter)
   }
 
   # ---- Add TFL_LAFUDATE to KP (which has separate TFL_LAFUDATEKI and TFL_LAFUDATEPA variables) -----
 if (file_key_input=="TX_KP") {
     df <- df |>
     dplyr::mutate(TFL_LAFUDATE = dplyr::if_else(
-      is.na(TFL_LAFUDATEPA) | (!is.na(TFL_LAFUDATEKI) & TFL_LAFUDATEKI >= TFL_LAFUDATEPA),
-      TFL_LAFUDATEKI,        # pick date1 when it's >= date2 (or date2 is NA)
-      TFL_LAFUDATEPA         # otherwise pick date2
+      is.na(.data$TFL_LAFUDATEPA) | (!is.na(.data$TFL_LAFUDATEKI) & .data$TFL_LAFUDATEKI >= .data$TFL_LAFUDATEPA),
+      .data$TFL_LAFUDATEKI,        # pick date1 when it's >= date2 (or date2 is NA)
+      .data$TFL_LAFUDATEPA         # otherwise pick date2
     ))
 }
 

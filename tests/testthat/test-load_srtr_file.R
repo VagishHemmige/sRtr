@@ -104,6 +104,26 @@ test_that("an unknown file key names the folder searched", {
   )
 })
 
+test_that("trr_id_filter uses the TRR_ID column, never a global object", {
+  local_srtr_folder("TX_KI.sas7bdat")
+  local_mocked_bindings(
+    read_sas = function(data_file, ...) tibble::tibble(source = c("a", "b")),
+    .package = "haven"
+  )
+  assign("TRR_ID", 900001, envir = globalenv())
+  withr::defer(rm("TRR_ID", envir = globalenv()))
+
+  expect_error(
+    load_srtr_file(
+      "TX_KI",
+      trr_id_filter = 900001,
+      factor_labels = FALSE,
+      var_labels = FALSE
+    ),
+    class = "rlang_error"
+  )
+})
+
 test_that("arrow.skip_nul is set only while a parquet file is read", {
   local_srtr_folder("TX_KI.parquet")
   withr::local_options(arrow.skip_nul = NULL)

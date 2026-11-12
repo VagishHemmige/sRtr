@@ -293,7 +293,7 @@ add_pdri <- function(df,
 
   # (Optional) move PDRI_terms to the end for readability
   if ("PDRI_terms" %in% names(out)) {
-    out <- dplyr::relocate(out, PDRI_terms, .after = dplyr::last_col())
+    out <- dplyr::relocate(out, "PDRI_terms", .after = dplyr::last_col())
   }
 
 pdri_nm <- rlang::as_string(out_name)

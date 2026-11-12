@@ -53,9 +53,9 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
   formats <- get("formats", envir = asNamespace("sRtr")) |>
     dplyr::rename_with(tolower) |>
     dplyr::rename(
-      Format = format,
-      Value  = code,
-      Label  = meaning
+      Format = "format",
+      Value  = "code",
+      Label  = "meaning"
     )
 
   # ---- Normalize variable names ----
@@ -63,12 +63,12 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
 
   # ---- Lookup variables to convert ----
   vars_to_factor <- dictionary |>
-    dplyr::filter(Dataset == file_key, !is.na(FormatID), FormatID != "") |>
+    dplyr::filter(.data$Dataset == file_key, !is.na(.data$FormatID), .data$FormatID != "") |>
     dplyr::mutate(
-      format_clean = stringr::str_remove(FormatID, "^fmt_"),
-      variable_upper = toupper(Variable)
+      format_clean = stringr::str_remove(.data$FormatID, "^fmt_"),
+      variable_upper = toupper(.data$Variable)
     ) |>
-    dplyr::filter(variable_upper %in% df_names_upper)
+    dplyr::filter(.data$variable_upper %in% df_names_upper)
 
   if (nrow(vars_to_factor) == 0) {
     if (verbose) message("No variables to convert to factor for ", file_key)
@@ -82,7 +82,7 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     var_match <- names(df)[toupper(names(df)) == var_upper][1]
 
     fmt_map <- formats |>
-      dplyr::filter(Format == fmt)
+      dplyr::filter(.data$Format == fmt)
 
     if (nrow(fmt_map) == 0) {
       if (verbose) message("No mapping found for format: ", fmt, " (variable: ", var_match, ")")

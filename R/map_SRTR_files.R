@@ -37,8 +37,8 @@
     raw_files <- list.files(path = SRTR_wd, pattern = pattern, recursive = TRUE)
     tibble::tibble(file_path = raw_files) |>
       dplyr::mutate(
-        file_name = fs::path_file(file_path),
-        file_path = file.path(SRTR_wd, file_path)
+        file_name = fs::path_file(.data$file_path),
+        file_path = file.path(SRTR_wd, .data$file_path)
       )
   }
 
@@ -46,7 +46,7 @@
     list_and_clean("sas7bdat$"),
     list_and_clean("parquet$")
   ) |>
-    tidyr::separate(file_name, c("file_root", "file_suffix"),
+    tidyr::separate("file_name", c("file_root", "file_suffix"),
                     sep = "\\.(?=[^.]+$)", remove = FALSE)
 
   .srtr_env$file_list <- File_List_clean
