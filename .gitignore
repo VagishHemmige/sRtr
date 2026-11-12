@@ -8,3 +8,14 @@ inst/doc
 /Meta/
 /doc/
 /docs/
+
+# SRTR data must never be committed (also checked in CI: data-guard.yaml).
+# Bracket patterns match either case, for Windows and macOS file names.
+*.[sS][aA][sS]7[bB][dD][aA][tT]
+*.[sS][aA][sS]7[bB][cC][aA][tT]
+*.[xX][pP][tT]
+*.[pP][aA][rR][qQ][uU][eE][tT]
+*.[fF][eE][aA][tT][hH][eE][rR]
+*.[aA][rR][rR][oO][wW]
+*.[dD][tT][aA]
+*.[sS][aA][vV]
