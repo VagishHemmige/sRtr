@@ -25,6 +25,11 @@ jobs:
           air format R tests
           git diff --stat
           git diff > air.patch
+          # Artifacts cannot be downloaded from Claude's workspace, so the
+          # patch is also printed to the log, base64-encoded so whitespace survives.
+          echo "AIR-PATCH-BEGIN"
+          base64 -w 76 air.patch
+          echo "AIR-PATCH-END"
 
       - uses: actions/upload-artifact@v4
         with:
