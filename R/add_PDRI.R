@@ -368,10 +368,8 @@ add_pdri <- function(
     df2[["PDRI_terms"]] <- terms_list
   }
 
-  # Drop scratch columns, preserve grouping
-  keep_terms <- if (return_terms) "PDRI_terms" else NULL
-  # Drop scratch columns safely, keep optional PDRI_terms
-
+  # Drop scratch columns (names starting with "."), preserving grouping.
+  # PDRI_terms does not start with "." and is always kept.
   out <- df2
   scratch <- grep("^\\.", names(out), value = TRUE)
   if (length(scratch)) {
