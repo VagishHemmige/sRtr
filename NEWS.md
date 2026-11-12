@@ -4,6 +4,11 @@
   depends on magrittr. Package code calls every function as `pkg::fun()`
   (#55).
 
+* The cohort-building vignette now uses the CRAN package flowchart instead of
+  strobe, and is renamed "Building Cohorts with Flow Diagrams" (#69).
+
+* `add_pdri()` is now exported (#50).
+
 * `add_txf_outcomes()` no longer fails unless dplyr is attached (#17).
 
 * `calculate_geography_coverage_gain()` now does what its arguments say
