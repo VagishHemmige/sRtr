@@ -1,9 +1,9 @@
 #' Helper function to add a time-to-event outcome from a date function
 #'
 #' Creates three columns for an outcome defined by an event date and a censor date:
-#' - {prefix}_CENSOR: event date if present, otherwise censor date
-#' - {prefix}_BINARY: 1 if event date present, else 0
-#' - {prefix}_{unit}: numeric time from start_date to {prefix}_CENSOR in chosen units
+#' - `{prefix}_CENSOR`: event date if present, otherwise censor date
+#' - `{prefix}_BINARY`: 1 if event date present, else 0
+#' - `{prefix}_{unit}`: numeric time from start_date to `{prefix}_CENSOR` in chosen units
 #'
 #' @param df A data frame.
 #' @param event_date Event date column (unquoted).
@@ -245,9 +245,9 @@ add_txf_outcomes <- function(
 #' loaded using a load function.
 #'
 #' Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:
-#' - {prefix}_CENSOR: event date if present, otherwise censor date
-#' - {prefix}_BINARY: 1 if event date present, else 0
-#' - {prefix}_{unit}: numeric time from start_date to {prefix}_CENSOR in chosen units
+#' - `{prefix}_CENSOR`: event date if present, otherwise censor date
+#' - `{prefix}_BINARY`: 1 if event date present, else 0
+#' - `{prefix}_{unit}`: numeric time from start_date to `{prefix}_CENSOR` in chosen units
 #'
 #' @param df A transplant data frame from [load_srtr_file()]. Its `file_key`
 #'   attribute decides which follow-up file and outcome columns are used.
