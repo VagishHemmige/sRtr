@@ -37,7 +37,10 @@ test_that("add_time_to_event_outcomes() builds rejection dates without dplyr att
   expect_equal(intersect(search(), "package:dplyr"), character())
   # Isolate the rejection step: the other helpers are tested separately (#25).
   local_mocked_bindings(
-    srtr_composite_death = function(df, ...) df,
+    srtr_composite_death = function(df, ...) {
+      df$REC_DEATH_DT_COMPOSITE <- as.Date(NA)
+      df
+    },
     srtr_time_to_event = function(df, ...) df,
     add_txf_outcomes = function(df) {
       df$FIRST_FU_REJ_DATE <- as.Date(c(NA, "2005-01-01"))
