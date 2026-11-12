@@ -31,11 +31,11 @@ reference:
       - srtr_normalize_missing
 
   - title: Time-to-event & composite dates
-    desc: Helpers for composing event dates and simple TTE calculations
+    desc: Helpers for composing event dates and simple time-to-event calculations
     contents:
       - srtr_composite_death
       - add_txf_outcomes
-      - add_tte_outcomes
+      - add_time_to_event_outcomes
       - srtr_time_to_event
 
   - title: Mapping transplant geography

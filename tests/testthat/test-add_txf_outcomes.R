@@ -33,7 +33,7 @@ test_that("add_txf_outcomes() runs for a single-organ file without dplyr attache
   expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2001-01-01", NA, "2003-01-01")))
 })
 
-test_that("add_tte_outcomes() builds rejection dates without dplyr attached", {
+test_that("add_time_to_event_outcomes() builds rejection dates without dplyr attached", {
   expect_false("package:dplyr" %in% search())
   # Isolate the rejection step: the other helpers are tested separately (#25).
   local_mocked_bindings(
@@ -56,7 +56,7 @@ test_that("add_tte_outcomes() builds rejection dates without dplyr attached", {
   )
   attr(df, "file_key") <- "TX_KI"
 
-  out <- add_tte_outcomes(df)
+  out <- add_time_to_event_outcomes(df)
 
   expect_equal(out$FIRST_REJ_DATE, as.Date(c("2000-01-11", "2005-01-01")))
 })
@@ -107,7 +107,7 @@ test_that("TX_KP splits rejections by organ", {
   expect_equal(out$FIRST_FU_REJ_DATE_PA, as.Date(c(NA, NA, "2003-01-01")))
 })
 
-# ---- add_tte_outcomes(): whole pipeline on made-up cohorts ----------------
+# ---- add_time_to_event_outcomes(): whole pipeline on made-up cohorts ----------------
 # Only the follow-up file loader is replaced; the outcome helpers run for real.
 
 fake_cohort <- function(file_key) {
@@ -144,9 +144,9 @@ fake_cohort_txf <- function(org_ty) {
   )
 }
 
-test_that("add_tte_outcomes() runs on a TX_KP cohort", {
+test_that("add_time_to_event_outcomes() runs on a TX_KP cohort", {
   local_mocked_bindings(load_srtr_file = function(...) fake_cohort_txf("KI"))
-  out <- add_tte_outcomes(fake_cohort("TX_KP"))
+  out <- add_time_to_event_outcomes(fake_cohort("TX_KP"))
 
   # Death is patient-level: censored at the later of the kidney and pancreas
   # follow-up dates (900001: 2005-01-01), or at death (900002: 2004-01-01).
@@ -164,11 +164,11 @@ test_that("add_tte_outcomes() runs on a TX_KP cohort", {
   expect_equal(out$FIRST_REJ_DATE_PA_CENSOR, as.Date(c("2005-01-01", "2002-01-01")))
 })
 
-test_that("add_tte_outcomes() runs on a single-organ cohort with no rejections", {
+test_that("add_time_to_event_outcomes() runs on a single-organ cohort with no rejections", {
   txf <- fake_cohort_txf("KI")
   txf$TFL_ACUTE_REJ_EPISODE <- "3: No"
   local_mocked_bindings(load_srtr_file = function(...) txf)
-  out <- add_tte_outcomes(fake_cohort("TX_KI"))
+  out <- add_time_to_event_outcomes(fake_cohort("TX_KI"))
   expect_equal(out$FIRST_REJ_DATE_BINARY, c(0L, 0L))
   expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2005-01-01", "2004-01-01")))
 })
@@ -176,11 +176,11 @@ test_that("add_tte_outcomes() runs on a single-organ cohort with no rejections",
 test_that("a missing follow-up date column is a clear error", {
   kp <- fake_cohort("TX_KP")
   kp$TFL_LAFUDATEPA <- NULL
-  expect_error(add_tte_outcomes(kp), "TFL_LAFUDATEPA")
+  expect_error(add_time_to_event_outcomes(kp), "TFL_LAFUDATEPA")
 
   ki <- fake_cohort("TX_KI")
   ki$TFL_LAFUDATE <- NULL
-  expect_error(add_tte_outcomes(ki), "TFL_LAFUDATE")
+  expect_error(add_time_to_event_outcomes(ki), "TFL_LAFUDATE")
 })
 
 test_that("TX_KP warns when follow-up rows are coded neither KI nor PA", {

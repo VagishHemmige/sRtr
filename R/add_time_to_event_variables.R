@@ -88,7 +88,7 @@ srtr_time_to_event <- function(
 
 
 
-#' Add time-to-event (TTE) follow-up outcomes to a transplant cohort
+#' Add time-to-event follow-up outcomes to a transplant cohort
 #'
 #' Uses the cohort's `file_key` attribute (as set by your SRTR load helpers)
 #' to locate and load the corresponding follow-up table, then derives:
@@ -144,7 +144,7 @@ srtr_time_to_event <- function(
 #' * Combined organ codes (e.g., `"HL"`) are not split; they will produce a
 #'   column `FIRST_FU_REJ_DATE_HL`. If you prefer to split into heart/lung,
 #'   duplicate those rows before pivoting.
-#' * This function only derives event *dates*. To build full TTE variables
+#' * This function only derives event *dates*. To build full time-to-event variables
 #'   (censor date, indicator, elapsed time), pass these dates to your
 #'   `srtr_time_to_event()` helper along with transplant and last-follow-up dates.
 #'
@@ -241,7 +241,7 @@ add_txf_outcomes <- function(
 
 }
 
-#' Add appropriate TTE outcome variables to a data frame based on the df attributes, if the file was
+#' Add appropriate time-to-event outcome variables to a data frame based on the df attributes, if the file was
 #' loaded using a load function.
 #'
 #' Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:
@@ -252,7 +252,7 @@ add_txf_outcomes <- function(
 #' @param df A transplant data frame from [load_srtr_file()]. Its `file_key`
 #'   attribute decides which follow-up file and outcome columns are used.
 #'
-add_tte_outcomes <- function(
+add_time_to_event_outcomes <- function(
     df)
 {
   is_kp <- identical(attr(df, "file_key"), "TX_KP")
