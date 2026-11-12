@@ -11,7 +11,7 @@
   consistently, and errors name the function you called. Every condition has
   a class you can catch: a general one (`sRtr_error`, `sRtr_warning`,
   `sRtr_message`) and a specific one such as `sRtr_error_file_not_found` or
-  `sRtr_error_missing_columns`. sRtr now imports cli.
+  `sRtr_error_missing_columns`. sRtr now imports cli (#102).
 
 * Loading sRtr no longer warns when `SRTR_WD` is not set, and no longer sets
   `options(arrow.skip_nul = TRUE)` for the session (#62).
