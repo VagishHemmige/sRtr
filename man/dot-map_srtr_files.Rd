@@ -11,7 +11,7 @@ Scans the directory set by the SRTR_WD environment variable and stores
 a cleaned file list in the package's internal environment for downstream use.
 }
 \details{
-This function is intended for internal use only and is automatically
-run on package load if SRTR_WD is set.
+Called by \code{.srtr_file_list()} when \code{load_srtr_file()} needs the list, and by
+\code{set_srtr_wd()}.
 }
 \keyword{internal}

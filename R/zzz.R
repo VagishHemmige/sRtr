@@ -9,9 +9,9 @@ utils::globalVariables(c(
 ))
 
 
+# No .onLoad(): loading sRtr does not scan SRTR_WD or change options. The
+# folder is scanned when load_srtr_file() first needs it (.srtr_file_list()).
+
 #' @importFrom rlang .data :=
 #' @noRd
-.onLoad <- function(libname, pkgname) {
-  try(.map_srtr_files(), silent = TRUE)
-  options(arrow.skip_nul = TRUE)
-}
+NULL

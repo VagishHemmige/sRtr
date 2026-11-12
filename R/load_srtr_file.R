@@ -4,6 +4,11 @@
 #' - Factor labels using the `formats` dataset
 #' - Variable labels using the `dictionary` dataset
 #'
+#' Files are looked up in the folder set with [set_srtr_wd()] (the `SRTR_WD`
+#' environment variable). The folder is scanned the first time a file is
+#' loaded, and again if a file is not found, so files added during the session
+#' are picked up.
+#'
 #' All variable names are standardized to uppercase after loading.
 #' The returned tibble includes two attributes:
 #' - `source_path`: the full path to the file on disk
@@ -32,28 +37,30 @@ load_srtr_file <- function(file_key,
                            var_labels = TRUE,
                            col_select = NULL,
                            ...) {
-  # ---- Check registry ----
-  if (is.null(.srtr_env$file_list)) {
-    stop("SRTR file list not initialized. Please set up the file registry.")
+  # ---- Lookup metadata ----
+  # Scans SRTR_WD on first use; rescans once if the file is not in the list
+  # or has gone, so files added or moved during the session are found.
+  file_key_input <- toupper(file_key)
+  find_file <- function(file_list) {
+    file_list |>
+      dplyr::filter(toupper(.data$file_root) == file_key_input) |>
+      dplyr::slice(1)
   }
 
-  # ---- Lookup metadata ----
-  file_key_input <- toupper(file_key)
-
-  match <- .srtr_env$file_list |>
-    dplyr::filter(toupper(.data$file_root) == file_key_input) |>
-    dplyr::slice(1)
-
+  match <- find_file(.srtr_file_list())
+  if (nrow(match) == 0 || !file.exists(match$file_path)) {
+    match <- find_file(.srtr_file_list(refresh = TRUE))
+  }
   if (nrow(match) == 0) {
-    stop("File key '", file_key, "' not found.")
+    stop(
+      "File key '", file_key, "' not found in SRTR_WD (",
+      Sys.getenv("SRTR_WD"), ").",
+      call. = FALSE
+    )
   }
 
   full_path <- match$file_path
   suffix <- tolower(match$file_suffix)
-
-  if (!file.exists(full_path)) {
-    stop("File not found: ", full_path)
-  }
 
   # ---- Read file ----
   df <- switch(
@@ -66,6 +73,10 @@ load_srtr_file <- function(file_key,
       }
     },
     "parquet" = {
+      # Drop embedded NUL characters in text instead of failing. Set only for
+      # this read; the caller's option is restored on exit.
+      old_options <- options(arrow.skip_nul = TRUE)
+      on.exit(options(old_options), add = TRUE)
       if (is.null(col_select)) {
         arrow::read_parquet(full_path, ...)
       } else {

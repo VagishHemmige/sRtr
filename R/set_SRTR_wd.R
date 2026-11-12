@@ -46,8 +46,7 @@ set_srtr_wd <- function(path, permanent = FALSE) {
     message("Restart R or call `Sys.getenv(\"SRTR_WD\")` to confirm.")
   }
 
-  # Clear and re-map after setting
-  .srtr_env$initialized <- FALSE
+  # Re-map after setting
   .map_srtr_files()
 
   invisible(normalized)
