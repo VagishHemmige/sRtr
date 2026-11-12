@@ -251,10 +251,42 @@ add_txf_outcomes <- function(
 #'
 #' @param df A transplant data frame from [load_srtr_file()]. Its `file_key`
 #'   attribute decides which follow-up file and outcome columns are used.
+#' @param death_window Which deaths count as events, and where recipients
+#'   without one are censored:
+#'   * `"follow_up"` (default): deaths on or before the recipient's last
+#'     follow-up date count; everyone else is censored at last follow-up.
+#'   * `"ascertainment"`: the SRTR program-specific report method for patient
+#'     survival. Deaths from any source on or before `ascertainment_date`
+#'     count; everyone else is assumed alive and censored at that date.
+#' @param ascertainment_date One date up to which deaths are ascertained in
+#'   your SAF release, from its release notes. Required when
+#'   `death_window = "ascertainment"`.
+#'
+#' @details
+#' `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only the
+#' event and censoring columns (`REC_DEATH_DT_COMPOSITE_BINARY`, `_CENSOR`,
+#' `_days`) depend on `death_window`. Counting deaths found after last
+#' follow-up while censoring survivors at last follow-up would overstate
+#' mortality (#18).
 #'
 add_time_to_event_outcomes <- function(
-    df)
+    df,
+    death_window = c("follow_up", "ascertainment"),
+    ascertainment_date = NULL)
 {
+  death_window <- match.arg(death_window)
+  if (death_window == "ascertainment") {
+    if (is.null(ascertainment_date) || length(ascertainment_date) != 1 ||
+        is.na(suppressWarnings(as.Date(ascertainment_date)))) {
+      stop(
+        "`death_window = \"ascertainment\"` needs `ascertainment_date`: ",
+        "one date up to which deaths are ascertained in the SAF release.",
+        call. = FALSE
+      )
+    }
+    ascertainment_date <- as.Date(ascertainment_date)
+  }
+
   is_kp <- identical(attr(df, "file_key"), "TX_KP")
 
   needed <- if (is_kp) c("TFL_LAFUDATEKI", "TFL_LAFUDATEPA") else "TFL_LAFUDATE"
@@ -282,12 +314,24 @@ add_time_to_event_outcomes <- function(
 #Add composite death
   df <- srtr_composite_death(df)
 
+  #Deaths count only inside the window survivors are followed for (#18).
+  #"follow_up": up to the patient's last follow-up date.
+  #"ascertainment": up to one closing date for everyone (SRTR PSR method).
+  df$.death_censor <- if (death_window == "follow_up") {
+    df$.patient_lafu
+  } else {
+    rep(ascertainment_date, nrow(df))
+  }
+  death <- df$REC_DEATH_DT_COMPOSITE
+  in_window <- !is.na(death) & !is.na(df$.death_censor) & death <= df$.death_censor
+  df$.death_event <- dplyr::if_else(in_window, death, as.Date(NA))
+
 #Death added here
   df<-df|>
     srtr_time_to_event(
-      event_date=REC_DEATH_DT_COMPOSITE,
+      event_date=.death_event,
       start_date=REC_TX_DT,
-      censor_date=.patient_lafu,
+      censor_date=.death_censor,
       prefix="REC_DEATH_DT_COMPOSITE",
       units = "days",
     )
@@ -405,5 +449,7 @@ add_time_to_event_outcomes <- function(
 
   df$.patient_lafu <- NULL
   df$.graft_lafu <- NULL
+  df$.death_event <- NULL
+  df$.death_censor <- NULL
   df
 }
