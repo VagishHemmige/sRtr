@@ -62,10 +62,10 @@ articles:
     contents:
       - getting-started
 
-  - title: Cohort Building using the `strobe` package
+  - title: Cohort Building
     navbar: ~
     contents:
-      - building-cohort-with-strobe
+      - building-cohort-with-flowchart
 
   - title: Missing data
     navbar: ~

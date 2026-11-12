@@ -1,0 +1,115 @@
+---
+title: "Building Cohorts with Flow Diagrams"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Building Cohorts with Flow Diagrams}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 8
+)
+```
+
+## Introduction
+
+The STROBE (Strengthening the Reporting of Observational Studies in
+Epidemiology) statement asks observational studies to report how the study
+population was selected, usually as a flow diagram. The
+[`flowchart`](https://bruigtp.github.io/flowchart/) package on CRAN builds
+that diagram while you build your cohort: each filtering step records how
+many records were kept and how many were excluded.
+
+This vignette shows how to:
+
+1. Start a flow diagram from a loaded SRTR file
+2. Apply inclusion criteria one at a time, with exclusion boxes
+3. Draw and export the diagram
+4. Get the final cohort back as a data frame
+
+The code below needs your own SRTR files, so it is shown but not run.
+
+## Setup
+
+```{r setup, eval=FALSE}
+install.packages("flowchart")
+
+library(sRtr)
+library(flowchart)
+
+TX_KI <- load_srtr_file("TX_KI")
+```
+
+## Example: a kidney transplant cohort
+
+`as_fc()` starts the diagram from a data frame. Each `fc_filter()` keeps the
+rows where its condition is true; `show_exc = TRUE` adds a box counting the
+rows it removed.
+
+```{r basic_example, eval=FALSE}
+kidney_fc <- TX_KI |>
+  as_fc(label = "All kidney transplants") |>
+  fc_filter(
+    DON_AGE > 18,
+    label = "Donor over 18 years old",
+    show_exc = TRUE,
+    label_exc = "Donor 18 or younger"
+  ) |>
+  fc_filter(
+    DON_ABO == "B",
+    label = "Donor blood type B",
+    show_exc = TRUE,
+    label_exc = "Donor blood type not B"
+  ) |>
+  fc_filter(
+    REC_AGE >= 18 & REC_AGE <= 65,
+    label = "Recipient age 18 to 65",
+    show_exc = TRUE,
+    label_exc = "Recipient age outside 18 to 65"
+  )
+```
+
+Rows where a condition is `NA` (for example, a missing donor age) are
+excluded, the same as in `dplyr::filter()`. If missing values should be
+handled differently, recode them first, for example with
+`srtr_normalize_missing()`.
+
+## What the boxes count
+
+`flowchart` counts rows. In `TX_KI` a row is a transplant, so a recipient
+with two kidney transplants is counted twice; label the boxes as transplants,
+or reduce to one row per recipient (for example on `PERS_ID`) as a labelled
+step of its own. Build the diagram before joining files with many rows per
+transplant, such as the follow-up file `TXF_KI`: after that join each row is
+a follow-up form, and the counts no longer describe transplants.
+
+## Drawing and exporting the diagram
+
+```{r draw, eval=FALSE}
+kidney_fc |>
+  fc_draw()
+
+kidney_fc |>
+  fc_draw() |>
+  fc_export("kidney-cohort.png", width = 3000, height = 4000, res = 700)
+```
+
+`fc_draw()` and `fc_filter()` have many arguments for box size, text and
+colour; see the [`flowchart` reference](https://bruigtp.github.io/flowchart/reference/index.html).
+
+## Getting the cohort back
+
+The flowchart object keeps the filtered data in its `data` element, so the
+cohort used in the diagram is the cohort you analyse:
+
+```{r cohort, eval=FALSE}
+kidney_cohort <- kidney_fc$data
+nrow(kidney_cohort)
+```
+
+The step-by-step counts behind the boxes are in `kidney_fc$fc`.
