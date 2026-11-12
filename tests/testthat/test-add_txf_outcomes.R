@@ -22,7 +22,7 @@ fake_txf <- function(org_ty) {
 }
 
 test_that("add_txf_outcomes() runs for a single-organ file without dplyr attached", {
-  expect_false("package:dplyr" %in% search())
+  expect_equal(intersect(search(), "package:dplyr"), character())
   local_mocked_bindings(load_srtr_file = function(...) fake_txf("KI"))
 
   out <- add_txf_outcomes(fake_tx("TX_KI"))
@@ -34,7 +34,7 @@ test_that("add_txf_outcomes() runs for a single-organ file without dplyr attache
 })
 
 test_that("add_time_to_event_outcomes() builds rejection dates without dplyr attached", {
-  expect_false("package:dplyr" %in% search())
+  expect_equal(intersect(search(), "package:dplyr"), character())
   # Isolate the rejection step: the other helpers are tested separately (#25).
   local_mocked_bindings(
     srtr_composite_death = function(df, ...) df,
@@ -73,7 +73,7 @@ test_that("a single-organ cohort with no rejections still gets FIRST_FU_REJ_DATE
   local_mocked_bindings(load_srtr_file = function(...) no_rejection_txf("KI"))
   out <- add_txf_outcomes(fake_tx("TX_KI"))
   expect_named(out, c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE"))
-  expect_true(all(is.na(out$FIRST_FU_REJ_DATE)))
+  expect_equal(out$FIRST_FU_REJ_DATE, rep(as.Date(NA), 3))
   expect_s3_class(out$FIRST_FU_REJ_DATE, "Date")
 })
 
@@ -82,8 +82,7 @@ test_that("a cohort with no malignancy still gets FIRST_FU_MALIG_DATE", {
   txf$TFL_MALIG <- "N"
   local_mocked_bindings(load_srtr_file = function(...) txf)
   out <- add_txf_outcomes(fake_tx("TX_KI"))
-  expect_true("FIRST_FU_MALIG_DATE" %in% names(out))
-  expect_true(all(is.na(out$FIRST_FU_MALIG_DATE)))
+  expect_equal(out$FIRST_FU_MALIG_DATE, rep(as.Date(NA), 3))
   expect_s3_class(out$FIRST_FU_MALIG_DATE, "Date")
 })
 
@@ -95,7 +94,7 @@ test_that("TX_KP keeps _KI and _PA columns when only kidney rejections occur", {
     c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE_KI", "FIRST_FU_REJ_DATE_PA")
   )
   expect_equal(out$FIRST_FU_REJ_DATE_KI, as.Date(c("2001-01-01", NA, "2003-01-01")))
-  expect_true(all(is.na(out$FIRST_FU_REJ_DATE_PA)))
+  expect_equal(out$FIRST_FU_REJ_DATE_PA, rep(as.Date(NA), 3))
 })
 
 test_that("TX_KP splits rejections by organ", {
@@ -158,9 +157,11 @@ test_that("add_time_to_event_outcomes() runs on a TX_KP cohort", {
   expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2001-01-01", "2004-01-01")))
 
   # Pancreas columns use the FIRST_REJ_DATE_PA prefix (was FIRST_REJ_DATEPA).
-  expect_true(all(c("FIRST_REJ_DATE_PA_CENSOR", "FIRST_REJ_DATE_PA_BINARY",
-                    "FIRST_REJ_DATE_PA_days") %in% names(out)))
-  expect_false(any(startsWith(names(out), "FIRST_REJ_DATEPA")))
+  expect_contains(
+    names(out),
+    c("FIRST_REJ_DATE_PA_CENSOR", "FIRST_REJ_DATE_PA_BINARY", "FIRST_REJ_DATE_PA_days")
+  )
+  expect_equal(grep("^FIRST_REJ_DATEPA", names(out), value = TRUE), character())
   expect_equal(out$FIRST_REJ_DATE_PA_CENSOR, as.Date(c("2005-01-01", "2002-01-01")))
 })
 
@@ -176,17 +177,17 @@ test_that("add_time_to_event_outcomes() runs on a single-organ cohort with no re
 test_that("a missing follow-up date column is a clear error", {
   kp <- fake_cohort("TX_KP")
   kp$TFL_LAFUDATEPA <- NULL
-  expect_error(add_time_to_event_outcomes(kp), "TFL_LAFUDATEPA")
+  expect_snapshot(error = TRUE, add_time_to_event_outcomes(kp))
 
   ki <- fake_cohort("TX_KI")
   ki$TFL_LAFUDATE <- NULL
-  expect_error(add_time_to_event_outcomes(ki), "TFL_LAFUDATE")
+  expect_snapshot(error = TRUE, add_time_to_event_outcomes(ki))
 })
 
 test_that("TX_KP warns when follow-up rows are coded neither KI nor PA", {
   # WLORG also allows "KP"; such rows cannot be assigned to one organ.
   local_mocked_bindings(load_srtr_file = function(...) fake_txf("KP"))
-  expect_warning(out <- add_txf_outcomes(fake_tx("TX_KP")), "ORG_TY")
-  expect_true(all(is.na(out$FIRST_FU_REJ_DATE_KI)))
-  expect_true(all(is.na(out$FIRST_FU_REJ_DATE_PA)))
+  expect_snapshot(out <- add_txf_outcomes(fake_tx("TX_KP")))
+  expect_equal(out$FIRST_FU_REJ_DATE_KI, rep(as.Date(NA), 3))
+  expect_equal(out$FIRST_FU_REJ_DATE_PA, rep(as.Date(NA), 3))
 })
