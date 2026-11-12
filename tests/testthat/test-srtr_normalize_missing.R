@@ -27,3 +27,17 @@ test_that("srtr_normalize_missing replaces expected values", {
   expect_true("Missing" %in% unique(as.character(df_missing$REC_HIV_STAT)))
   expect_false(any(is.na(df_missing$REC_HIV_STAT)))
 })
+
+# ---- Offline test: a tiny made-up table, no SAF needed ----
+
+test_that("verbose = TRUE reports processed and skipped columns", {
+  df <- tibble::tibble(FAKE_A = c(1, -99))
+  expect_snapshot(
+    out <- srtr_normalize_missing(
+      df,
+      missing_vals = list(FAKE_A = -99, FAKE_NOT_THERE = -99),
+      verbose = TRUE
+    )
+  )
+  expect_equal(out$FAKE_A, c(1, NA))
+})

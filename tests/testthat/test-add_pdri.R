@@ -155,3 +155,43 @@ testthat::test_that("Groupwise mean-impute works; grouping preserved; source col
 testthat::test_that("add_pdri() is exported", {
   testthat::expect_true("add_pdri" %in% getNamespaceExports("sRtr"))
 })
+
+fake_donors <- function() {
+  tibble::tibble(
+    DON_GENDER = "F",
+    DON_AGE_IN_MONTHS = 300,
+    DON_CREAT = 1,
+    DON_RACE = 8L,
+    DON_BMI = 25,
+    DON_HGT_CM = 170,
+    DON_COD_DON_STROKE = 0L,
+    REC_PA_PRESERV_TM = 12,
+    DON_NON_HR_BEAT = "N"
+  )
+}
+
+testthat::test_that("add_pdri() names the missing columns", {
+  df <- fake_donors()
+  df$DON_CREAT <- NULL
+  testthat::expect_error(
+    add_pdri(df, variant = "KP"),
+    class = "sRtr_error_missing_columns"
+  )
+  testthat::expect_snapshot(error = TRUE, add_pdri(df, variant = "KP"))
+})
+
+testthat::test_that("add_pdri() warns before overwriting the PDRI column", {
+  df <- fake_donors()
+  df$PDRI <- 1
+  testthat::expect_warning(
+    add_pdri(df, variant = "KP"),
+    class = "sRtr_warning_column_overwritten"
+  )
+})
+
+testthat::test_that("add_pdri(verbose = TRUE) reports the variant and BMI", {
+  df <- fake_donors()
+  df$DON_BMI <- NULL
+  df$DON_WGT_KG <- 70
+  testthat::expect_snapshot(out <- add_pdri(df, verbose = TRUE))
+})

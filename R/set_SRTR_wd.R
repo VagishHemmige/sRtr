@@ -15,7 +15,10 @@
 #' }
 set_srtr_wd <- function(path, permanent = FALSE) {
   if (!dir.exists(path)) {
-    stop("Directory does not exist: ", path)
+    srtr_abort(
+      c("The folder does not exist:", " " = "{.path {path}}"),
+      class = "folder_missing"
+    )
   }
   normalized <- normalizePath(path, winslash = "/", mustWork = TRUE)
 
@@ -28,7 +31,10 @@ set_srtr_wd <- function(path, permanent = FALSE) {
 
     if (!file.exists(renv_path)) {
       writeLines(line, renv_path)
-      message("Created ~/.Renviron and added:\n", line)
+      srtr_inform(
+        c("v" = "Created {.file ~/.Renviron} and added:", " " = "{.code {line}}"),
+        class = "renviron_updated"
+      )
     } else {
       renv <- readLines(renv_path)
 
@@ -36,16 +42,25 @@ set_srtr_wd <- function(path, permanent = FALSE) {
       if (any(grepl("^SRTR_WD=", renv))) {
         # Replace existing line
         renv <- sub("^SRTR_WD=.*", line, renv)
-        message("Updated SRTR_WD in ~/.Renviron:\n", line)
+        srtr_inform(
+          c("v" = "Updated {.envvar SRTR_WD} in {.file ~/.Renviron}:", " " = "{.code {line}}"),
+          class = "renviron_updated"
+        )
       } else {
         renv <- c(renv, line)
-        message("Appended SRTR_WD to ~/.Renviron:\n", line)
+        srtr_inform(
+          c("v" = "Added {.envvar SRTR_WD} to {.file ~/.Renviron}:", " " = "{.code {line}}"),
+          class = "renviron_updated"
+        )
       }
 
       writeLines(renv, renv_path)
     }
 
-    message("Restart R or call `Sys.getenv(\"SRTR_WD\")` to confirm.")
+    srtr_inform(
+      c("i" = "Restart R to use it in new sessions; it is already set for this one."),
+      class = "renviron_updated"
+    )
   }
 
   # Re-map after setting

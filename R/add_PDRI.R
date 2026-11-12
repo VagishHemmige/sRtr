@@ -66,10 +66,12 @@ add_pdri <- function(
   infer_pdri_variant <- function(df, verbose = FALSE) {
     pick <- function(v, why = NULL) {
       if (verbose) {
-        message(
-          "add_pdri(): inferred variant = ",
-          v,
-          if (!is.null(why)) paste0(" (", why, ")")
+        srtr_inform(
+          c(
+            "Using PDRI variant {.val {v}}.",
+            "i" = if (!is.null(why)) "Inferred from {why}."
+          ),
+          class = "pdri_variant_inferred"
         )
       }
       v
@@ -110,7 +112,13 @@ add_pdri <- function(
       return(pick("KP", "many _KI columns"))
     }
     if (verbose) {
-      message("add_pdri(): unable to infer confidently; defaulting to KP")
+      srtr_inform(
+        c(
+          "Using PDRI variant {.val KP}.",
+          "i" = "Could not tell KP from PA, so used the default."
+        ),
+        class = "pdri_variant_inferred"
+      )
     }
     "KP"
   }
@@ -205,41 +213,38 @@ add_pdri <- function(
     required_base <- c(required_base, "DON_WGT_KG")
   }
 
-  missing_base <- setdiff(required_base, names(df))
-  if (length(missing_base)) {
-    stop(
-      "Missing required columns: ",
-      paste(missing_base, collapse = ", "),
-      call. = FALSE
-    )
-  }
+  check_columns(df, required_base)
 
   if (verbose) {
     if (!has_bmi) {
-      message(
-        "add_pdri(): DON_BMI not found; computing from DON_WGT_KG and DON_HGT_CM."
+      srtr_inform(
+        "{.field DON_BMI} not found; computing it from {.field DON_WGT_KG} and {.field DON_HGT_CM}.",
+        class = "pdri_bmi_computed"
       )
     } else if (
       any(is.na(df$DON_BMI)) &&
         all(c("DON_WGT_KG", "DON_HGT_CM") %in% names(df))
     ) {
-      message(
-        "add_pdri(): filling missing DON_BMI from DON_WGT_KG and DON_HGT_CM where available."
+      srtr_inform(
+        "Filling missing {.field DON_BMI} from {.field DON_WGT_KG} and {.field DON_HGT_CM} where available.",
+        class = "pdri_bmi_computed"
       )
     }
     bad_h <- !is.na(df$DON_HGT_CM) & df$DON_HGT_CM <= 0
     if (any(bad_h)) {
-      warning(
-        "DON_HGT_CM <= 0 for n = ",
-        sum(bad_h),
-        " rows; BMI set to NA there.",
-        call. = FALSE
+      n_bad <- sum(bad_h)
+      srtr_warn(
+        "{.field DON_HGT_CM} is 0 or negative in {n_bad} row{?s}; BMI set to {.val {NA}} there.",
+        class = "pdri_bad_height"
       )
     }
   }
 
   if (pdri_col %in% names(df)) {
-    warning("Overwriting existing column: ", pdri_col, call. = FALSE)
+    srtr_warn(
+      "Overwriting existing column {.field {pdri_col}}.",
+      class = "column_overwritten"
+    )
   }
   out_name <- rlang::ensym(pdri_col)
   has_prev_ki <- "REC_PREV_KI" %in% names(df)
@@ -319,19 +324,14 @@ add_pdri <- function(
       round(utils::head(df2$.linpred[inf_idx], 5), 3),
       collapse = ", "
     )
-    warning(
-      sprintf(
-        "add_pdri(): %d row(s) produced Inf in %s (exp(linear predictor) overflow). ",
-        length(inf_idx),
-        pdri_nm
+    n_inf <- length(inf_idx)
+    srtr_warn(
+      c(
+        "{n_inf} row{?s} gave {.val {Inf}} in {.field {pdri_nm}} (the linear predictor overflowed).",
+        "i" = "Check inputs in {qty(n_inf)}{?that row/those rows} for unit or coding errors or extreme values.",
+        "i" = "First rows: {ex_rows}; linear predictors: {ex_lp}."
       ),
-      "Validate inputs for those rows (possible unit/coding errors or extreme values). ",
-      sprintf(
-        "Examples \u2014 rows: [%s]; linear predictors: [%s].",
-        ex_rows,
-        ex_lp
-      ),
-      call. = FALSE
+      class = "pdri_infinite"
     )
   }
 

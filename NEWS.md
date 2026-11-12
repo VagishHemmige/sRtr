@@ -7,6 +7,12 @@
 * The cohort-building vignette now uses the CRAN package flowchart instead of
   strobe, and is renamed "Building Cohorts with Flow Diagrams" (#69).
 
+* Errors, warnings and messages now come from cli, so they are formatted
+  consistently, and errors name the function you called. Every condition has
+  a class you can catch: a general one (`sRtr_error`, `sRtr_warning`,
+  `sRtr_message`) and a specific one such as `sRtr_error_file_not_found` or
+  `sRtr_error_missing_columns`. sRtr now imports cli.
+
 * Loading sRtr no longer warns when `SRTR_WD` is not set, and no longer sets
   `options(arrow.skip_nul = TRUE)` for the session (#62).
 

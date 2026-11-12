@@ -38,23 +38,28 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
     if (!is.null(attr_key)) {
       file_key <- toupper(attr_key)
       if (verbose) {
-        message(
-          "Inferred file_key = '",
-          file_key,
-          "' from data frame attribute."
+        srtr_inform(
+          "Using {.arg file_key} {.val {file_key}} from the data frame's attribute.",
+          class = "file_key_inferred"
         )
       }
     } else {
       file_key <- toupper(deparse(substitute(df)))
       if (verbose) {
-        message("Inferred file_key = '", file_key, "' from object name.")
+        srtr_inform(
+          "Using {.arg file_key} {.val {file_key}} from the object name.",
+          class = "file_key_inferred"
+        )
       }
     }
   }
 
   # ---- Ensure dictionary exists ----
   if (!exists("dictionary", envir = asNamespace("sRtr"))) {
-    stop("The `dictionary` dataset must be available in the sRtr package.")
+    srtr_abort(
+      "The {.pkg sRtr} {.code dictionary} dataset is not available.",
+      class = "internal_data_missing"
+    )
   }
   dict <- get("dictionary", envir = asNamespace("sRtr"))
 
@@ -63,7 +68,10 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
     !vapply(df, function(x) is.null(labelled::var_label(x)), logical(1))
   )
   if (already_labelled) {
-    warning("Some variables already have labels. Skipping re-labeling.")
+    srtr_warn(
+      "Some variables already have labels, so none were relabeled.",
+      class = "already_labelled"
+    )
     return(df)
   }
 
@@ -77,7 +85,10 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
 
   if (nrow(vars_to_label) == 0) {
     if (verbose) {
-      message("No variable labels applied for ", file_key)
+      srtr_inform(
+        "No variable labels applied for {.val {file_key}}.",
+        class = "nothing_to_label"
+      )
     }
     return(df)
   }
@@ -90,7 +101,10 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
     labelled::var_label(df[[var_match]]) <- label_text
 
     if (verbose) {
-      message("Labeled variable: ", var_match, " - ", label_text)
+      srtr_inform(
+        c("v" = "Labeled variable: {.var {var_match}} ({label_text})."),
+        class = "variable_labeled"
+      )
     }
   }
 

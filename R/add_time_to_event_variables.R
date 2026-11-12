@@ -82,11 +82,11 @@ srtr_time_to_event <- function(
   # Negative times
   neg <- is.finite(time_days) & (time_days < 0)
   if (isTRUE(warn_negative) && any(neg, na.rm = TRUE)) {
-    warning(sprintf(
-      "%d rows had negative %s times; setting to NA.",
-      sum(neg, na.rm = TRUE),
-      prefix
-    ))
+    n_neg <- sum(neg, na.rm = TRUE)
+    srtr_warn(
+      "{n_neg} row{?s} had a negative {.field {prefix}} time; set to {.val {NA}}.",
+      class = "negative_time"
+    )
   }
   time_days[neg] <- NA_real_
 
@@ -247,11 +247,12 @@ add_txf_outcomes <- function(
       c("KI", "PA")
     )
     if (length(other) > 0) {
-      warning(
-        "TXF_KP follow-up rows with ORG_TY ",
-        paste0("'", other, "'", collapse = ", "),
-        " are not KI or PA; their rejections are not assigned to an organ.",
-        call. = FALSE
+      srtr_warn(
+        c(
+          "{.file TXF_KP} follow-up rows with {.field ORG_TY} {.val {other}} are not {.val KI} or {.val PA}.",
+          "i" = "Their rejections are not assigned to an organ."
+        ),
+        class = "kp_unknown_organ"
       )
     }
     for (organ in c("KI", "PA")) {
@@ -309,10 +310,12 @@ add_time_to_event_outcomes <- function(
         length(ascertainment_date) != 1 ||
         is.na(suppressWarnings(as.Date(ascertainment_date)))
     ) {
-      stop(
-        "`death_window = \"ascertainment\"` needs `ascertainment_date`: ",
-        "one date up to which deaths are ascertained in the SAF release.",
-        call. = FALSE
+      srtr_abort(
+        c(
+          "{.code death_window = \"ascertainment\"} needs {.arg ascertainment_date}.",
+          "i" = "Give one date up to which deaths are ascertained in the SAF release."
+        ),
+        class = "ascertainment_date_missing"
       )
     }
     ascertainment_date <- as.Date(ascertainment_date)
@@ -321,15 +324,7 @@ add_time_to_event_outcomes <- function(
   is_kp <- identical(attr(df, "file_key"), "TX_KP")
 
   needed <- if (is_kp) c("TFL_LAFUDATEKI", "TFL_LAFUDATEPA") else "TFL_LAFUDATE"
-  missing <- setdiff(needed, names(df))
-  if (length(missing) > 0) {
-    stop(
-      "`df` is missing the follow-up date column(s) ",
-      paste0("`", missing, "`", collapse = ", "),
-      " needed to censor outcomes.",
-      call. = FALSE
-    )
-  }
+  check_columns(df, needed, why = "Follow-up dates are needed to censor outcomes.")
 
   #Patient-level outcomes (death, malignancy) are censored at the patient's
   #last follow-up. TX_KP has no TFL_LAFUDATE, only one date per graft, so use

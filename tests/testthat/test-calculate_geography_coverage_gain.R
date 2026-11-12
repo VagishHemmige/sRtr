@@ -273,7 +273,7 @@ test_that("no covered_ids attribute without geography_id; a missing column error
       "area_cases",
       geography_id = "tract_id"
     ),
-    "tract_id"
+    class = "sRtr_error_missing_columns"
   )
 })
 

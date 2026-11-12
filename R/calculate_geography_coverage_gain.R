@@ -105,11 +105,10 @@ calculate_geography_coverage_gain <- function(
   if (
     !is.null(geography_id) && !geography_id %in% names(population_geography)
   ) {
-    stop(
-      "`geography_id` column '",
-      geography_id,
-      "' is not in `population_geography`.",
-      call. = FALSE
+    srtr_abort(
+      "{.arg geography_id} column {.field {geography_id}} is not in {.arg population_geography}.",
+      class = "missing_columns",
+      missing = geography_id
     )
   }
 
