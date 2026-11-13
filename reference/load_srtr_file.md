@@ -15,6 +15,7 @@ load_srtr_file(
   factor_labels = TRUE,
   var_labels = TRUE,
   col_select = NULL,
+  column_check = c("warn", "error", "none"),
   ...
 )
 ```
@@ -49,6 +50,20 @@ load_srtr_file(
   `col_select` is `NULL`, includes it, or includes both `TFL_LAFUDATEKI`
   and `TFL_LAFUDATEPA`. Renaming (`c(new = OLD)`) is not supported;
   rename after loading.
+
+- column_check:
+
+  What to do when the file's columns differ from the columns the bundled
+  data dictionary
+  ([dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md))
+  lists for `file_key`. `"warn"` (the default) warns about columns the
+  file is missing; `"error"` makes that an error; `"none"` skips the
+  comparison. Either way, columns the dictionary does not list are named
+  in a message, once per file key per session, and loaded as they are.
+  The comparison runs only when every column is read
+  (`col_select = NULL`) and only for file keys the dictionary lists. A
+  file from a different SAF release than the dictionary can differ in
+  its columns.
 
 - ...:
 
