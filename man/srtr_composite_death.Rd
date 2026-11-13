@@ -10,7 +10,6 @@ srtr_composite_death(
   ssa = "PERS_SSA_DEATH_DT",
   tfl = "TFL_DEATH_DT",
   out = "REC_DEATH_DT_COMPOSITE",
-  parse = TRUE,
   keep_source = TRUE,
   add_conflict_flag = TRUE,
   prefer_earliest = FALSE
@@ -19,11 +18,10 @@ srtr_composite_death(
 \arguments{
 \item{df}{A data frame.}
 
-\item{optn, ssa, tfl}{Character column names for OPTN, SSA, and TFL death dates.}
+\item{optn, ssa, tfl}{Character column names for OPTN, SSA, and TFL death
+dates. Each must be a \code{Date} column.}
 
 \item{out}{Name of the output composite column to create.}
-
-\item{parse}{If TRUE, parse the three inputs with \code{.srtr_as_date()}.}
 
 \item{keep_source}{If TRUE, add \verb{\{out\}_source} with the chosen source label.}
 
@@ -41,9 +39,9 @@ By default it respects this precedence using \code{dplyr::coalesce()}. Optionall
 set \code{prefer_earliest = TRUE} to pick the earliest non-missing date instead.
 }
 \details{
-Columns are parsed with \code{.srtr_as_date()} to accept YYYYMMDD integers/strings.
-You can also keep a "which source won" indicator and a conflict flag when
-multiple sources disagree.
+The three columns must be stored as \code{Date}, which is how \code{\link[=load_srtr_file]{load_srtr_file()}}
+returns SAS date columns. You can also keep a "which source won" indicator
+and a conflict flag when multiple sources disagree.
 }
 \examples{
 \dontrun{

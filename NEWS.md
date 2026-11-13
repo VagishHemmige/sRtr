@@ -48,3 +48,10 @@
 
 * `rank_individual_coverage_gains()` now defaults to `method = "areal"`,
   like `calculate_geography_coverage_gain()` (#58).
+
+* `srtr_composite_death()` now requires its three death date columns to be
+  `Date`, which is how `load_srtr_file()` returns SAS date columns, and errors
+  with the names of any that are not. It no longer converts numbers or text to
+  dates, so the `parse` argument is removed; the conversion could misread
+  `MM/DD/YYYY` text and SAS day counts (#23, #59). A missing column now gives a
+  clear error instead of a failed `stopifnot()`.

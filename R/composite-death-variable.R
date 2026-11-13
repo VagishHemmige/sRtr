@@ -5,14 +5,14 @@
 #' By default it respects this precedence using `dplyr::coalesce()`. Optionally,
 #' set `prefer_earliest = TRUE` to pick the earliest non-missing date instead.
 #'
-#' Columns are parsed with `.srtr_as_date()` to accept YYYYMMDD integers/strings.
-#' You can also keep a "which source won" indicator and a conflict flag when
-#' multiple sources disagree.
+#' The three columns must be stored as `Date`, which is how [load_srtr_file()]
+#' returns SAS date columns. You can also keep a "which source won" indicator
+#' and a conflict flag when multiple sources disagree.
 #'
 #' @param df A data frame.
-#' @param optn,ssa,tfl Character column names for OPTN, SSA, and TFL death dates.
+#' @param optn,ssa,tfl Character column names for OPTN, SSA, and TFL death
+#'   dates. Each must be a `Date` column.
 #' @param out Name of the output composite column to create.
-#' @param parse If TRUE, parse the three inputs with `.srtr_as_date()`.
 #' @param keep_source If TRUE, add `{out}_source` with the chosen source label.
 #' @param add_conflict_flag If TRUE, add `{out}_conflict` when sources disagree.
 #' @param prefer_earliest If TRUE, ignore precedence and choose the earliest date.
@@ -28,18 +28,15 @@ srtr_composite_death <- function(
   ssa = "PERS_SSA_DEATH_DT",
   tfl = "TFL_DEATH_DT",
   out = "REC_DEATH_DT_COMPOSITE",
-  parse = TRUE,
   keep_source = TRUE,
   add_conflict_flag = TRUE,
   prefer_earliest = FALSE
 ) {
   cols <- c(optn, ssa, tfl)
-  stopifnot(all(cols %in% names(df)))
+  check_columns(df, cols)
+  check_date_columns(df, cols)
 
   vals <- lapply(cols, function(nm) df[[nm]])
-  if (parse) {
-    vals <- lapply(vals, .srtr_as_date)
-  }
 
   n <- NROW(df)
 

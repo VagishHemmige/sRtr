@@ -74,3 +74,26 @@ check_columns <- function(
     call = call
   )
 }
+
+# Error if any of `cols` in `data` is not a Date. Returns `data` invisibly.
+check_date_columns <- function(
+  data,
+  cols,
+  arg = rlang::caller_arg(data),
+  call = rlang::caller_env()
+) {
+  is_date <- vapply(data[cols], inherits, logical(1), what = "Date")
+  columns <- cols[!is_date]
+  if (length(columns) == 0) {
+    return(invisible(data))
+  }
+  srtr_abort(
+    c(
+      "{.arg {arg}} has {length(columns)} date column{?s} not stored as {.cls Date}: {.field {columns}}.",
+      "i" = "SAS files read with {.fn load_srtr_file} give {.cls Date} for dates; convert other sources before calling this function."
+    ),
+    class = "non_date_columns",
+    columns = columns,
+    call = call
+  )
+}
