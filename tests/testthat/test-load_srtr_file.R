@@ -337,7 +337,7 @@ test_that("parquet col_select is passed to read_parquet() as col_select", {
 test_that("a parquet file round-trips with col_select", {
   skip_if_not_installed("arrow")
   skip_if_not(
-    isTRUE(tryCatch(arrow::arrow_available(), error = function(e) FALSE)),
+    isTRUE(tryCatch(arrow::arrow_with_parquet(), error = function(e) FALSE)),
     "arrow cannot read or write parquet here"
   )
   dir <- local_srtr_folder(character())
