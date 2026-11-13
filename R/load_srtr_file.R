@@ -28,6 +28,15 @@
 #'   `col_select` is `NULL`, includes it, or includes both `TFL_LAFUDATEKI` and
 #'   `TFL_LAFUDATEPA`. Renaming (`c(new = OLD)`) is not
 #'   supported; rename after loading.
+#' @param column_check What to do when the file's columns differ from the
+#'   columns the bundled data dictionary ([dictionary]) lists for `file_key`.
+#'   `"warn"` (the default) warns about columns the file is missing; `"error"`
+#'   makes that an error; `"none"` skips the comparison. Either way, columns
+#'   the dictionary does not list are named in a message, once per file key
+#'   per session, and loaded as they are. The comparison runs only when every
+#'   column is read (`col_select = NULL`) and only for file keys the dictionary
+#'   lists. A file from a different SAF release than the dictionary can differ
+#'   in its columns.
 #' @param ... Additional arguments passed to the file reader
 #'   ([haven::read_sas()] or [arrow::read_parquet()]), e.g. `encoding` for
 #'   `read_sas()`.
@@ -47,8 +56,11 @@ load_srtr_file <- function(
   factor_labels = TRUE,
   var_labels = TRUE,
   col_select = NULL,
+  column_check = c("warn", "error", "none"),
   ...
 ) {
+  column_check <- match.arg(column_check)
+
   # ---- Lookup metadata ----
   # Scans SRTR_WD on first use; rescans once if the file is not in the list
   # or has gone, so files added or moved during the session are found.
@@ -158,6 +170,13 @@ load_srtr_file <- function(
   # ---- Standardize column names ----
   names(df) <- toupper(names(df))
 
+  # ---- Compare columns with the data dictionary ----
+  # Only when every column is read: with col_select, a selected column the
+  # file lacks is already an error from tidyselect.
+  if (rlang::quo_is_null(col_select)) {
+    .srtr_check_dictionary_columns(names(df), file_key_input, column_check)
+  }
+
   # ---- Apply TRR_ID filter -----
   if (!is.null(trr_id_filter)) {
     if (!"TRR_ID" %in% names(df)) {
@@ -213,6 +232,54 @@ load_srtr_file <- function(
       utils::head(0) |>
       dplyr::collect()
   }
+}
+
+# Compares a file's columns with those the bundled data dictionary lists for
+# its file key. Missing columns warn or error (`column_check`); columns the
+# dictionary does not list get a message once per file key per session. File
+# keys the dictionary does not list are not compared.
+.srtr_check_dictionary_columns <- function(
+  file_names,
+  file_key,
+  column_check,
+  call = rlang::caller_env()
+) {
+  if (column_check == "none") {
+    return(invisible())
+  }
+  dictionary <- sRtr::dictionary
+  expected <- dictionary$Variable[dictionary$Dataset == file_key]
+  if (length(expected) == 0) {
+    return(invisible())
+  }
+
+  missing <- setdiff(expected, file_names)
+  if (length(missing) > 0) {
+    text <- c(
+      "The {.val {file_key}} file is missing {length(missing)} column{?s} that the bundled SRTR data dictionary lists: {.field {missing}}.",
+      "i" = "The file may come from a different SAF release than the dictionary. Code that needs these columns will not work with this file.",
+      "i" = "Set {.code column_check = \"none\"} to skip this check."
+    )
+    if (column_check == "error") {
+      srtr_abort(text, class = "missing_columns", missing = missing, call = call)
+    }
+    srtr_warn(text, class = "missing_columns", missing = missing)
+  }
+
+  extra <- setdiff(file_names, expected)
+  if (length(extra) > 0) {
+    srtr_inform(
+      c(
+        "The {.val {file_key}} file has {length(extra)} column{?s} that the bundled SRTR data dictionary does not list: {.field {extra}}.",
+        "i" = "They are loaded as they are, without variable labels or factor levels."
+      ),
+      class = "extra_columns",
+      extra = extra,
+      .frequency = "once",
+      .frequency_id = paste0("sRtr_extra_columns_", file_key)
+    )
+  }
+  invisible()
 }
 
 # TX_KP's TFL_LAFUDATE is derived from the kidney and pancreas follow-up dates;

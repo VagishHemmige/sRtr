@@ -53,3 +53,32 @@
       ! Can't derive TFL_LAFUDATE: the "TX_KP" file has no TFL_LAFUDATEPA column.
       i TFL_LAFUDATE is the later of TFL_LAFUDATEKI and TFL_LAFUDATEPA.
 
+# a column missing from the file gives a warning naming it
+
+    Code
+      out <- load_immuno()
+    Condition
+      Warning:
+      The "IMMUNO" file is missing 1 column that the bundled SRTR data dictionary lists: REC_DRUG_DAYS.
+      i The file may come from a different SAF release than the dictionary. Code that needs these columns will not work with this file.
+      i Set `column_check = "none"` to skip this check.
+
+# column_check = "error" makes a missing column an error
+
+    Code
+      load_immuno(column_check = "error")
+    Condition
+      Error in `load_srtr_file()`:
+      ! The "IMMUNO" file is missing 1 column that the bundled SRTR data dictionary lists: REC_DRUG_DAYS.
+      i The file may come from a different SAF release than the dictionary. Code that needs these columns will not work with this file.
+      i Set `column_check = "none"` to skip this check.
+
+# a column not in the dictionary gives a message naming it
+
+    Code
+      out <- load_immuno()
+    Message
+      The "IMMUNO" file has 1 column that the bundled SRTR data dictionary does not list: NOT_A_DICTIONARY_COLUMN.
+      i They are loaded as they are, without variable labels or factor levels.
+      This message is displayed once per session.
+

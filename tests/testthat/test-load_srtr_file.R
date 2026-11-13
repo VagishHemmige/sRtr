@@ -50,8 +50,15 @@ fake_read_sas <- function(data_file, ...) {
   tibble::tibble(trr_id = 900001, source = basename(data_file))
 }
 
+# The fake files below are not whole SAFs, so the dictionary column check is
+# turned off; it has its own tests at the end of this file.
 load_fake <- function(file_key) {
-  load_srtr_file(file_key, factor_labels = FALSE, var_labels = FALSE)
+  load_srtr_file(
+    file_key,
+    factor_labels = FALSE,
+    var_labels = FALSE,
+    column_check = "none"
+  )
 }
 
 test_that("the folder is scanned on first use, without set_srtr_wd()", {
@@ -130,7 +137,8 @@ test_that("trr_id_filter uses the TRR_ID column, never a global object", {
       "TX_KI",
       trr_id_filter = 900001,
       factor_labels = FALSE,
-      var_labels = FALSE
+      var_labels = FALSE,
+      column_check = "none"
     ),
     class = "rlang_error"
   )
@@ -181,8 +189,14 @@ local_sas_file <- function(data, file_key, env = parent.frame()) {
   dir
 }
 
-load_cols <- function(file_key, ...) {
-  load_srtr_file(file_key, factor_labels = FALSE, var_labels = FALSE, ...)
+load_cols <- function(file_key, ..., column_check = "none") {
+  load_srtr_file(
+    file_key,
+    factor_labels = FALSE,
+    var_labels = FALSE,
+    column_check = column_check,
+    ...
+  )
 }
 
 test_that("col_select takes a character vector", {
@@ -352,4 +366,91 @@ test_that("a parquet file round-trips with col_select", {
   expect_named(out, c("REC_AGE_AT_TX", "TFL_LAFUDATE"))
   expect_equal(out$REC_AGE_AT_TX, c(1, 3))
   expect_equal(out$TFL_LAFUDATE, as.Date(c("2002-01-01", "2001-01-01")))
+})
+
+# Columns compared with the data dictionary (#4). Synthetic IMMUNO files:
+# column names from the dictionary, made-up values.
+
+load_immuno <- function(...) {
+  load_srtr_file("IMMUNO", factor_labels = FALSE, var_labels = FALSE, ...)
+}
+
+test_that("a file with every dictionary column loads quietly", {
+  local_sas_file(fake_immuno(), "IMMUNO")
+
+  expect_no_warning(expect_no_message(out <- load_immuno()))
+  expect_named(out, names(fake_immuno()))
+})
+
+test_that("a column missing from the file gives a warning naming it", {
+  data <- fake_immuno()
+  data$REC_DRUG_DAYS <- NULL
+  local_sas_file(data, "IMMUNO")
+
+  expect_warning(out <- load_immuno(), class = "sRtr_warning_missing_columns")
+  expect_named(out, names(data))
+  expect_snapshot(out <- load_immuno())
+})
+
+test_that("column_check = \"error\" makes a missing column an error", {
+  data <- fake_immuno()
+  data$REC_DRUG_DAYS <- NULL
+  local_sas_file(data, "IMMUNO")
+
+  expect_error(
+    load_immuno(column_check = "error"),
+    class = "sRtr_error_missing_columns"
+  )
+  expect_snapshot(error = TRUE, load_immuno(column_check = "error"))
+})
+
+test_that("a column not in the dictionary gives a message naming it", {
+  withr::local_options(rlib_message_verbosity = "verbose")
+  data <- fake_immuno()
+  data$NOT_A_DICTIONARY_COLUMN <- c(1, 2)
+  local_sas_file(data, "IMMUNO")
+
+  expect_message(out <- load_immuno(), class = "sRtr_message_extra_columns")
+  expect_named(out, names(data))
+  expect_snapshot(out <- load_immuno())
+})
+
+test_that("column_check = \"none\" skips the comparison", {
+  data <- fake_immuno()
+  data$REC_DRUG_DAYS <- NULL
+  data$NOT_A_DICTIONARY_COLUMN <- c(1, 2)
+  local_sas_file(data, "IMMUNO")
+
+  expect_no_warning(expect_no_message(load_immuno(column_check = "none")))
+})
+
+test_that("col_select skips the comparison", {
+  data <- fake_immuno()
+  data$REC_DRUG_DAYS <- NULL
+  local_sas_file(data, "IMMUNO")
+
+  expect_no_warning(out <- load_immuno(col_select = "TRR_ID"))
+  expect_named(out, "TRR_ID")
+})
+
+test_that("a file the dictionary does not list is not compared", {
+  local_sas_file(fake_immuno(), "NOT_A_SAF")
+
+  expect_no_warning(expect_no_message(
+    load_srtr_file("NOT_A_SAF", factor_labels = FALSE, var_labels = FALSE)
+  ))
+})
+
+test_that("parquet files are compared with the dictionary too", {
+  skip_if_not_installed("arrow")
+  skip_if_not(
+    isTRUE(tryCatch(arrow::arrow_with_parquet(), error = function(e) FALSE)),
+    "arrow cannot read or write parquet here"
+  )
+  dir <- local_srtr_folder(character())
+  data <- fake_immuno()
+  data$REC_DRUG_DAYS <- NULL
+  arrow::write_parquet(data, file.path(dir, "IMMUNO.parquet"))
+
+  expect_warning(load_immuno(), class = "sRtr_warning_missing_columns")
 })
