@@ -75,8 +75,8 @@ Variable labels using the dictionary dataset
 
 
 <dt id="arg-trr-id-filter">trr_id_filter<a class="anchor" aria-label="anchor" href="#arg-trr-id-filter"></a></dt>
-<dd><p>Optional vector of TRR_IDs to keep..
-If not NULL, will filter by `TRR_ID' vector passed to this option.</p></dd>
+<dd><p>Optional vector of <code>TRR_ID</code> values. If not <code>NULL</code>, only
+rows whose <code>TRR_ID</code> is in this vector are kept.</p></dd>
 
 
 <dt id="arg-factor-labels">factor_labels<a class="anchor" aria-label="anchor" href="#arg-factor-labels"></a></dt>
@@ -84,15 +84,25 @@ If not NULL, will filter by `TRR_ID' vector passed to this option.</p></dd>
 
 
 <dt id="arg-var-labels">var_labels<a class="anchor" aria-label="anchor" href="#arg-var-labels"></a></dt>
-<dd><p>Logical. Whether to apply variable labels. Default = FALSE.</p></dd>
+<dd><p>Logical. Whether to apply variable labels. Default = TRUE.</p></dd>
 
 
 <dt id="arg-col-select">col_select<a class="anchor" aria-label="anchor" href="#arg-col-select"></a></dt>
-<dd><p>Optional. Tidyselect expression or character vector for selecting columns.</p></dd>
+<dd><p>Optional. Columns to keep, as a character vector or a
+tidyselect expression such as <code>starts_with("REC_")</code>. Names are matched in
+upper case, as in the result, whatever their case in the file. Columns
+come back in the order selected. Columns needed only for <code>trr_id_filter</code>
+are read and then dropped. For <code>"TX_KP"</code>, <code>TFL_LAFUDATE</code> (derived on
+loading) can be selected like any other column; it is derived when
+<code>col_select</code> is <code>NULL</code>, includes it, or includes both <code>TFL_LAFUDATEKI</code> and
+<code>TFL_LAFUDATEPA</code>. Renaming (<code>c(new = OLD)</code>) is not
+supported; rename after loading.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments passed to the file reader (e.g., <code>as_factor</code> for <code>read_sas()</code>).</p></dd>
+<dd><p>Additional arguments passed to the file reader
+(<code><a href="https://haven.tidyverse.org/reference/read_sas.html" class="external-link">haven::read_sas()</a></code> or <code><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">arrow::read_parquet()</a></code>), e.g. <code>encoding</code> for
+<code>read_sas()</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

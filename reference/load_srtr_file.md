@@ -27,8 +27,8 @@ load_srtr_file(
 
 - trr_id_filter:
 
-  Optional vector of TRR_IDs to keep.. If not NULL, will filter by
-  \`TRR_ID' vector passed to this option.
+  Optional vector of `TRR_ID` values. If not `NULL`, only rows whose
+  `TRR_ID` is in this vector are kept.
 
 - factor_labels:
 
@@ -36,17 +36,27 @@ load_srtr_file(
 
 - var_labels:
 
-  Logical. Whether to apply variable labels. Default = FALSE.
+  Logical. Whether to apply variable labels. Default = TRUE.
 
 - col_select:
 
-  Optional. Tidyselect expression or character vector for selecting
-  columns.
+  Optional. Columns to keep, as a character vector or a tidyselect
+  expression such as `starts_with("REC_")`. Names are matched in upper
+  case, as in the result, whatever their case in the file. Columns come
+  back in the order selected. Columns needed only for `trr_id_filter`
+  are read and then dropped. For `"TX_KP"`, `TFL_LAFUDATE` (derived on
+  loading) can be selected like any other column; it is derived when
+  `col_select` is `NULL`, includes it, or includes both `TFL_LAFUDATEKI`
+  and `TFL_LAFUDATEPA`. Renaming (`c(new = OLD)`) is not supported;
+  rename after loading.
 
 - ...:
 
-  Additional arguments passed to the file reader (e.g., `as_factor` for
-  `read_sas()`).
+  Additional arguments passed to the file reader
+  ([`haven::read_sas()`](https://haven.tidyverse.org/reference/read_sas.html)
+  or
+  [`arrow::read_parquet()`](https://arrow.apache.org/docs/r/reference/read_parquet.html)),
+  e.g. `encoding` for `read_sas()`.
 
 ## Value
 

@@ -60,6 +60,14 @@
 <li>It no longer fails unless dplyr and sf are attached (<a href="https://github.com/VagishHemmige/sRtr/issues/55" class="external-link">#55</a>).</li>
 </ul></li>
 <li><p><code><a href="../reference/load_srtr_file.html">load_srtr_file()</a></code> finds the folder set with <code><a href="../reference/set_srtr_wd.html">set_srtr_wd()</a></code> when it first needs it, and looks again if a file is not found, so files added during a session are picked up. Errors now say when <code>SRTR_WD</code> is not set and which folder was searched (<a href="https://github.com/VagishHemmige/sRtr/issues/62" class="external-link">#62</a>).</p></li>
+<li>
+<p><code><a href="../reference/load_srtr_file.html">load_srtr_file()</a></code> <code>col_select</code> now works as documented (<a href="https://github.com/VagishHemmige/sRtr/issues/98" class="external-link">#98</a>):</p>
+<ul><li>Tidyselect expressions such as <code>starts_with("REC_")</code> work; before, they failed before any file was read. Parquet files now get the selection too.</li>
+<li>Names are matched in upper case, as in the result, and columns come back in the order selected.</li>
+<li>
+<code>trr_id_filter</code> works when <code>TRR_ID</code> is not selected; it is read for the filter and then dropped.</li>
+<li>A <code>"TX_KP"</code> subset no longer needs <code>TFL_LAFUDATEKI</code> and <code>TFL_LAFUDATEPA</code>. <code>TFL_LAFUDATE</code> can be selected by name, and is still added when both dates are selected.</li>
+</ul></li>
 <li><p><code><a href="../reference/rank_individual_coverage_gains.html">rank_individual_coverage_gains()</a></code> now defaults to <code>method = "areal"</code>, like <code><a href="../reference/calculate_geography_coverage_gain.html">calculate_geography_coverage_gain()</a></code> (<a href="https://github.com/VagishHemmige/sRtr/issues/58" class="external-link">#58</a>).</p></li>
 </ul></div>
   </main></div>
