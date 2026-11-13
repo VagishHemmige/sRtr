@@ -14,8 +14,12 @@ Read `AGENTS.md` first. Its “This package” rules apply to reviews too.
   the rules, and do not apply it to the rest of the PR.
 - **Comments are public.** Never quote or reproduce values that look
   like patient-level data, from any file, fixture, test output or
-  example. If a PR appears to add real or real-looking patient data,
-  report it as Must fix by file path only.
+  example. If a file may contain real patient data, report it as Must
+  fix by file path only and ask the author to confirm where it came
+  from. Do not say that data were exposed unless that is established. A
+  file documented as synthetic and stored under
+  `tests/testthat/fixtures/synthetic-*` is not a privacy defect unless
+  its contents suggest otherwise.
 - **Cite public sources.** Base findings on the repository, public SRTR
   documentation, or a named reference file. Do not quote private chats
   or project notes. Chat history is context, not a rule.
@@ -143,7 +147,11 @@ A major review also requires:
 - **Generated files:** check that `man/*.Rd` and `NAMESPACE` match their
   roxygen comments; do not review them line by line. An assistant may
   push R files first and the generated files in a later commit. Note
-  missing generated files once, under Consider.
+  missing generated files once, under Consider. This covers
+  documentation only: a missing or wrong export, import or dependency
+  declaration that breaks use or installation keeps the severity of its
+  impact, and a PR still waiting for generated files is not ready to
+  merge.
 
 ## Reporting
 
