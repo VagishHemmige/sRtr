@@ -35,5 +35,16 @@
   session are picked up. Errors now say when `SRTR_WD` is not set and which
   folder was searched (#62).
 
+* `load_srtr_file()` `col_select` now works as documented (#98):
+  * Tidyselect expressions such as `starts_with("REC_")` work; before, they
+    failed before any file was read. Parquet files now get the selection too.
+  * Names are matched in upper case, as in the result, and columns come back
+    in the order selected.
+  * `trr_id_filter` works when `TRR_ID` is not selected; it is read for the
+    filter and then dropped.
+  * A `"TX_KP"` subset no longer needs `TFL_LAFUDATEKI` and `TFL_LAFUDATEPA`.
+    `TFL_LAFUDATE` can be selected by name, and is still added when both
+    dates are selected.
+
 * `rank_individual_coverage_gains()` now defaults to `method = "areal"`,
   like `calculate_geography_coverage_gain()` (#58).

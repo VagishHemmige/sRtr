@@ -151,3 +151,205 @@ test_that("arrow.skip_nul is set only while a parquet file is read", {
   expect_equal(out$SKIP_NUL, TRUE)
   expect_null(getOption("arrow.skip_nul"))
 })
+
+# Column selection (#98). Small synthetic files written to a temporary
+# folder; the values are made up and only the column names come from the
+# data dictionary.
+
+fake_tx <- function() {
+  tibble::tibble(
+    TRR_ID = c(900001, 900002, 900003),
+    PX_ID = c(800001, 800002, 800003),
+    REC_AGE_AT_TX = c(1, 2, 3),
+    REC_BMI = c(10, 20, 30)
+  )
+}
+
+fake_tx_kp <- function() {
+  tibble::tibble(
+    TRR_ID = c(900001, 900002, 900003),
+    REC_AGE_AT_TX = c(1, 2, 3),
+    TFL_LAFUDATEKI = as.Date(c("2001-01-01", NA, "2001-01-01")),
+    TFL_LAFUDATEPA = as.Date(c("2002-01-01", "2002-01-01", NA))
+  )
+}
+
+local_sas_file <- function(data, file_key, env = parent.frame()) {
+  dir <- local_srtr_folder(character(), env = env)
+  withr::local_options(lifecycle_verbosity = "quiet")
+  haven::write_sas(data, file.path(dir, paste0(file_key, ".sas7bdat")))
+  dir
+}
+
+load_cols <- function(file_key, ...) {
+  load_srtr_file(file_key, factor_labels = FALSE, var_labels = FALSE, ...)
+}
+
+test_that("col_select takes a character vector", {
+  local_sas_file(fake_tx(), "TX_KI")
+
+  out <- load_cols("TX_KI", col_select = c("REC_BMI", "TRR_ID"))
+
+  expect_named(out, c("REC_BMI", "TRR_ID"))
+  expect_equal(out$REC_BMI, c(10, 20, 30))
+})
+
+test_that("col_select takes a tidyselect expression", {
+  local_sas_file(fake_tx(), "TX_KI")
+
+  out <- load_cols("TX_KI", col_select = tidyselect::starts_with("REC_"))
+  expect_named(out, c("REC_AGE_AT_TX", "REC_BMI"))
+
+  out <- load_cols("TX_KI", col_select = c(TRR_ID, REC_BMI))
+  expect_named(out, c("TRR_ID", "REC_BMI"))
+})
+
+test_that("col_select uses the upper-case names the result has", {
+  data <- fake_tx()
+  names(data) <- tolower(names(data))
+  local_sas_file(data, "TX_KI")
+
+  out <- load_cols("TX_KI", col_select = c("TRR_ID", "REC_BMI"))
+
+  expect_named(out, c("TRR_ID", "REC_BMI"))
+})
+
+test_that("col_select naming a column the file lacks is an error", {
+  local_sas_file(fake_tx(), "TX_KI")
+
+  expect_error(
+    load_cols("TX_KI", col_select = "NOT_A_COLUMN"),
+    class = "vctrs_error_subscript_oob"
+  )
+})
+
+test_that("col_select can't rename columns", {
+  local_sas_file(fake_tx(), "TX_KI")
+
+  expect_error(
+    load_cols("TX_KI", col_select = c(age = REC_AGE_AT_TX)),
+    class = "rlang_error"
+  )
+})
+
+test_that("trr_id_filter works when col_select leaves out TRR_ID", {
+  local_sas_file(fake_tx(), "TX_KI")
+
+  out <- load_cols("TX_KI", col_select = "REC_BMI", trr_id_filter = 900002)
+
+  expect_named(out, "REC_BMI")
+  expect_equal(out$REC_BMI, 20)
+})
+
+test_that("trr_id_filter on a file with no TRR_ID column is an error", {
+  data <- fake_tx()
+  data$TRR_ID <- NULL
+  local_sas_file(data, "TX_KI")
+
+  expect_error(
+    load_cols("TX_KI", col_select = "REC_BMI", trr_id_filter = 900002),
+    class = "sRtr_error_missing_columns"
+  )
+  expect_snapshot(
+    error = TRUE,
+    load_cols("TX_KI", col_select = "REC_BMI", trr_id_filter = 900002)
+  )
+})
+
+test_that("TX_KP without col_select still gets TFL_LAFUDATE", {
+  local_sas_file(fake_tx_kp(), "TX_KP")
+
+  out <- load_cols("TX_KP")
+
+  expect_equal(
+    out$TFL_LAFUDATE,
+    as.Date(c("2002-01-01", "2002-01-01", "2001-01-01"))
+  )
+})
+
+test_that("a TX_KP subset without the follow-up dates loads", {
+  local_sas_file(fake_tx_kp(), "TX_KP")
+
+  out <- load_cols("TX_KP", col_select = "TRR_ID")
+
+  expect_named(out, "TRR_ID")
+})
+
+test_that("TX_KP col_select can ask for TFL_LAFUDATE by name", {
+  local_sas_file(fake_tx_kp(), "TX_KP")
+
+  out <- load_cols("TX_KP", col_select = c("TRR_ID", "TFL_LAFUDATE"))
+
+  expect_named(out, c("TRR_ID", "TFL_LAFUDATE"))
+  expect_equal(
+    out$TFL_LAFUDATE,
+    as.Date(c("2002-01-01", "2002-01-01", "2001-01-01"))
+  )
+})
+
+test_that("TX_KP selecting both follow-up dates still adds TFL_LAFUDATE", {
+  local_sas_file(fake_tx_kp(), "TX_KP")
+
+  out <- load_cols("TX_KP", col_select = c("TFL_LAFUDATEKI", "TFL_LAFUDATEPA"))
+
+  expect_named(out, c("TFL_LAFUDATEKI", "TFL_LAFUDATEPA", "TFL_LAFUDATE"))
+})
+
+test_that("TFL_LAFUDATE can't be derived without both follow-up dates", {
+  data <- fake_tx_kp()
+  data$TFL_LAFUDATEPA <- NULL
+  local_sas_file(data, "TX_KP")
+
+  expect_error(
+    load_cols("TX_KP", col_select = "TFL_LAFUDATE"),
+    class = "sRtr_error_missing_columns"
+  )
+  expect_snapshot(error = TRUE, load_cols("TX_KP", col_select = "TFL_LAFUDATE"))
+})
+
+test_that("TX_KP without col_select and a follow-up date missing is an error", {
+  data <- fake_tx_kp()
+  data$TFL_LAFUDATEPA <- NULL
+  local_sas_file(data, "TX_KP")
+
+  expect_error(load_cols("TX_KP"), class = "sRtr_error_missing_columns")
+  expect_snapshot(error = TRUE, load_cols("TX_KP"))
+})
+
+test_that("parquet col_select is passed to read_parquet() as col_select", {
+  local_srtr_folder("TX_KI.parquet")
+  seen <- NULL
+  local_mocked_bindings(.srtr_file_template = function(...) fake_tx()[0, ])
+  local_mocked_bindings(
+    read_parquet = function(file, col_select = NULL, ...) {
+      seen <<- names(tidyselect::eval_select(rlang::enquo(col_select), fake_tx()))
+      fake_tx()[seen]
+    },
+    .package = "arrow"
+  )
+
+  out <- load_cols("TX_KI", col_select = tidyselect::starts_with("REC_"))
+
+  expect_equal(seen, c("REC_AGE_AT_TX", "REC_BMI"))
+  expect_named(out, c("REC_AGE_AT_TX", "REC_BMI"))
+})
+
+test_that("a parquet file round-trips with col_select", {
+  skip_if_not_installed("arrow")
+  skip_if_not(
+    isTRUE(tryCatch(arrow::arrow_with_parquet(), error = function(e) FALSE)),
+    "arrow cannot read or write parquet here"
+  )
+  dir <- local_srtr_folder(character())
+  arrow::write_parquet(fake_tx_kp(), file.path(dir, "TX_KP.parquet"))
+
+  out <- load_cols(
+    "TX_KP",
+    col_select = c(tidyselect::starts_with("REC_"), "TFL_LAFUDATE"),
+    trr_id_filter = c(900001, 900003)
+  )
+
+  expect_named(out, c("REC_AGE_AT_TX", "TFL_LAFUDATE"))
+  expect_equal(out$REC_AGE_AT_TX, c(1, 3))
+  expect_equal(out$TFL_LAFUDATE, as.Date(c("2002-01-01", "2001-01-01")))
+})

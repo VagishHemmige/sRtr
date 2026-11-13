@@ -16,16 +16,26 @@ load_srtr_file(
 \arguments{
 \item{file_key}{Character. Canonical dataset key (e.g., "TX_LI", "CAND_KIPA").}
 
-\item{trr_id_filter}{Optional vector of TRR_IDs to keep..
-If not NULL, will filter by `TRR_ID' vector passed to this option.}
+\item{trr_id_filter}{Optional vector of \code{TRR_ID} values. If not \code{NULL}, only
+rows whose \code{TRR_ID} is in this vector are kept.}
 
 \item{factor_labels}{Logical. Whether to apply factor labels. Default = TRUE.}
 
-\item{var_labels}{Logical. Whether to apply variable labels. Default = FALSE.}
+\item{var_labels}{Logical. Whether to apply variable labels. Default = TRUE.}
 
-\item{col_select}{Optional. Tidyselect expression or character vector for selecting columns.}
+\item{col_select}{Optional. Columns to keep, as a character vector or a
+tidyselect expression such as \code{starts_with("REC_")}. Names are matched in
+upper case, as in the result, whatever their case in the file. Columns
+come back in the order selected. Columns needed only for \code{trr_id_filter}
+are read and then dropped. For \code{"TX_KP"}, \code{TFL_LAFUDATE} (derived on
+loading) can be selected like any other column; it is derived when
+\code{col_select} is \code{NULL}, includes it, or includes both \code{TFL_LAFUDATEKI} and
+\code{TFL_LAFUDATEPA}. Renaming (\code{c(new = OLD)}) is not
+supported; rename after loading.}
 
-\item{...}{Additional arguments passed to the file reader (e.g., \code{as_factor} for \code{read_sas()}).}
+\item{...}{Additional arguments passed to the file reader
+(\code{\link[haven:read_sas]{haven::read_sas()}} or \code{\link[arrow:read_parquet]{arrow::read_parquet()}}), e.g. \code{encoding} for
+\code{read_sas()}.}
 }
 \value{
 A tibble with the loaded file contents, optionally labeled.

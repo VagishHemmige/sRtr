@@ -26,3 +26,30 @@
       i Looked for a '.sas7bdat' or '.parquet' file in `SRTR_WD`:
         '<SRTR_WD>'
 
+# trr_id_filter on a file with no TRR_ID column is an error
+
+    Code
+      load_cols("TX_KI", col_select = "REC_BMI", trr_id_filter = 900002)
+    Condition
+      Error in `load_srtr_file()`:
+      ! `trr_id_filter` needs a TRR_ID column, and the "TX_KI" file has none.
+      i Leave `trr_id_filter` as `NULL` for this file.
+
+# TFL_LAFUDATE can't be derived without both follow-up dates
+
+    Code
+      load_cols("TX_KP", col_select = "TFL_LAFUDATE")
+    Condition
+      Error in `load_srtr_file()`:
+      ! Can't derive TFL_LAFUDATE: the "TX_KP" file has no TFL_LAFUDATEPA column.
+      i TFL_LAFUDATE is the later of TFL_LAFUDATEKI and TFL_LAFUDATEPA.
+
+# TX_KP without col_select and a follow-up date missing is an error
+
+    Code
+      load_cols("TX_KP")
+    Condition
+      Error in `load_srtr_file()`:
+      ! Can't derive TFL_LAFUDATE: the "TX_KP" file has no TFL_LAFUDATEPA column.
+      i TFL_LAFUDATE is the later of TFL_LAFUDATEKI and TFL_LAFUDATEPA.
+
