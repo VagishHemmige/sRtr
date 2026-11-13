@@ -41,8 +41,10 @@ changes how hard to push on some things, but not on others.
   them so the maintainer sees them; they are not defects.
 - Missing tests for new behavior, missing NEWS bullets, and gaps in
   documentation or examples are Should fix or Consider, not Must fix.
-- CI is still being built. Report only CI failures the PR causes, and
-  say when a check looks unreliable rather than treating it as evidence.
+- CI is still being built. Report relevant failures as introduced by the
+  PR, pre-existing, or of uncertain origin; do not attribute them to the
+  PR without evidence. Say when a check looks unreliable rather than
+  treating it as evidence.
 
 **Never softer:**
 
@@ -120,12 +122,21 @@ A major review also requires:
     Does each skipped test have a stated reason? Keep apart synthetic
     unit tests, integration tests, and real-SAF validation. Passing
     tests do not prove their assumptions.
-6.  **Verify in proportion.** Look at CI results for the exact revision
-    you reviewed: passed, failed, pending and skipped. Run focused
-    synthetic checks in an isolated copy when that is safe, allowed and
-    useful. Before running anything, check startup files and test guards
-    for writes or data access you did not expect. If you cannot run
-    code, say which conclusions remain uncertain.
+6.  **Verify in proportion.** Choose validation scope from the changed
+    behavior and its downstream reach, not merely the number of changed
+    lines. Inspect relevant callers and affected workflows, and state
+    the selected scope and rationale. Look at CI results for the exact
+    revision you reviewed: passed, failed, pending and skipped. Run
+    focused synthetic checks first in an isolated copy when that is
+    safe, allowed and useful; expand when shared interfaces, scientific
+    calculations, dependencies, or observed failures warrant it. Before
+    running anything, check startup files and test guards for writes or
+    data access you did not expect. Distinguish failures introduced by
+    the PR, pre-existing failures, and failures of uncertain origin. If
+    adequate validation is unavailable, report the specific gap and its
+    implications. Do not expand into an unrelated whole-package audit. A
+    full package check may still be warranted without a whole-package
+    audit.
 7.  **Reconcile earlier findings.** Check whether changes meant to fix
     earlier findings actually do. Do not repeat findings already
     resolved, and do not hold the PR responsible for unrelated problems
