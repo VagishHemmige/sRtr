@@ -1,7 +1,9 @@
 # Conditions signalled by sRtr
 #
-# Every error, warning and message from sRtr goes through these three
-# wrappers around cli. Each condition carries two classes:
+# Every error, warning and message that sRtr code signals itself goes through
+# these three wrappers around cli. Conditions raised inside base R or other
+# packages (match.arg(), dplyr, haven, arrow, ...) pass through with their own
+# classes. Each sRtr condition carries two classes:
 #   * a general one: "sRtr_error", "sRtr_warning" or "sRtr_message";
 #   * a specific one built from `class`, e.g. class = "file_not_found" gives
 #     "sRtr_error_file_not_found".
