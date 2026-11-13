@@ -271,7 +271,7 @@ load_srtr_file <- function(
     srtr_inform(
       c(
         "The {.val {file_key}} file has {length(extra)} column{?s} that the bundled SRTR data dictionary does not list: {.field {extra}}.",
-        "i" = "They are loaded as they are, without variable labels or factor levels."
+        "i" = "They are loaded as they are; labels and factor levels from the dictionary are not applied to them."
       ),
       class = "extra_columns",
       extra = extra,

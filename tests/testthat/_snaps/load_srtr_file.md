@@ -79,6 +79,6 @@
       out <- load_immuno()
     Message
       The "IMMUNO" file has 1 column that the bundled SRTR data dictionary does not list: NOT_A_DICTIONARY_COLUMN.
-      i They are loaded as they are, without variable labels or factor levels.
+      i They are loaded as they are; labels and factor levels from the dictionary are not applied to them.
       This message is displayed once per session.
 

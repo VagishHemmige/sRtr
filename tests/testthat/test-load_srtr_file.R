@@ -410,7 +410,9 @@ test_that("a column not in the dictionary gives a message naming it", {
   data$NOT_A_DICTIONARY_COLUMN <- c(1, 2)
   local_sas_file(data, "IMMUNO")
 
-  expect_message(out <- load_immuno(), class = "sRtr_message_extra_columns")
+  cnd <- expect_message(out <- load_immuno(), class = "sRtr_message_extra_columns")
+  expect_equal(cnd$extra, "NOT_A_DICTIONARY_COLUMN")
+  expect_equal(out$NOT_A_DICTIONARY_COLUMN, c(1, 2))
   expect_named(out, names(data))
   expect_snapshot(out <- load_immuno())
 })
@@ -453,4 +455,21 @@ test_that("parquet files are compared with the dictionary too", {
   arrow::write_parquet(data, file.path(dir, "IMMUNO.parquet"))
 
   expect_warning(load_immuno(), class = "sRtr_warning_missing_columns")
+})
+
+test_that("a parquet column not in the dictionary gives a message naming it", {
+  skip_if_not_installed("arrow")
+  skip_if_not(
+    isTRUE(tryCatch(arrow::arrow_with_parquet(), error = function(e) FALSE)),
+    "arrow cannot read or write parquet here"
+  )
+  withr::local_options(rlib_message_verbosity = "verbose")
+  dir <- local_srtr_folder(character())
+  data <- fake_immuno()
+  data$NOT_A_DICTIONARY_COLUMN <- c(7, 8)
+  arrow::write_parquet(data, file.path(dir, "IMMUNO.parquet"))
+
+  cnd <- expect_message(out <- load_immuno(), class = "sRtr_message_extra_columns")
+  expect_equal(cnd$extra, "NOT_A_DICTIONARY_COLUMN")
+  expect_equal(out$NOT_A_DICTIONARY_COLUMN, c(7, 8))
 })
