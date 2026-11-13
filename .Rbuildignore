@@ -12,3 +12,5 @@
 ^reference$
 ^vignettes/articles$
 ^CITATION\.cff$
+^AGENTS\.md$
+^REVIEWING\.md$
