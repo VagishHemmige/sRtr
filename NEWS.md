@@ -48,6 +48,12 @@
     `TFL_LAFUDATE` can be selected by name, and is still added when both
     dates are selected.
 
+* `load_srtr_file()` now compares a file's columns with the bundled data
+  dictionary when every column is read. It warns about columns the file is
+  missing and names columns the dictionary does not list (once per file per
+  session). The new `column_check` argument turns the warning into an error
+  (`"error"`) or skips the comparison (`"none"`) (#4).
+
 * `rank_individual_coverage_gains()` now defaults to `method = "areal"`,
   like `calculate_geography_coverage_gain()` (#58).
 

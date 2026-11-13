@@ -10,6 +10,7 @@ load_srtr_file(
   factor_labels = TRUE,
   var_labels = TRUE,
   col_select = NULL,
+  column_check = c("warn", "error", "none"),
   ...
 )
 }
@@ -32,6 +33,16 @@ loading) can be selected like any other column; it is derived when
 \code{col_select} is \code{NULL}, includes it, or includes both \code{TFL_LAFUDATEKI} and
 \code{TFL_LAFUDATEPA}. Renaming (\code{c(new = OLD)}) is not
 supported; rename after loading.}
+
+\item{column_check}{What to do when the file's columns differ from the
+columns the bundled data dictionary (\link{dictionary}) lists for \code{file_key}.
+\code{"warn"} (the default) warns about columns the file is missing; \code{"error"}
+makes that an error; \code{"none"} skips the comparison. Either way, columns
+the dictionary does not list are named in a message, once per file key
+per session, and loaded as they are. The comparison runs only when every
+column is read (\code{col_select = NULL}) and only for file keys the dictionary
+lists. A file from a different SAF release than the dictionary can differ
+in its columns.}
 
 \item{...}{Additional arguments passed to the file reader
 (\code{\link[haven:read_sas]{haven::read_sas()}} or \code{\link[arrow:read_parquet]{arrow::read_parquet()}}), e.g. \code{encoding} for
