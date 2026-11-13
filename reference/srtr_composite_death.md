@@ -16,7 +16,6 @@ srtr_composite_death(
   ssa = "PERS_SSA_DEATH_DT",
   tfl = "TFL_DEATH_DT",
   out = "REC_DEATH_DT_COMPOSITE",
-  parse = TRUE,
   keep_source = TRUE,
   add_conflict_flag = TRUE,
   prefer_earliest = FALSE
@@ -31,15 +30,12 @@ srtr_composite_death(
 
 - optn, ssa, tfl:
 
-  Character column names for OPTN, SSA, and TFL death dates.
+  Character column names for OPTN, SSA, and TFL death dates. Each must
+  be a `Date` column.
 
 - out:
 
   Name of the output composite column to create.
-
-- parse:
-
-  If TRUE, parse the three inputs with `.srtr_as_date()`.
 
 - keep_source:
 
@@ -59,9 +55,10 @@ srtr_composite_death(
 
 ## Details
 
-Columns are parsed with `.srtr_as_date()` to accept YYYYMMDD
-integers/strings. You can also keep a "which source won" indicator and a
-conflict flag when multiple sources disagree.
+The three columns must be stored as `Date`, which is how
+[`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+returns SAS date columns. You can also keep a "which source won"
+indicator and a conflict flag when multiple sources disagree.
 
 ## Examples
 

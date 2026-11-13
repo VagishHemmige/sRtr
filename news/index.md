@@ -73,3 +73,15 @@
   now defaults to `method = "areal"`, like
   [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
   ([\#58](https://github.com/VagishHemmige/sRtr/issues/58)).
+
+- [`srtr_composite_death()`](https://vagishhemmige.github.io/sRtr/reference/srtr_composite_death.md)
+  now requires its three death date columns to be `Date`, which is how
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+  returns SAS date columns, and errors with the names of any that are
+  not. It no longer converts numbers or text to dates, so the `parse`
+  argument is removed; the conversion could misread `MM/DD/YYYY` text
+  and SAS day counts
+  ([\#23](https://github.com/VagishHemmige/sRtr/issues/23),
+  [\#59](https://github.com/VagishHemmige/sRtr/issues/59)). A missing
+  column now gives a clear error instead of a failed
+  [`stopifnot()`](https://rdrr.io/r/base/stopifnot.html).
