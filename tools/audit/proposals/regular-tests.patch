@@ -1,0 +1,16 @@
+--- a/tests/testthat/test-add_time_to_event_variables.R
++++ b/tests/testthat/test-add_time_to_event_variables.R
+@@ -281,3 +281,13 @@
+   )
+   expect_equal(out$FAKE_days, c(NA, 365))
+ })
++
++testthat::test_that("documented time units use exact hand-worked conversion", {
++  x <- data.frame(start = as.Date("2000-01-01"), event = as.Date("2001-01-01"), end = as.Date("2002-01-01"))
++  y <- srtr_time_to_event(x, event, start, end, prefix = "FAKE", units = "days", add_epsilon = 0)
++  testthat::expect_equal(y$FAKE_BINARY, 1L)
++  testthat::expect_equal(y$FAKE_CENSOR, as.Date("2001-01-01"))
++  testthat::expect_equal(y$FAKE_days, 366)
++  z <- srtr_time_to_event(x, event, start, end, prefix = "FAKE", units = "years", add_epsilon = 0)
++  testthat::expect_equal(z$FAKE_yrs, 366/365.25)
++})
