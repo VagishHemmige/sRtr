@@ -21,6 +21,13 @@
 - **Scope:** organ-specific PSR graft/patient survival. These evaluation methods
   are not a universal research estimand; do not silently combine historical
   endpoint definitions with the current page.
+- **Verified organ distinction:** Section C, "Estimated graft survival",
+  organ-specific paragraphs; page labeled July 7, 2026 / Spring 2026 cohorts,
+  rechecked 2026-11-14. Heart uses death/retransplantation, not the OPTN
+  graft-failure date, and continues beyond last OPTN follow-up. Lung/heart-lung
+  use reported failure/death with last-OPTN-follow-up censoring; the abdominal
+  group adds retransplantation. These are PSR definitions, not defaults for
+  every research analysis.
 - **Key passages (quoted):**
   - Missing data: "In general, 10 iterations of multiple imputation via
     chained equations handles missing values." "To determine the expected
@@ -87,6 +94,35 @@
   retrieved 2026-11-14, includes qualifying dialysis and age-dependent inputs.
   A complete historical equation/policy comparison was not performed.
 
+### OPTN/SRTR 2024 Annual Data Report: Pancreas
+
+- **Source:** https://srtr.hrsa.gov/adr/2024/Pancreas/; section 4 Outcomes and
+  captions PA47, PA48, PA53, PA54; retrieved and read 2026-11-14.
+- **Kidney after simultaneous pancreas-kidney transplant:** PA47 includes
+  reported kidney failure, retransplantation, dialysis return, and death;
+  PA48's death-censored endpoint excludes death as a failure component.
+- **Pancreas:** section 4 lists graft removal, pancreas re-registration,
+  subsequent islet registration, death, or insulin use at least 0.5 units/kg/day
+  for 90 consecutive days. This does not establish which components are already
+  incorporated into a particular SAF release's derived date.
+- **Era caution:** section 4 describes definitions starting in 2020, while PA53
+  says the uniform definition took effect in 2018. Preserve this inconsistency;
+  confirm dated OPTN policy and form implementation before choosing a cutoff.
+- **Population caution:** PA54 reclassifies PAK recipients without a prior
+  kidney/kidney-pancreas record as PTA for that figure. Do not generalize this
+  figure-specific rule without matching the research population and data coverage.
+
+### Williams et al., cellular processing of DAB486-IL-2 (1990)
+
+- **Source:** https://pubmed.ncbi.nlm.nih.gov/2243114/;
+  doi:10.1016/S0021-9258(17)30556-2, abstract and mechanism description.
+- **Access:** primary-source search retrieval read 2026-11-14; subsequent direct
+  PubMed open was blocked. No complete-paper review claimed.
+- **Meaning:** a diphtheria toxin/IL-2 fusion protein targeting receptor-bearing
+  cells, not a conventional receptor-blocking monoclonal antibody. The shared
+  IL-2 name is insufficient to define an immunosuppression class. This mechanistic
+  source does not establish transplant efficacy or a complete drug ontology.
+
 ### Registry dictionaries and geographic sources
 
 - **Dictionary:** https://www.srtr.org/docs/datadictionary.html, retrieved
@@ -141,3 +177,15 @@ Verify before relying on these.
   (fetch failed on 2026-11-02).
 - OPTN MPSC performance metrics materials, surfaced by search:
   https://optn.transplant.hrsa.gov/media/r5lmmgcl/mpsc_performancemetrics_3242022b.pdf
+
+### Liver annual-report lead requiring renewed retrieval
+
+- Kwong et al., OPTN/SRTR 2023 Annual Data Report: Liver,
+  doi:10.1016/j.ajt.2025.01.022,
+  https://pmc.ncbi.nlm.nih.gov/articles/PMC12334193/.
+- The 2026-11-14 specialty review recorded reading sections 1 and 2.4 and
+  captions LI41-LI42 for simultaneous liver-kidney versus later safety-net kidney
+  populations and allocation-score eras. During catalogue integration, direct
+  PMC retrieval was blocked and the official report page exceeded the retrieval
+  size limit. Those details were not independently reverified in this pass;
+  recover the source before relying on an exact cohort or policy definition.
