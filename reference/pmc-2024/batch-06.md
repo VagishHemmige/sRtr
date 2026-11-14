@@ -67,8 +67,10 @@ MT, 2026-11-14
   2010 Census income [reported Data Sources; Merging; Exposure].
 - **Data needs:** Recurrent hospitalizations/biopsies with death as potentially
   informative terminal event; censor at age 22 or administrative end. Annual
-  bed-days use a two-part count model. [reported Statistical Analysis] Tags:
+  bed-days use a mixed-effects zero-inflated Poisson model. [reported Statistical Analysis] Tags:
   `external-linkage`, `geography`, `follow-up-horizon`.
+  The utilization model is mixed-effects zero-inflated Poisson; linked PHIS follow-up ends at death, age 22 or May 31, 2022. [reported Statistical Analysis; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Unmatched patients differ geographically and by age;
   non-PHIS admissions are missed. Biopsy is not confirmed rejection.
   Neighborhood income is not individual income. [reported Discussion]
@@ -93,13 +95,13 @@ Screened, 2026-11-14
   policy strata use listing date relative to March 15, 2021. [reported Methods]
   Tags: `candidate-registration`, `repeat-transplant`, `policy-era`,
   `living-donor`.
+  Use listing cPRA; logistic models retain the historical >80% definition. Death and removal compete, with September 30, 2023 censoring; post-KAS250 includes listings after March 15, 2021. [reported Methods; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Baseline sensitization can change. Rounded broad cPRA
   groups conceal highly sensitized subgroups; post-policy follow-up is shorter.
   High-sensitization threshold wording differs between Methods and tables.
   [reported Discussion; unclear Methods/Table 2]
-- **Locators:** PMC cached Methods, Results and Discussion passages read;
-  continuity of complete main text not established, so Screened. Tables and
-  supplements not comprehensively inspected.
+- **Locators:** Initial abstract/targeted reading was supplemented by Claude's browser review of PMC Methods on 2026-11-14 (sections cited above). Full text was accessible, but the review explicitly reports Methods rather than a complete main-text read. Screened retained; full Results/Discussion, tables and supplements are not established as read.
 
 ### PMC11232925
 
