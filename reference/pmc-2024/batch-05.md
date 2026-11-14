@@ -139,7 +139,9 @@ MT, 2026-11-14
 - **Data needs:** Raw EPTS is mapped using the 2023 reference table. Distinguish
   initial priority from loss of priority; higher-KDPI transplant, death and
   delisting compete with low-KDPI transplant; living donation censors. [reported
-  Methods] Tags: `candidate-registration`, `derived-score`, `living-donor`,
+  Methods] The 2023 EPTS percentile table uses all adult waitlisted candidates
+  on December 31, 2022 as its reference population [reported EPTS calculation].
+  Tags: `candidate-registration`, `derived-score`, `living-donor`,
   `death-source`, `follow-up-horizon`.
 - **Data pitfalls:** Unknown diabetes is treated as absent. OPTN-verified deaths
   may undercount mortality. [reported EPTS calculation; Limitations] The
