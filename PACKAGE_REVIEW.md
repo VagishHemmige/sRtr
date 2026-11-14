@@ -3,9 +3,11 @@
 This document records the protocol for an explicitly commissioned deep review of
 sRtr: current code, every open issue, and gaps for future development.
 [REVIEWING.md](REVIEWING.md) remains the protocol for individual PR reviews.
-This plan applies only when the maintainer explicitly commissions a review using
-`PACKAGE_REVIEW.md`. Its presence does not trigger an audit or govern routine PR
-reviews. Saving this protocol does not mean an audit has been performed.
+This protocol applies when the maintainer commissions a package-wide deep review,
+including ordinary-language requests routed here by REVIEWING.md. Naming this
+file or repeating a commissioning prompt is unnecessary. Its presence alone does
+not trigger an audit or govern routine PR reviews. Saving this protocol does not
+mean an audit has been performed.
 
 Read current [AGENTS.md](AGENTS.md) and applicable subdirectory guidance before
 starting. The coordinator inventories the repository reference records named
@@ -139,9 +141,10 @@ catalogue as proposed documentation changes. Verify historical claims rather
 than treating a prior review or external code as authoritative. Inspect external
 code only after checking provenance; never open uncertain data or outputs.
 
-If the maintainer later supplies a PMC paper list, inventory its actual location
-and revision and incorporate relevant papers into these packets. Do not assume
-that file exists or wait for it to begin. Reviewers should fill organ/method
+At intake, check the tracked repository for any additional PMC paper list,
+inventory its actual location and revision, and incorporate relevant papers into
+these packets. Incorporate later additions as well. Do not assume a list exists
+or wait for a future list to begin. Reviewers should fill organ/method
 coverage gaps with primary literature, including PMC full text and supplements
 where available; record unresolved access or evidence gaps. Distinguish papers
 linked to their own code from separate comparison implementations.
@@ -386,6 +389,53 @@ tests and justified test/CI proposals must also be preserved and linked; each
 material test or CI gap needs a concrete draft or a specific blocker. A disposition
 of "not assessed" remains a coverage gap, not completed substantive review.
 If gaps remain, label the report partial and state what remains to finish.
+
+### Integrate knowledge before closing the review
+
+Retaining an audit archive and posting issues do not by themselves preserve
+usable project knowledge. For each material discovery, identify its maintained
+destination or explain why it belongs only in the archive. Group related results;
+do not create a new ledger entry for every minor observation.
+
+| Result | Maintained destination |
+| --- | --- |
+| Verified paper or official method, including conflicting source versions | `reference/web-sources.md` |
+| External implementation and the capability it informs | `reference/repositories.md` |
+| Field/code interpretation, organ or release limitation | `reference/codebook-notes.md` |
+| Methodological comparison, assumption, or decision rationale | `reference/methodology-review.md`, linked to the owning issue |
+| Reproducible defect or independent reference example | Proposed focused regression test beside the affected tests; retain the audit reproducer until implementation is approved |
+| User-facing misunderstanding | Proposed correction to the relevant help or vignette |
+| Review-process lesson | Proposed amendment to the applicable review protocol |
+
+Prepare concrete, self-reviewed documentation diffs as review deliverables.
+Use existing documentation permissions to preserve them on a task branch/PR;
+otherwise retain the patches durably for approval. Do not edit the connected
+checkout, merge changes, or interpret this step as behavior-change permission.
+Record each material result as integrated (with revision/link), proposed (with
+patch/link), deferred (with owning issue and reason), or archive-only (with
+reason). A report that merely recommends saving sources has not completed this
+step. Report analytical coverage and pending integration/approval separately.
+
+Keep entries short and topic-based: what was verified, why it matters, applicable
+organ/population/release, exact source section or code revision, verification
+status/date, and the owning issue. Amend existing entries, reconcile contradictions,
+and mark superseded conclusions. Preserve important disagreements and evidentiary
+limits; reviewer agreement is not a scientific authority. Do not paste reviewer
+transcripts, full reports, logs, or issue-comment compilations into the catalogue.
+
+An unresolved scientific question belongs with its owning issue and supporting
+reference entry. Do not present an alternative as an approved definition. Once
+the maintainer decides, record the selected definition, source or explicit
+package assumption, rationale, and affected tests/help in the maintained location.
+The audit decision register is a dated snapshot, not a second live backlog.
+
+Keep full coverage/evidence/progress records and reusable audit artifacts in the
+permitted durable archive for resumption. The repository needs only a short dated
+review record, when permitted, identifying the frozen revision, scope, material
+limitations, and links to integrated knowledge and remaining work. Do not expose
+private archive links. Finish with a concise handoff explaining what was preserved,
+where it lives, and what remains unresolved. Future independent first-pass packets
+must still exclude these accumulated diagnoses until reconciliation.
 
 ## 8. Report first, posting afterwards
 
