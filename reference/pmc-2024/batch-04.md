@@ -85,7 +85,7 @@ MT, 2026-11-14
 ### PMC11835194
 
 Pediatric kidney neighborhood deprivation · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC11835194/) ·
-doi:10.2215/CJN.0000000592 · External linkage · transplants January 2010–May 2022; cutoff not verified ·
+doi:10.2215/CJN.0000000592 · External linkage · transplants January 2010–May 2022; cutoff November 30, 2022 ·
 Screened, 2026-11-14
 
 - **Population / unit:** Kidney recipients younger than 18 at listing, not
@@ -97,13 +97,11 @@ Screened, 2026-11-14
   distinguish preemptive and living-donor transplantation and graft loss.
   [reported Abstract] Tags: `geography`, `external-linkage`, `living-donor`,
   `candidate-registration`.
-- **Data pitfalls:** The retrieved figure caption calls graft loss
-  death-censored, but its exact event/censor implementation is not available
-  [unclear Figure 2 caption]. Neighborhood deprivation must not be assumed to
-  measure individual household resources [inference].
-- **Locators:** PubMed abstract and Figure 2 caption (PMID 39480491); PMC
-  returned a browser check and no full body was available in the saved XML. Full
-  methods, tables and supplements remain unread; Screened only.
+  Graft loss includes documented failure or kidney re-registration; other deaths are censored and follow-up ends November 30, 2022. First kidney-alone transplants are January 2010–May 2022, with age under 18 at registration; MCDI uses listing ZIP/ZCTA and three equal-width ranges. [reported Outcomes of Interest; Study Population; Primary Exposure; source checked by Claude, 2026-11-14]
+
+- **Data pitfalls:** Neighborhood deprivation measures an area, not individual household resources. Its ZIP-to-ZCTA mapping and missing-geography exclusions affect who is included. [inference; reported Primary Exposure; source checked by Claude, 2026-11-14]
+
+- **Locators:** Initial abstract/targeted reading was supplemented by Claude's browser review of PMC Methods on 2026-11-14 (sections cited above). Full text was accessible, but the review explicitly reports Methods rather than a complete main-text read. Screened retained; full Results/Discussion, tables and supplements are not established as read.
 
 ### PMC11426084
 
