@@ -85,6 +85,8 @@ Screened, 2026-11-14
 
 - **Population / unit:** Candidates aged 3–17 at listing, plus adults whose
   dialysis began before age 18. Unit: candidate. [reported Methods Parts 1–2]
+  Exclude age ≤2 at listing, simultaneous kidney–pancreas listings, invalid removal records and missing height/weight; activation analysis starts at first active status. [reported Part 1; Statistical Analysis for Part 1; source checked by Claude, 2026-11-14]
+
 - **Files and fields:** Candidate registration, dialysis onset,
   activation/status and transplant/removal records; exact mappings unverified
   [inference].
@@ -97,10 +99,7 @@ Screened, 2026-11-14
   Specific removal exclusions are in the unread supplement. [reported Methods]
   Age at dialysis initiation and age at listing must be calculated separately
   [inference].
-- **Locators:** Abstract and main Methods/selected Results from PMC search
-  cache; direct retrieval returned a browser check. Complete main text not
-  established; remains Screened. Supplemental exclusions and tables not
-  appraised.
+- **Locators:** Initial abstract/targeted reading was supplemented by Claude's browser review of PMC Methods on 2026-11-14 (sections cited above). Full text was accessible, but the review explicitly reports Methods rather than a complete main-text read. Screened retained; full Results/Discussion, tables and supplements are not established as read.
 
 ### PMC11375524
 
@@ -117,13 +116,11 @@ Screened, 2026-11-14
   death/health-deterioration removal, analyzed with competing risks. [reported
   Abstract] Tags: `candidate-registration`, `derived-score`,
   `follow-up-horizon`.
-- **Data pitfalls:** The retrieved abstract does not specify size
-  transformations, exception time origin, missing-data handling or exact
-  censoring; these remain unverified [unclear Abstract]. Do not equate a sex
-  comparison with a size-matched analysis [inference].
-- **Locators:** PMC abstract and opening Methods passages from search cache;
-  direct retrieval returned a browser check. Full Methods/Results/Discussion,
-  tables and supplements not read; Screened only.
+  Time begins at exception approval. Living-donor transplant and other removals are censored; DDLT competes with death/too-sick removal. Keep the earliest registration; exclude status 1A and prior liver transplant. Short stature is <166 cm; policy boundaries are October 8, 2015, May 19, 2019 and February 4, 2020. [reported Outcomes; Study Population; Exposure; Statistical Analysis; source checked by Claude, 2026-11-14]
+
+- **Data pitfalls:** Sex is center-reported with no uniform sex/gender interpretation; radiologic body/liver size is unavailable. Size transformations and missing-data handling still require checking before reconstruction. [reported Exposure and Patient Characteristics; source checked by Claude, 2026-11-14; inference]
+
+- **Locators:** Initial abstract/targeted reading was supplemented by Claude's browser review of PMC Methods on 2026-11-14 (sections cited above). Full text was accessible, but the review explicitly reports Methods rather than a complete main-text read. Screened retained; full Results/Discussion, tables and supplements are not established as read.
 
 ### PMC11421570
 
