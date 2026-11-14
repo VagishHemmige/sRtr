@@ -16,8 +16,11 @@ MT, 2026-11-14
 - **Files and fields:** SRTR transplant/follow-up linked to National Kidney
   Registry; encrypted identifiers checked against transplant date, blood group
   and sex [reported Methods].
+  The study uses the December 2022 SAF; deaths are supplemented by the National
+  Death Index and Death Master File, and graft failure by CMS Form 2728.
+  [reported Methods]
 - **Data needs:** KPD combines reported relationship codes 9/11/12 with NKR
-  confirmation; these codes are not dictionary-verified here. Death-censored
+  confirmation (see the code-label pitfall below). Death-censored
   failure includes maintenance dialysis, relisting or retransplantation.
   Multiple imputation, stabilized/truncated weighting and center-stratified Cox
   models require separate preparation steps. [reported Methods] Tags:
@@ -53,6 +56,10 @@ MT, 2026-11-14
   inverse-link transformation need verification to reconstruct the score.
   [reported Limitations; unclear Methods; inference]
   Discontinued laboratory collection is the paper's explanation, not an independently verified registry-wide change. Imputation is separate in training/test data; improved-health removal is censored alive. [reported Methods; Limitations; source checked by Claude, 2026-11-14]
+  The paper states that SRTR stopped recording laboratory values in 2018, which
+  is why the cohort starts in 2017; albumin, AST, bilirubin, BNP and sodium are
+  missing for about 80% of candidates and imputed with MICE. [reported Study
+  population]
 
 - **Locators:** Complete main text read from PMC XML, including model equations
   and Discussion; supplemental calculations and code not checked.
@@ -118,6 +125,8 @@ MT, 2026-11-14
   combinations. [reported Methods]
 - **Files and fields:** SRTR linked to 2017 Social Deprivation Index using
   ZIP/ZCTA crosswalks and 2013 county rurality [reported Methods].
+  SDI uses 2013–2017 ACS, merged through a ZCTA–ZIP crosswalk and grouped in
+  quintiles. [reported Methods; Abstract]
 - **Data needs:** Separate baseline recipient seropositivity from posttransplant
   CMV infection. Preserve organ-combination categories, geography vintage and
   interactions; imputation applies to covariates. [reported Methods] Tags:
@@ -125,6 +134,10 @@ MT, 2026-11-14
 - **Data pitfalls:** Missing-ZIP exclusion wording appears inconsistent with
   reported availability. Area deprivation is ecological and a fixed vintage may
   poorly describe earlier residence. [unclear Methods; inference]
+  The bundled dictionary has no recipient ZIP field in any TX_ file; its only
+  ZIP field is in INSTITUTION [dictionary: sRtr::dictionary at 8e73993]. The
+  paper used recipient permanent ZIP from SRTR [reported Methods], so this field
+  comes from a restricted or separately requested file [inference].
 - **Locators:** Complete main text read from PMC XML: Methods, Results and
   Discussion. Supplementary geographic crosswalks and effect-estimation code not
   inspected.
@@ -146,11 +159,15 @@ MT, 2026-11-14
   discrimination, calibration and risk categories; mortality observation censors
   at retransplantation. [reported Methods] Tags: `derived-score`,
   `repeat-transplant`, `follow-up-horizon`.
-- **Data pitfalls:** Minimum one-year-follow-up eligibility needs clarification
-  to exclude survivor selection. Original score coefficients, MELD bounds and
+- **Data pitfalls:** Original score coefficients, MELD bounds and
   dialysis rules require source verification. Risk-category boundaries are
   score-specific rather than interchangeable across models. [unclear Methods;
   inference]
+  The cohort requires at least 1 year of follow-up, so survivor selection is
+  reported, not merely possible. MELD uses the original Kamath formula without
+  HCC exception points; bounds and the dialysis rule are not stated. Cold
+  ischemia time runs from aortic cross-clamp to removal from cold storage.
+  [reported Study Design; Data Collection]
 - **Locators:** Complete main text read from PMC XML: Methods through
   Conclusions. Original score publications and calibration supplements not
   checked.

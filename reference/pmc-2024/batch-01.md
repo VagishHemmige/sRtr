@@ -27,6 +27,9 @@ listing 2019–2022; follow-up through March 2023 · MT, 2026-11-14
   durable LVADs; coefficients and supplementary material changed [reported
   correction]. Verify the corrected specification before reconstructing the
   score [inference].
+  The correction defines a durable LVAD by the OPTN list of dischargeable device
+  brands; that is the specification to use when reconstructing device status.
+  [reported correction letter]
 - **Locators:** Methods; Results; Discussion/Limitations;
   [coding-error correction](https://pmc.ncbi.nlm.nih.gov/articles/PMC12413661/)
   (read in full). Main text read; tables/captions not comprehensively appraised;

@@ -51,6 +51,9 @@ MT, 2026-11-14
   creating potential immortal time if survival begins at transplant without
   delayed entry/time-varying exposure. Claims capture is incomplete and fills do
   not prove adherence. [inference from Methods; reported Limitations]
+  Pharmacy data cover 65% of LAM recipients, and posttransplant sirolimus may be
+  prescribed for calcineurin-inhibitor intolerance rather than LAM. [reported
+  Limitations]
 - **Locators:** Methods; Results; Comment. Complete main text read from PMC XML;
   supplements and prescription linkage algorithm not inspected.
 
@@ -64,12 +67,18 @@ MT, 2026-11-14
   data; excludes perioperative/early deaths. Post-treatment comparison uses
   continuers/new starters versus discontinuers. [reported Methods]
 - **Files and fields:** SRTR linked to external prescription fills; article
-  reports diagnosis code 1606, not independently codebook-verified [reported
-  Study population].
+  reports diagnosis code 1606 [reported Study population]; 1606 is "ALPHA - 1 -
+  ANTITRYPSIN DEFICIENCY" in format THDGN ("LU:" prefixed in DGN)
+  [dictionary: sRtr::dictionary at 8e73993].
 - **Data needs:** All-cause graft failure combines death, failure and
   retransplantation. Delayed entry is three months posttransplant or first
   posttransplant prescription, whichever later for treated recipients. [reported
   Outcomes] Tags: `external-linkage`, `follow-up-horizon`, `death-source`.
+  Prescription data cover about 74% of recipients and about 78% of those with
+  AAT deficiency. Augmentation has four groups: none, continuation,
+  discontinuation and post-LT only. Graft failure is verified through
+  waiting-list linkage. [reported Data source; Study population; Post-LT
+  long-term outcomes]
 - **Data pitfalls:** Early-death exclusion uses discharge-based wording while
   entry uses transplant-based wording. One prescription assumes indefinite
   treatment. Age-binned mean survival estimation does not specify handling of
@@ -126,6 +135,9 @@ MT, 2026-11-14
   donation-attributable. Few events preclude adjusted modeling; follow-up
   requirements changed over time. [inference; reported Methods/Discussion] Table
   age-category denominators merit reconciliation before reuse [unclear Table].
+  OPTN policy requires donor deaths within 2 years of donation to be reported
+  within 72 hours of the hospital becoming aware; CMS–HRSA shared deaths are
+  secondarily verified by the OPTN contractor. [reported Methods]
 - **Locators:** Complete short main text, table and caption read from PMC search
   cache; source death linkage and supplemental data-sharing statement not
   inspected.
@@ -139,9 +151,11 @@ MT, 2026-11-14
 - **Population / unit:** Transplanted deceased-donor kidneys excluding
   Hawaii/Puerto Rico procurement or transplant sites. Unit: kidney, with
   OPO/center summaries. [reported Methods]
+  The analysis covers 55 OPOs and 230 centers after KAS250. [reported Methods]
 - **Files and fields:** Match runs linked to donor and recipient data; article
-  reports prior-offer codes 861/862/863 for OOS, not independently
-  codebook-verified [reported Methods].
+  reports prior-offer codes 861/862/863 for OOS [reported Methods]. These codes
+  are not in the bundled dictionary's code lists, as expected for match-run
+  (PTR) data [dictionary: sRtr::dictionary at 8e73993].
 - **Data needs:** Identify OOS codes before acceptance; compare interrupted
   trends by KDPI, using all transplanted kidneys as denominator. Preserve
   paired-kidney and OPO/center aggregation distinctions. [reported Methods;

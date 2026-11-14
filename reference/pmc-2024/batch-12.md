@@ -14,6 +14,9 @@ MT, 2026-11-14
 - **Population / unit:** Liver candidates represented by transplant-origin and
   repeated waitlist-landmark records; outcome is death/health-related removal.
   [reported Application]
+  The SRTR application uses 43,190 people listed January 1, 2014–April 30, 2019,
+  with a 3-year horizon for death or removal for worsening health. [reported
+  Application to liver transplantation]
 - **Files and fields:** Candidate/status histories, longitudinal biomarkers,
   transplant/removal/death dates; validation additionally needs confounders
   beyond prediction inputs [reported Methods].
@@ -27,6 +30,8 @@ MT, 2026-11-14
   subsets. Verify person-level development/validation separation for repeated
   landmarks and combined censoring assumptions. Equation 2 has an [erratum](https://pubmed.ncbi.nlm.nih.gov/39038238/) published online August 6, 2024 (doi:10.1097/EDE.0000000000001769); use corrected source and inspect code before reuse. [reported
   Discussion/correction; inference]
+  The combined dataset was "divided randomly" 70/30; the text does not say the
+  split was by person. [reported Application to liver transplantation]
 - **Locators:** Complete main text read from PMC XML. Supplemental setup not
   read; article-linked R simulation code:
   https://github.com/survival-lumc/Validation_Under_Interventions (focused source inspection in [repositories.md](../repositories.md#survival-lumcvalidation_under_interventions), not a full audit).
@@ -40,6 +45,11 @@ MT, 2026-11-14
 - **Population / unit:** Offer-level heart/liver/lung cohorts; survival analysis
   pairs accepter with immediately higher-ranked decliner for the same organ.
   [reported Methods]
+  Exclusions: organs never accepted; offers ranked below the eventual recipient;
+  exceptional allocation; candidates under 18 at listing; retransplant
+  candidates; temporarily inactive heart candidates; DCD donors; offers outside
+  the candidate's donor age, weight and height ranges set at listing; centers
+  with fewer than 50 offers. [reported Data and Cohort Selection]
 - **Files and fields:** PTR offer files joined to SAF donor/candidate data and
   offer-time allocation scores; external Census income and CDC vulnerability
   linked geographically [reported Methods].
@@ -47,11 +57,17 @@ MT, 2026-11-14
   cluster logistic errors by candidate and donor, distinguish center/year fixed
   effects, and retain pair structure for survival/RMST. [reported Methods] Tags:
   `candidate-registration`, `status-history`, `external-linkage`, `geography`.
+  Survival pairs drop accepting candidates who had earlier refused an offer; Cox
+  models are stratified by donor and adjust for waiting time and all candidate
+  covariates. Income is ZIP-level (Census) and SVI county-level (CDC), both from
+  candidate ZIP. [reported Patient Outcomes; Data and Cohort Selection]
 - **Data pitfalls:** Refusal codes can be catch-all categories; codes not
   independently verified. Random offer splits can share donors/candidates across
   sets. Later-transplanted-only sensitivity selects recipients using a future
   event. [reported Limitations; inference]
   PTR refusal codes are not covered by the bundled dictionary; absence there does not establish unavailability in supplemental offer data. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here]
+  Heart statuses under the 6-tier system were mapped back to 1A/1B/2. [reported
+  Table 1 footnote]
 
 - **Locators:** Complete main text read from PMC XML; Data/cohort, Statistical
   Analysis, Results and Discussion. Supplemental mappings, censoring rules and
@@ -66,8 +82,13 @@ MT, 2026-11-14
 - **Population / unit:** HCC liver candidates with versus without TIPS before
   listing, then a matched cohort and transplanted subset. [reported Methods]
 - **Files and fields:** Article explicitly names CAN_TIPSS and MPEXCEPT;
-  longitudinal tumor size/count/AFP, treatment, transplant and mortality. Names
-  reported, not codebook-verified. [reported Methods]
+  longitudinal tumor size/count/AFP, treatment, transplant and mortality. [reported
+  Methods]
+  `CAN_TIPSS` ("History of TIPSS") is in CAND_LIIN and TX_LI and carries no
+  date. Per-tumor diameters are in MPEXCEPT_TUMORS
+  (`CANHX_MPXCPT_HCC_TUMOR_SIZE_CM`) and MPEXCEPT_ORIG_TUMORS
+  (`CANHX_MPXCPT_ORIG_HCC_TUMOR_SIZE`), linked on `CANHX_MPXCPT_FORM_ID`.
+  [dictionary: sRtr::dictionary at 8e73993]
 - **Data needs:** Sum spherical lesion volumes; distinguish monthly volume/AFP
   changes from annual tumor-count changes. Separate listing-origin survival
   censored at transplant, transplant-origin mortality and recurrence competing
@@ -79,6 +100,9 @@ MT, 2026-11-14
   treatment. Recurrence algorithm is delegated to prior papers, not specified
   here. TIPS date relative to HCC is unavailable. [unclear Methods/Results;
   reported Discussion]
+  The paper caps sodium at "125 and 137 mg/dL" and creatinine at "4 mmol/L",
+  units that do not match MELD-Na (mEq/L, mg/dL); log terms are floored at 1 and
+  the score capped at 40. [reported Data Collection]
 - **Locators:** Complete main text read from PMC XML. Original recurrence
   algorithm, MELD specification and matching code not inspected.
 
@@ -98,6 +122,9 @@ MT, 2026-11-14
   resistance within well, compare assay AUC with healthy-serum control, and
   distinguish technical replicates from independent patients. [reported Methods]
   Tags: `external-linkage`, `cross-organ-link`.
+  Early allograft dysfunction uses the Olthoff criteria and AKI the
+  International Club of Ascites modification of KDIGO; samples S1–S5 run from
+  induction to 120 min after portal reperfusion. [reported 2.1; 2.5]
 - **Data pitfalls:** Rich intraoperative measurements, cytokines and endothelial
   responses are not routine SAF variables. Early graft dysfunction/AKI
   definitions require local timed laboratories. Small selected cohort and
@@ -123,6 +150,9 @@ MT, 2026-11-14
   create 25 datasets; Weibull modeling uses competing-death imputation. KDRI
   normalized to 2021. [reported Analysis] Tags: `derived-score`, `death-source`,
   `follow-up-horizon`.
+  Insurance is grouped as private, Medicare or VA versus underinsured (Medicaid,
+  self-pay or donation); cPRA bands are 0–80, 81–98 and 99–100%; deaths include
+  the SSDMF; n = 102,114. [reported Covariates; Data Set; Abstract]
 - **Data pitfalls:** Death-censored endpoint language and reported
   subdistribution hazards require careful reconciliation with the imputation
   estimator, not substitution of ordinary Cox censoring. Acute rejection was
@@ -153,5 +183,10 @@ MT, 2026-11-14
   graft-failure date. Table counts/percentages and MELD/ischemia boundary
   wording are inconsistent across sections and merit checking. [reported
   Results/Discussion; inference]
+  Ischemia time differs by donor type: DDLT runs from aortic cross-clamp to
+  removal from cold storage, LDLT from hepatic artery and portal vein clamp to
+  removal from preservation solution. Waiting time counts inactive time; there
+  is no imputation; 188,595 were screened and 103,243 included. [reported
+  Definitions; Statistical analysis; Results]
 - **Locators:** Complete main text read from PMC XML. Supplemental matching
   diagnostics and precise biochemical MELD implementation not inspected.

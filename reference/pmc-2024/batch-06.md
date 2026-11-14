@@ -24,6 +24,9 @@ MT, 2026-11-14
   excluded. Counts do not estimate population donation rates; evaluated but
   ineligible donors are absent from the registry used. [reported Methods;
   Discussion]
+  The White/other group is 93% White, 5% Asian and 2% other, so Asian donors are
+  grouped with White donors. Only 25 donors (0.024%) were excluded for missing
+  race. Eras are 1988–2004 and 2005–2022. [reported Methods; Figure 1 caption]
 - **Locators:** Methods; Results; Discussion; inline Figure 1 caption. Complete
   main text read from PMC XML; underlying figure data not independently checked.
 
@@ -65,6 +68,10 @@ MT, 2026-11-14
 - **Files and fields:** SRTR linked to PHIS by hospital, transplant
   hospitalization dates, age and sex; PHIS supplies utilization and ZIP-based
   2010 Census income [reported Data Sources; Merging; Exposure].
+  The patient-level merge matched 1,006 of 1,214 available patient records
+  (82.9%); unmatched patients are excluded. Income groups use fixed 2010 Census
+  cut-offs: <$33,075; $33,075–44,099; $44,100–66,149; ≥$66,150. [reported Study
+  Participants & Data Merging; Primary Exposure]
 - **Data needs:** Recurrent hospitalizations/biopsies with death as potentially
   informative terminal event; censor at age 22 or administrative end. Annual
   bed-days use a mixed-effects zero-inflated Poisson model. [reported Statistical Analysis] Tags:

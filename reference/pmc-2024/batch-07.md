@@ -145,10 +145,17 @@ MT, 2026-11-14
 - **Files and fields:** Candidate diagnosis, mPAP/PVR/wedge pressure, lung
   function, walk distance, oxygen requirement and waitlist outcomes; exact
   mappings unverified [inference].
+  The bundled dictionary has no stored PVR field; CAND_THOR holds
+  `CAN_PULM_ART_MEAN`, `CAN_PCW_MEAN` and `CAN_CARDIAC_OUTPUT`. Whether the
+  paper derived PVR from these is unstated. [dictionary: sRtr::dictionary at
+  8e73993; unclear Data collection]
 - **Data needs:** Compare combined PH classifications with separate
   pressure/resistance thresholds and adjusted Cox models. Preserve units and
   strict versus inclusive boundaries. [reported Statistical analysis] Tags:
-  `candidate-registration`, `derived-score`, `follow-up-horizon`.
+  `candidate-registration`, `derived-score`, `follow-up-horizon`,
+  `policy-era`.
+  Listings run January 1, 2000–December 31, 2022, spanning the 2005 LAS change.
+  [reported Subjects]
 - **Data pitfalls:** Threshold wording, PH counts and some units conflict across
   sections. Timing of measurements and transplant/removal censoring are not
   specified. PH treatment and disease subtype unavailable. [unclear

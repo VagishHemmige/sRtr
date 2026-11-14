@@ -14,6 +14,9 @@ MT, 2026-11-14
 - **Population / unit:** Adult lung candidates and donors aged at least 12 with
   recovered lungs; site-specific counts and synthetic person profiles. [reported
   Methods]
+  Training uses 15,826 donors (January 1, 2015–June 30, 2021) and 18,299
+  candidates listed February 19, 2015–September 1, 2021 at 61 centers. [reported
+  Step 1]
 - **Files and fields:** Registry donor/hospital and candidate/center records
   used to fit hierarchical count models and conditional trait distributions;
   exact fields unverified [reported Methods; inference].
@@ -124,6 +127,8 @@ MT, 2026-11-14
 - **Population / unit:** Adult primary-HCC liver candidates without previous LT
   and with recorded pretransplant Karnofsky status; transplanted subset for
   recurrence. [reported Methods]
+  n = 17,726, in KPS groups of 8,379, 8,091 and 1,256; recurrence follows
+  Samoylova et al. and Orci et al. [reported Methods]
 - **Files and fields:** Candidate/status, tumor/exception and
   transplant/death/follow-up records; precise mappings and recurrence algorithm
   unverified [inference].
