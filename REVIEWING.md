@@ -65,7 +65,8 @@ A major review also requires:
    Check a claimed fix on every similar path, not just the example shown.
 5. **Evaluate tests independently.** Do expected values have a basis other than the code itself? Would the test fail if the original bug came back? Does a mock bypass the behavior the test claims to check? Does each skipped test have a stated reason? Keep apart synthetic unit tests, integration tests, and real-SAF validation. Passing tests do not prove their assumptions.
 6. **Verify in proportion.** Choose validation scope from the changed behavior and its downstream reach, not merely the number of changed lines. Inspect relevant callers and affected workflows, and state the selected scope and rationale. Look at CI results for the exact revision you reviewed: passed, failed, pending and skipped. Run focused synthetic checks first in an isolated copy when that is safe, allowed and useful; expand when shared interfaces, scientific calculations, dependencies, or observed failures warrant it. Before running anything, check startup files and test guards for writes or data access you did not expect. Distinguish failures introduced by the PR, pre-existing failures, and failures of uncertain origin. If adequate validation is unavailable, report the specific gap and its implications. Do not expand into an unrelated whole-package audit. A full package check may still be warranted without a whole-package audit.
-7. **Reconcile earlier findings.** Check whether changes meant to fix earlier findings actually do. Do not repeat findings already resolved, and do not hold the PR responsible for unrelated problems that predate it.
+7. **Recommend ongoing test improvements within the PR scope.** Identify warranted changes to tests, shared fixtures, integration checks, runners, or CI for the changed behavior and its downstream effects. For useful review-created checks, recommend integration into the regular suite, retention as a standalone reproducer, or disposal as exploratory work. Explain coverage gained, maintenance/runtime cost, and unresolved assumptions. Present concrete proposals where warranted; retaining scripts alone is insufficient. Do not expand this into an unrelated whole-package testing audit or activate changes without authorization.
+8. **Reconcile earlier findings.** Check whether changes meant to fix earlier findings actually do. Do not repeat findings already resolved, and do not hold the PR responsible for unrelated problems that predate it.
 
 ## sRtr checks
 
@@ -92,8 +93,8 @@ and the conventions for recording it. Follow that guide, amend existing topical
 entries where possible, and link related entries instead of duplicating content.
 Do not maintain a separate routing guide in review instructions.
 
-Use the whole-package protocol's knowledge-integration rules in proportion to the
-review: a routine PR need not produce a separate report or ledger.
+Keep knowledge preservation scoped to the PR and its downstream effects; a PR
+review does not require a whole-package report, issue inventory, or audit ledger.
 Preserve verified background about the database and its use: sources, field
 meanings, collection eras, and methodological limitations. Keep sRtr function
 behavior, defects, implementation proposals, and package decisions in issues,

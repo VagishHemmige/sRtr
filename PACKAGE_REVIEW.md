@@ -188,6 +188,19 @@ assets and binaries; inventory is not permission to open uncertain data.
 Name every exclusion and its reason. Persist progress and reviewer assignments
 so an interrupted audit can resume without silently losing coverage.
 
+### Resuming versus commissioning a fresh review
+
+When resuming the same audit, reuse its coverage and execution records, identify
+any intervening revision changes, and recheck affected conclusions. A new review
+starts with the current target, primary sources, and independently derived
+expectations. Prior audit reports are historical evidence, not authority for the
+current code or scientific definitions. Withhold previous diagnoses, issue
+conclusions, and audit-specific regression cases from independent first-pass
+packets; introduce them during reconciliation. Existing package tests remain
+part of the implementation available for review. Record which checks are new,
+reused, or adapted. Rerunning an old audit bundle does not establish fresh or
+complete coverage.
+
 ## 2. Independent first passes
 
 Give reviewers the frozen source, applicable rules, role questions, and relevant
@@ -299,6 +312,19 @@ silently changing package behavior. After approval to implement, demonstrate
 failure before the fix and success afterwards where feasible.
 
 ### Concrete test and CI proposals
+
+A prioritized proposal for improvements to ongoing testing is a required outcome
+of a whole-package review. The testing reviewer owns this assessment and the
+coordinator ensures it appears in the handoff. Assess missing cross-function,
+organ-specific, input-representation, and failure-path coverage; implementation-
+derived expectations; mocks that bypass behavior; and skips that hide gaps.
+Identify what belongs in regular tests, integration checks, runners, or CI,
+including useful existing tests that should be strengthened rather than duplicated.
+For each useful audit-created check, recommend permanent integration, a retained
+standalone reproducer, or disposal as exploratory work. Explain coverage gained,
+priority, runtime/maintenance cost, and scientific or data-dependent prerequisites.
+Reusable audit scripts support this proposal; they are not its main outcome.
+If no changes are warranted, justify that conclusion from the full assessment.
 
 Deliver reviewable test additions and targeted workflow patches for material
 gaps, not only recommendations to add tests or improve CI. Identify destination
@@ -463,10 +489,22 @@ and issues, and revise drafts when intervening work changes the conclusion.
 A prior substantive issue comment does not substitute for this audit's assessment.
 Retain a draft for every open issue as commissioned; when the conclusion is
 unchanged, explain the newly checked revision, evidence and remaining work
-concisely instead of repeating the earlier comment. Propose withholding a
-redundant post to the maintainer in the report, but do not silently omit that
-issue or change the commissioned posting scope.
-Confirm writes succeeded and map report IDs to posted URLs.
+concisely instead of repeating the earlier comment. Do not omit the reassessment
+record merely because the conclusion is unchanged.
+Each open issue receives a concise dated reassessment tied to the reviewed
+commit: current disposition (still applicable, partly resolved, resolved, or
+needs a decision), specific supporting evidence, and next step where needed.
+An unchanged conclusion still merits a brief record that it was reevaluated.
+Omit repeated scope paragraphs, generic disclaimers, reviewer-role footers, and
+private finding/test IDs. Include limitations where they affect that issue.
+Use longer comments only for substantive new evidence or scientific disagreement.
+Reconcile and rewrite the final assessment instead of appending contradictory
+updates. Classify code/help disagreements separately from calculation defects;
+if either code or documentation could change, name the maintainer decision before
+prescribing a repair. Assign severity from impact and context, not classification
+alone. Provide direct source locators and public, commit-pinned reproducers or
+small inline synthetic examples; private bundle commands alone are insufficient.
+Confirm writes succeeded and map report IDs to posted URLs in the audit ledger.
 
 Review-created tests and proposed CI patches are report deliverables. Installing
 them in the package or activating workflows follows the separately authorized
@@ -479,6 +517,12 @@ maintainer's working instructions. This document grants no standing posting,
 implementation, or automated-review permissions.
 
 ## 9. Posting templates
+
+The templates below are drafting prompts, not mandatory public boilerplate.
+Apply the concise posting rules above: omit internal IDs and redundant fields,
+use descriptive links, and replace private artifact references with accessible
+reproducers. Keep detailed reviewer attribution and execution ledgers in the
+audit archive rather than repeating them on every issue.
 
 Use these templates for the report's proposed GitHub text. Replace placeholders
 and omit genuinely inapplicable sections; never fill a field with an invented
