@@ -52,6 +52,14 @@ paper's statistics or mention sRtr code. A design feature such as competing
 risks, time-varying exposure, matching, or weighting is named when it explains
 why particular records, identifiers, or follow-up intervals are needed.
 
+Longer catalogs may keep annotations in `pmc-<year>/batch-NN.md`, linked from
+individual index rows. Earlier annotations may remain in the catalog itself.
+Batch numbers organize reading work, not topics. During concurrent annotation
+work, each batch changes only its own file. Update the shared catalog links,
+roles and reading statuses together after the reviewed batches merge; verify
+those values against the final entries and check every link before merging
+the catalog update.
+
 **Catalog header.** Give the search string, run date, records returned, and
 records kept. Counts with no screening log in the repository are marked
 *reported*.
