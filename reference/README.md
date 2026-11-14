@@ -41,3 +41,86 @@ authority for clinical definitions or permission to open its data.
 - Code claims ("removal code 14 means ...") should be checked against
   `data-raw/` or the SRTR data dictionary before being relied on, and say
   which was checked.
+
+## Literature annotations
+
+Catalog files (`pmc-<year>.md`) list papers that use SRTR data, with links and
+short annotations. An annotation records what data the paper shows a user
+needs, and where the data can lead to a wrong result. It does not appraise the
+paper's statistics or mention sRtr code.
+
+**Catalog header.** Give the search string, run date, records returned, and
+records kept. Counts with no screening log in the repository are marked
+*reported*.
+
+**Index columns.** PMC link, organ, SRTR role, publication year(s), reading
+status.
+
+- *SRTR role:* `SAF analysis`; `External linkage` (SRTR joined to another
+  source and analyzed); `Case-finding or local source` (SRTR used to find
+  cases, or as one part of a local data warehouse); `Methods or simulation`.
+- *Reading status:* `Screened` (title, abstract, targeted passages); `MT`
+  (complete main text); `MT+T` (plus tables and figure captions); `MT+T+S`
+  (plus supplements).
+
+**Entries.** The heading is `### PMC<id>` alone, so the link anchor is
+`#pmc<id>`. Fields, in this order:
+
+- First line: topic · DOI · SRTR role · study period and data cutoff · reading
+  status and date.
+- **Population / unit:** cohort, and unit of analysis (person, registration,
+  transplant, donor, or donor pair).
+- **Files and fields:** each with a provenance tag (below).
+- **Data needs:** links and identifiers, timing rules, definitions, outcome
+  and censoring sources, policy eras. End with tags from the list below.
+- **Data pitfalls:** missing data, ambiguous or duplicate fields, timing
+  traps. Write each one as a statement that can be checked.
+- **Locators:** the sections and tables used.
+
+**Provenance tags.** Every file, field, or definition carries one:
+`[reported §…]` (the paper states it); `[inferred: <dictionary>]` (deduced
+from a named dictionary, such as `sRtr::dictionary` at a given commit, and not
+stated by the paper); `[external]` (needs data outside the SAFs);
+`[not in SAFs]` (the paper or dictionary shows it is unavailable).
+
+**Data-need tags.** `cross-organ-link`, `repeat-transplant`, `donor-pair`,
+`candidate-registration`, `status-history`, `post-removal-death`,
+`death-source`, `follow-up-horizon`, `policy-era`, `derived-score`,
+`external-linkage`, `geography`, `living-donor`. Add a new tag here before
+using it.
+
+**Checking an entry.**
+
+- Every claim has a provenance tag; every reported claim has a locator.
+- Field names match the named dictionary.
+- The reading status matches what was read; nothing unread is cited.
+- Pitfalls describe the data, not the paper's analysis or sRtr code.
+- Tags come from the list above.
+
+Example:
+
+```markdown
+### PMC12851315
+
+Intestine–kidney timing · doi:10.1016/j.intf.2024.100005 · SAF analysis ·
+1995–2023 (abstract says 1994) · MT, 2026-11-14
+
+- **Population / unit:** first intestine transplant, on dialysis and listed
+  for kidney before it; 54 people. Unit: person.
+- **Files and fields:** `tx_in`, `tx_ki`, `txf_in`, `PERS_ID` [reported
+  §Study design]; `CAN_DIAL` [reported §Patients], which is in CAND_LIIN and
+  CAND_KIPA, not TX_IN [inferred: `sRtr::dictionary`, e7a74d1]. Source of
+  kidney listing not reported.
+- **Data needs:** link organ files by person; keep the earliest intestine
+  transplant; group by days from intestine to kidney transplant (7 used);
+  graft failure includes death; 2,000-day horizon; second time origin at
+  kidney transplant. Tags: `cross-organ-link`, `repeat-transplant`,
+  `follow-up-horizon`, `derived-score`.
+- **Data pitfalls:** day 7 itself, and kidney before intestine, are not
+  assigned to a group. The delayed group is defined by a later event (median
+  3,087 days after intestine transplant), so its earlier time is not time at
+  risk of that exposure. Diabetes and dialysis start were too sparse for
+  EPTS; values were substituted.
+- **Locators:** Methods (Study design; Patients and study groups;
+  Statistical analysis); Results.
+```
