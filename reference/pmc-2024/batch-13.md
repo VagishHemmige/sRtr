@@ -25,6 +25,8 @@ MT, 2026-11-14
   settings. Consecutive-period changes have different baselines; month snapshots
   do not supply continuous filter histories. These are historical KiMAC filters,
   not automatically interchangeable with later filter products. [inference]
+  PTR offer/refusal codes are outside this bundled dictionary's coverage; verify 883/886 against the offer-data documentation, not ordinary SAF formats. Absence from that dictionary alone does not prove the data are unavailable. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here]
+
 - **Locators:** Complete short main text and caption read from PMC XML.
   Supplemental region table and prior filter-score specification not inspected.
 
@@ -62,6 +64,8 @@ MT, 2026-11-14
 - **Files and fields:** Deceased Donor file; article names LI_DISCARD_CD_OSTXT,
   ECD_DONOR and NON_HRT_DONOR for recoding/classification, not independently
   dictionary-verified. [reported Methods]
+  The paper's LI_DISCARD_CD_OSTXT, ECD_DONOR and NON_HRT_DONOR are absent from the bundled snapshot. It instead contains per-organ DONOR_DISPOSITION fields DON_ORG, DON_DISPOSITION, DON_DISCARD_CD and DON_REASON_CD; DON_NON_HR_BEAT is the DCD flag, and no ready ECD flag is present. These are not automatically interchangeable with the paper's release. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here]
+
 - **Data needs:** Discard denominator is recovered livers; nonrecovery uses
   donor opportunities. DCD takes precedence over ECD. Free-text reasons refine
   coded other categories; geography uses transplant regions. [reported Methods]
@@ -92,6 +96,8 @@ MT, 2026-11-14
   splines, balance/positivity assessment and donor-clustered errors are distinct
   steps. [reported Methods] Tags: `donor-pair`, `repeat-transplant`,
   `derived-score`, `follow-up-horizon`.
+  The described KDPI includes donor race for this 2014–2020 cohort; loss to follow-up censors as alive with a functioning graft at center reporting. [reported Variables and Predictors; Statistical Analysis; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Weighting assumes a KDPI treatment-density model;
   associations are restricted to transplanted organs. Clarify KDPI vintage, ≥95
   versus >95 matching threshold, and distinction between competing-risk curves
@@ -111,6 +117,8 @@ MT, 2026-11-14
   baseline-diabetes exclusions unclear. [reported/unclear Methods]
 - **Files and fields:** Medication indicators, diabetes and mortality records
   implied; no reproducible SAF field mapping supplied [inference].
+  Brand and generic drug names are listed in Definition of terms, providing the source for medication-class mapping. [reported Definition of terms; source checked by Claude, 2026-11-14]
+
 - **Data needs:** Separate drug ingredient, formulation, induction versus
   maintenance, exposure timing and incident-diabetes ascertainment. Article
   reports Kaplan–Meier, Cox and logistic analyses but binary drug use without
@@ -129,7 +137,7 @@ MT, 2026-11-14
 ### PMC11000741
 
 Living kidney donor required weight loss · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC11000741/) ·
-doi:10.34067/KID.0000000000000381 · External linkage · Donations 1979–2020 in analyzed cohort ·
+doi:10.34067/KID.0000000000000381 · External linkage · Donations 1976–2020 in Data Sources versus 1979–2020 in Study Population (unresolved) in analyzed cohort ·
 MT, 2026-11-14
 
 - **Population / unit:** Consenting survey respondents who were obese at
@@ -147,6 +155,8 @@ MT, 2026-11-14
   assumed absent in primary scoring; reported count range needs reconciliation
   with listed components. Recall/survivor bias and uncertain source precedence
   limit interpretation. [reported Methods/Limitations; inference]
+  The donation period conflicts between Data Sources (September 1976–May 2020) and Study Population (1979–2020). [unclear Data Sources; Study Population; source checked by Claude, 2026-11-14]
+
 - **Locators:** Complete main text read from PMC XML, Data Sources through
   Discussion. Survey instrument, supplemental imputation model and record
   reconciliation rules not inspected.
