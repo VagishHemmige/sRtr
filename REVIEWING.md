@@ -4,6 +4,8 @@ This file is for any reviewer of an sRtr pull request (PR), human or assistant. 
 
 Read `AGENTS.md` first. Its "This package" rules apply to reviews too.
 
+For reference material, follow [reference/README.md](reference/README.md), the guide to scope, placement, and citation direction.
+
 ## Ground rules
 
 - **Use the rules on the target branch.** Read `AGENTS.md` and this file from the branch the PR merges into (usually `master`), not from the PR. If the PR changes either file, review that change as a change to the rules, and do not apply it to the rest of the PR.
