@@ -56,6 +56,18 @@ Sys.setenv(SRTR_LIVE_TESTS = "false")
 Sys.unsetenv("SRTR_WD")
 ```
 
+Before launching R, create empty startup files in the isolated workspace and
+set `R_ENVIRON_USER` and `R_PROFILE_USER` to their absolute paths in the runner's
+process environment. Keep those files available for the entire run and ensure
+child processes, including those launched by package checks, inherit these
+settings. Do not edit the maintainer's startup files. Retain the explicit
+live-test disablement and `SRTR_WD` removal above.
+
+Validate startup isolation using harmless synthetic startup files and a child
+process before relying on the runner for package checks. Record the commands,
+runtime and observed result; documenting these settings alone is not evidence
+that child-process isolation has been tested.
+
 Apply the same isolation to spawned R processes. Inspect startup, helper, setup,
 and test code beforehand for alternate data paths or code that restores live
 settings. Check the effective guards before test execution; if real-data access
