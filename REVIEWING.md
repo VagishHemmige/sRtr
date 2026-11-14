@@ -73,6 +73,7 @@ A major review also requires:
 
 - **`data/`:** a PR that changes `data/` is Must fix unless its description says the maintainer regenerated the files from `data-raw/`.
 - **Sources:** a change to epidemiologic logic needs its source named in the PR description (see `AGENTS.md`). Flag a missing or unverifiable source.
+- **Citations in code:** check them against "Citing sources in code" in `AGENTS.md`. Flag a `@references` entry that only used a similar choice rather than defining it, an option documented as a published definition when it is a convention, and an internal comment that cites `reference/` by file path instead of PMC ID or repository name. When a PR changes a choice that an internal comment explains, check that the comment still matches.
 - **"Needs SAF check":** flag a change to file loading, labeling, derived variables, joins or vignettes whose PR description does not say what was checked only on made-up data, with the commands to run.
 - **Conventions:** check the package code, test, documentation and NEWS conventions in `AGENTS.md`.
 - **Generated files:** check that `man/*.Rd` and `NAMESPACE` match their roxygen comments; do not review them line by line. An assistant may push R files first and the generated files in a later commit. Note missing generated files once, under Consider. This covers documentation only: a missing or wrong export, import or dependency declaration that breaks use or installation keeps the severity of its impact, and a PR still waiting for generated files is not ready to merge.
