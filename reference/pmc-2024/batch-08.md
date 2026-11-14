@@ -20,7 +20,9 @@ MT, 2026-11-14
 - **Data needs:** Graft failure includes death; survival models cluster by
   donor. Subgroup analyses retain pairs only when both recipients meet subgroup
   criteria. Separate first-year complications from five-year survival. [reported
-  Methods] Tags: `donor-pair`, `repeat-transplant`, `follow-up-horizon`.
+  Methods] Mortality uses TFL_ENDTXFU; graft failure uses TFL_ENDTXFU and
+  TFL_LAFUDATE [reported Methods]. Tags: `donor-pair`, `repeat-transplant`,
+  `follow-up-horizon`.
 - **Data pitfalls:** BOS/bronchial-stricture collection stopped around 2020;
   missing follow-up may reflect death, unavailable forms or loss. Exact
   combination of censoring dates needs clarification. Early-death counts differ
@@ -142,11 +144,11 @@ MT, 2026-11-14
   CAS posttransplant model using ten-fold time-dependent AUC, calibration and
   Brier scores. Separate prediction from causal effect estimation. [reported
   Methods; Discussion] Tags: `derived-score`, `follow-up-horizon`.
-- **Data pitfalls:** Cardiac-index missingness drives exclusions. No independent
-  validation cohort; selection of interactions requires scrutiny within
-  resampling. Some narrative directions differ from table HRs. Serologic
-  mismatch must not be assumed to mean only D+/R−. [reported
-  Results/Limitations; inference; unclear Table 3]
+- **Data pitfalls:** Cardiac-index missingness drives exclusions. Derived-risk
+  reconstruction needs the complete predictor set and interaction definitions.
+  Some narrative directions differ from table HRs. Serologic mismatch must not
+  be assumed to mean only D+/R−. [reported Results/Limitations; inference;
+  unclear Table 3]
 - **Locators:** Methods; Results; Discussion and embedded tables read from PMC
   XML. Complete main text read; supplemental model specification and code not
   appraised.
