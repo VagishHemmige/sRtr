@@ -60,9 +60,10 @@ follow-up while censoring survivors at last follow-up would overstate
 mortality (#18).
 
 Graft failure (\code{TFL_GRAFT_DT}, or \code{TFL_GRAFT_DT_KI} and \code{TFL_GRAFT_DT_PA}
-for \code{TX_KP}) is death-censored: each graft is followed until the earlier of
-its last follow-up date and the recipient's death from any source
-(\code{REC_DEATH_DT_COMPOSITE}), whatever \code{death_window} is. A graft failure
-dated after death is not counted. Death with a functioning graft is a
-censoring time, not a graft failure.
+for \code{TX_KP}) is death-censored, whatever \code{death_window} is: a graft failure
+dated after the recipient's death from any source (\code{REC_DEATH_DT_COMPOSITE})
+is not counted, and a graft without a failure is censored at the earlier of
+its last follow-up date and death. Death with a functioning graft is a
+censoring time, not a graft failure. A graft failure dated after the last
+follow-up date but before death is still counted, at its own date.
 }

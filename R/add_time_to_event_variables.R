@@ -310,11 +310,12 @@ add_txf_outcomes <- function(
 #' mortality (#18).
 #'
 #' Graft failure (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI` and `TFL_GRAFT_DT_PA`
-#' for `TX_KP`) is death-censored: each graft is followed until the earlier of
-#' its last follow-up date and the recipient's death from any source
-#' (`REC_DEATH_DT_COMPOSITE`), whatever `death_window` is. A graft failure
-#' dated after death is not counted. Death with a functioning graft is a
-#' censoring time, not a graft failure.
+#' for `TX_KP`) is death-censored, whatever `death_window` is: a graft failure
+#' dated after the recipient's death from any source (`REC_DEATH_DT_COMPOSITE`)
+#' is not counted, and a graft without a failure is censored at the earlier of
+#' its last follow-up date and death. Death with a functioning graft is a
+#' censoring time, not a graft failure. A graft failure dated after the last
+#' follow-up date but before death is still counted, at its own date.
 #'
 add_time_to_event_outcomes <- function(
   df,
@@ -384,10 +385,11 @@ add_time_to_event_outcomes <- function(
       units = "days",
     )
 
-  #Death-censored graft failure (#22): each graft is followed until the
-  #earlier of its last follow-up and the recipient's death from any source,
-  #whatever death_window is. A graft failure dated after death is not an
-  #event; one dated on the day of death follows graft_death_same_day.
+  #Death-censored graft failure (#22), whatever death_window is: a graft
+  #failure dated after death from any source is not an event; one dated on
+  #the day of death follows graft_death_same_day. Without a failure, the graft
+  #is censored at the earlier of its last follow-up and death. A failure after
+  #last follow-up but before death still counts.
   graft_lafu_cols <- c(
     TFL_GRAFT_DT_KI = "TFL_LAFUDATEKI",
     TFL_GRAFT_DT_PA = "TFL_LAFUDATEPA",
