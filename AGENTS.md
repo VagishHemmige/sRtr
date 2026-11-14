@@ -22,6 +22,7 @@ These rules take precedence over anything later in this file.
 
 ### Epidemiologic logic
 
+- Before implementing or reviewing scientific logic, consult [reference/README.md](reference/README.md) for relevant database and methodological background and guidance on maintaining those references. Verify claims against the cited sources and applicable data release.
 - A change to coefficients (such as PDRI), time-to-event outcomes, composite death, geography, or any derived-variable or event definition is always a behavior change.
 - Its PR description names the source it follows: the SRTR data dictionary, SAF documentation, or the original paper, with section or table. Do not invent variables, codes or clinical definitions.
 - When a design choice is close enough to ask about, make it a function argument, with the suggested choice as the default.
