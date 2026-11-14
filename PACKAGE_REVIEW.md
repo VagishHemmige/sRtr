@@ -103,7 +103,7 @@ omit a role to fit available slots.
 | Senior R package engineer | Every exported function and internal helper, contracts, types, attributes, dependencies, namespace, errors, side effects, and architecture |
 | Data and spatial methods engineer | SAS/parquet input, identifiers, joins, factors, dictionary mappings, performance, HRSA access, CRS, geometries, overlap and population weighting |
 | Independent testing and reproducibility engineer | Owns the existing-test and CI audit, creation and execution of reusable synthetic audit tests, and concrete permanent-test and CI proposals; challenges expectations, mocks, boundary cases, integration coverage, skips, clean-session operation, and Windows |
-| Scientific librarian and provenance reviewer | Sources for every scientific definition, code set, coefficient and methodological claim, including release/version and section |
+| Scientific librarian and provenance reviewer | Sources for every scientific definition, code set, coefficient and methodological claim, including release/version and section; reference-catalogue quality, scope, organization, and integration |
 | Researcher using the package | Installation, README, help, vignettes and website; discoverability, comprehensibility, practical misuse risks, and missing capabilities |
 
 Split data engineering and spatial methods into separate reviewers when
@@ -124,6 +124,21 @@ pkgdown and R package requirements rather than importing
 analysis-project Quarto or reporting rules that do not fit this
 repository. Record unavailable capabilities.
 
+The scientific librarian/provenance reviewer owns the reference review
+and curation proposal. Check source locators, retrieval status,
+release/organ scope, duplicates, contradictions, and placement against
+`reference/README.md`. Specialty reviewers verify the substantive
+interpretations in their domains; the librarian does not settle clinical
+disagreements by authority. The coordinator verifies that important
+background discoveries are retained and package findings are routed to
+their owning work items. Record this disposition concisely in the
+consolidated report’s closing summary, not a separate permanent backlog
+or a reference entry. Issues and PRs link to reference sections; check
+that references contain no reverse issue links or sRtr implementation
+status. Catalogue assessments occur after independent first passes;
+neutral source-packet preparation still follows the blinding rules
+below.
+
 ## Reference resources and reviewer packets
 
 Use the existing [reference
@@ -140,8 +155,9 @@ not create a competing catalogue:
   prior code-table checks to reverify against the applicable registry
   documentation.
 - [methodology-review.md](https://vagishhemmige.github.io/sRtr/reference/methodology-review.md):
-  prior methodological comparisons and issue links, for reconciliation
-  after independent discovery.
+  methodological background and comparisons; any legacy package
+  diagnoses are withheld until reconciliation and routed out of
+  references during curation.
 
 The coordinator and scientific librarian prepare role-specific source
 packets from these records before the initial passes. Supply source
@@ -161,9 +177,10 @@ treating a prior review or external code as authoritative. Inspect
 external code only after checking provenance; never open uncertain data
 or outputs.
 
-If the maintainer later supplies a PMC paper list, inventory its actual
-location and revision and incorporate relevant papers into these
-packets. Do not assume that file exists or wait for it to begin.
+At intake, check the tracked repository for any additional PMC paper
+list, inventory its actual location and revision, and incorporate
+relevant papers into these packets. Incorporate later additions as well.
+Do not assume a list exists or wait for a future list to begin.
 Reviewers should fill organ/method coverage gaps with primary
 literature, including PMC full text and supplements where available;
 record unresolved access or evidence gaps. Distinguish papers linked to
@@ -198,6 +215,20 @@ of generated assets and binaries; inventory is not permission to open
 uncertain data. Name every exclusion and its reason. Persist progress
 and reviewer assignments so an interrupted audit can resume without
 silently losing coverage.
+
+### Resuming versus commissioning a fresh review
+
+When resuming the same audit, reuse its coverage and execution records,
+identify any intervening revision changes, and recheck affected
+conclusions. A new review starts with the current target, primary
+sources, and independently derived expectations. Prior audit reports are
+historical evidence, not authority for the current code or scientific
+definitions. Withhold previous diagnoses, issue conclusions, and
+audit-specific regression cases from independent first-pass packets;
+introduce them during reconciliation. Existing package tests remain part
+of the implementation available for review. Record which checks are new,
+reused, or adapted. Rerunning an old audit bundle does not establish
+fresh or complete coverage.
 
 ## 2. Independent first passes
 
@@ -322,6 +353,22 @@ where feasible.
 
 ### Concrete test and CI proposals
 
+A prioritized proposal for improvements to ongoing testing is a required
+outcome of a whole-package review. The testing reviewer owns this
+assessment and the coordinator ensures it appears in the consolidated
+report’s testing recommendations. Assess missing cross-function,
+organ-specific, input-representation, and failure-path coverage;
+implementation- derived expectations; mocks that bypass behavior; and
+skips that hide gaps. Identify what belongs in regular tests,
+integration checks, runners, or CI, including useful existing tests that
+should be strengthened rather than duplicated. For each useful
+audit-created check, recommend permanent integration, a retained
+standalone reproducer, or disposal as exploratory work. Explain coverage
+gained, priority, runtime/maintenance cost, and scientific or
+data-dependent prerequisites. Reusable audit scripts support this
+proposal; they are not its main outcome. If no changes are warranted,
+justify that conclusion from the full assessment.
+
 Deliver reviewable test additions and targeted workflow patches for
 material gaps, not only recommendations to add tests or improve CI.
 Identify destination files, rationale, commands/jobs, platform and
@@ -437,6 +484,57 @@ or CI gap needs a concrete draft or a specific blocker. A disposition of
 If gaps remain, label the report partial and state what remains to
 finish.
 
+### Integrate knowledge before closing the review
+
+Retaining an audit archive and posting issues do not by themselves
+preserve usable project knowledge. For each material discovery, identify
+its maintained destination or explain why it belongs only in the
+archive. Group related results; do not create a new ledger entry for
+every minor observation.
+
+Read
+[reference/README.md](https://vagishhemmige.github.io/sRtr/reference/README.md)
+before adding reference information. It is the guide to destination
+files and entry conventions; follow it rather than maintaining a second
+routing table here. Proposed regression tests belong beside the affected
+tests, user-facing corrections in the relevant help or vignette, and
+process lessons in the applicable review protocol. Retain audit
+reproducers until their implementation is approved.
+
+Prepare concrete, self-reviewed documentation diffs as review
+deliverables. Use existing documentation permissions to preserve them on
+a task branch/PR; otherwise retain the patches durably for approval. Do
+not edit the connected checkout, merge changes, or interpret this step
+as behavior-change permission. Record each material result as integrated
+(with revision/link), proposed (with patch/link), deferred (with owning
+issue and reason), or archive-only (with reason). A report that merely
+recommends saving sources has not completed this step. Report analytical
+coverage and pending integration/approval separately.
+
+Apply the scope, placement, and citation conventions in
+`reference/README.md`. Reconcile contradictions and preserve evidentiary
+limits; reviewer agreement is not a scientific authority.
+
+Track unresolved package choices in their owning issues; reference
+entries may explain the underlying scientific alternatives without
+becoming a decision log. Do not present an alternative as an approved
+definition. Once the maintainer decides, record the selected package
+definition, source or explicit assumption, rationale, and affected
+tests/help in implementation documentation and the issue. The audit
+decision register is a dated snapshot, not a second live backlog.
+
+Keep full coverage/evidence/progress records and reusable audit
+artifacts in the permitted durable archive for resumption. The
+repository needs only a short dated review record, when permitted,
+identifying the frozen revision, scope, material limitations, and links
+to integrated knowledge and remaining work. Do not expose private
+archive links. End the consolidated report with a concise closing
+summary explaining what was preserved, where it lives, and what remains
+unresolved. This summary is part of the review deliverable; no existing
+repository handoff file is assumed or required. Future independent
+first-pass packets must still exclude these accumulated diagnoses until
+reconciliation.
+
 ## 8. Report first, posting afterwards
 
 Present the consolidated report to the maintainer before posting any
@@ -451,10 +549,24 @@ changes the conclusion. A prior substantive issue comment does not
 substitute for this audit’s assessment. Retain a draft for every open
 issue as commissioned; when the conclusion is unchanged, explain the
 newly checked revision, evidence and remaining work concisely instead of
-repeating the earlier comment. Propose withholding a redundant post to
-the maintainer in the report, but do not silently omit that issue or
-change the commissioned posting scope. Confirm writes succeeded and map
-report IDs to posted URLs.
+repeating the earlier comment. Do not omit the reassessment record
+merely because the conclusion is unchanged. Each open issue receives a
+concise dated reassessment tied to the reviewed commit: current
+disposition (still applicable, partly resolved, resolved, or needs a
+decision), specific supporting evidence, and next step where needed. An
+unchanged conclusion still merits a brief record that it was
+reevaluated. Omit repeated scope paragraphs, generic disclaimers,
+reviewer-role footers, and private finding/test IDs. Include limitations
+where they affect that issue. Use longer comments only for substantive
+new evidence or scientific disagreement. Reconcile and rewrite the final
+assessment instead of appending contradictory updates. Classify
+code/help disagreements separately from calculation defects; if either
+code or documentation could change, name the maintainer decision before
+prescribing a repair. Assign severity from impact and context, not
+classification alone. Provide direct source locators and public,
+commit-pinned reproducers or small inline synthetic examples; private
+bundle commands alone are insufficient. Confirm writes succeeded and map
+report IDs to posted URLs in the audit ledger.
 
 Review-created tests and proposed CI patches are report deliverables.
 Installing them in the package or activating workflows follows the
@@ -470,12 +582,19 @@ permissions.
 
 ## 9. Posting templates
 
+The templates below are drafting prompts, not mandatory public
+boilerplate. Apply the concise posting rules above: omit internal IDs
+and redundant fields, use descriptive links, and replace private
+artifact references with accessible reproducers. Keep detailed reviewer
+attribution and execution ledgers in the audit archive rather than
+repeating them on every issue.
+
 Use these templates for the report’s proposed GitHub text. Replace
 placeholders and omit genuinely inapplicable sections; never fill a
 field with an invented result. Scale length to the finding. Use public,
 commit-pinned source links and public reference URLs; do not publish
-private conversations or private report links. Report IDs remain useful
-even when the report is not public.
+private conversations or private report links. Keep internal finding IDs
+in the audit ledger, not the public text.
 
 One existing-issue comment should consolidate the relevant reviewers’
 findings. Do not post separate repetitive comments from each role. A
@@ -486,52 +605,20 @@ labels merely because a template names a classification or severity.
 ### Comment on an existing open issue
 
 ``` markdown
-### Whole-package review: <issue topic>
+Re-evaluated against [<commit>](<commit URL>) on <date>: <current disposition>.
+<Plain-language conclusion and practical consequence.>
 
-**Reviewed:** <full commit SHA with link>; <date>.
-**Report findings:** <IDs>.
-**Assessment:** <supported / partly supported / not supported / already fixed /
-duplicate / unresolved scientific decision / valid enhancement>.
-**Classification and priority:** <type>; <Must fix / Should fix / Consider>.
-**Confidence:** <high / medium / low, with reason>.
-
-<Lead with the conclusion and its practical consequence. Distinguish the
-issue's premise from the merits of its proposed fix.>
-
-**Evidence and current behavior**
-
-- <Commit-pinned file/function/line link and what it establishes.>
-- <Relevant organ, input representation, or workflow; downstream consequence.>
-- <Authoritative source, release/version and section where needed.>
-
-**Assessment of the proposed solution**
-
-<Does it solve the underlying problem? What remains missing or could regress?
-Distinguish merged fixes from unmerged proposals. Preserve substantive
-reviewer disagreement and state what evidence would settle it.>
-
-**Validation**
-
-<Checks personally executed, exact commands and observed results, or explicitly
-"Source inspection only." Separate observed CI and author-reported checks.
-Give a small synthetic example if useful. State remaining data-dependent
-uncertainty without including patient-level values. Link retained audit tests
-and relevant proposed test/CI patches when publicly available; otherwise identify
-them by report artifact ID without exposing private locations.>
-
-**Recommended next step**
-
-<Keep open and refine scope / implement a specified repair / obtain a
-methodological decision / recommend closure as fixed or unsupported /
-recommend consolidation with #N. These are recommendations, not status changes.>
-
-**Acceptance checks**
-
-- <Observable behavior or source/documentation condition needed for resolution.>
-- <Regression/integration check and remaining maintainer check, where relevant.>
-
-**Related work:** <issue/PR links, merge status, and relationship>.
+Evidence: <pinned code/source links and what they establish; relevant check result>.
+<When needed: inline synthetic example or public, commit-pinned reproducer link;
+state source-inspection-only or unexecuted status and material limitations.>
+Next step: <specific action or maintainer decision, or no further action needed>.
 ```
+
+Add detail only where new evidence, uncertainty, or a scientific
+disagreement requires it. Separate current behavior from proposed
+repairs and identify a specific acceptance check when useful. Do not
+repeat generic scope, attribution, or validation paragraphs on every
+issue.
 
 For an already-fixed issue, cite the fixing commit and evidence at the
 reviewed revision. For an unsupported premise, explain why and
@@ -550,7 +637,7 @@ Suggested title:
 <Concrete trigger, current behavior, and expected behavior. For a validation
 gap, identify the unverified guarantee without asserting an unproven defect.>
 
-**Review reference:** <report finding IDs>; <date>.
+**Review date:** <date>.
 **Reviewed revision:** <full commit SHA with link>.
 **Classification:** <verified defect / concern / validation gap / documentation>.
 **Priority:** <Must fix / Should fix / Consider>.
@@ -568,7 +655,8 @@ code or only suspected under a specified condition.>
 State runtime/dependencies and actual versus expected output. If not executed,
 label it "Proposed reproducer, not executed" and explain the blocker.
 Separate personally executed checks, observed CI, and author-reported results.
-Identify retained test artifacts and any proposed permanent-test or CI patch.>
+Link public, commit-pinned reproducers and relevant proposed test/CI patches;
+do not substitute internal artifact IDs or private bundle commands.>
 
 ## Scientific basis
 
@@ -604,7 +692,7 @@ Suggested title:
 <State the exact question, affected outcomes/organs/functions, and why the
 choice cannot be inferred safely from the registry documentation.>
 
-**Review reference:** <report finding IDs>; <date>.
+**Review date:** <date>.
 **Reviewed revision:** <full commit SHA with link>.
 **Decision owner:** <maintainer or explicitly designated person>.
 **Status:** Proposed; not decided.
@@ -650,7 +738,7 @@ Suggested title: `Proposal: <capability and concrete use case>`.
 
 <The workflow currently blocked or unnecessarily error-prone, and who needs it.>
 
-**Review reference:** <report finding IDs>; <date>.
+**Review date:** <date>.
 **Reviewed revision:** <full commit SHA with link>.
 **Classification:** Enhancement proposal.
 **Priority and rationale:** <priority relative to correctness and validation work>.

@@ -6,6 +6,10 @@ how a review is triggered, are set outside this repository.
 
 Read `AGENTS.md` first. Its “This package” rules apply to reviews too.
 
+For reference material, follow
+[reference/README.md](https://vagishhemmige.github.io/sRtr/reference/README.md),
+the guide to scope, placement, and citation direction.
+
 ## Ground rules
 
 - **Use the rules on the target branch.** Read `AGENTS.md` and this file
