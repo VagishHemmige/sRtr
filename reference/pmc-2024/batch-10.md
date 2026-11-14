@@ -23,9 +23,8 @@ MT, 2026-11-14
   models require separate preparation steps. [reported Methods] Tags:
   `external-linkage`, `living-donor`, `death-source`.
 - **Data pitfalls:** Nondirected donation alone does not establish KPD. Listing
-  age differs from transplant age. Results/Discussion disagree on KPD counts and
-  DGF significance; resolve before reusing counts. [inference; unclear
-  Results/Discussion]
+  age differs from transplant age. Results/Discussion disagree on KPD counts;
+  resolve before reusing counts. [inference; unclear Results/Discussion]
 - **Locators:** Complete main text read from PMC XML: Methods, Results,
   Discussion. Supplement, exact relationship codes and score formulas not
   checked.
@@ -48,10 +47,9 @@ MT, 2026-11-14
   `derived-score`, `follow-up-horizon`.
 - **Data pitfalls:** Extensive missing laboratories and discontinued collection
   restrict representativeness. Binary-horizon handling of incomplete follow-up
-  and transplantation is insufficiently clear. Internal holdout performance is
-  not external validation; coefficients, log bases and inverse-link
-  transformation require verification before implementation. [reported
-  Limitations; unclear Methods; inference]
+  and transplantation is insufficiently clear. Coefficients, log bases and
+  inverse-link transformation need verification to reconstruct the score.
+  [reported Limitations; unclear Methods; inference]
 - **Locators:** Complete main text read from PMC XML, including model equations
   and Discussion; supplemental calculations and code not checked.
 
@@ -71,11 +69,12 @@ MT, 2026-11-14
   horizon; overall failure includes death. [reported Methods] Tags:
   `follow-up-horizon`, `derived-score`.
 - **Data pitfalls:** Failure-date wording includes relisting/death and needs
-  reconciliation with recorded graft failure. Matching-score construction
-  appears to use early-failure predictors; clarify propensity versus prognostic
-  scoring. The ROC-derived 30-minute boundary and conflicting matched-outcome
-  statements need checking. Selected transplanted donors cannot establish
-  protective preconditioning causally. [unclear Methods/Results; inference]
+  reconciliation with recorded graft failure. The 30-minute CPR boundary leaves
+  equality unclear. The cohort excludes unused donor livers, and matching
+  requires complete predictor/outcome records. [unclear Methods/Results;
+  inference] The relisting-or-death definition is the paper’s description of the
+  SRTR field [reported Outcomes], not independently verified SAF documentation;
+  reconcile it before relying on that definition [inference].
 - **Locators:** Complete main text read from PMC XML: Methods, Results,
   Discussion. DRI original specification, supplements and matching code not
   checked.
@@ -96,10 +95,10 @@ MT, 2026-11-14
   nephrectomy or retransplant; composite safety additionally includes death,
   serious events and HIV/infectious outcomes. [reported Methods] Tags:
   `external-linkage`, `follow-up-horizon`.
-- **Data pitfalls:** Study-specific noninferiority margin and composite endpoint
-  are not general safety defaults or evidence of equivalence for each component.
-  Distinguish protocol graft failure from death-inclusive graft survival.
-  Registry-only replication cannot reproduce adjudicated outcomes. [inference]
+- **Data pitfalls:** The composite requires study-adjudicated events beyond
+  death and graft failure. Distinguish protocol graft failure from
+  death-inclusive graft survival. Registry-only replication cannot reproduce
+  adjudicated outcomes. [inference]
 - **Locators:** Complete main text read from PMC XML; Methods, Results,
   Discussion. Linked protocol/supplement and adjudication specifications not
   fully inspected.
@@ -119,11 +118,9 @@ MT, 2026-11-14
   CMV infection. Preserve organ-combination categories, geography vintage and
   interactions; imputation applies to covariates. [reported Methods] Tags:
   `cross-organ-link`, `repeat-transplant`, `external-linkage`, `geography`.
-- **Data pitfalls:** Reported logit models and prevalence-ratio terminology need
-  reconciliation before translating effects. Missing-ZIP exclusion wording
-  appears inconsistent with reported availability. Area deprivation is
-  ecological and a fixed vintage may poorly describe earlier residence. [unclear
-  Methods; inference]
+- **Data pitfalls:** Missing-ZIP exclusion wording appears inconsistent with
+  reported availability. Area deprivation is ecological and a fixed vintage may
+  poorly describe earlier residence. [unclear Methods; inference]
 - **Locators:** Complete main text read from PMC XML: Methods, Results and
   Discussion. Supplementary geographic crosswalks and effect-estimation code not
   inspected.
@@ -147,9 +144,9 @@ MT, 2026-11-14
   `repeat-transplant`, `follow-up-horizon`.
 - **Data pitfalls:** Minimum one-year-follow-up eligibility needs clarification
   to exclude survivor selection. Original score coefficients, MELD bounds and
-  dialysis rules require source verification. Similar performance or
-  nonsignificant differences do not establish formal noninferiority; risk labels
-  are study-specific. [unclear Methods; inference]
+  dialysis rules require source verification. Risk-category boundaries are
+  score-specific rather than interchangeable across models. [unclear Methods;
+  inference]
 - **Locators:** Complete main text read from PMC XML: Methods through
   Conclusions. Original score publications and calibration supplements not
   checked.
