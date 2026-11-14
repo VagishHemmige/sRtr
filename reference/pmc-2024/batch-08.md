@@ -48,10 +48,14 @@ MT, 2026-11-14
   low-resolution evolutionary-group comparisons distinct from molecular mismatch
   predictions. [reported Statistics; Results] Tags: `donor-pair`,
   `follow-up-horizon`.
+  Cox covariates are DR mismatches, recipient sex, age and race, insurance,
+  pretransplant cPRA, cold ischemia time, dialysis time and cause of ESRD.
+  [reported Statistics]
 - **Data pitfalls:** SRTR lacks dnDSA and granular ABMR; low-resolution typing
-  cannot test all heterodimer hypotheses. Wording about required molecular
-  typing conflicts with acknowledged resolution. Follow-up exclusion conditions
-  on early survival. [reported Discussion; unclear Methods; inference]
+  cannot test all heterodimer hypotheses. The registry cohort
+  requires HLA molecular typing at A, B, C, DR and DQ [reported SRTR Registry
+  study]. Follow-up exclusion conditions on early survival. [reported
+  Discussion; inference]
 - **Locators:** Complete main text read from PMC XML, including laboratory and
   SRTR methods. Supplementary registry models, software and HLA mapping details
   not independently checked.

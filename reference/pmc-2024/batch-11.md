@@ -38,6 +38,9 @@ MT, 2026-11-14
 - **Population / unit:** Primary kidney recipients aged at least 55, receiving
   one specified induction agent and tacrolimus/mycophenolate at discharge;
   excludes ABO-incompatible/positive-crossmatch transplants. [reported Methods]
+  Of 106,295 recipients, exclusions remove 13,329 for other or no induction,
+  3,486 for other maintenance regimens and 2,184 for positive crossmatch or ABO
+  incompatibility. [reported Study Population]
 - **Files and fields:** Induction/discharge medications, donor–recipient CMV/EBV
   serology and longitudinal graft/death/rejection records; mappings unverified
   [inference].
@@ -122,6 +125,9 @@ MT, 2026-11-14
   Fine–Gray models. [reported Methods] Tags: `living-donor`, `derived-score`,
   `follow-up-horizon`.
   Unindexed donor GFR is donor eGFR × donor BSA / 1.73; recipient-indexed GFR multiplies that by 1.73 / recipient BSA. Last follow-up is March 2, 2023. [reported Methods; source checked by Claude, 2026-11-14]
+  Plausibility exclusions are creatinine ≤0.4 or ≥2.0 mg/dL, height <120 or >210
+  cm and weight <40 or >150 kg; BSA is DuBois. Follow-up ends at last reported
+  follow-up or March 2, 2023. [reported main text]
 
 - **Data pitfalls:** Results swap units for indexed/deindexed estimates; retain
   dimensional checks rather than copying labels. Donor-selection restriction

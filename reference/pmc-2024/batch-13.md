@@ -13,6 +13,10 @@ MT, 2026-11-14
 
 - **Population / unit:** Active adult kidney centers with recorded filter
   settings; distinct center-month and candidate-offer units. [reported Methods]
+  The study counts 91 filters and analyzes 192 centers after excluding 38
+  pediatric centers, 38 with no deceased-donor transplants in 2021/2022 and 10
+  with no filter settings; bypasses for reasons outside the center's control are
+  dropped. [reported main text]
 - **Files and fields:** UNOS center filter settings linked to SRTR kidney offer
   records; filter-settings availability is separate from routine SAFs [reported
   Methods; inference].
@@ -88,6 +92,8 @@ MT, 2026-11-14
 
 - **Population / unit:** Deceased-donor kidney recipients with complete analyzed
   predictors; repeated transplants retained. [reported Methods/Results]
+  n = 89,290 analyzed; retransplants are 12.4%; complete-case analysis with 2.1%
+  missing. [reported Data; Table 1; Statistical Analysis]
 - **Files and fields:** Donor KDPI/KDRI, recipient history, transplant and
   failure/death follow-up; donor identifiers preserve paired kidneys [reported
   Methods].
@@ -115,6 +121,10 @@ MT, 2026-11-14
 - **Population / unit:** Reported liver, kidney, heart, lung, heart–lung,
   intestine and very small pancreas groups; exact eligibility and
   baseline-diabetes exclusions unclear. [reported/unclear Methods]
+  Group sizes: LT 87,763; KT 214,935; IT 2,047; PA 68; HT 37,962; LU 23,904; HL
+  535. Table 1 gives the PA group mean age 2.4 years and mean weight 11.6 kg, so
+  pediatric recipients appear to be included. [reported Results; Table 1;
+  inference]
 - **Files and fields:** Medication indicators, diabetes and mortality records
   implied; no reproducible SAF field mapping supplied [inference].
   Brand and generic drug names are listed in Definition of terms, providing the source for medication-class mapping. [reported Definition of terms; source checked by Claude, 2026-11-14]
@@ -150,6 +160,11 @@ MT, 2026-11-14
   weight loss. Aggregate center metrics before donor linkage; use
   center-clustered logistic GEE and imputation sensitivity. [reported Methods]
   Tags: `living-donor`, `external-linkage`.
+  The outcome is a yes to any of three survey questions (asked to lose weight
+  before approval, after approval, or required to have weight-loss surgery).
+  Metabolic thresholds: glucose >100 mg/dL or HbA1c >5.6; BP ≥130/80;
+  triglycerides >150; HDL <40 (men) or <50 (women). [reported Outcomes and
+  Exposures]
 - **Data pitfalls:** Rejected candidates and donors who reduced BMI below
   eligibility threshold are not represented. Missing metabolic components are
   assumed absent in primary scoring; reported count range needs reconciliation
