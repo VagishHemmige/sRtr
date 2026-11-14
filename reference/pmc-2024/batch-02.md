@@ -141,6 +141,8 @@ Screened, 2026-11-14
 - **Files and fields:** Transplant/follow-up, primary diagnosis, Milan
   eligibility and graft-failure cause records; exact mappings unverified
   [inference].
+  Milan eligibility is a dataset yes/no field; missing primary diagnosis or follow-up causes exclusion. [reported Study Designs; source checked by Claude, 2026-11-14]
+
 - **Data needs:** Separate patient and graft survival, transplantation eras and
   Milan eligibility. Graft failure is described through regrafting or a recorded
   death cause; no recorded death is treated as alive through May 2023. [reported
@@ -149,7 +151,4 @@ Screened, 2026-11-14
   [inference]. Calendar bounds differ between abstract and Methods; precise
   failure/censor construction requires clarification. [unclear Abstract; Study
   Designs; Outcome Definitions]
-- **Locators:** Retrieved Methods, Results and Discussion passages via PMC
-  search cache. Direct PMC retrieval returned a browser check; complete
-  main-text coverage not established. Remains Screened; tables/captions and
-  supplements not appraised.
+- **Locators:** Initial abstract/targeted reading was supplemented by Claude's browser review of PMC Methods on 2026-11-14 (sections cited above). Full text was accessible, but the review explicitly reports Methods rather than a complete main-text read. Screened retained; full Results/Discussion, tables and supplements are not established as read.
