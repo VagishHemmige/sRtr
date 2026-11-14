@@ -19,6 +19,8 @@ listing 2019–2022; follow-up through March 2023 · MT, 2026-11-14
   repeated observations by candidate; split training/test sets by center.
   [reported Methods] Tags: `candidate-registration`, `status-history`,
   `post-removal-death`, `death-source`, `derived-score`.
+  Censoring is at transplant, last removal or active/inactive status date. eGFR uses race-neutral CKD-EPI 2021 with dialysis assigned zero; BNP and NT-proBNP require a type indicator. [reported Methods; Statistical Analysis]
+
 - **Data pitfalls:** carrying observations forward and imputing normal values
   affect trajectories [reported Methods; Limitations]. Device classification
   was corrected: temporary percutaneous devices had been misclassified as
@@ -74,6 +76,8 @@ SRTR releases June 2021/March 2023 · MT, 2026-11-14
   posttransplant follow-up ends at death, retransplant or last follow-up, with
   era-specific administrative cutoffs. [reported Methods] Tags: `geography`,
   `external-linkage`, `policy-era`, `derived-score`, `candidate-registration`.
+  Both cohorts exclude status 1; ACS measures use 2014–2018 and region refers to the listing center. [reported Materials and Methods]
+
 - **Data pitfalls:** unmatched/nonresidential ZIPs and missing index/center data
   cause exclusions; neighborhood measures are ecological [reported Methods;
   Discussion]. Preserve the release, era and geographic denominator when
@@ -89,6 +93,8 @@ listed January 2015–May 30, 2022; cutoff May 31, 2022 · MT, 2026-11-14
 - **Population / unit:** adult kidney candidates in their first eligible
   waitlist period; never-activated candidates excluded. Unit: candidate.
   [reported Methods]
+  Exclude undocumented listing-date consent and living-donor transplant on listing/activation day. [reported Methods; Figure 1]
+
 - **Files and fields:** candidate/status records, consent, removal events,
   transplant donor KDPI and center identifiers; exact mappings unverified
   [inference].
@@ -124,8 +130,7 @@ linkage · 1996–2019, bounded by registry coverage · MT, 2026-11-14
 - **Data pitfalls:** organ type is a proxy for immunosuppression, not measured
   treatment intensity; registry covariates leave important exposures unmeasured
   [reported Discussion]. SAF malignancy flags alone cannot reproduce the
-  linked histology-specific outcome classification [inference]. Epidemiologic
-  patterns do not establish a tumor's viral cause [reported Discussion].
+  linked histology-specific outcome classification [inference].
 - **Locators:** Methods; Results; Discussion; Data availability. Main text read;
   tables/captions not comprehensively appraised; supplementary classification
   details unread.
@@ -149,9 +154,8 @@ MT, 2026-11-14
   `geography`, `follow-up-horizon`.
 - **Data pitfalls:** generated populations and simulated outcomes differ from
   observed records; fitted modules depend on historical inputs and
-  recalibration [reported Methods; Discussion]. Lung-specific assumptions
-  should not become other organs' defaults [inference].
+  recalibration [reported Methods; Discussion]. Compatibility and allocation inputs are lung-specific [reported Methods].
 - **Locators:** Methods; Results; Discussion. Main text read; tables, figure
   captions and supplements not comprehensively appraised.
   [Code linked by the article](https://github.com/ClevelandClinicQHS/COMET)
-  has not been inspected.
+  has a focused source annotation in [repositories.md](../repositories.md#clevelandclinicqhscomet); this is not a full code audit.
