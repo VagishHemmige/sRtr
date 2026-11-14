@@ -94,9 +94,12 @@ Do not maintain a separate routing guide in review instructions.
 
 Use the whole-package protocol's knowledge-integration rules in proportion to the
 review: a routine PR need not produce a separate report or ledger.
-Prepare concise amendments when verified sources, field meanings, methodological
-limits, or decision rationale would prevent future rediscovery. Link the owning
-issue and preserve unresolved choices as unresolved. A review request alone does
+Preserve verified background about the database and its use: sources, field
+meanings, collection eras, and methodological limitations. Keep sRtr function
+behavior, defects, implementation proposals, and package decisions in issues,
+PRs, tests, function documentation, or dated review records, not in `reference/`.
+A brief issue cross-link may connect background to work without copying the
+package assessment. Preserve unresolved scientific questions as unresolved. A review request alone does
 not authorize pushing those amendments; follow existing documentation permissions
 and otherwise deliver the concrete diff. Raw reviewer notes and repeated issue
 text do not belong in the reference catalogue.

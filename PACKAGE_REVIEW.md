@@ -92,7 +92,7 @@ waves if concurrency is limited; do not omit a role to fit available slots.
 | Senior R package engineer | Every exported function and internal helper, contracts, types, attributes, dependencies, namespace, errors, side effects, and architecture |
 | Data and spatial methods engineer | SAS/parquet input, identifiers, joins, factors, dictionary mappings, performance, HRSA access, CRS, geometries, overlap and population weighting |
 | Independent testing and reproducibility engineer | Owns the existing-test and CI audit, creation and execution of reusable synthetic audit tests, and concrete permanent-test and CI proposals; challenges expectations, mocks, boundary cases, integration coverage, skips, clean-session operation, and Windows |
-| Scientific librarian and provenance reviewer | Sources for every scientific definition, code set, coefficient and methodological claim, including release/version and section |
+| Scientific librarian and provenance reviewer | Sources for every scientific definition, code set, coefficient and methodological claim, including release/version and section; reference-catalogue quality, scope, organization, and integration |
 | Researcher using the package | Installation, README, help, vignettes and website; discoverability, comprehensibility, practical misuse risks, and missing capabilities |
 
 Split data engineering and spatial methods into separate reviewers when the
@@ -109,6 +109,17 @@ Use available package-development, critical-code-review, test-review, testthat,
 design, and accessibility guidance where relevant. Apply pkgdown and R package
 requirements rather than importing analysis-project Quarto or reporting rules
 that do not fit this repository. Record unavailable capabilities.
+
+The scientific librarian/provenance reviewer owns the reference review and
+curation proposal. Check source locators, retrieval status, release/organ scope,
+duplicates, contradictions, and placement against `reference/README.md`.
+Specialty reviewers verify the substantive interpretations in their domains;
+the librarian does not settle clinical disagreements by authority. The coordinator
+verifies that important background discoveries are retained and package findings
+are routed to their owning work items. Record this disposition concisely in the
+existing handoff, not a separate permanent backlog. Catalogue assessments occur
+after independent first passes; neutral source-packet preparation still follows
+the blinding rules below.
 
 ## Reference resources and reviewer packets
 
@@ -411,17 +422,21 @@ patch/link), deferred (with owning issue and reason), or archive-only (with
 reason). A report that merely recommends saving sources has not completed this
 step. Report analytical coverage and pending integration/approval separately.
 
-Keep entries short and topic-based: what was verified, why it matters, applicable
-organ/population/release, exact source section or code revision, verification
-status/date, and the owning issue. Amend existing entries, reconcile contradictions,
+Keep reference entries short and topic-based: database background, what a source
+establishes about its use, applicable organ/population/release, exact source
+section or external code revision, and verification status/date. sRtr function
+behavior, defects, proposed fixes, and package decision rationale belong in
+issues/PRs, tests, implementation documentation, or dated review records. A brief
+issue cross-link is useful; copying the package assessment into references is not. Amend existing entries, reconcile contradictions,
 and mark superseded conclusions. Preserve important disagreements and evidentiary
 limits; reviewer agreement is not a scientific authority. Do not paste reviewer
 transcripts, full reports, logs, or issue-comment compilations into the catalogue.
 
-An unresolved scientific question belongs with its owning issue and supporting
-reference entry. Do not present an alternative as an approved definition. Once
-the maintainer decides, record the selected definition, source or explicit
-package assumption, rationale, and affected tests/help in the maintained location.
+Track unresolved package choices in their owning issues; reference entries may
+explain the underlying scientific alternatives without becoming a decision log.
+Do not present an alternative as an approved definition. Once the maintainer
+decides, record the selected package definition, source or explicit assumption,
+rationale, and affected tests/help in implementation documentation and the issue.
 The audit decision register is a dated snapshot, not a second live backlog.
 
 Keep full coverage/evidence/progress records and reusable audit artifacts in the
