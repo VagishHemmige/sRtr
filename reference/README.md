@@ -11,7 +11,7 @@ This folder is excluded from the package build (`.Rbuildignore`).
 | [`methodology-review.md`](methodology-review.md) | Topic-by-topic background: estimands, ascertainment, methodological alternatives, and limitations |
 | [`repositories.md`](repositories.md) | Other code repositories reviewed, with the commit read and what was learned |
 | [`web-sources.md`](web-sources.md) | Websites and papers consulted, with access dates and key passages |
-| [`pmc-2024.md`](pmc-2024.md) | 89 direct/linked SRTR studies from a 2024 PMC publication search; reading status and compact organ, data, methods, and function-relevance annotations |
+| [`pmc-2024.md`](pmc-2024.md) | 89 SRTR studies from a 2024 PMC publication search: index with organ, SRTR role and reading status; annotations of data needs |
 | [`codebook-notes.md`](codebook-notes.md) | Field and code meanings checked against named dictionary/codebook versions |
 
 ## Scope and placement
@@ -61,7 +61,8 @@ status.
 
 - *SRTR role:* `SAF analysis`; `External linkage` (SRTR joined to another
   source and analyzed); `Case-finding or local source` (SRTR used to find
-  cases, or as one part of a local data warehouse); `Methods or simulation`.
+  cases, or as one part of a local data warehouse); `Methods or simulation`;
+  `Not recorded` (role not yet checked).
 - *Reading status:* `Screened` (title, abstract, targeted passages); `MT`
   (complete main text); `MT+T` (plus tables and figure captions); `MT+T+S`
   (plus supplements).
