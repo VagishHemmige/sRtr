@@ -22,7 +22,10 @@ generalizations across organs.
 
 Review is read-only with respect to package implementation. Do not silently fix
 code or decide scientific defaults. Proposed repairs and methodological choices
-belong in the report for maintainer consideration.
+belong in the report for maintainer consideration. Review work includes writing
+and running independent synthetic audit tests in the isolated workspace and
+preparing concrete test and CI patches for review. Preserve these as deliverables;
+do not silently install them into the package or activate changed workflows.
 
 Never access, copy, upload, or expose patient-level SRTR data. Never execute
 real-SAF tests, even if environment variables enable them. The connected working
@@ -51,7 +54,7 @@ waves if concurrency is limited; do not omit a role to fit available slots.
 | Biostatistician and epidemiologist | Time origins, estimands, event ascertainment, censoring, competing events, missingness, composite outcomes, risk calculations, and units |
 | Senior R package engineer | Every exported function and internal helper, contracts, types, attributes, dependencies, namespace, errors, side effects, and architecture |
 | Data and spatial methods engineer | SAS/parquet input, identifiers, joins, factors, dictionary mappings, performance, HRSA access, CRS, geometries, overlap and population weighting |
-| Independent testing and reproducibility engineer | Independently justified expectations, mocks, boundary cases, integration tests, skips, CI, clean-session operation, and Windows |
+| Independent testing and reproducibility engineer | Owns the existing-test and CI audit, creation and execution of reusable synthetic audit tests, and concrete permanent-test and CI proposals; challenges expectations, mocks, boundary cases, integration coverage, skips, clean-session operation, and Windows |
 | Scientific librarian and provenance reviewer | Sources for every scientific definition, code set, coefficient and methodological claim, including release/version and section |
 | Researcher using the package | Installation, README, help, vignettes and website; discoverability, comprehensibility, practical misuse risks, and missing capabilities |
 
@@ -136,7 +139,34 @@ and state what would settle them. Distinguish source-backed facts from package
 choices and unresolved questions. A scientific choice needs options, consequences,
 and a named maintainer decision; do not add options merely to avoid deciding.
 
-## 4. Independent validation
+## 4. Independent validation, test creation, and CI
+
+The testing and reproducibility engineer owns this workstream. Clinical,
+registry, and statistical reviewers establish the scientific basis for expected
+results; package and data engineers help construct fixtures and integration
+checks. The testing reviewer independently challenges those expectations and
+implementations. Every reviewer contributes relevant failure cases.
+
+### Existing tests and CI
+
+Audit every test file and workflow, including helper/setup code. Map existing
+tests to functions, scientific definitions, organ-specific paths, and complete
+user workflows. Record what is untested; line coverage alone does not establish
+correctness.
+
+For CI, inspect triggers and path filters, tested revisions, R/OS matrices,
+dependency installation and caching, optional dependencies, permissions,
+secrets handling, external-service access, timeouts, skips, failure propagation,
+and retained logs/artifacts. Check whether meaningful failures can be hidden by
+continue-on-error, unconditional skips, or jobs that never run. Distinguish
+workflow configuration from observed execution. Inspect required-check settings
+where access permits; unavailable settings are an explicit verification gap.
+Assess synthetic SAS/parquet paths, Windows behavior, package checks, documentation
+builds, and data-safety guards where relevant. Do not execute documentation or
+examples that access real SAFs.
+
+### Create and preserve independent audit tests
+
 
 Inspect test expectations independently of implementation. Use authoritative
 definitions and hand-worked synthetic examples. Assess whether mocks bypass the
@@ -148,6 +178,59 @@ downstream reach; start focused, then broaden where justified. For a whole-packa
 audit, assess the complete suite and package checks when safely feasible, while
 ensuring real-SAF tests cannot execute. Do not run restricted or expensive
 operations merely to fill the ledger.
+
+Write meaningful new synthetic tests for uncovered high-risk behavior and
+suspected defects during the audit; do not defer all test creation to later
+implementation. Preserve reusable test files, small documented synthetic
+fixtures or fixture generators, and an exact runner with the report. Keep audit
+additions distinct from the frozen baseline and identify which checks are
+existing tests versus new audit tests. A later test author must be able to rerun
+them against the same revision without reconstructing the review conversation.
+
+For each new test, record its purpose, independently justified expectation,
+source or accepted contract, affected paths, finding/issue IDs, dependencies,
+command, and result. Include regression and integration tests as appropriate;
+for outcomes, check event status, assigned date, censoring date, and elapsed time.
+Do not create tests that merely restate implementation or enforce an unresolved
+scientific preference.
+
+Classify deliverables as:
+
+- Passing: evidence for specified behavior and candidate permanent coverage.
+- Failing: a reproducible discrepancy linked to a finding, with defect versus
+  incorrect-test-expectation distinguished by evidence.
+- Decision-dependent: alternative synthetic comparisons awaiting a scientific
+  decision; do not encode one alternative as the approved expectation.
+- Blocked or not run: exact execution blocker and remaining verification work.
+
+Retain a failing reproducer even if the package fix is outside review scope.
+Do not make it pass by weakening assertions, adding unjustified skips, or
+silently changing package behavior. After approval to implement, demonstrate
+failure before the fix and success afterwards where feasible.
+
+### Concrete test and CI proposals
+
+Deliver reviewable test additions and targeted workflow patches for material
+gaps, not only recommendations to add tests or improve CI. Identify destination
+files, rationale, commands/jobs, platform and dependency requirements, expected
+signals, approximate resource needs where known, and validation already performed.
+Separate fast routine checks from justified broader or scheduled checks. Tie
+each proposed change to a finding or documented coverage gap; if no change is
+warranted, state that conclusion and its evidence rather than inventing work.
+
+Show complete proposed new files and readable diffs for changed files. Preserve
+patches and test artifacts with the report in durable, maintainer-accessible
+storage allowed by the session. Record locations in the coverage ledger. Do not
+rely on temporary workspace paths as the only retained copies.
+
+Preparing CI patches does not authorize activating workflows, changing repository
+settings, using secrets, or executing untrusted PR code with elevated permissions.
+State which checks were validated locally and which require a subsequently
+authorized CI run. Permanent package tests and workflow installation are a
+separate implementation step through task branches and PRs after maintainer
+review. Any accompanying behavior change still needs per-file approval.
+
+### Execution record and remaining checks
 
 Record actual OS, R version, dependency versions, commands, results and skips.
 Separate personally executed synthetic checks, source inspection, observed CI
@@ -203,6 +286,11 @@ Deliver:
 - Scientific decision register with alternatives and consequences.
 - Definition/source tables and coverage ledger.
 - Validation log, limitations, reviewer disagreements and corrections.
+- Reusable audit tests and synthetic fixtures/generators, exact execution
+  instructions, and a manifest distinguishing passing, failing,
+  decision-dependent and blocked checks.
+- Concrete permanent-test and CI patches addressing material gaps, with
+  destination files, dependencies, validation status and proposed rollout.
 - Staged roadmap appropriate to the package's development stage.
 
 Give each finding a stable ID, severity (Must fix / Should fix / Consider),
@@ -214,7 +302,9 @@ Keep classifications separate from severity. Do not report suggestions as bugs.
 An audit is complete only when every in-scope file, function and open issue has
 a disposition; serious findings have a reproducer or a specific verification
 blocker; scientific claims have sources or explicit uncertainty; and draft issue
-comments and new-issue proposals are ready for maintainer review. A disposition
+comments and new-issue proposals are ready for maintainer review. Reusable audit
+tests and justified test/CI proposals must also be preserved and linked; each
+material test or CI gap needs a concrete draft or a specific blocker. A disposition
 of "not assessed" remains a coverage gap, not completed substantive review.
 If gaps remain, label the report partial and state what remains to finish.
 
@@ -229,6 +319,10 @@ new issues for accepted findings. Prepare all drafts in the report first.
 Before posting, refresh revisions and discussions, check for duplicate comments
 and issues, and revise drafts when intervening work changes the conclusion.
 Confirm writes succeeded and map report IDs to posted URLs.
+
+Review-created tests and proposed CI patches are report deliverables. Installing
+them in the package or activating workflows follows the separately authorized
+implementation step; it is not implied by permission to post issue findings.
 
 Do not close issues, formally approve or merge PRs, or modify package code as
 part of this audit. Those actions require their own authorization. Behavior
@@ -282,7 +376,9 @@ reviewer disagreement and state what evidence would settle it.>
 <Checks personally executed, exact commands and observed results, or explicitly
 "Source inspection only." Separate observed CI and author-reported checks.
 Give a small synthetic example if useful. State remaining data-dependent
-uncertainty without including patient-level values.>
+uncertainty without including patient-level values. Link retained audit tests
+and relevant proposed test/CI patches when publicly available; otherwise identify
+them by report artifact ID without exposing private locations.>
 
 **Recommended next step**
 
@@ -330,7 +426,8 @@ code or only suspected under a specified condition.>
 <Minimal, obviously synthetic example and exact commands when available.
 State runtime/dependencies and actual versus expected output. If not executed,
 label it "Proposed reproducer, not executed" and explain the blocker.
-Separate personally executed checks, observed CI, and author-reported results.>
+Separate personally executed checks, observed CI, and author-reported results.
+Identify retained test artifacts and any proposed permanent-test or CI patch.>
 
 ## Scientific basis
 
