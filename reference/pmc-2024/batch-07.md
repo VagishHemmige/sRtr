@@ -43,13 +43,16 @@ MT, 2026-11-14
   follow-up; exact mappings unverified [inference].
 - **Data needs:** Distinguish ACLF at listing from transplantation; separate
   donor-age groups and donor–recipient age combinations. Graft endpoint includes
-  failure/retransplantation. [reported Study design] Tags: `derived-score`,
-  `follow-up-horizon`.
+  failure/retransplantation. [reported Study design] ACLF is assessed at listing
+  and transplant: bilirubin ≥12 mg/dL, encephalopathy grade 3–4, INR ≥2.5, and
+  creatinine ≥2 mg/dL or dialysis define specified failures; creatinine 1.5–1.9
+  defines dysfunction. Vasopressors and ventilation proxy circulatory and
+  respiratory failure. Donor-age groups are ≤17, 18–59 and ≥60 [reported Study
+  design]. Tags: `derived-score`, `follow-up-horizon`.
 - **Data pitfalls:** Ventilation and vasopressors are imperfect organ-failure
-  proxies. Death handling in graft survival is unspecified. Discussion describes
-  IPTW as losing unmatched patients, requiring implementation clarification.
-  Living donors are a small minority. [reported Limitations; unclear Study
-  design; Discussion]
+  proxies. Death handling in graft survival is unspecified. Membership of the
+  weighted analysis cohort needs clarification. Living donors are a small
+  minority. [reported Limitations; unclear Study design; Discussion]
 - **Locators:** Materials and Methods; Results; Discussion. Complete main text
   read from PMC XML; supplemental weighting and ACLF details not independently
   verified.
@@ -62,15 +65,17 @@ MT, 2026-11-14
 
 - **Population / unit:** Adult deceased donors with at least one
   kidney/liver/heart/lung recovered; excludes HIV/HBV/HCV-positive donors. Units
-  differ by organ. [reported §§2.2–2.4]
+  differ by organ. [reported §§2.2–2.4] Kidney donors missing serum creatinine
+  are excluded [reported §2.4].
 - **Files and fields:** Donor infection-risk classification, testing,
   recovery/disposition and recipient/match information; exact mappings
   unverified [inference].
 - **Data needs:** Separate recovered-but-unused from overall non-utilization.
   Kidneys are separate observations; a liver or lung donor counts as utilized if
   any part/lung is transplanted. Model policy interaction and secular trend;
-  assess donor correlation. [reported §2.4] Tags: `donor-pair`,
-  `cross-organ-link`, `policy-era`.
+  assess donor correlation. [reported §2.4] Kidney models retain individual KDRI
+  component factors rather than the composite index [reported §2.4]. Tags:
+  `donor-pair`, `cross-organ-link`, `policy-era`.
 - **Data pitfalls:** PHS classification itself changes across eras; do not treat
   it as stable biological risk. Denominators exclude potential donors with no
   recovered organ. Policy and COVID changes overlap. [reported Methods;
@@ -90,14 +95,17 @@ MT, 2026-11-14
   coverage. [reported Methods]
 - **Files and fields:** SRTR–cancer-registry linkage; death-certificate cause
   from vital statistics/NDI; external SEER8 comparison rates [reported Methods].
+  The linkage covers 28 cancer registries and 61% of US recipients in 1990–2019
+  [reported Methods].
 - **Data needs:** Separate de novo invasive melanoma from melanoma death; use
   sex/age/calendar-specific expected rates for SIR/SMR. Posttransplant melanoma
-  enters mortality models as time-dependent exposure. [reported Methods] Tags:
+  enters mortality models as time-dependent exposure. [reported Methods]
+  Follow-up also ends at SRTR loss to follow-up [reported Methods]. Tags:
   `external-linkage`, `death-source`, `follow-up-horizon`.
 - **Data pitfalls:** Cancer registries do not record recurrence; melanoma
   mortality is only a surrogate. Detailed AJCC stage/Breslow depth unavailable.
-  Immunosuppression and transplant era are associated, and drug effects violate
-  proportional hazards. [reported Discussion; Results]
+  Immunosuppression information is tied to transplant-era practices rather than
+  a complete longitudinal dosing history. [reported Discussion; Results]
 - **Locators:** Methods; Results; Discussion. Complete main text read from PMC
   XML; cancer-code mappings, tables and supplements not independently checked.
 
