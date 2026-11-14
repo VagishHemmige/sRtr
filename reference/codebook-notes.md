@@ -86,3 +86,20 @@ MELD/PELD 6. The prefixes alone do not distinguish MELD from PELD; use the
 appropriate score-type fields and policy era. REC_PREV_KI is described as prior
 kidney transplantation but has no confirming binary format in the inspected
 HTML dictionary; a universal 0/1 or PAK mapping is not established by that label.
+
+## Admission timing and medication indication
+
+Rechecked 2026-11-14 against the bundled SRTR 2203 HTML dictionary and workbook
+at revision `e7a74d1fba67d25970703545cb11eda07007080c` (metadata only).
+REC_POSTX_LOS is labeled "Time after first Tx, same stay". A retransplant during
+that admission therefore requires checking the time origin before interpreting
+length of stay as time from the later operation; the label alone does not verify
+a replacement discharge-date calculation.
+
+IMMUNO distinguishes REC_DRUG_CD (format DRUG) from REC_DRUG_INDUCTION,
+REC_DRUG_MAINT, and REC_DRUG_ANTI_REJ. Drug identity alone does not establish its
+indication. The workbook maps DRUG 20 to DAB486-IL-2; the mechanism source in
+[web-sources.md](web-sources.md#williams-et-al-cellular-processing-of-dab486-il-2-1990)
+explains why name-based grouping with receptor-blocking antibodies is unsafe.
+The workbook's independent release remains unestablished. These targeted checks
+do not validate every medication class, indication value, or organ-specific linkage.

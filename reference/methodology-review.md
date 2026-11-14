@@ -32,6 +32,11 @@ interchangeable endpoints. Verify whether an organ/release's derived graft date
 already incorporates component events before constructing a composite. Equal
 failure and death dates do not establish within-day event ordering.
 
+For a concrete organ comparison, consult the PSR source entry's Section C
+locator and the [pancreas annual-report entry](web-sources.md#optnsrtr-2024-annual-data-report-pancreas).
+They distinguish outcome components and observation windows. Match the organ,
+report purpose, population, and policy era before reusing either definition.
+
 ## Status histories and units of analysis
 
 A person, listing, transplant episode, and follow-up form are different units.
@@ -71,6 +76,16 @@ aggregation on long tables is another. Neither representation alone validates a
 cohort. Distinguish unmatched records, missing keys, duplicate parents, and
 intentional exclusions. No follow-up is an observation-completeness question,
 not a universal exclusion rule for every survival analysis.
+
+## Medication exposures
+
+Separate recorded drug identity, indication, timing, and class assignment.
+A medication record does not by itself establish induction treatment; multiple
+records may represent a regimen. Absence of records, unknown indication, and
+observed records without induction are different observation states. Preserve
+those distinctions before constructing research exposure categories. See the
+[medication metadata notes](codebook-notes.md#admission-timing-and-medication-indication)
+for the verified fields and the limits of drug-name-based classification.
 
 ## Missing values, plausibility, and modeling
 
