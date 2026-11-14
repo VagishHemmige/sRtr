@@ -25,16 +25,15 @@ MT, 2026-11-14
   `follow-up-horizon`.
 - **Data pitfalls:** Observed strategy-followers alone give selected validation
   subsets. Verify person-level development/validation separation for repeated
-  landmarks and combined censoring assumptions. Equation 2 was corrected July
-  2024; use corrected source and inspect code before reuse. [reported
+  landmarks and combined censoring assumptions. Equation 2 has an [erratum](https://pubmed.ncbi.nlm.nih.gov/39038238/) published online August 6, 2024 (doi:10.1097/EDE.0000000000001769); use corrected source and inspect code before reuse. [reported
   Discussion/correction; inference]
 - **Locators:** Complete main text read from PMC XML. Supplemental setup not
   read; article-linked R simulation code:
-  https://github.com/survival-lumc/Validation_Under_Interventions (not audited).
+  https://github.com/survival-lumc/Validation_Under_Interventions (focused source inspection in [repositories.md](../repositories.md#survival-lumcvalidation_under_interventions), not a full audit).
 
 ### PMC11275659
 
-Heart, liver and lung offer acceptance inequities · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC11275659/) ·
+Heart, liver and lung offer acceptance inequities (preprint) · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC11275659/) ·
 doi:10.1101/2024.07.14.24310395 · External linkage · 2010–2020 offers ·
 MT, 2026-11-14
 
@@ -52,6 +51,8 @@ MT, 2026-11-14
   independently verified. Random offer splits can share donors/candidates across
   sets. Later-transplanted-only sensitivity selects recipients using a future
   event. [reported Limitations; inference]
+  PTR refusal codes are not covered by the bundled dictionary; absence there does not establish unavailability in supplemental offer data. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here]
+
 - **Locators:** Complete main text read from PMC XML; Data/cohort, Statistical
   Analysis, Results and Discussion. Supplemental mappings, censoring rules and
   full covariate list not checked.
@@ -138,7 +139,7 @@ doi:10.1093/bjsopen/zrae058 · SAF analysis · 2002–2020; cutoff December 31, 
 MT, 2026-11-14
 
 - **Population / unit:** Adult first liver recipients, excluding multivisceral,
-  ABO-incompatible and selected non-HCC malignant indications; matching within
+  ABO-incompatible and all hepatic malignancies other than HCC; matching within
   biochemical MELD strata. [reported Methods]
 - **Files and fields:** Recipient/donor/transplant data plus later relisting,
   retransplant and mortality; exact linkage mappings unverified [inference].
