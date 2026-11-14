@@ -16,7 +16,8 @@ by an event date and a censor date:
 add_time_to_event_outcomes(
   df,
   death_window = c("follow_up", "ascertainment"),
-  ascertainment_date = NULL
+  ascertainment_date = NULL,
+  graft_death_same_day = c("censor", "event")
 )
 ```
 
@@ -47,6 +48,21 @@ add_time_to_event_outcomes(
   One date up to which deaths are ascertained in your SAF release, from
   its release notes. Required when `death_window = "ascertainment"`.
 
+- graft_death_same_day:
+
+  How to treat a graft failure dated on the day the recipient died:
+
+  - `"censor"` (default): as death with a functioning graft. The graft
+    is censored at death, not counted as failed.
+
+  - `"event"`: as a graft failure.
+
+  The default is a package assumption, not an SRTR rule: the data
+  dictionary does not say whether the graft failure date is filled in
+  with the death date when a recipient dies with a functioning graft. A
+  real failure and death can also fall on the same day. Run both
+  settings to see how much your results depend on it.
+
 ## Details
 
 `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only
@@ -54,3 +70,10 @@ the event and censoring columns (`REC_DEATH_DT_COMPOSITE_BINARY`,
 `_CENSOR`, `_days`) depend on `death_window`. Counting deaths found
 after last follow-up while censoring survivors at last follow-up would
 overstate mortality (#18).
+
+Graft failure (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI` and
+`TFL_GRAFT_DT_PA` for `TX_KP`) is death-censored: each graft is followed
+until the earlier of its last follow-up date and the recipient's death
+from any source (`REC_DEATH_DT_COMPOSITE`), whatever `death_window` is.
+A graft failure dated after death is not counted. Death with a
+functioning graft is a censoring time, not a graft failure.

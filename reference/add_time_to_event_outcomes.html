@@ -62,7 +62,8 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_time_to_event_outcomes</span><span class="op">(</span></span>
 <span>  <span class="va">df</span>,</span>
 <span>  death_window <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"follow_up"</span>, <span class="st">"ascertainment"</span><span class="op">)</span>,</span>
-<span>  ascertainment_date <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  ascertainment_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  graft_death_same_day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"censor"</span>, <span class="st">"event"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -90,6 +91,18 @@ count; everyone else is assumed alive and censored at that date.</p></li>
 your SAF release, from its release notes. Required when
 <code>death_window = "ascertainment"</code>.</p></dd>
 
+
+<dt id="arg-graft-death-same-day">graft_death_same_day<a class="anchor" aria-label="anchor" href="#arg-graft-death-same-day"></a></dt>
+<dd><p>How to treat a graft failure dated on the day
+the recipient died:</p><ul><li><p><code>"censor"</code> (default): as death with a functioning graft. The graft is
+censored at death, not counted as failed.</p></li>
+<li><p><code>"event"</code>: as a graft failure.</p></li>
+</ul><p>The default is a package assumption, not an SRTR rule: the data
+dictionary does not say whether the graft failure date is filled in with
+the death date when a recipient dies with a functioning graft. A real
+failure and death can also fall on the same day. Run both settings to see
+how much your results depend on it.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -98,6 +111,12 @@ event and censoring columns (<code>REC_DEATH_DT_COMPOSITE_BINARY</code>, <code>_
 <code>_days</code>) depend on <code>death_window</code>. Counting deaths found after last
 follow-up while censoring survivors at last follow-up would overstate
 mortality (#18).</p>
+<p>Graft failure (<code>TFL_GRAFT_DT</code>, or <code>TFL_GRAFT_DT_KI</code> and <code>TFL_GRAFT_DT_PA</code>
+for <code>TX_KP</code>) is death-censored: each graft is followed until the earlier of
+its last follow-up date and the recipient's death from any source
+(<code>REC_DEATH_DT_COMPOSITE</code>), whatever <code>death_window</code> is. A graft failure
+dated after death is not counted. Death with a functioning graft is a
+censoring time, not a graft failure.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
