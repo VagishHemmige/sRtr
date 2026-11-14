@@ -25,6 +25,8 @@ MT, 2026-11-14
 - **Data pitfalls:** Nondirected donation alone does not establish KPD. Listing
   age differs from transplant age. Results/Discussion disagree on KPD counts;
   resolve before reusing counts. [inference; unclear Results/Discussion]
+  The paper's KPD codes 9/11/12 do not map uniformly to KPD in the bundled LVDNRL format: 9 is paired, 12 domino, 11 inactive living/deceased exchange, and 10 nondirected. Preserve the paper's rule and verify its release before reuse. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here]
+
 - **Locators:** Complete main text read from PMC XML: Methods, Results,
   Discussion. Supplement, exact relationship codes and score formulas not
   checked.
@@ -50,6 +52,8 @@ MT, 2026-11-14
   and transplantation is insufficiently clear. Coefficients, log bases and
   inverse-link transformation need verification to reconstruct the score.
   [reported Limitations; unclear Methods; inference]
+  Discontinued laboratory collection is the paper's explanation, not an independently verified registry-wide change. Imputation is separate in training/test data; improved-health removal is censored alive. [reported Methods; Limitations; source checked by Claude, 2026-11-14]
+
 - **Locators:** Complete main text read from PMC XML, including model equations
   and Discussion; supplemental calculations and code not checked.
 
@@ -91,7 +95,7 @@ MT, 2026-11-14
   viral load, genotyping, opportunistic-infection adjudication and detailed
   safety events require external study records [reported Methods; not in SAFs].
 - **Data needs:** Confirm donor HIV status after false-positive allocation
-  tests. Protocol graft failure includes prolonged renal replacement,
+  tests. Protocol graft failure includes at least 90 days of renal replacement,
   nephrectomy or retransplant; composite safety additionally includes death,
   serious events and HIV/infectious outcomes. [reported Methods] Tags:
   `external-linkage`, `follow-up-horizon`.
