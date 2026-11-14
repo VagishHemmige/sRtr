@@ -1,135 +1,114 @@
-# Methodology review
+# Methodological background
 
-One section per methodological question. Each gives SRTR's practice (where
-known), how other projects handled it, what sRtr does now, and the related
-issues. Sources are in [`web-sources.md`](web-sources.md) and
-[`repositories.md`](repositories.md). Started 2026-11-02; extend as issues
-are worked.
+Background for interpreting and analyzing SRTR data, not a review of sRtr
+functions. Sources and retrieval limits are recorded in [web-sources.md](web-sources.md),
+[repositories.md](repositories.md), and [codebook-notes.md](codebook-notes.md).
+Updated 2026-11-14 using the completed review's source verification. These notes
+identify methodological choices; they do not select package defaults.
 
 ## Waitlist outcomes and competing risks
 
-- **SRTR:** transplant and death compete. About 1% of candidates die or are
-  transplanted before their removal date, so the earliest of removal, death
-  and transplant dates matters. Some removals for transplant have no
-  transplant record.
-- **Others:** the kidney calculator takes the earliest event across sources
-  and keeps an event-type label, but miscodes removal code 14, censors
-  living-donor transplant, and counts deaths after unrelated removal. Wood
-  et al. use IPCW because transplant is informative censoring.
-- **sRtr:** no waitlist outcome function yet.
-- **Decisions to make:** death window (on the list vs from listing);
-  living-donor transplant as competing or censored; whether "too sick" and
-  "medically unsuitable" count as death.
-- **Issues:** #6, #11
+Death while listed and death from the date of listing are different estimands.
+Living-donor transplant may be a competing event or receive different treatment
+under a specified estimand. Combining death with too-sick or medically unsuitable
+removal also changes the endpoint. Removal code 14 alone does not identify donor
+type. Use dated events and release-specific administrative follow-up, rather than
+assuming that removal codes alone settle all event histories.
 
-## Death ascertainment and censoring
+The external kidney calculator illustrates earliest-event selection; Wood et al.
+illustrate inverse probability of censoring weighting for informative transplant
+censoring. Their implementations are comparisons, not universal definitions.
 
-- **SRTR:** precedence OPTN > SSDMF > CMS. Patients not reported dead in any
-  source are assumed alive. External sources under-count deaths. Some
-  calculations exclude deaths after loss to follow-up.
-- **Others:** the kidney calculator takes the earliest of four sources.
-- **sRtr:** `srtr_composite_death()` combines OPTN, SSA and TFL with OPTN
-  first; `add_tte_outcomes()` counts SSA deaths after last follow-up but
-  censors survivors at last follow-up, which overstates mortality.
-- **Issues:** #5, #18, #22
+## Death and graft outcome ascertainment
 
-## Status history and time-varying covariates
+The official PSR methods describe OPTN, SSDMF, and CMS death-source precedence.
+A follow-up death field is not automatically interchangeable with a CMS source.
+Death ascertainment and last clinical follow-up are separate observation processes;
+consistent censoring requires a stated endpoint and source coverage window.
 
-- **SRTR:** not reviewed yet.
-- **Others:** Wood et al. build start–stop intervals from `STATHIST_*`,
-  handling post-allocation rows, an off-by-one day at transplant, and
-  administrative censoring. Carry-forward must be grouped by candidate
-  (the data_clean_up notebook shows the failure).
-- **sRtr:** no status history support yet.
-- **Issues:** #7, #9
+PSR graft-survival definitions differ by organ. Death-censored reported graft
+failure, overall graft loss, dialysis return, and retransplantation are not
+interchangeable endpoints. Verify whether an organ/release's derived graft date
+already incorporates component events before constructing a composite. Equal
+failure and death dates do not establish within-day event ordering.
 
-## Post-transplant follow-up
+## Status histories and units of analysis
 
-- **SRTR:** graft failure recorded before the transplant date is censored
-  at day 0.
-- **Others:** day-range windows instead of the follow-up code.
-- **sRtr:** `add_txf_outcomes()` uses every follow-up form, including those
-  after graft failure, and dates events by the form date.
-- **Issues:** #10, #16, #21, #22
+A person, listing, transplant episode, and follow-up form are different units.
+Repeated follow-up forms can share a transplant identifier even when the field
+label calls it a unique key. Verify table grain and release-specific linkage
+before joining; missing identifiers do not establish a relationship.
 
-## Joining files
+Wood et al. illustrate start-stop intervals from status histories, grouping
+carry-forward by candidate and handling rows around transplantation. Their
+bootstrap resamples candidates, not individual intervals. Interval boundaries,
+administrative censoring, and simultaneous events require explicit definitions.
 
-- **SRTR:** keys and grain are not documented reliably; the dictionary labels
-  `TRR_ID` a "unique key" in `TXF_KI`/`TXF_KP`, which have many rows per
-  recipient. Keys are numeric in every file. `TX_ID` is shared across organ
-  files for multi-organ transplants; `TX_KP` has `TRR_ID` and `TRR_ID_PA`.
-- **Repeated columns:** files share many non-key columns (50 between `TX_KI`
-  and `CAND_KIPA`; 240 between `TX_KI` and `TX_LI`), so a join without `by`
-  silently drops rows and a join with `by` makes `.x`/`.y` pairs.
-- **Others:** the kidney calculator avoids joins by using columns repeated in
-  `CAND_KIPA`; Wood et al. copy only needed columns by `px_id` lookup; the
-  data_clean_up notebook intersects ID sets across three files and reports
-  the counts lost.
-- **sRtr:** two joins, both in `add_txf_outcomes()`, without `by`.
-  `load_srtr_file()` can only filter on `TRR_ID`.
-- **Issues:** #3, #34, #35, #36, #37, #38, #39, #40
+## Follow-up reports and event dates
 
-## Cohort workflow: nest, then join, then unnest
+In the inspected dictionary, TFL_PX_STAT_DT is a patient status date, while
+rejection fields refer to events during a follow-up period. A first positive
+report date need not be the clinical onset date. Discharge timing is also a proxy
+for an event during admission. Known occurrence with an unknown date must remain
+distinguishable from an observed negative report, an unknown response, and no
+eligible follow-up. A later report can describe an earlier event; report receipt
+and event chronology should not be conflated.
 
-- **Problem:** flowchart tools (`flowchart`, `strobe`) count rows, so a
-  one-to-many join (transplant → follow-up forms) changes the unit from
-  people to forms. `flowchart`'s `fc_merge()`/`fc_stack()` combine diagrams,
-  not data.
-- **Order:** load → join parents flat (many-to-one) → nest children under
-  the unit (`TXF_*` under `TX_*`, `STATHIST_*` under `CAND_*`) → derive flags
-  → flowchart, tables, models → unnest only at the end for long-format
-  analyses.
-- **Rules:** joins never exclude; filters do (labelled exclusion boxes).
-  Changing the unit (listings → persons) is a new stacked chart, not an
-  exclusion. Excluding transplants with no follow-up suits visit-based
-  outcomes, not survival outcomes.
-- **Diagnostics:** reconcile child rows (nested + outside cohort + true
-  orphans + NA keys); most child rows are outside the cohort when a whole
-  file is nested, which is expected. Report empty nests by transplant year,
-  children per parent, duplicates and impossible dates. Counts only.
-- **Outcome functions:** compute once on long data; accept nested, long or
-  file input with identical output.
-- **Issues:** #41, #42, #43, #44 (with #3, #34, #40)
+Treated rejection differs from all rejection. A malignancy flag alone does not
+establish incident versus recurrent cancer or complete ascertainment; cancer
+registry linkage studies provide relevant limitations. Organ-specific studies
+in the source catalogue require their stated retrieval qualifications.
 
-## Missing values
+## Linking records and describing cohorts
 
-- **SRTR:** "Unknown" is missing. Missing values are multiply imputed
-  (chained equations, 10 iterations). For program evaluation only, missing
-  values get the least beneficial value; that is an incentive device, not a
-  research method.
-- **Codebook:** several kinds of missing (unknown, not applicable, not done,
-  pending, cannot disclose, indeterminate, partly known) and inconsistent
-  code numbers across formats.
-- **sRtr:** `srtr_normalize_missing()` maps a hand-written list to one
-  replacement; 13 labels don't match their formats; level order changes.
-- **Issues:** #19, #20, #27, #28, #29
+Explicit keys, expected cardinality, and row-count reconciliation protect the
+unit of analysis. Shared non-key columns are not evidence of a join relationship.
+TX_KP contains TRR_ID and TRR_ID_PA in the inspected metadata; organ-specific
+linkage must be checked rather than inferred from similar names.
 
-## Implausible values
+Nesting repeated records under a parent is one way to preserve parent grain;
+aggregation on long tables is another. Neither representation alone validates a
+cohort. Distinguish unmatched records, missing keys, duplicate parents, and
+intentional exclusions. No follow-up is an observation-completeness question,
+not a universal exclusion rule for every survival analysis.
 
-- **SRTR:** conservative plausible ranges set by expert opinion; values
-  outside are treated as missing. Ranges not found published. Separately,
-  1st/99th percentile truncation for modelling.
-- **Others:** ad hoc cut-offs (BMI ≤ 0 or > 100).
-- **sRtr:** none, apart from a height check in `add_pdri()`.
-- **Issues:** #30, #31, #32
+## Missing values, plausibility, and modeling
 
-## Codes, labels and codebook versions
+The registry distinguishes unknown, not applicable, not done, pending,
+indeterminate, and other states, with format-specific encodings. Structural
+absence across collection eras differs from a recorded unknown response.
+Collapsing these categories is an analysis choice, not a universal cleaning rule.
 
-- **Others:** every project reviewed hard-codes code lists, and each has
-  errors; label matching breaks on padded Stata labels.
-- **sRtr:** labels from a single undated snapshot; codes missing from a
-  format become NA.
-- **Issues:** #2, #15, #26
+The cited SRTR modeling paper describes conservative expert-defined plausibility
+ranges, imputation, and separate percentile truncation for model fitting. These
+serve different purposes. The earlier source review did not locate a complete
+published per-variable range list; do not invent one from observed sample extrema.
+Program-evaluation missing-data rules should not be adopted as generic research
+methods. Retain release and transformation provenance.
 
-## Scores
+## Risk scores and allocation scores
 
-- **MELD family:** coefficients and bounds to come from the primary papers
-  and OPTN policy, not from other code (#8). Match MELD decoding (#9).
-- **PDRI:** implemented in `add_pdri()`.
+PDRI is a relative risk index, not an absolute failure probability. Its source
+population and SPK/PAK/PTA distinctions matter. The original-paper copies disagree
+on a printed BMI coefficient; see the source entry before choosing an equation.
+A prior-kidney field alone requires validation before being treated as a complete
+PAK classification rule.
 
-## Geography
+MELD model equations, allocation policy, and encoded match scores are different
+objects. Use primary equations and applicable policy eras for bounds, units,
+dialysis rules, and eligibility; do not derive MELD versus PELD solely from a
+61xx/62xx prefix.
 
-- **OPTN regions:** Vermont and Virginia are split between regions; sRtr
-  assigns each whole state to one region, and "Northern Virginia" is dropped
-  by a join (#14).
-- **PSR data:** public center-level tables join on `CTR_CD == OTCCode` (#13).
+## Geography and population coverage
+
+OPTN membership is versioned and includes substate assignments; whole-state
+outlines cannot represent every region exactly. The Census 2018 1:20,000,000
+boundary metadata describes generalized display geometry and excludes precise
+geographic/area analysis. Reprojection does not restore omitted detail.
+
+Counting every intersected population polygon, assigning its centroid, and
+allocating population by intersected area answer different questions. Area
+weighting assumes uniform distribution within each polygon. State the method,
+source vintage, geographic exclusions, and treatment of missing population totals.
+Public PSR tables and HRSA center/OPO layers also have distinct units and release
+or snapshot dates.

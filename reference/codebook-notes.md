@@ -1,8 +1,8 @@
 # Codebook notes
 
-Code tables that other projects got wrong, checked against
+Field and code meanings checked against
 `data-raw/SRTR_format_codebooks.xlsx` and `data-raw/dataDictionary.html`
-on 2026-11-02. Codebooks change between releases (#26); recheck against the
+on 2026-11-02. Codebooks change between releases; recheck against the
 codebook for the release in use.
 
 ## Removal codes (`CAN_REM_CD`, format `REMCD`)
@@ -56,10 +56,33 @@ The same code number means different things in different formats (code 4
 is "Unknown", "N/A", "Not tested" or "Yes, but CAD unknown" depending on the
 format). Kinds found in the codebook: unknown, not applicable, not done,
 pending, cannot disclose, indeterminate, partly known, and SAS missing.
-Classifying every format value by kind is tracked in #27.
+A missingness taxonomy must be checked against each applicable format.
 
-## Label format
+## Representation and release scope
 
-`apply_srtr_factors()` labels values as `"code: Meaning"` (e.g. `"8: Died"`).
-Stata exports of SAFs pad these with leading spaces, which breaks exact
-string matching; match on the code where possible.
+Code values and display labels are distinct representations. Exported labels can
+contain padding; match against the applicable format rather than assuming an
+arbitrary label string is stable across software or releases.
+
+On 2026-11-14, metadata-only inspection of the workbook at repository revision
+`ebd869acf5d0618c4d64c9ec71fb62e9a85be701` reverified REMCD 14/18/19/21/23,
+FOLCD 900/998/999, RACE 16 (Black) and 64 (Asian), and ACREJEPF below. The bundled
+HTML dictionary identifies itself as SRTR 2203; that does not independently
+establish the workbook's release. The official dictionary retrieved during that
+review was 2609; no exhaustive cross-release comparison was performed.
+
+## Rejection and status dates
+
+ACREJEPF: 1 = treated rejection; 2 = untreated rejection; 3 = no rejection;
+998 = unknown. A treated-rejection definition differs from any-rejection and
+cannot silently classify untreated rejection as absence of all rejection.
+Check each organ/table/era's field-to-format assignment before reuse.
+TFL_PX_STAT_DT is a status date, not proof of exact clinical onset.
+
+## Liver status and prior transplant history
+
+In the inspected CANDSTAT table, 6106 is labeled MELD/PELD -94 and 6206 is
+MELD/PELD 6. The prefixes alone do not distinguish MELD from PELD; use the
+appropriate score-type fields and policy era. REC_PREV_KI is described as prior
+kidney transplantation but has no confirming binary format in the inspected
+HTML dictionary; a universal 0/1 or PAK mapping is not established by that label.
