@@ -143,8 +143,8 @@ MT, 2026-11-14
   Figure 1] Tags: `donor-pair`, `policy-era`, `geography`.
 - **Data pitfalls:** Missing process timestamps and unsuccessful OOS attempts
   among unused kidneys prevent efficiency estimates. Travel/access and
-  neighborhood measures require additional derivation/source checking. No causal
-  claim that OOS reduces nonuse follows from these summaries. [reported
+  neighborhood measures require additional derivation/source checking. Unused
+  organs and unsuccessful attempts would be needed to study nonuse. [reported
   Discussion; inference]
 - **Locators:** Methods; Results; Discussion and embedded table. Complete main
   text read from PMC XML; supplemental geography derivations and code
