@@ -27,6 +27,8 @@ MT, 2026-11-14
   missingness. Forward populations are scenarios, not validated forecasts;
   synthetic status alone is not a privacy guarantee. [unclear Methods/Tables;
   inference]
+  Hospital donor rates use 2013–2014, outside the stated training extraction period; the relationship between these windows is not explained. The simulation assumes 94% of recovered lungs are transplanted. [unclear Step 1; reported Step 1; source checked by Claude, 2026-11-14]
+
 - **Locators:** Complete main text read from PMC XML, including network tables.
   Article-linked code: https://github.com/ClevelandClinicQHS/COMET (not
   audited); priors and latent-index supplements not read.
@@ -38,8 +40,8 @@ doi:10.3389/ti.2024.12309 · SAF analysis · Finland 2004–2019; SRTR 2014–20
 MT, 2026-11-14
 
 - **Population / unit:** Separate Finnish and US brain-dead donor kidney-only
-  cohorts restricted to recipients on dialysis before transplant, excluding
-  early nonfunction. [reported Methods]
+  cohorts restricted to recipients on dialysis before transplant. The Finnish
+  cohort excludes first-week graft loss; this exclusion is not stated for SRTR. [reported Methods]
 - **Files and fields:** Donor, transplant, first-week dialysis and graft/death
   records in two independent registries; no patient-level international linkage
   [reported Methods].
@@ -48,13 +50,17 @@ MT, 2026-11-14
   retain donor clustering, interactions, splines and time-splitting for
   nonproportional hazards. [reported Methods] Tags: `donor-pair`,
   `derived-score`, `follow-up-horizon`.
-- **Data pitfalls:** Finland and US age thresholds differ; cohort/event totals
-  conflict across narrative and tables. Clarify first-week exclusions and time
+  SRTR dates are January 1, 2014–September 9, 2019, with follow-up through September 9, 2020. [reported Materials and Methods; source checked by Claude, 2026-11-14]
+
+- **Data pitfalls:** The SRTR age rule and first-week exclusion are not stated;
+  Finland's >16 inclusion and <16 exclusion leave age 16 ambiguous. Cohort/event
+  totals conflict across narrative and tables. Clarify first-week exclusions and time
   origin before modeling future-observed DGF. The cohort omits DCD and
   preemptive recipients, limiting which donor/recipient records these
   definitions cover. [unclear Methods/Results; inference]
 - **Locators:** Complete main text read from PMC XML. Supplemental hazards
   diagnostics, time-split models and original KDPI instructions not inspected.
+  Cohort eligibility corrected from Claude's PMC Materials and Methods reading, 2026-11-14.
 
 ### PMC10928501
 
@@ -85,11 +91,13 @@ MT, 2026-11-14
 
 Cross-organ sex differences in cancer incidence · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC10919340/) ·
 doi:10.1093/jnci/djad224 · External linkage · 1995–2017 ·
-Screened, 2026-11-14
+MT, 2026-11-14 (full main-text read reported by Claude)
 
 - **Population / unit:** Adult transplants without prior cancer in covered
   cancer-registry areas; multiple transplant episodes can occur per person.
   [reported Methods]
+  The analyzed 343,802 transplants represent 322,007 people; exclusions include uncovered residence/follow-up, age under 18, cancer before transplant and race/ethnicity outside the four comparison groups. [reported Methods; source checked by Claude, 2026-11-14]
+
 - **Files and fields:** Transplant Cancer Match links SRTR with 33 cancer
   registries; SEER expected rates, neighborhood deprivation and UV exposure add
   external inputs [reported Methods].
@@ -102,9 +110,10 @@ Screened, 2026-11-14
   malignancy flags. Organ type proxies immunosuppression without measured dose;
   repeated episodes and coverage windows require careful handling. [reported
   Methods/Discussion; inference]
-- **Locators:** Cached PMC Methods, Results and Discussion read, with missing
-  intervening passages; direct page blocked. Complete main text not established:
-  Screened. Cancer-site supplement and linkage specification not checked.
+- **Locators:** PMC main text, especially Methods and Discussion. Full main-text
+  reading reported by Claude on 2026-11-14 using the browser; this records that
+  reader's source access, not a repeat full read by this annotator. Supplements
+  and external linkage specifications remain unchecked.
 
 ### PMC10895807
 
@@ -118,11 +127,15 @@ MT, 2026-11-14
 - **Files and fields:** Candidate/status, tumor/exception and
   transplant/death/follow-up records; precise mappings and recurrence algorithm
   unverified [inference].
+  CAN_FUNCTN_STAT in CAND_LIIN is listing function; REC_FUNCTN_STAT in TX_LI is transplant function. FUNCSTAT mixes adult Karnofsky 2010–2100, older ADL 1–3, Lansky 4010–4100 and unknown/not-applicable codes 996/998; these require explicit mapping rather than interpreting raw codes as percentages. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here]
+
 - **Data needs:** Distinguish listing-origin survival, transplant-origin
   survival, dropout and recurrence. KPS grouped 80–100, 50–70 and 10–40;
   recurrence treats death as competing event. [reported Methods] Tags:
   `candidate-registration`, `status-history`, `post-removal-death`,
   `follow-up-horizon`.
+  Dropout includes death, deterioration and medical unsuitability. [reported Methods; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Exact KPS measurement time is unclear. Donor covariates in
   listing-origin models require clarification for nontransplanted candidates and
   possible future-information selection. Dropout handling, administrative cutoff
@@ -144,6 +157,8 @@ MT, 2026-11-14
 - **Files and fields:** Listing hemodynamics, respiratory/support measures,
   transplant and death/removal records; exact mappings and PVR derivation
   unverified [inference].
+  The bundled CAND_THOR dictionary includes CAN_PULM_ART_MEAN, CAN_PCW_MEAN and CAN_CARDIAC_OUTPUT but no stored PVR field; whether the paper calculated PVR is unstated. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here; unclear Data collection]
+
 - **Data needs:** Distinguish pressure, wedge pressure, cardiac output and
   resistance units; separate guideline-derived severe PH from data-derived
   quintile thresholds. Keep baseline measurements distinct from later status
@@ -154,6 +169,8 @@ MT, 2026-11-14
   and censoring need clarification. Substantial missingness and inconsistent
   boundary inequalities require checking before assigning categories. [unclear
   Methods/Results; inference]
+  The extract lacks candidate CAS values and most measures are listing-only. The paper defines PH as mPAP >20 mmHg and severe PH as PVR >5 WU. [reported Data collection; Limitations; source checked by Claude, 2026-11-14]
+
 - **Locators:** Complete main text read from PMC XML. Original PH guideline,
   allocation-era specifications and supplemental collinearity analysis not
   independently reviewed.
