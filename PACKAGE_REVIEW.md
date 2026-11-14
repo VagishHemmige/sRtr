@@ -117,7 +117,9 @@ Specialty reviewers verify the substantive interpretations in their domains;
 the librarian does not settle clinical disagreements by authority. The coordinator
 verifies that important background discoveries are retained and package findings
 are routed to their owning work items. Record this disposition concisely in the
-existing handoff, not a separate permanent backlog. Catalogue assessments occur
+existing handoff, not a separate permanent backlog or a reference entry. Issues
+and PRs link to reference sections; check that references contain no reverse issue
+links or sRtr implementation status. Catalogue assessments occur
 after independent first passes; neutral source-packet preparation still follows
 the blinding rules below.
 
@@ -132,8 +134,9 @@ competing catalogue:
   distinguishing retrieved sources from unverified citations.
 - [codebook-notes.md](reference/codebook-notes.md): prior code-table checks to
   reverify against the applicable registry documentation.
-- [methodology-review.md](reference/methodology-review.md): prior methodological
-  comparisons and issue links, for reconciliation after independent discovery.
+- [methodology-review.md](reference/methodology-review.md): methodological
+  background and comparisons; any legacy package diagnoses are withheld until
+  reconciliation and routed out of references during curation.
 
 The coordinator and scientific librarian prepare role-specific source packets
 from these records before the initial passes. Supply source links, pinned code
@@ -426,8 +429,8 @@ Keep reference entries short and topic-based: database background, what a source
 establishes about its use, applicable organ/population/release, exact source
 section or external code revision, and verification status/date. sRtr function
 behavior, defects, proposed fixes, and package decision rationale belong in
-issues/PRs, tests, implementation documentation, or dated review records. A brief
-issue cross-link is useful; copying the package assessment into references is not. Amend existing entries, reconcile contradictions,
+issues/PRs, tests, implementation documentation, or dated review records. Issues, PRs, and implementation documentation cite the reference sections;
+references do not link back to issues or track changes in sRtr functions. Amend existing entries, reconcile contradictions,
 and mark superseded conclusions. Preserve important disagreements and evidentiary
 limits; reviewer agreement is not a scientific authority. Do not paste reviewer
 transcripts, full reports, logs, or issue-comment compilations into the catalogue.

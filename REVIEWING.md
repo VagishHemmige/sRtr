@@ -98,8 +98,8 @@ Preserve verified background about the database and its use: sources, field
 meanings, collection eras, and methodological limitations. Keep sRtr function
 behavior, defects, implementation proposals, and package decisions in issues,
 PRs, tests, function documentation, or dated review records, not in `reference/`.
-A brief issue cross-link may connect background to work without copying the
-package assessment. Preserve unresolved scientific questions as unresolved. A review request alone does
+Issues, PRs, and implementation documentation cite reference sections; references
+do not link back to issues or change when sRtr functions change. Preserve unresolved scientific questions as unresolved. A review request alone does
 not authorize pushing those amendments; follow existing documentation permissions
 and otherwise deliver the concrete diff. Raw reviewer notes and repeated issue
 text do not belong in the reference catalogue.
