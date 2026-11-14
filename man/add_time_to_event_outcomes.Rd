@@ -36,7 +36,13 @@ the recipient died:
 \item \code{"censor"} (default): as death with a functioning graft. The graft is
 censored at death, not counted as failed.
 \item \code{"event"}: as a graft failure.
-}}
+}
+
+The default is a package assumption, not an SRTR rule: the data
+dictionary does not say whether the graft failure date is filled in with
+the death date when a recipient dies with a functioning graft. A real
+failure and death can also fall on the same day. Run both settings to see
+how much your results depend on it.}
 }
 \description{
 Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:
