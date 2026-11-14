@@ -11,6 +11,7 @@ This folder is excluded from the package build (`.Rbuildignore`).
 | [`methodology-review.md`](methodology-review.md) | Topic-by-topic background: estimands, ascertainment, methodological alternatives, and limitations |
 | [`repositories.md`](repositories.md) | Other code repositories reviewed, with the commit read and what was learned |
 | [`web-sources.md`](web-sources.md) | Websites and papers consulted, with access dates and key passages |
+| [`pmc-2024.md`](pmc-2024.md) | 89 direct/linked SRTR studies from a 2024 PMC publication search; reading status and compact organ, data, methods, and function-relevance annotations |
 | [`codebook-notes.md`](codebook-notes.md) | Field and code meanings checked against named dictionary/codebook versions |
 
 ## Scope and placement
