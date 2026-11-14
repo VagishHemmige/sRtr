@@ -117,8 +117,8 @@ Specialty reviewers verify the substantive interpretations in their domains;
 the librarian does not settle clinical disagreements by authority. The coordinator
 verifies that important background discoveries are retained and package findings
 are routed to their owning work items. Record this disposition concisely in the
-existing handoff, not a separate permanent backlog or a reference entry. Issues
-and PRs link to reference sections; check that references contain no reverse issue
+consolidated report's closing summary, not a separate permanent backlog or a
+reference entry. Issues and PRs link to reference sections; check that references contain no reverse issue
 links or sRtr implementation status. Catalogue assessments occur
 after independent first passes; neutral source-packet preparation still follows
 the blinding rules below.
@@ -315,8 +315,8 @@ failure before the fix and success afterwards where feasible.
 
 A prioritized proposal for improvements to ongoing testing is a required outcome
 of a whole-package review. The testing reviewer owns this assessment and the
-coordinator ensures it appears in the handoff. Assess missing cross-function,
-organ-specific, input-representation, and failure-path coverage; implementation-
+coordinator ensures it appears in the consolidated report's testing recommendations.
+Assess missing cross-function, organ-specific, input-representation, and failure-path coverage; implementation-
 derived expectations; mocks that bypass behavior; and skips that hide gaps.
 Identify what belongs in regular tests, integration checks, runners, or CI,
 including useful existing tests that should be strengthened rather than duplicated.
@@ -472,9 +472,10 @@ Keep full coverage/evidence/progress records and reusable audit artifacts in the
 permitted durable archive for resumption. The repository needs only a short dated
 review record, when permitted, identifying the frozen revision, scope, material
 limitations, and links to integrated knowledge and remaining work. Do not expose
-private archive links. Finish with a concise handoff explaining what was preserved,
-where it lives, and what remains unresolved. Future independent first-pass packets
-must still exclude these accumulated diagnoses until reconciliation.
+private archive links. End the consolidated report with a concise closing summary
+explaining what was preserved, where it lives, and what remains unresolved. This
+summary is part of the review deliverable; no existing repository handoff file is
+assumed or required. Future independent first-pass packets must still exclude these accumulated diagnoses until reconciliation.
 
 ## 8. Report first, posting afterwards
 
@@ -528,7 +529,7 @@ Use these templates for the report's proposed GitHub text. Replace placeholders
 and omit genuinely inapplicable sections; never fill a field with an invented
 result. Scale length to the finding. Use public, commit-pinned source links and
 public reference URLs; do not publish private conversations or private report
-links. Report IDs remain useful even when the report is not public.
+links. Keep internal finding IDs in the audit ledger, not the public text.
 
 One existing-issue comment should consolidate the relevant reviewers' findings.
 Do not post separate repetitive comments from each role. A finding already
@@ -539,52 +540,19 @@ a classification or severity.
 ### Comment on an existing open issue
 
 ```markdown
-### Whole-package review: <issue topic>
+Re-evaluated against [<commit>](<commit URL>) on <date>: <current disposition>.
+<Plain-language conclusion and practical consequence.>
 
-**Reviewed:** <full commit SHA with link>; <date>.
-**Report findings:** <IDs>.
-**Assessment:** <supported / partly supported / not supported / already fixed /
-duplicate / unresolved scientific decision / valid enhancement>.
-**Classification and priority:** <type>; <Must fix / Should fix / Consider>.
-**Confidence:** <high / medium / low, with reason>.
-
-<Lead with the conclusion and its practical consequence. Distinguish the
-issue's premise from the merits of its proposed fix.>
-
-**Evidence and current behavior**
-
-- <Commit-pinned file/function/line link and what it establishes.>
-- <Relevant organ, input representation, or workflow; downstream consequence.>
-- <Authoritative source, release/version and section where needed.>
-
-**Assessment of the proposed solution**
-
-<Does it solve the underlying problem? What remains missing or could regress?
-Distinguish merged fixes from unmerged proposals. Preserve substantive
-reviewer disagreement and state what evidence would settle it.>
-
-**Validation**
-
-<Checks personally executed, exact commands and observed results, or explicitly
-"Source inspection only." Separate observed CI and author-reported checks.
-Give a small synthetic example if useful. State remaining data-dependent
-uncertainty without including patient-level values. Link retained audit tests
-and relevant proposed test/CI patches when publicly available; otherwise identify
-them by report artifact ID without exposing private locations.>
-
-**Recommended next step**
-
-<Keep open and refine scope / implement a specified repair / obtain a
-methodological decision / recommend closure as fixed or unsupported /
-recommend consolidation with #N. These are recommendations, not status changes.>
-
-**Acceptance checks**
-
-- <Observable behavior or source/documentation condition needed for resolution.>
-- <Regression/integration check and remaining maintainer check, where relevant.>
-
-**Related work:** <issue/PR links, merge status, and relationship>.
+Evidence: <pinned code/source links and what they establish; relevant check result>.
+<When needed: inline synthetic example or public, commit-pinned reproducer link;
+state source-inspection-only or unexecuted status and material limitations.>
+Next step: <specific action or maintainer decision, or no further action needed>.
 ```
+
+Add detail only where new evidence, uncertainty, or a scientific disagreement
+requires it. Separate current behavior from proposed repairs and identify a
+specific acceptance check when useful. Do not repeat generic scope, attribution,
+or validation paragraphs on every issue.
 
 For an already-fixed issue, cite the fixing commit and evidence at the reviewed
 revision. For an unsupported premise, explain why and acknowledge any residual
@@ -601,7 +569,7 @@ Suggested title: `<function or component>: <specific incorrect behavior or gap>`
 <Concrete trigger, current behavior, and expected behavior. For a validation
 gap, identify the unverified guarantee without asserting an unproven defect.>
 
-**Review reference:** <report finding IDs>; <date>.
+**Review date:** <date>.
 **Reviewed revision:** <full commit SHA with link>.
 **Classification:** <verified defect / concern / validation gap / documentation>.
 **Priority:** <Must fix / Should fix / Consider>.
@@ -619,7 +587,8 @@ code or only suspected under a specified condition.>
 State runtime/dependencies and actual versus expected output. If not executed,
 label it "Proposed reproducer, not executed" and explain the blocker.
 Separate personally executed checks, observed CI, and author-reported results.
-Identify retained test artifacts and any proposed permanent-test or CI patch.>
+Link public, commit-pinned reproducers and relevant proposed test/CI patches;
+do not substitute internal artifact IDs or private bundle commands.>
 
 ## Scientific basis
 
@@ -654,7 +623,7 @@ Suggested title: `Decision: <specific definition or methodological choice>`.
 <State the exact question, affected outcomes/organs/functions, and why the
 choice cannot be inferred safely from the registry documentation.>
 
-**Review reference:** <report finding IDs>; <date>.
+**Review date:** <date>.
 **Reviewed revision:** <full commit SHA with link>.
 **Decision owner:** <maintainer or explicitly designated person>.
 **Status:** Proposed; not decided.
@@ -700,7 +669,7 @@ Suggested title: `Proposal: <capability and concrete use case>`.
 
 <The workflow currently blocked or unnecessarily error-prone, and who needs it.>
 
-**Review reference:** <report finding IDs>; <date>.
+**Review date:** <date>.
 **Reviewed revision:** <full commit SHA with link>.
 **Classification:** Enhancement proposal.
 **Priority and rationale:** <priority relative to correctness and validation work>.
