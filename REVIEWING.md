@@ -1,37 +1,8 @@
-# Reviewing sRtr
+# Reviewing sRtr pull requests
 
-This file is the entry point for human and assistant reviews of sRtr. It routes the requested scope and gives the procedure for individual pull requests (PRs). Permissions to post or implement changes are set outside this repository.
+This file is for any reviewer of an sRtr pull request (PR), human or assistant. It says what to check and how to report it. Who may post, and how a review is triggered, are set outside this repository.
 
 Read `AGENTS.md` first. Its "This package" rules apply to reviews too.
-
-## Select the review scope
-
-Interpret the maintainer's intent and current conversation; no exact filename
-or copy-pasted commissioning prompt is required.
-
-- A package-wide request such as "detailed review time", "deep review of sRtr",
-  or "whole-package review", without a narrower target, commissions the full
-  [whole-package protocol](PACKAGE_REVIEW.md). Begin that work, including its
-  multidisciplinary AI team and independent first passes; do not stop at a plan
-  or require the maintainer to repeat the team instructions.
-- A named PR, branch, commit, function, or local change remains the target even
-  when the maintainer says "detailed". Use the relevant scoped review procedure;
-  the adjective alone does not expand it into a whole-package audit.
-- A follow-up uses the prior reviewed revision and stated scope, retaining
-  relevant context. Ask only when materially different targets remain plausible.
-
-State the selected scope and revision at intake. Read current AGENTS.md and
-applicable review guidance from the actual default branch for an overall review,
-from the recorded target revision for a PR, and from committed HEAD for a local
-review. Proposed policy changes do not govern their own review. If review files
-move under `review/`, follow the committed entry point and update its links rather
-than keeping competing protocols.
-
-A commission authorizes the review work described by that protocol, subject to
-external permissions. It does not authorize posting, package behavior changes,
-workflow activation, merging, or recurring automation. Explicit maintainer
-instructions take precedence. The full protocol owns the detailed requirements;
-do not maintain a second checklist here.
 
 ## Ground rules
 

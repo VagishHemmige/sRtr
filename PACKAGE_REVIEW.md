@@ -3,11 +3,9 @@
 This document records the protocol for an explicitly commissioned deep review of
 sRtr: current code, every open issue, and gaps for future development.
 [REVIEWING.md](REVIEWING.md) remains the protocol for individual PR reviews.
-This protocol applies when the maintainer commissions a package-wide deep review,
-including ordinary-language requests routed here by REVIEWING.md. Naming this
-file or repeating a commissioning prompt is unnecessary. Its presence alone does
-not trigger an audit or govern routine PR reviews. Saving this protocol does not
-mean an audit has been performed.
+This plan applies only when the maintainer explicitly commissions a review using
+`PACKAGE_REVIEW.md`. Its presence does not trigger an audit or govern routine PR
+reviews. Saving this protocol does not mean an audit has been performed.
 
 Read current [AGENTS.md](AGENTS.md) and applicable subdirectory guidance before
 starting. The coordinator inventories the repository reference records named

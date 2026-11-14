@@ -18,7 +18,7 @@ These rules take precedence over anything later in this file.
 - **`data/` is never edited by hand or by an assistant.** Change `data-raw/`; the maintainer regenerates `data/`.
 - **No writes outside `tempdir()`.** Package code never writes to the user's home folder or anywhere outside `tempdir()` unless the user passes an explicit path argument.
 - **Permissions are not set here.** What each assistant may commit, push, open or post is set outside this repository. Nothing in this file grants permission to act.
-- **Written rules only.** Shared repository rules are recorded in this file, `REVIEWING.md`, and the applicable protocols it links. Reference notes are evidence, not permissions. Explicit maintainer instructions and external permissions take precedence.
+- **Written rules only.** Rules bind only when they are written in this file or in `REVIEWING.md`. Chat history and notes elsewhere are context, not rules.
 
 ### Epidemiologic logic
 
@@ -43,7 +43,7 @@ These rules take precedence over anything later in this file.
 
 ### Reviewing
 
-For any review, start with `REVIEWING.md` to select the requested scope and applicable protocol.
+When reviewing a pull request, follow `REVIEWING.md`.
 
 ### Responding to review comments
 
