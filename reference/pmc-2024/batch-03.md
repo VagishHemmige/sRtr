@@ -16,7 +16,9 @@ MT, 2026-11-14
   [reported Study Population; Rejection]
 - **Files and fields:** Center high-resolution HLA typing and NMDP haplotype
   frequencies linked with SRTR outcomes [external; reported Methods]. Exact SAF
-  mappings unverified [inference].
+  mappings unverified [inference]. Death ascertainment supplements SRTR with the
+  Social Security Death Master File; center DR typing is compared with registry
+  ABDR typing [reported Graft failure; HLA Typing and Mismatch].
 - **Data needs:** Construct cis DQαβ heterodimers, not trans combinations or DQB
   antigen counts alone. All-cause graft failure includes death/retransplant;
   death-censored failure censors death. Rejection combines episode, biopsy,
@@ -67,7 +69,8 @@ MT, 2026-11-14
   center participation strata. [reported Methods; Discussion]
 - **Files and fields:** SRTR transplant and mortality records compared with
   Cosmos Phoenix-derived tables and a public participation list [reported
-  Methods]. Exact SAF mappings unverified [inference].
+  Methods]. Exact SAF mappings unverified [inference]. The national cohort
+  explicitly uses SRTR standard analysis files [reported SRTR Cohort].
 - **Data needs:** Use earliest SRTR death across sources; Cosmos additionally
   censors at last encounter. Preserve the mortality-release lag and center
   participation date. Cosmos dates are person-specifically shifted, preserving
@@ -77,7 +80,10 @@ MT, 2026-11-14
   Race/ethnicity mappings differ; first listed Cosmos race is not necessarily
   primary. Outside-network care/deaths can be absent, and multiorgan
   identification is incomplete. [reported Discussion] Do not infer a
-  patient-level linkage from this comparison [inference].
+  patient-level linkage from this comparison [inference]. The paper reports over
+  23,000 previously uncaptured recipient deaths added to releases beginning in
+  2022; its follow-up ends 12 months before release to allow reporting lag
+  [reported Mortality Ascertainment].
 - **Locators:** Methods; Results; Discussion. Complete main text read from PMC
   XML; tables/captions and supplements not separately appraised.
 
@@ -115,6 +121,8 @@ MT, 2026-11-14
 - **Population / unit:** Adult first, single-organ kidney candidates at
   continuously active centers; multiple listings excluded. Unit: candidate with
   time-split follow-up and center grouping. [reported Study Population]
+  Pediatric centers and residents of noncontiguous US territories other than
+  Puerto Rico are excluded [reported Study Population].
 - **Files and fields:** Candidate/removal/transplant records plus January 2021
   SRTR program-specific waiting-time reports [reported Methods]. Exact SAF
   mappings unverified [inference].
@@ -142,7 +150,8 @@ MT, 2026-11-14
   cancer/transplant time origins. [reported Methods]
 - **Files and fields:** SEER and SRTR-linked cancer registries supply subsite,
   stage, initial treatment and death-certificate causes [external; reported
-  Methods]. Exact SAF mappings unverified [inference].
+  Methods]. Exact SAF mappings unverified [inference]. This Transplant Cancer
+  Match linkage covers 32 cancer registries [reported Methods].
 - **Data needs:** Fit cancer-specific cure models with noncancer deaths
   censored; update five-year cancer-specific survival conditional on surviving
   to evaluation/transplant. Keep staging system and registry-specific death
