@@ -35,7 +35,8 @@ MT, 2026-11-14
 
 - **Population / unit:** First-time active adult liver registrations; each
   registration analyzed separately. Status 1, mixed exception categories and HAT
-  exceptions excluded. [reported Study Population]
+  exceptions excluded. [reported Study Population] Missing transplant center is
+  also excluded [reported Study Population].
 - **Files and fields:** Candidate/status histories, exception
   applications/approval, allocation and laboratory MELD, removal and mortality
   records; exact mappings unverified [inference].
@@ -70,9 +71,9 @@ MT, 2026-11-14
   `external-linkage`, `geography`, `follow-up-horizon`.
 - **Data pitfalls:** Unmatched patients differ geographically and by age;
   non-PHIS admissions are missed. Biopsy is not confirmed rejection.
-  Neighborhood income is not individual income. [reported Discussion] Verify
-  zero-inflated versus hurdle implementation before reuse [inference from model
-  description].
+  Neighborhood income is not individual income. [reported Discussion]
+  Distinguish children with no captured admissions from children whose
+  admissions occurred outside PHIS [inference from model description].
 - **Locators:** Methods; Results; Discussion. Complete main text read from PMC
   XML; supplemental merge algorithm, ICD codes and model code not inspected.
 
@@ -114,13 +115,15 @@ MT, 2026-11-14
   mappings unverified [inference].
 - **Data needs:** Preserve NDI construction and constituent standardized
   variables; compare cause-specific hazards with Fine–Gray sensitivity analyses,
-  and race/era interactions. [reported Statistical Analysis] Tags:
-  `external-linkage`, `geography`, `living-donor`, `candidate-registration`.
-- **Data pitfalls:** Non-listed recipients lack an obvious listing time origin.
-  DDKT censoring in the preemptive analysis and definition of preemptive
-  eligibility need clarification. Kaplan–Meier complements differ from
-  competing-risk incidence. [unclear Statistical Analysis; inference] ZIP
-  measures cannot establish individual deprivation [reported Discussion].
+  and race/era interactions. [reported Statistical Analysis] Listed candidates
+  enter at listing; DDKT, death, removal or December 31, 2021 censors follow-up.
+  NDI tertiles use ≤−0.29 and >0.42 boundaries [reported Likelihood of LDKT and
+  Preemptive KT; NDI]. Tags: `external-linkage`, `geography`, `living-donor`,
+  `candidate-registration`.
+- **Data pitfalls:** Non-listed recipients lack an obvious listing time origin,
+  and preemptive eligibility is not clearly defined [unclear Statistical
+  Analysis]. ZIP measures cannot establish individual deprivation [reported
+  Discussion].
 - **Locators:** Methods; Results; Discussion. Complete main text read from PMC
   XML; supplementary missing-data details and NDI implementation not inspected.
 
@@ -132,10 +135,13 @@ MT, 2026-11-14
 
 - **Population / unit:** Adult heart-only DCD recipients with eligible status
   and complete required variables. Unit: transplant; matched analyses pair
-  recipients. [reported Methods]
+  recipients. [reported Methods] Inactive or outdated listing status at
+  transplantation is excluded [reported Methods].
 - **Files and fields:** Donor death/cross-clamp/withdrawal timestamps, recipient
   characteristics, centers and OPTN-verified death/follow-up records; exact
-  mappings unverified [inference].
+  mappings unverified [inference]. UNOS does not collect the procurement method,
+  requiring the timestamp proxy [not in SAFs; reported Determining Procurement
+  Methodology].
 - **Data needs:** Procurement is inferred from death-to-cross-clamp duration:
   over 30 minutes NRP, otherwise DPP. Compare 365-day RMST and
   matched-pair-stratified Cox models. [reported Methods] Tags: `death-source`,
