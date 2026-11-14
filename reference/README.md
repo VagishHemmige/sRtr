@@ -52,6 +52,10 @@ paper's statistics or mention sRtr code. A design feature such as competing
 risks, time-varying exposure, matching, or weighting is named when it explains
 why particular records, identifiers, or follow-up intervals are needed.
 
+Longer catalogs may keep annotations in `pmc-<year>/batch-NN.md`, linked from
+individual index rows. The index is the entry point; earlier annotations may
+remain in the catalog itself. Batch numbers organize reading work, not topics.
+
 **Catalog header.** Give the search string, run date, records returned, and
 records kept. Counts with no screening log in the repository are marked
 *reported*.

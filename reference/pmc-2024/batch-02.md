@@ -68,7 +68,7 @@ MT, 2026-11-14
 - **Data needs:** Separate biologically related from unrelated donors, retaining
   relationship subtypes; age split <40 versus ≥40. Negative-binomial count
   models estimate change per three years within strata. [reported Methods;
-  Results] Tags: `living-donor`, `follow-up-horizon`.
+  Results] Tags: `living-donor`.
 - **Data pitfalls:** Counts concern completed donors, not everyone evaluated;
   excluded donor candidates are absent. [reported Discussion] Methods groups
   White/others together, while results shorten the label to White [reported
@@ -105,19 +105,22 @@ MT, 2026-11-14
 ### PMC11862262
 
 Kidney nonuse and allocation delays · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC11862262/) ·
-doi:10.1097/TP.0000000000005178 · External linkage · regression March 2019–January 2023; curated match runs March 2020–December 2021 ·
+doi:10.1097/TP.0000000000005178 · SAF analysis · regression March 2019–January 2023; curated match runs March 2020–December 2021 ·
 MT, 2026-11-14
 
 - **Population / unit:** Recovered deceased-donor kidneys, including nonused
   organs; two kidneys may share a donor. [reported §§2.3–2.4]
 - **Files and fields:** SRTR plus specially curated OPTN match-run data;
   notification/response/cross-clamp timestamps and center sequence. [reported
-  §§2.1–2.4] Standard-SAF availability requires verification [inference].
+  §§2.1–2.4] Standard-SAF availability requires verification [inference]. The
+  curated OPTN match runs are an additional source, not an ordinary SAF
+  [external; reported §2.3].
 - **Data needs:** Progression time uses the maximum prior response timestamp
   because responses can be out of sequence. Separate candidate and center
   counts. Cold time at last notification differs from transplant CIT and is zero
-  before cross-clamp; GEE clusters kidneys by donor. [reported §§2.3–2.4] Tags:
-  `donor-pair`, `policy-era`, `follow-up-horizon`.
+  before cross-clamp; GEE clusters kidneys by donor. [reported §§2.3–2.4]
+  Residual KDRI is calculated by regressing KDRI on other predictors [reported
+  §2.4]. Tags: `derived-score`, `donor-pair`, `policy-era`, `follow-up-horizon`.
 - **Data pitfalls:** Moving-average displays use a different period and are not
   regression inputs; missing/extreme notification times cause exclusions.
   [reported §§2.2–2.4] Transplanted-only data omit the nonuse denominator
