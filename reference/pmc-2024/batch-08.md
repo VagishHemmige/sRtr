@@ -94,6 +94,8 @@ MT, 2026-11-14
   windows; standardize morphine equivalents, distinguish >48-hour ventilation
   from mortality, and preserve propensity/weighting estimands. [reported
   Methods] Tags: `external-linkage`, `follow-up-horizon`.
+  Pretransplant exposure requires at least one opioid fill within six months; posttransplant windows are 0–6, 6–12 and >12 months. Weighted Weibull follow-up censors October 31, 2022. [reported Methods; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Prescription fills do not establish consumption; inpatient
   opioids and prescribing indications unavailable. Missing pharmacy coverage can
   select patients. Dose-window denominator and weighting/censoring
