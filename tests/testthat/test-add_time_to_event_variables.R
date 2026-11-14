@@ -206,6 +206,19 @@ test_that("graft failure on the day of death is censored by default", {
   expect_equal(out$TFL_GRAFT_DT_CENSOR[1], as.Date("2002-01-01"))
 })
 
+test_that("a missing last follow-up date is not filled in from death", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- graft_cohort()[1:2, ]
+  df$TFL_LAFUDATE <- as.Date(NA)
+  out <- add_time_to_event_outcomes(df)
+
+  # 900011 died with a working graft: no follow-up date, so no graft time.
+  # 900012 failed before death: the failure still counts, timed at failure.
+  expect_equal(out$TFL_GRAFT_DT_BINARY, c(0L, 1L))
+  expect_equal(out$TFL_GRAFT_DT_CENSOR, as.Date(c(NA, "2001-06-01")))
+  expect_equal(out$TFL_GRAFT_DT_days, c(NA, 518))
+})
+
 test_that("an unknown graft_death_same_day is an error", {
   # Not a snapshot: match.arg()'s quote marks depend on the locale.
   expect_error(

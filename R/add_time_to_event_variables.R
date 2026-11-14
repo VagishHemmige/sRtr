@@ -296,6 +296,12 @@ add_txf_outcomes <- function(
 #'     censored at death, not counted as failed.
 #'   * `"event"`: as a graft failure.
 #'
+#'   The default is a package assumption, not an SRTR rule: the data
+#'   dictionary does not say whether the graft failure date is filled in with
+#'   the death date when a recipient dies with a functioning graft. A real
+#'   failure and death can also fall on the same day. Run both settings to see
+#'   how much your results depend on it.
+#'
 #' @details
 #' `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only the
 #' event and censoring columns (`REC_DEATH_DT_COMPOSITE_BINARY`, `_CENSOR`,
