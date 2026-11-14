@@ -154,6 +154,13 @@ A major review also requires:
 - **Sources:** a change to epidemiologic logic needs its source named in
   the PR description (see `AGENTS.md`). Flag a missing or unverifiable
   source.
+- **Citations in code:** check them against “Citing sources in code” in
+  `AGENTS.md`. Flag a `@references` entry that only used a similar
+  choice rather than defining it, an option documented as a published
+  definition when it is a convention, and an internal comment that cites
+  `reference/` by file path instead of PMC ID or repository name. When a
+  PR changes a choice that an internal comment explains, check that the
+  comment still matches.
 - **“Needs SAF check”:** flag a change to file loading, labeling,
   derived variables, joins or vignettes whose PR description does not
   say what was checked only on made-up data, with the commands to run.

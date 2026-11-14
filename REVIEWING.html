@@ -126,6 +126,8 @@ Check a claimed fix on every similar path, not just the example shown.</li>
 <li>
 <strong>Sources:</strong> a change to epidemiologic logic needs its source named in the PR description (see <code>AGENTS.md</code>). Flag a missing or unverifiable source.</li>
 <li>
+<strong>Citations in code:</strong> check them against “Citing sources in code” in <code>AGENTS.md</code>. Flag a <code>@references</code> entry that only used a similar choice rather than defining it, an option documented as a published definition when it is a convention, and an internal comment that cites <code>reference/</code> by file path instead of PMC ID or repository name. When a PR changes a choice that an internal comment explains, check that the comment still matches.</li>
+<li>
 <strong>“Needs SAF check”:</strong> flag a change to file loading, labeling, derived variables, joins or vignettes whose PR description does not say what was checked only on made-up data, with the commands to run.</li>
 <li>
 <strong>Conventions:</strong> check the package code, test, documentation and NEWS conventions in <code>AGENTS.md</code>.</li>

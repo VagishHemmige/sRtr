@@ -72,6 +72,20 @@
 <li>When a design choice is close enough to ask about, make it a function argument, with the suggested choice as the default.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="citing-sources-in-code">Citing sources in code<a class="anchor" aria-label="anchor" href="#citing-sources-in-code"></a></h3>
+<p>Cite a source according to what it does for the code:</p>
+<ul><li>
+<strong><code>@references</code> is for defining sources only.</strong> List the source that defines what the function computes: the paper that gives the equation or coefficients, or the SRTR or OPTN document that sets the code list or rule. Use <code>\doi{}</code> where there is a DOI. If an option switches between published definitions, cite each one. A paper that only used a similar choice does not go here.</li>
+<li>
+<strong>Conventions are labeled as conventions.</strong> When an option or default follows common practice rather than a published definition, its <code>@param</code> says so. The reason for the default goes in the PR description.</li>
+<li>
+<strong>Practice goes in internal comments.</strong> Papers and repositories that show how analysts make a choice go in a short <code>#</code> comment at the line that makes the choice, not in user-facing documentation. Cite entries in <code>reference/</code> by PMC ID (<code>PMC11427033</code>) or by repository name as headed in <code>reference/repositories.md</code> (<code>owner/repo</code>), never by file path, because files there may move. For example: <code># Practice varies (reference/): PMC11427033; dyjohnson/opo_survival</code>.</li>
+<li>
+<strong>Pitfalls become tests.</strong> A trap found in a paper or repository becomes a synthetic test case. The PR description says where the case came from; the test needs no citation.</li>
+<li>
+<strong>The direction is one way.</strong> Code cites <code>reference/</code>; reference entries never name sRtr functions (see <a href="reference/README.html">reference/README.md</a>).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="testing-without-safs">Testing without SAFs<a class="anchor" aria-label="anchor" href="#testing-without-safs"></a></h3>
 <ul><li>Write the test that shows the problem first, then the fix.</li>
 <li>Synthetic data checks code paths, not real data. By maintainer policy, changes to file loading (<code>.sas7bdat</code> or <code>.parquet</code>), labeling, derived variables, joins between SAFs, or vignettes are not validated on real data until the maintainer runs the live tests on real SAFs. Their PR description says what the synthetic tests established and what remains data-dependent.</li>

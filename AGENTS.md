@@ -58,6 +58,34 @@ These rules take precedence over anything later in this file.
 - When a design choice is close enough to ask about, make it a function
   argument, with the suggested choice as the default.
 
+### Citing sources in code
+
+Cite a source according to what it does for the code:
+
+- **`@references` is for defining sources only.** List the source that
+  defines what the function computes: the paper that gives the equation
+  or coefficients, or the SRTR or OPTN document that sets the code list
+  or rule. Use `\doi{}` where there is a DOI. If an option switches
+  between published definitions, cite each one. A paper that only used a
+  similar choice does not go here.
+- **Conventions are labeled as conventions.** When an option or default
+  follows common practice rather than a published definition, its
+  `@param` says so. The reason for the default goes in the PR
+  description.
+- **Practice goes in internal comments.** Papers and repositories that
+  show how analysts make a choice go in a short `#` comment at the line
+  that makes the choice, not in user-facing documentation. Cite entries
+  in `reference/` by PMC ID (`PMC11427033`) or by repository name as
+  headed in `reference/repositories.md` (`owner/repo`), never by file
+  path, because files there may move. For example:
+  `# Practice varies (reference/): PMC11427033; dyjohnson/opo_survival`.
+- **Pitfalls become tests.** A trap found in a paper or repository
+  becomes a synthetic test case. The PR description says where the case
+  came from; the test needs no citation.
+- **The direction is one way.** Code cites `reference/`; reference
+  entries never name sRtr functions (see
+  [reference/README.md](https://vagishhemmige.github.io/sRtr/reference/README.md)).
+
 ### Testing without SAFs
 
 - Write the test that shows the problem first, then the fix.
