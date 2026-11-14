@@ -112,11 +112,12 @@ event and censoring columns (<code>REC_DEATH_DT_COMPOSITE_BINARY</code>, <code>_
 follow-up while censoring survivors at last follow-up would overstate
 mortality (#18).</p>
 <p>Graft failure (<code>TFL_GRAFT_DT</code>, or <code>TFL_GRAFT_DT_KI</code> and <code>TFL_GRAFT_DT_PA</code>
-for <code>TX_KP</code>) is death-censored: each graft is followed until the earlier of
-its last follow-up date and the recipient's death from any source
-(<code>REC_DEATH_DT_COMPOSITE</code>), whatever <code>death_window</code> is. A graft failure
-dated after death is not counted. Death with a functioning graft is a
-censoring time, not a graft failure.</p>
+for <code>TX_KP</code>) is death-censored, whatever <code>death_window</code> is: a graft failure
+dated after the recipient's death from any source (<code>REC_DEATH_DT_COMPOSITE</code>)
+is not counted, and a graft without a failure is censored at the earlier of
+its last follow-up date and death. Death with a functioning graft is a
+censoring time, not a graft failure. A graft failure dated after the last
+follow-up date but before death is still counted, at its own date.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
