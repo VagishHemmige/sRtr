@@ -290,6 +290,17 @@ add_txf_outcomes <- function(
 #' @param ascertainment_date One date up to which deaths are ascertained in
 #'   your SAF release, from its release notes. Required when
 #'   `death_window = "ascertainment"`.
+#' @param graft_death_same_day How to treat a graft failure dated on the day
+#'   the recipient died:
+#'   * `"censor"` (default): as death with a functioning graft. The graft is
+#'     censored at death, not counted as failed.
+#'   * `"event"`: as a graft failure.
+#'
+#'   The default is a package assumption, not an SRTR rule: the data
+#'   dictionary does not say whether the graft failure date is filled in with
+#'   the death date when a recipient dies with a functioning graft. A real
+#'   failure and death can also fall on the same day. Run both settings to see
+#'   how much your results depend on it.
 #'
 #' @details
 #' `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only the
@@ -298,12 +309,21 @@ add_txf_outcomes <- function(
 #' follow-up while censoring survivors at last follow-up would overstate
 #' mortality (#18).
 #'
+#' Graft failure (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI` and `TFL_GRAFT_DT_PA`
+#' for `TX_KP`) is death-censored: each graft is followed until the earlier of
+#' its last follow-up date and the recipient's death from any source
+#' (`REC_DEATH_DT_COMPOSITE`), whatever `death_window` is. A graft failure
+#' dated after death is not counted. Death with a functioning graft is a
+#' censoring time, not a graft failure.
+#'
 add_time_to_event_outcomes <- function(
   df,
   death_window = c("follow_up", "ascertainment"),
-  ascertainment_date = NULL
+  ascertainment_date = NULL,
+  graft_death_same_day = c("censor", "event")
 ) {
   death_window <- match.arg(death_window)
+  graft_death_same_day <- match.arg(graft_death_same_day)
   if (death_window == "ascertainment") {
     if (
       is.null(ascertainment_date) ||
@@ -364,39 +384,38 @@ add_time_to_event_outcomes <- function(
       units = "days",
     )
 
-  #Death-censored graft failure added here:
-  if ("TFL_GRAFT_DT_KI" %in% names(df)) {
+  #Death-censored graft failure (#22): each graft is followed until the
+  #earlier of its last follow-up and the recipient's death from any source,
+  #whatever death_window is. A graft failure dated after death is not an
+  #event; one dated on the day of death follows graft_death_same_day.
+  graft_lafu_cols <- c(
+    TFL_GRAFT_DT_KI = "TFL_LAFUDATEKI",
+    TFL_GRAFT_DT_PA = "TFL_LAFUDATEPA",
+    TFL_GRAFT_DT = "TFL_LAFUDATE"
+  )
+  for (graft_col in names(graft_lafu_cols)) {
+    if (!graft_col %in% names(df)) {
+      next
+    }
+    censored <- .srtr_death_censor(
+      event = df[[graft_col]],
+      censor = df[[graft_lafu_cols[[graft_col]]]],
+      death = death,
+      same_day = graft_death_same_day
+    )
+    df$.graft_event <- censored$event
+    df$.graft_censor <- censored$censor
     df <- df |>
       srtr_time_to_event(
-        event_date = .data$TFL_GRAFT_DT_KI,
+        event_date = .data$.graft_event,
         start_date = .data$REC_TX_DT,
-        censor_date = .data$TFL_LAFUDATEKI,
-        prefix = "TFL_GRAFT_DT_KI",
+        censor_date = .data$.graft_censor,
+        prefix = graft_col,
         units = "days",
       )
   }
-
-  if ("TFL_GRAFT_DT_PA" %in% names(df)) {
-    df <- df |>
-      srtr_time_to_event(
-        event_date = .data$TFL_GRAFT_DT_PA,
-        start_date = .data$REC_TX_DT,
-        censor_date = .data$TFL_LAFUDATEPA,
-        prefix = "TFL_GRAFT_DT_PA",
-        units = "days",
-      )
-  }
-
-  if ("TFL_GRAFT_DT" %in% names(df)) {
-    df <- df |>
-      srtr_time_to_event(
-        event_date = .data$TFL_GRAFT_DT,
-        start_date = .data$REC_TX_DT,
-        censor_date = .data$TFL_LAFUDATE,
-        prefix = "TFL_GRAFT_DT",
-        units = "days",
-      )
-  }
+  df$.graft_event <- NULL
+  df$.graft_censor <- NULL
 
   #Add rejection and malignancy from follow up database
   df <- add_txf_outcomes(df)
@@ -473,4 +492,26 @@ add_time_to_event_outcomes <- function(
   df$.death_event <- NULL
   df$.death_censor <- NULL
   df
+}
+
+#' Censor an outcome at death
+#'
+#' An event counts only if it is dated before death (or on the day of death
+#' when `same_day = "event"`). Follow-up ends at death when death comes before
+#' the censor date. A missing censor date stays missing: without a follow-up
+#' date it is not known that the outcome was followed up to death.
+#'
+#' @param event,censor,death `Date` vectors of the same length.
+#' @param same_day `"censor"` or `"event"`: how to treat an event dated on the
+#'   day of death.
+#' @return A list with `event` and `censor` `Date` vectors.
+#' @noRd
+.srtr_death_censor <- function(event, censor, death, same_day) {
+  before_death <- if (same_day == "event") event <= death else event < death
+  keep_event <- !is.na(event) & (is.na(death) | before_death)
+  died_first <- !is.na(death) & !is.na(censor) & death < censor
+  list(
+    event = dplyr::if_else(keep_event, event, as.Date(NA)),
+    censor = dplyr::if_else(died_first, death, censor)
+  )
 }
