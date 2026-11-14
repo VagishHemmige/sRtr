@@ -154,6 +154,8 @@ MT, 2026-11-14
   specified. PH treatment and disease subtype unavailable. [unclear
   Methods/Results/Discussion; reported Limitations] Do not copy classifications
   without reconciliation [inference].
+  Cohort stages differ: 1,175 identified, 1,029 in Table 1 and 980 complete records. The reported PVR unit of mmHg conflicts with resistance units; preserve this as a reporting ambiguity rather than a conversion rule. [reported Results; Table 1; unclear Methods; source checked by Claude, 2026-11-14]
+
 - **Locators:** Methods; Results; Discussion, including embedded table text.
   Complete main text read from PMC XML; rendered figures and exact SAF codes not
   independently appraised.
