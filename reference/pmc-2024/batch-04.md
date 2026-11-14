@@ -39,7 +39,8 @@ MT, 2026-11-14
 - **Population / unit:** Incident candidates reaching MELD/PELD ≥15 and
   transplanted donor livers for optimization; a separate LSAM population for
   simulation. Units: donor hospital, aggregated center demand and simulated
-  candidate. [reported Methods]
+  candidate. [reported Methods] The simulation excludes transplant centers in
+  Hawaii, Alaska and Puerto Rico [reported Methods].
 - **Files and fields:** SRTR donor/candidate geography and LSAM input files;
   exact SAF mappings unverified [inference].
 - **Data needs:** Separate supply/demand optimization from outcome simulation;
@@ -63,7 +64,8 @@ MT, 2026-11-14
 
 - **Population / unit:** Adult lung candidates and recovered donors;
   research-only recoveries excluded. Unit: candidate-specific donor supply and
-  simulated candidate. [reported Methods]
+  simulated candidate. [reported Methods] Missing blood type, height or
+  diagnosis group and height <36 inches are excluded [reported Methods].
 - **Files and fields:** Candidate diagnosis, ABO, height and donor
   recovery/geography records; exact SAF mappings unverified [inference].
 - **Data needs:** Calculate distance-adjusted compatible donors per observed day
@@ -123,22 +125,27 @@ MT, 2026-11-14
   lacks stage/histopathology. The mortality outcome is all-cause, not
   cancer-specific. [reported Discussion] Results describe first-year incidence
   despite excluding first-year cancers; reconcile plotted time with delayed
-  entry before reproducing it [unclear Exposures; Results].
+  entry before reproducing it [unclear Exposures; Results]. Cancer is reported
+  when it reaches center attention, often at annual follow-up; report timing can
+  differ from clinical onset [reported Exposures; inference].
 - **Locators:** Materials and Methods; Results; Discussion. Complete main text
   read from PMC XML; tables/captions and supplements not separately appraised.
 
 ### PMC11573248
 
 Kidney offer-notification batches · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC11573248/) ·
-doi:10.1111/ctr.70024 · External linkage · match runs December 2017–January 2023; OPO performance report uses 2021 data ·
+doi:10.1111/ctr.70024 · SAF analysis · match runs December 2017–January 2023; OPO performance report uses 2021 data ·
 MT, 2026-11-14
 
 - **Population / unit:** Match runs with at least one kidney recovered; host-OPO
   final run chosen when repeated. Units: notification, candidate, distinct
-  center and OPO. [reported Methods]
+  center and OPO. [reported Methods] LifeChoice Donor Services is excluded
+  because it merged during the study period [reported Methods].
 - **Files and fields:** SAFs, Potential Transplant Recipient file and
   supplemental notification timestamps; external OPO performance report.
   [reported Data source; Analysis] Exact join keys unverified [inference].
+  Supplemental SRTR match-run timestamps are a separate file from the SAF and
+  PTR file [reported Data Source; not in SAFs].
 - **Data needs:** Exclude bypasses from notified counts and placement ranks;
   distinguish first/second kidney and candidate/center ranks. Placement-rank
   calculations require both kidneys accepted. Preserve KAS250 geography and OPO
