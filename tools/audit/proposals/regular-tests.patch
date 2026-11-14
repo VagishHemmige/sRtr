@@ -14,19 +14,3 @@
 +  z <- srtr_time_to_event(x, event, start, end, prefix = "FAKE", units = "years", add_epsilon = 0)
 +  testthat::expect_equal(z$FAKE_yrs, 366/365.25)
 +})
---- a/tests/testthat/test-load_srtr_file.R
-+++ b/tests/testthat/test-load_srtr_file.R
-@@ -473,3 +473,13 @@
-   expect_equal(cnd$extra, "NOT_A_DICTIONARY_COLUMN")
-   expect_equal(out$NOT_A_DICTIONARY_COLUMN, c(7, 8))
- })
-+
-+testthat::test_that("a selected synthetic SAS file round trips without row inflation", {
-+  dir <- withr::local_tempdir()
-+  withr::local_envvar(SRTR_WD = dir)
-+  x <- data.frame(TRR_ID = c(900001, 900002), FAKE_VALUE = c(7, 8))
-+  suppressWarnings(haven::write_sas(x, file.path(dir, "AUDIT.sas7bdat")))
-+  y <- load_srtr_file("AUDIT", trr_id_filter = 900002, col_select = "FAKE_VALUE", factor_labels = FALSE, var_labels = FALSE)
-+  testthat::expect_equal(y$FAKE_VALUE, 8)
-+  testthat::expect_named(y, "FAKE_VALUE")
-+})

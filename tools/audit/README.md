@@ -14,9 +14,12 @@ From its repository root, in Bash (Git Bash on Windows):
 ```sh
 bash tools/audit/run.sh contracts
 bash tools/audit/run.sh installed
+bash tools/audit/run.sh decisions
 ```
 
-Both commands deliberately return nonzero when a discrepancy remains. They do
+The contract and installed checks return nonzero when a discrepancy remains.
+The decisions mode reports observed behavior without asserting a selected policy.
+The commands do
 not download dependencies. `AUDIT_RSCRIPT` may name an explicit Rscript executable.
 The installed check installs only this package into a temporary library.
 
@@ -41,16 +44,19 @@ the existing tests and workflows did not change.
 Personally executed on Linux with R 4.5.0, testthat 3.2.3, pkgload 1.4.0,
 dplyr 1.1.4, haven 2.5.4, arrow 26.0.1 and sf 1.0-19:
 
-- Contract checks: 20 cases; 32 passing expectations, 15 failed expectations,
-  four errors, two warnings, no skips. Five cases pass completely. Failures remain
+- Contract checks after review cleanup: 18 cases; 30 passing expectations, 14 failed expectations,
+  four errors, two warnings, no skips. Four cases pass completely. Failures remain
   visible rather than being converted into expected failures or skipped.
 - Installed package: installation succeeds; both factor and variable label calls
   fail because the dictionary/formats lookup does not find installed metadata.
 - Parent/child startup isolation passes in both modes.
-- The two proposed permanent tests were executed separately: six passing
-  expectations, no failures, errors, skips or test warnings. Both patches pass
+- The retained time-conversion proposal was executed in the earlier isolated
+  proposal check: four passing expectations. The redundant SAS proposal was
+  removed; existing loader tests already read synthetically generated SAS files. Both patches pass
   `git apply --check`. The CI step itself has not run on GitHub.
-- Development loading also emits two Arrow/dplyr method-registration warnings
+- Decisions mode observes selection of SYNTHETIC SAS when both formats exist;
+  it does not count that observation as a defect or approved preference.
+- Development loading also emits Arrow/dplyr method-registration warnings
   with this dependency combination; these are separate from the two date warnings.
 
 No real-SAF, Windows, full-package check or vignette run is claimed for this PR.
@@ -68,7 +74,7 @@ is not authorization to change behavior or automatically a settled scientific ru
 | No-op ordered factors; repeated factor labels | A transformation with no matched missing code preserves levels/order; applying labels twice must not erase values. [Factor order](https://github.com/VagishHemmige/sRtr/issues/20), [repeat labeling](https://github.com/VagishHemmige/sRtr/issues/15). Promote with fixes. |
 | Undated positive follow-up forms | Missing date is not an infinite date; [undated forms](https://github.com/VagishHemmige/sRtr/issues/97). Retain failing candidate. |
 | Pre-origin event with epsilon | A negative raw interval must not become valid through the offset; [negative-time finding](https://github.com/VagishHemmige/sRtr/issues/120). Documentation contract, not a censoring-policy assertion. |
-| Time units; selected synthetic SAS round trip | Hand-counted 366-day leap-year interval and exactly one selected fabricated row/column. Passing; complete permanent-test proposal below. |
+| Time units | Hand-counted 366-day leap-year interval. Passing; complete permanent-test proposal below. |
 | Follow-up table keys | Canonical `TX_` to `TXF_` mapping for seven organs; passing. Mocked loader proves routing only. Add to existing outcome tests when expanding organ integration. |
 | PDRI raw versus labeled input | Equivalent representation should preserve the score; passing. Retain as integration candidate, not coefficient validation. |
 | Raw versus labeled index rejection | Equivalent code/label should give equal status, date and time; [representation mismatch](https://github.com/VagishHemmige/sRtr/issues/121). Does not approve length-of-stay as a clinical onset date. |
@@ -76,7 +82,8 @@ is not authorization to change behavior or automatically a settled scientific ru
 | Unknown factor normalization | Bundled SRLSTT maps U to U: Unknown; [normalization gap](https://github.com/VagishHemmige/sRtr/issues/19). Missing-code policy still needs variable-specific validation. |
 | Orchestration caller columns | Preserve pre-existing caller column; [orchestration](https://github.com/VagishHemmige/sRtr/issues/24). Retain candidate. |
 | Missing transplant identifiers | Two unknown keys do not establish identity; [missing-key match](https://github.com/VagishHemmige/sRtr/issues/123). Retain candidate. |
-| Uppercase extension; duplicate keys | [Case discovery](https://github.com/VagishHemmige/sRtr/issues/125); [silent ambiguous selection](https://github.com/VagishHemmige/sRtr/issues/124). Duplicate-key test proposes rejection; an approved explicit selection API could replace that expectation. |
+| Uppercase extension | [Case discovery](https://github.com/VagishHemmige/sRtr/issues/125). Retain failing candidate. |
+| Duplicate keys (decision-dependent) | [File-selection policy](https://github.com/VagishHemmige/sRtr/issues/124). `decisions.R` observes current selection. Alternatives: reject ambiguity, document format precedence with a message, or require explicit selection. Maintainer choice precedes any permanent expectation. |
 | Empty ranking; metadata collisions | One result per candidate per help contract; [ranking errors](https://github.com/VagishHemmige/sRtr/issues/126). No collision renaming policy is prescribed. |
 | Installed label calls | Exported functions should work with `sRtr::` alone; [namespace lookup](https://github.com/VagishHemmige/sRtr/issues/90). Separate process catches what development loading masks. |
 
@@ -90,8 +97,8 @@ in [database background](../../reference/codebook-notes.md) and
 
 | Priority | Proposal | Benefit, cost and prerequisite |
 | --- | --- | --- |
-| First | [regular-tests.patch](proposals/regular-tests.patch) | Appends two complete tests to the existing time-to-event and loader test files for exact time conversion and an actual SAS projection/filter round trip. Small temporary file, no network; supplement existing mocked loader tests. Apply only after reviewing current coverage. |
-| First, with namespace repair | [installed-ci.patch](proposals/installed-ci.patch) | Adds the installed check to the existing OS/R matrix, not another workflow. One temporary install per job; no new downloads beyond existing dependencies. Currently fails on known metadata lookup: do not activate as a green gate before the repair. Windows/Git Bash and older R still require CI validation. |
+| First | [regular-tests.patch](proposals/regular-tests.patch) | Appends one exact time-conversion test to the existing time-to-event tests. Four arithmetic/status/date expectations, no files or network. The existing loader suite already tests SAS filtering with column projection; no duplicate proposal is retained. |
+| First, with namespace repair | [installed-ci.patch](proposals/installed-ci.patch) | Adds the installed check after the main package check in the existing OS/R matrix. `!cancelled()` allows it to run after an earlier failure without continuing a canceled job; failures remain visible and cannot prevent the main check. One temporary install per job; no new downloads beyond existing dependencies. Currently fails on known metadata lookup: do not activate as a green gate before the repair. Windows/Git Bash and older R still require CI validation. |
 | With each approved fix | Move relevant failing cases next to their existing function tests | Demonstrate failure before repair and success after; avoid a permanent separate regression suite. Strengthen numeric/labeled and empty/missing matrices instead of duplicating these exact examples indefinitely. |
 | Next | Unmocked cross-function synthetic file → label → normalize → outcome check | Existing mocked derivations do not establish the complete path. Add organ-specific KI/KP/thoracic fixtures after namespace and representation issues are resolved; keep clinical onset and censoring decisions explicit. |
 
@@ -114,6 +121,12 @@ isolation. No recurring job, new workflow, or real-data CI is proposed.
   probes, runtime-install scripts, logs and raw output were omitted. The original
   audit archive retains history; this bundle is intentionally a selected useful
   subset, not all original issue reproducers or whole-package coverage.
+
+When fixing a listed issue, the implementation PR should move useful coverage
+into the existing function tests (failure before the fix, success after), remove
+the standalone case and update this table. If coverage already exists or the
+expectation is rejected, remove the case with a short rationale instead. The PR
+reviewer checks that disposition; scientific decisions must be settled first.
 
 For a fresh review, derive expectations from current contracts and primary
 sources before reconciling these historical cases. Update or retire each case

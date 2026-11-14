@@ -6,7 +6,7 @@ blank <- normalizePath(args[[3]], mustWork = TRUE)
 Sys.setenv(R_ENVIRON = blank, R_ENVIRON_USER = blank,
            R_PROFILE = blank, R_PROFILE_USER = blank)
 audit <- normalizePath(args[[1]], mustWork = TRUE)
-mode <- match.arg(args[[2]], c("contracts", "installed"))
+mode <- match.arg(args[[2]], c("contracts", "installed", "decisions"))
 startup <- Sys.getenv(c("R_ENVIRON", "R_ENVIRON_USER", "R_PROFILE", "R_PROFILE_USER"))
 stopifnot(all(nzchar(startup)), all(file.exists(startup)),
           all(file.info(startup)$size == 0))
@@ -36,6 +36,11 @@ for (item in c("R", "data", "man", "DESCRIPTION", "NAMESPACE", "LICENSE")) {
 cat("Runtime:", R.version.string, "on", Sys.info()[["sysname"]], "\n")
 for (pkg in c("testthat", "pkgload", "dplyr", "haven", "arrow", "sf")) {
   cat(pkg, as.character(utils::packageVersion(pkg)), "\n")
+}
+if (mode == "decisions") {
+  pkgload::load_all(work, helpers = FALSE, quiet = TRUE)
+  source(file.path(audit, "decisions.R"))
+  quit(status = 0L)
 }
 if (mode == "installed") {
   lib <- file.path(tempdir(), "library")

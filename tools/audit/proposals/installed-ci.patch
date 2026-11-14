@@ -1,13 +1,11 @@
 --- a/.github/workflows/R-CMD-check.yaml
 +++ b/.github/workflows/R-CMD-check.yaml
-@@ -48,6 +48,10 @@
-           extra-packages: any::rcmdcheck
-           needs: check
-
-+      - name: Installed namespace synthetic smoke check
-+        shell: bash
-+        run: bash tools/audit/run.sh installed
-+
-       - uses: r-lib/actions/check-r-package@v2
+@@ -52,3 +52,8 @@
          with:
            upload-snapshots: true
+           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
++
++      - name: Installed namespace synthetic smoke check
++        if: ${{ !cancelled() }}
++        shell: bash
++        run: bash tools/audit/run.sh installed

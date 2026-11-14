@@ -61,15 +61,6 @@ testthat::test_that("PDRI is invariant to documented default loader labeling", {
   b <- add_pdri(labeled, variant = "KP")
   testthat::expect_equal(as.numeric(b$PDRI), as.numeric(a$PDRI))
 })
-testthat::test_that("a selected synthetic SAS file round trips without row inflation", {
-  dir <- withr::local_tempdir()
-  withr::local_envvar(SRTR_WD = dir)
-  x <- data.frame(TRR_ID = c(900001, 900002), FAKE_VALUE = c(7, 8))
-  suppressWarnings(haven::write_sas(x, file.path(dir, "AUDIT.sas7bdat")))
-  y <- load_srtr_file("AUDIT", trr_id_filter = 900002, col_select = "FAKE_VALUE", factor_labels = FALSE, var_labels = FALSE)
-  testthat::expect_equal(y$FAKE_VALUE, 8)
-  testthat::expect_named(y, "FAKE_VALUE")
-})
 testthat::test_that("raw and labeled rejection codes identify the same event", {
   testthat::local_mocked_bindings(load_srtr_file = function(...) synthetic_followup()[0, ])
   raw <- synthetic_cohort("LI")
