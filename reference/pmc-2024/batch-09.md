@@ -26,6 +26,8 @@ MT, 2026-11-14
   missingness is substantial; device/dialysis duration and rejection type are
   unavailable. [unclear Methods/Table 3; reported Limitations] Resolve before
   translating outcome definitions [inference].
+  One-year rejection collection is unavailable for transplants after July 1, 2021, so rejection comparisons use the earlier transplant window rather than all survival follow-up. [reported Methods; source checked by Claude, 2026-11-14]
+
 - **Locators:** Materials and methods; Results; Discussion and embedded tables.
   Complete main text read from PMC XML; supplements and exact device codes not
   checked.
@@ -81,7 +83,7 @@ MT, 2026-11-14
 
 Kidney residential and center segregation · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC10877505/) ·
 doi:10.1001/jamainternmed.2023.8184 · External linkage · 1995–2021; maximum three years from listing ·
-Screened, 2026-11-14
+MT, 2026-11-14 (full main-text read reported by Claude)
 
 - **Population / unit:** First-time adult Black/White kidney candidates,
   including non-listed living-donor recipients; complete-case primary analysis.
@@ -93,13 +95,16 @@ Screened, 2026-11-14
   competing-risk and center-frailty analyses. [reported Access; Sensitivity
   Analysis] Tags: `external-linkage`, `geography`, `living-donor`,
   `candidate-registration`.
+  Follow listing to the first of three years, December 31, 2021, removal, transplant or death; never-waitlisted living-donor recipients receive one waitlist day. Segregation uses the ACS five-year ZCTA multigroup Theil H index. [reported Access to LDKT; Methods; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Preemptive transplant is listed as a separate competing
   endpoint, requiring mutually exclusive outcome clarification. ZIP/ZCTA
   measures are ecological; historical ACS alignment and full score construction
   need checking. [unclear Methods; reported Limitations]
-- **Locators:** PMC cached Methods, selected Results and Limitations; direct
-  retrieval blocked by browser check. Complete main text not established:
-  Screened. Supplementary score formula not read.
+- **Locators:** PMC main text, especially Methods and Discussion. Full main-text
+  reading reported by Claude on 2026-11-14 using the browser; this records that
+  reader's source access, not a repeat full read by this annotator. Supplements
+  and external linkage specifications remain unchecked.
 
 ### PMC11359088
 
