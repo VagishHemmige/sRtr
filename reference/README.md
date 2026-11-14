@@ -47,7 +47,9 @@ authority for clinical definitions or permission to open its data.
 Catalog files (`pmc-<year>.md`) list papers that use SRTR data, with links and
 short annotations. An annotation records what data the paper shows a user
 needs, and where the data can lead to a wrong result. It does not appraise the
-paper's statistics or mention sRtr code.
+paper's statistics or mention sRtr code. A design feature such as competing
+risks, time-varying exposure, matching, or weighting is named when it explains
+why particular records, identifiers, or follow-up intervals are needed.
 
 **Catalog header.** Give the search string, run date, records returned, and
 records kept. Counts with no screening log in the repository are marked
@@ -72,16 +74,26 @@ status.
   transplant, donor, or donor pair).
 - **Files and fields:** each with a provenance tag (below).
 - **Data needs:** links and identifiers, timing rules, definitions, outcome
-  and censoring sources, policy eras. End with tags from the list below.
+  and censoring sources, policy eras, and any design feature that drives them.
+  End with tags from the list below.
 - **Data pitfalls:** missing data, ambiguous or duplicate fields, timing
   traps. Write each one as a statement that can be checked.
 - **Locators:** the sections and tables used.
 
-**Provenance tags.** Every file, field, or definition carries one:
-`[reported §…]` (the paper states it); `[inferred: <dictionary>]` (deduced
-from a named dictionary, such as `sRtr::dictionary` at a given commit, and not
-stated by the paper); `[external]` (needs data outside the SAFs);
-`[not in SAFs]` (the paper or dictionary shows it is unavailable).
+**Provenance tags.** Every statement has a source basis. One tag at the end of
+a bullet covers the whole bullet; tag a clause separately only when its basis
+differs.
+
+- `[reported §…]`: the paper states it.
+- `[dictionary: <name and version>]`: checked against a named dictionary, such
+  as `sRtr::dictionary` at a given commit; not stated by the paper.
+- `[inference]`: the annotator's reasoning, including record families the
+  analysis clearly needs but the paper does not name. Never give exact file or
+  field names under this tag.
+- `[unclear §…]`: the paper leaves it open; keep its wording and do not
+  resolve it.
+- `[external]`: needs data outside the SAFs.
+- `[not in SAFs]`: the paper or a dictionary shows it is unavailable.
 
 **Data-need tags.** `cross-organ-link`, `repeat-transplant`, `donor-pair`,
 `candidate-registration`, `status-history`, `post-removal-death`,
@@ -91,8 +103,10 @@ using it.
 
 **Checking an entry.**
 
-- Every claim has a provenance tag; every reported claim has a locator.
-- Field names match the named dictionary.
+- Every bullet has a source basis; `[reported]` and `[unclear]` tags have a
+  locator.
+- Exact file and field names are reported or dictionary-checked, never
+  inferred.
 - The reading status matches what was read; nothing unread is cited.
 - Pitfalls describe the data, not the paper's analysis or sRtr code.
 - Tags come from the list above.
@@ -106,21 +120,26 @@ Intestine–kidney timing · doi:10.1016/j.intf.2024.100005 · SAF analysis ·
 1995–2023 (abstract says 1994) · MT, 2026-11-14
 
 - **Population / unit:** first intestine transplant, on dialysis and listed
-  for kidney before it; 54 people. Unit: person.
+  for kidney before it; 54 people. Unit: person. [reported §Patients;
+  Results]
 - **Files and fields:** `tx_in`, `tx_ki`, `txf_in`, `PERS_ID` [reported
-  §Study design]; `CAN_DIAL` [reported §Patients], which is in CAND_LIIN and
-  CAND_KIPA, not TX_IN [inferred: `sRtr::dictionary`, e7a74d1]. Source of
-  kidney listing not reported.
+  §Study design]; `CAN_DIAL` [reported §Patients] is in CAND_KIPA, CAND_LIIN
+  and CAND_THOR, not TX_IN [dictionary: `sRtr::dictionary` at e7a74d1].
+  Kidney waitlisting needs candidate registration records; the paper names no
+  source [inference].
 - **Data needs:** link organ files by person; keep the earliest intestine
-  transplant; group by days from intestine to kidney transplant (7 used);
-  graft failure includes death; 2,000-day horizon; second time origin at
-  kidney transplant. Tags: `cross-organ-link`, `repeat-transplant`,
-  `follow-up-horizon`, `derived-score`.
-- **Data pitfalls:** day 7 itself, and kidney before intestine, are not
-  assigned to a group. The delayed group is defined by a later event (median
-  3,087 days after intestine transplant), so its earlier time is not time at
-  risk of that exposure. Diabetes and dialysis start were too sparse for
-  EPTS; values were substituted.
+  transplant; group by days from intestine to kidney transplant (seven-day
+  window); graft failure includes death; 2,000-day horizon; second time
+  origin at kidney transplant. [reported §Study design; Patients; Statistical
+  analysis; Results] Tags: `cross-organ-link`, `repeat-transplant`,
+  `candidate-registration`, `follow-up-horizon`, `derived-score`.
+- **Data pitfalls:** the paper does not say which group day 7 falls in, or how
+  a kidney transplant before the intestine transplant was handled; it uses
+  "within" and "following" seven days [unclear §Patients]. The delayed group
+  waited a median of 3,087 days for the kidney [reported §Results], so time
+  before that date cannot count as delayed-group time at risk [inference].
+  Diabetes and dialysis start were too sparse for EPTS, and values were
+  substituted [reported §Statistical analysis].
 - **Locators:** Methods (Study design; Patients and study groups;
   Statistical analysis); Results.
 ```
