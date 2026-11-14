@@ -23,9 +23,9 @@ MT, 2026-11-14
   Methods/Table 1] Tags: `policy-era`, `follow-up-horizon`, `geography`.
 - **Data pitfalls:** Karnofsky grouping is not a validated frailty phenotype.
   Public-insurance definition omits explicit Medicare handling; cohort bounds,
-  graft-failure definition and some table denominators are unclear. A
-  before/after recipient sample cannot alone measure population access or
-  isolate policy effects. [unclear Methods/Tables; inference]
+  graft-failure definition and some table denominators are unclear. Population
+  access would additionally require eligible nonrecipient denominators. [unclear
+  Methods/Tables; inference]
 - **Locators:** Complete main text read from PMC XML, Methods through
   Conclusion; original insurance codes and CDC supplement not checked.
 
@@ -70,10 +70,9 @@ MT, 2026-11-14
   [reported Methods] Tags: `derived-score`, `donor-pair`.
 - **Data pitfalls:** Later pumping is unrecorded, dialysis thresholds vary by
   center, and DGF does not identify injury severity or dialysis duration.
-  Hospital stay begins at admission, not necessarily transplant. Confounded
-  preservation comparisons and inconsistent ischemia-hour summaries do not
-  establish a causal safe-delay threshold or cost savings. [reported Discussion;
-  inference]
+  Hospital stay begins at admission, not necessarily transplant. Ischemia-hour
+  summaries differ across sections; exact measurement boundaries need checking
+  before classifying delays. [reported Discussion; inference]
 - **Locators:** Complete main text read from PMC XML; Methods, Results,
   Discussion and Conclusions. Detailed cost data and KDPI mapping not
   independently checked.
