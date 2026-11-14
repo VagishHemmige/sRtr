@@ -395,15 +395,12 @@ usable project knowledge. For each material discovery, identify its maintained
 destination or explain why it belongs only in the archive. Group related results;
 do not create a new ledger entry for every minor observation.
 
-| Result | Maintained destination |
-| --- | --- |
-| Verified paper or official method, including conflicting source versions | `reference/web-sources.md` |
-| External implementation and the capability it informs | `reference/repositories.md` |
-| Field/code interpretation, organ or release limitation | `reference/codebook-notes.md` |
-| Methodological comparison, assumption, or decision rationale | `reference/methodology-review.md`, linked to the owning issue |
-| Reproducible defect or independent reference example | Proposed focused regression test beside the affected tests; retain the audit reproducer until implementation is approved |
-| User-facing misunderstanding | Proposed correction to the relevant help or vignette |
-| Review-process lesson | Proposed amendment to the applicable review protocol |
+Read [reference/README.md](reference/README.md) before adding reference
+information. It is the guide to destination files and entry conventions; follow
+it rather than maintaining a second routing table here. Proposed regression
+tests belong beside the affected tests, user-facing corrections in the relevant
+help or vignette, and process lessons in the applicable review protocol. Retain
+audit reproducers until their implementation is approved.
 
 Prepare concrete, self-reviewed documentation diffs as review deliverables.
 Use existing documentation permissions to preserve them on a task branch/PR;

@@ -86,9 +86,14 @@ A major review also requires:
 
 ## Preserve reusable knowledge
 
-For material discoveries, use the [reference catalogue](reference/README.md)
-and the whole-package protocol's knowledge-integration rules. Scale this work
-to the review: a routine PR need not produce a separate report or ledger.
+Before adding reference information, read [reference/README.md](reference/README.md).
+It is the guide to which existing file should receive each kind of information
+and the conventions for recording it. Follow that guide, amend existing topical
+entries where possible, and link related entries instead of duplicating content.
+Do not maintain a separate routing guide in review instructions.
+
+Use the whole-package protocol's knowledge-integration rules in proportion to the
+review: a routine PR need not produce a separate report or ledger.
 Prepare concise amendments when verified sources, field meanings, methodological
 limits, or decision rationale would prevent future rediscovery. Link the owning
 issue and preserve unresolved choices as unresolved. A review request alone does
