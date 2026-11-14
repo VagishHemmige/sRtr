@@ -64,6 +64,8 @@ MT, 2026-11-14
   Methods]
 - **Files and fields:** Donor, preservation-at-receipt, transplant ischemia time
   and admission/discharge records; mappings unverified [inference].
+  Recipient receipt-on-pump is distinct from donor-side pumping: REC_RECEIVED_ON_PUMP is in TX_KI/TX_KP, whereas left/right donor pump fields describe donor kidneys. [dictionary: sRtr::dictionary at 8e73993, checked by Claude; not independently verified here]
+
 - **Data needs:** Machine perfusion means received on pump; kidneys received on
   ice and pumped later remain cold-storage classified. DGF is first-week
   dialysis; stay is discharge minus admission. KDPI uses the 2022 mapping table.
@@ -81,7 +83,7 @@ MT, 2026-11-14
 
 Kidney donor sex, age and registry harmonization · [PMC article](https://pmc.ncbi.nlm.nih.gov/articles/PMC10966323/) ·
 doi:10.1093/ndt/gfad181 · SAF analysis · SRTR 1988–2018; follow-up June 2019 ·
-Screened, 2026-11-14
+MT, 2026-11-14 (full main-text read reported by Claude)
 
 - **Population / unit:** First deceased-donor kidney-only recipients of all
   ages, combined analytically with ANZDATA/CTS cohorts. [reported Methods]
@@ -93,13 +95,16 @@ Screened, 2026-11-14
   donor-age/recipient-sex interactions. Figure 1 conditions on graft function
   beyond 90 days. [reported Methods/caption] Tags: `follow-up-horizon`,
   `derived-score`.
+  SRTR transplants span January 1, 1988–December 31, 2018 with June 1, 2019 follow-up; exclude donors under 5. Harmonization reduces race to White/other and PRA to zero/positive. Outcome is death-censored graft loss; other registries have different periods. [reported Data sources and population; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Covariate availability differs across registries;
   death-censored loss is dialysis/retransplant, not death-inclusive failure.
   Clarify landmark entry and harmonization before reuse. [reported Methods;
   inference]
-- **Locators:** Cached PMC/publisher Methods, selected Results, Discussion and
-  caption read; direct PMC blocked. Continuity of complete main text not
-  established: Screened. Supplements not read.
+- **Locators:** PMC main text, especially Methods and Discussion. Full main-text
+  reading reported by Claude on 2026-11-14 using the browser; this records that
+  reader's source access, not a repeat full read by this annotator. Supplements
+  and external linkage specifications remain unchecked.
 
 ### PMC11342767
 
@@ -116,6 +121,8 @@ MT, 2026-11-14
   recipient-reindexed GFR; compare Cox discrimination and death-competing
   Fine–Gray models. [reported Methods] Tags: `living-donor`, `derived-score`,
   `follow-up-horizon`.
+  Unindexed donor GFR is donor eGFR × donor BSA / 1.73; recipient-indexed GFR multiplies that by 1.73 / recipient BSA. Last follow-up is March 2, 2023. [reported Methods; source checked by Claude, 2026-11-14]
+
 - **Data pitfalls:** Results swap units for indexed/deindexed estimates; retain
   dimensional checks rather than copying labels. Donor-selection restriction
   limits inference for extreme size mismatch. Exact failure coding and original
