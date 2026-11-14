@@ -1,8 +1,9 @@
 # Repositories reviewed
 
 All reviewed on 2026-11-01 unless noted. "Commit" is the commit read; later
-changes are not covered. None of these repositories contains SRTR
-patient-level data; outputs and data files were checked for shape only.
+changes are not covered. Code inspection does not establish data provenance or
+certify an entire repository as free of patient-level data. Do not open data or
+outputs without established safe provenance; public availability is insufficient.
 
 ## heatherjcohen/SRTR
 
@@ -13,13 +14,13 @@ patient-level data; outputs and data files were checked for shape only.
   Sankey diagram of heart waitlist flow from Table B1; the other fits a
   straight line through one center's transplant rate ratio across releases.
 - **Useful:**
-  - PSR center code `CTR_CD` matches `OTCCode` in `transplant_centers_sf`.
+  - PSR tables expose center code `CTR_CD`; validate the matching identifier
+    and release when linking other public center metadata.
   - Hard-coded table of PSR release dates and cohort end dates (1 month,
     1 year, 3 years). Take dates from SRTR's release notes, not this table.
   - Sheet names and columns change between PSR releases.
 - **Pitfalls:** forecasting from five overlapping release cohorts ignores
   published uncertainty.
-- **Issues:** #12, #13
 
 ## NicholasLinderWood/Status1A_Life_Expectancy
 
@@ -44,7 +45,6 @@ patient-level data; outputs and data files were checked for shape only.
   `x == np.nan` never true, so carry-forward never happens; MELD-GRAIL-Na
   rescaled by sample min/max; matching on padded Stata labels; MELD 3.0
   without the dialysis rule; misses removal codes 21 and 23 (deaths).
-- **Issues:** #6, #7, #8, #9
 
 ## bcollins92078/SRTS_liver_center
 
@@ -59,16 +59,16 @@ patient-level data; outputs and data files were checked for shape only.
   - PSR waitlist tables mix adult and pediatric listings.
   - Region assigned from the state prefix of the center code, which fails
     for the split states (Vermont, Virginia).
-- **Issues:** #11, #13, #14
 
 ## rmahfouz/srtr-kidney-waitlist-calculator
 
 - **URL:** https://github.com/rmahfouz/srtr-kidney-waitlist-calculator
-- **Commit:** `2152427`
+- **Commit:** `2152427cd49072f3598bd6da9a0f896b78f83949`
+- **Rechecked:** 2026-11-14, [src/outcomes.py](https://github.com/rmahfouz/srtr-kidney-waitlist-calculator/blob/2152427cd49072f3598bd6da9a0f896b78f83949/src/outcomes.py), source inspection only; other file assessments below remain dated 2026-11-01.
 - **What it is:** Python competing-risks waitlist model on `CAND_KIPA`
   (deceased-donor transplant vs death or too sick), time to equivalent risk
-  (TiTER), Cox and random survival forest models, Streamlit app. Committed
-  CSVs are cohort counts and coefficients only; `.gitignore` excludes SAFs.
+  (TiTER), Cox and random survival forest models, Streamlit app. The 2026-11-14
+  follow-up inspected only the outcome script; no data/outputs were accessed.
 - **Useful:**
   - `src/outcomes.py`: collect every candidate event from removal code and
     transplant record, take the earliest, keep an `event_type` label.
@@ -81,12 +81,13 @@ patient-level data; outputs and data files were checked for shape only.
   - Removal code 14 treated as deceased-donor transplant; it is "Transplant
     at another center (multi-listed)". Misses 18, 19 (deceased-donor), 21,
     23 (deaths).
-  - Any death after an unrelated removal counts as waitlist death.
-  - Living-donor transplant censored instead of competing.
+  - The earliest-event selection includes dated other removals; an earlier
+    dated removal takes precedence over a later death.
+  - Living-donor transplant is censored; whether it should compete depends
+    on the target estimand.
   - Follow-up cut-off from the data's maximum listing date, not the release.
   - Functional status mapped wrongly (codes 4 and 5 don't exist; Lansky
     4000-series ignored); two conflicting diagnosis code lists.
-- **Issues:** #2, #5, #6, #12
 
 ## TramAnhDoLe/data_clean_up
 
@@ -98,15 +99,24 @@ patient-level data; outputs and data files were checked for shape only.
   follow-up code (`TFL_FOL_CD`) already encodes the period.
 - **Pitfalls:** `ffill()` without grouping copies one recipient's values
   into the next recipient's missing cells.
-- **Issues:** #7, #10
+
+## lgragert/srtr-impute-pubsaf2306
+
+- **Reviewed:** 2026-11-14, script only; not executed.
+- **Source:** [construct_outcomes_vars_9loc.py](https://github.com/lgragert/srtr-impute-pubsaf2306/blob/7a1a8747b8b753f07cba83ba1de072fadc954b83/construct_outcomes_vars_9loc.py), commit `7a1a8747b8b753f07cba83ba1de072fadc954b83`.
+- **Scope:** kidney HLA analysis, pubsaf2306, transplants from 2005.
+- **Useful comparison:** explicit retransplant component and fixed censor date.
+  It uses TFL_DEATH_DT only; the graft-years <= 1 disjunction can classify
+  censored first-year follow-up as failure. Do not adopt it as a validated endpoint.
+- **Access limit:** the README example's provenance is unresolved. No example
+  values are reproduced here; associated data and outputs were not accessed.
 
 ## Found, not yet reviewed
 
 Found on 2026-11-02 by GitHub code search for SAF column and file names
 (`REC_TX_DT`, `CAN_LISTING_DT`, `TFL_DEATH_DT`, `PERS_OPTN_DEATH_DT`,
 `CAN_REM_CD`, `REC_CTR_CD`, `tx_ki.sas7bdat`, `cand_kipa`). Not read yet and
-**not** checked for patient-level data; the statement at the top of this file
-does not cover them. Move an entry into a full section above once reviewed.
+**not** cleared for data access. Move an entry into a full section above once reviewed.
 
 ### R / R Markdown
 
@@ -156,8 +166,6 @@ does not cover them. Move an entry into a full section above once reviewed.
   for KDRI.
 - https://github.com/pairs-jh/beta — Stata `.do` files defining patient
   survival, graft survival and transplant date.
-- https://github.com/lgragert/srtr-impute-pubsaf2306 — outcome variables
-  (`construct_outcomes_vars_9loc.py`) and HLA imputation.
 
 ### Python, Julia, Stata
 
