@@ -451,15 +451,9 @@ patch/link), deferred (with owning issue and reason), or archive-only (with
 reason). A report that merely recommends saving sources has not completed this
 step. Report analytical coverage and pending integration/approval separately.
 
-Keep reference entries short and topic-based: database background, what a source
-establishes about its use, applicable organ/population/release, exact source
-section or external code revision, and verification status/date. sRtr function
-behavior, defects, proposed fixes, and package decision rationale belong in
-issues/PRs, tests, implementation documentation, or dated review records. Issues, PRs, and implementation documentation cite the reference sections;
-references do not link back to issues or track changes in sRtr functions. Amend existing entries, reconcile contradictions,
-and mark superseded conclusions. Preserve important disagreements and evidentiary
-limits; reviewer agreement is not a scientific authority. Do not paste reviewer
-transcripts, full reports, logs, or issue-comment compilations into the catalogue.
+Apply the scope, placement, and citation conventions in `reference/README.md`.
+Reconcile contradictions and preserve evidentiary limits; reviewer agreement is
+not a scientific authority.
 
 Track unresolved package choices in their owning issues; reference entries may
 explain the underlying scientific alternatives without becoming a decision log.

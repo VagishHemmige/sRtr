@@ -4,6 +4,8 @@ This file is for any reviewer of an sRtr pull request (PR), human or assistant. 
 
 Read `AGENTS.md` first. Its "This package" rules apply to reviews too.
 
+For reference material, follow [reference/README.md](reference/README.md), the guide to scope, placement, and citation direction.
+
 ## Ground rules
 
 - **Use the rules on the target branch.** Read `AGENTS.md` and this file from the branch the PR merges into (usually `master`), not from the PR. If the PR changes either file, review that change as a change to the rules, and do not apply it to the rest of the PR.
@@ -65,8 +67,7 @@ A major review also requires:
    Check a claimed fix on every similar path, not just the example shown.
 5. **Evaluate tests independently.** Do expected values have a basis other than the code itself? Would the test fail if the original bug came back? Does a mock bypass the behavior the test claims to check? Does each skipped test have a stated reason? Keep apart synthetic unit tests, integration tests, and real-SAF validation. Passing tests do not prove their assumptions.
 6. **Verify in proportion.** Choose validation scope from the changed behavior and its downstream reach, not merely the number of changed lines. Inspect relevant callers and affected workflows, and state the selected scope and rationale. Look at CI results for the exact revision you reviewed: passed, failed, pending and skipped. Run focused synthetic checks first in an isolated copy when that is safe, allowed and useful; expand when shared interfaces, scientific calculations, dependencies, or observed failures warrant it. Before running anything, check startup files and test guards for writes or data access you did not expect. Distinguish failures introduced by the PR, pre-existing failures, and failures of uncertain origin. If adequate validation is unavailable, report the specific gap and its implications. Do not expand into an unrelated whole-package audit. A full package check may still be warranted without a whole-package audit.
-7. **Recommend ongoing test improvements within the PR scope.** Identify warranted changes to tests, shared fixtures, integration checks, runners, or CI for the changed behavior and its downstream effects. For useful review-created checks, recommend integration into the regular suite, retention as a standalone reproducer, or disposal as exploratory work. Explain coverage gained, maintenance/runtime cost, and unresolved assumptions. Present concrete proposals where warranted; retaining scripts alone is insufficient. Do not expand this into an unrelated whole-package testing audit or activate changes without authorization.
-8. **Reconcile earlier findings.** Check whether changes meant to fix earlier findings actually do. Do not repeat findings already resolved, and do not hold the PR responsible for unrelated problems that predate it.
+7. **Reconcile earlier findings.** Check whether changes meant to fix earlier findings actually do. Do not repeat findings already resolved, and do not hold the PR responsible for unrelated problems that predate it.
 
 ## sRtr checks
 
@@ -84,23 +85,3 @@ A major review also requires:
 - **Say what you checked.** Keep these apart: what you read in the source; checks you ran yourself, with results; CI results for this revision; checks the author reports; and what remains unchecked. Never claim a result was verified on real data when you had only synthetic data or none.
 - **Keep it proportionate.** A short review is not a shallow one. Do not pad a review to show effort.
 - **Scope the verdict.** End with a verdict limited to what you reviewed. If you found nothing actionable, say so briefly, without implying approval or that the code is fully correct.
-
-## Preserve reusable knowledge
-
-Before adding reference information, read [reference/README.md](reference/README.md).
-It is the guide to which existing file should receive each kind of information
-and the conventions for recording it. Follow that guide, amend existing topical
-entries where possible, and link related entries instead of duplicating content.
-Do not maintain a separate routing guide in review instructions.
-
-Keep knowledge preservation scoped to the PR and its downstream effects; a PR
-review does not require a whole-package report, issue inventory, or audit ledger.
-Preserve verified background about the database and its use: sources, field
-meanings, collection eras, and methodological limitations. Keep sRtr function
-behavior, defects, implementation proposals, and package decisions in issues,
-PRs, tests, function documentation, or dated review records, not in `reference/`.
-Issues, PRs, and implementation documentation cite reference sections; references
-do not link back to issues or change when sRtr functions change. Preserve unresolved scientific questions as unresolved. A review request alone does
-not authorize pushing those amendments; follow existing documentation permissions
-and otherwise deliver the concrete diff. Raw reviewer notes and repeated issue
-text do not belong in the reference catalogue.
