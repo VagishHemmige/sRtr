@@ -235,3 +235,212 @@ part of this audit. Those actions require their own authorization. Behavior
 changes require per-file approval of concrete, self-reviewed drafts under the
 maintainer's working instructions. This document grants no standing posting,
 implementation, or automated-review permissions.
+
+## 9. Posting templates
+
+Use these templates for the report's proposed GitHub text. Replace placeholders
+and omit genuinely inapplicable sections; never fill a field with an invented
+result. Scale length to the finding. Use public, commit-pinned source links and
+public reference URLs; do not publish private conversations or private report
+links. Report IDs remain useful even when the report is not public.
+
+One existing-issue comment should consolidate the relevant reviewers' findings.
+Do not post separate repetitive comments from each role. A finding already
+covered by an issue belongs in that issue unless a distinct scope justifies a
+new linked issue. Do not create or apply labels merely because a template names
+a classification or severity.
+
+### Comment on an existing open issue
+
+```markdown
+### Whole-package review: <issue topic>
+
+**Reviewed:** <full commit SHA with link>; <date>.
+**Report findings:** <IDs>.
+**Assessment:** <supported / partly supported / not supported / already fixed /
+duplicate / unresolved scientific decision / valid enhancement>.
+**Classification and priority:** <type>; <Must fix / Should fix / Consider>.
+**Confidence:** <high / medium / low, with reason>.
+
+<Lead with the conclusion and its practical consequence. Distinguish the
+issue's premise from the merits of its proposed fix.>
+
+**Evidence and current behavior**
+
+- <Commit-pinned file/function/line link and what it establishes.>
+- <Relevant organ, input representation, or workflow; downstream consequence.>
+- <Authoritative source, release/version and section where needed.>
+
+**Assessment of the proposed solution**
+
+<Does it solve the underlying problem? What remains missing or could regress?
+Distinguish merged fixes from unmerged proposals. Preserve substantive
+reviewer disagreement and state what evidence would settle it.>
+
+**Validation**
+
+<Checks personally executed, exact commands and observed results, or explicitly
+"Source inspection only." Separate observed CI and author-reported checks.
+Give a small synthetic example if useful. State remaining data-dependent
+uncertainty without including patient-level values.>
+
+**Recommended next step**
+
+<Keep open and refine scope / implement a specified repair / obtain a
+methodological decision / recommend closure as fixed or unsupported /
+recommend consolidation with #N. These are recommendations, not status changes.>
+
+**Acceptance checks**
+
+- <Observable behavior or source/documentation condition needed for resolution.>
+- <Regression/integration check and remaining maintainer check, where relevant.>
+
+**Related work:** <issue/PR links, merge status, and relationship>.
+```
+
+For an already-fixed issue, cite the fixing commit and evidence at the reviewed
+revision. For an unsupported premise, explain why and acknowledge any residual
+uncertainty. For a duplicate, name the substantive overlap and any unique part
+that should be preserved. Do not imply that recommending closure closes it.
+
+### New defect or validation-gap issue
+
+Suggested title: `<function or component>: <specific incorrect behavior or gap>`.
+
+```markdown
+## Problem
+
+<Concrete trigger, current behavior, and expected behavior. For a validation
+gap, identify the unverified guarantee without asserting an unproven defect.>
+
+**Review reference:** <report finding IDs>; <date>.
+**Reviewed revision:** <full commit SHA with link>.
+**Classification:** <verified defect / concern / validation gap / documentation>.
+**Priority:** <Must fix / Should fix / Consider>.
+**Confidence:** <level and evidence supporting it>.
+
+## Evidence and impact
+
+<Commit-pinned locations; affected organs, functions and downstream workflows;
+why the result matters. State whether the problem is established in current
+code or only suspected under a specified condition.>
+
+## Reproduction and validation
+
+<Minimal, obviously synthetic example and exact commands when available.
+State runtime/dependencies and actual versus expected output. If not executed,
+label it "Proposed reproducer, not executed" and explain the blocker.
+Separate personally executed checks, observed CI, and author-reported results.>
+
+## Scientific basis
+
+<Authoritative source URL, release/version, section/table, and what it supports.
+Identify package assumptions and unresolved choices separately. Omit only if
+the finding has no scientific definition or methodological claim.>
+
+## Proposed resolution
+
+<Focused remedy and affected paths. State methodological decisions needed
+before implementation. Do not present an unapproved default as settled.>
+
+## Acceptance criteria
+
+- <Correct observable behavior, including relevant edge cases.>
+- <Independent regression test and integration coverage where needed.>
+- <Documentation/source updates and focused maintainer SAF checks if required.>
+
+## Related work
+
+<Existing issues and PRs checked; explain why this is a distinct issue.
+Link dependencies rather than duplicating their scope.>
+```
+
+### New scientific decision issue
+
+Suggested title: `Decision: <specific definition or methodological choice>`.
+
+```markdown
+## Decision needed
+
+<State the exact question, affected outcomes/organs/functions, and why the
+choice cannot be inferred safely from the registry documentation.>
+
+**Review reference:** <report finding IDs>; <date>.
+**Reviewed revision:** <full commit SHA with link>.
+**Decision owner:** <maintainer or explicitly designated person>.
+**Status:** Proposed; not decided.
+
+## Current implementation and evidence
+
+<Commit-pinned behavior, public source URLs with versions/sections, and
+uncertainties. Separate documented registry facts from package assumptions.>
+
+## Alternatives
+
+| Option | Scientific meaning | Consequences and limitations | Evidence |
+| --- | --- | --- | --- |
+| <A> | <Definition/estimand> | <Affected outputs and users> | <Source or assumption> |
+| <B> | <Definition/estimand> | <Affected outputs and users> | <Source or assumption> |
+
+## Synthetic comparison
+
+<Where feasible, show how the options change events, dates, denominators,
+follow-up or scores using the same synthetic inputs. State whether executed
+or hand-worked. Do not imply synthetic data establish clinical validity.>
+
+## Reviewer positions
+
+<Reasoned recommendation, substantive disagreement, and evidence that would
+resolve it. Agreement among reviewers is not a scientific source.>
+
+## Completion criteria
+
+- Maintainer records the selected definition and rationale.
+- Required behavior changes, affected files and migration implications are identified.
+- Tests and documentation implement the selected definition consistently.
+
+**Related work:** <issues/PRs and implementation dependencies>.
+```
+
+### New future-capability issue
+
+Suggested title: `Proposal: <capability and concrete use case>`.
+
+```markdown
+## Research use case
+
+<The workflow currently blocked or unnecessarily error-prone, and who needs it.>
+
+**Review reference:** <report finding IDs>; <date>.
+**Reviewed revision:** <full commit SHA with link>.
+**Classification:** Enhancement proposal.
+**Priority and rationale:** <priority relative to correctness and validation work>.
+
+## Existing support and gap
+
+<What sRtr already provides; why composition or an analysis-specific helper
+does not adequately solve this use case. Link relevant code and documentation.>
+
+## Source feasibility and scope
+
+<Verified SAF fields, public APIs, or methods with sources and applicable
+versions. Identify organ coverage, limitations and unresolved feasibility.
+Do not promise variables or outcomes that the available data cannot support.>
+
+## Proposed capability
+
+<Minimal behavior and intended outputs; dependencies and alternatives.
+Keep unsettled API details explicitly proposed.>
+
+## Acceptance criteria
+
+- <Demonstrable end-to-end synthetic workflow.>
+- <Scientific source verification and needed maintainer decisions.>
+- <Tests, documentation and remaining data-dependent validation.>
+
+**Related work:** <existing issues/PRs; why this proposal is distinct>.
+```
+
+Before publication, confirm that the text matches the maintainer-reviewed
+report and any authorized revisions, refresh the evidence against intervening
+changes, and record the successful comment or issue URL in the posting ledger.
