@@ -3,10 +3,16 @@
 This document records the protocol for an explicitly commissioned deep review of
 sRtr: current code, every open issue, and gaps for future development.
 [REVIEWING.md](REVIEWING.md) remains the protocol for individual PR reviews.
-Saving this protocol does not mean an audit has been performed.
+This plan applies only when the maintainer explicitly commissions a review using
+`PACKAGE_REVIEW.md`. Its presence does not trigger an audit or govern routine PR
+reviews. Saving this protocol does not mean an audit has been performed.
 
-Read current [AGENTS.md](AGENTS.md), applicable subdirectory guidance, and
-relevant decision and handoff records before starting. Use REVIEWING.md's
+Read current [AGENTS.md](AGENTS.md) and applicable subdirectory guidance before
+starting. The coordinator inventories the repository reference records named
+below and any maintainer-supplied decision or handoff context, recording which
+revision was read. Outside context is for the coordinator only; do not reproduce
+private conversations or project notes in reviewer packets or public findings.
+Use REVIEWING.md's
 evidence, severity, and reporting standards, but use whole-package scope here.
 This is a commissioned review plan, not an expansion of permissions or a
 replacement for repository policy. Explicit maintainer instructions govern.
@@ -29,13 +35,32 @@ do not silently install them into the package or activate changed workflows.
 
 Never access, copy, upload, or expose patient-level SRTR data. Never execute
 real-SAF tests, even if environment variables enable them. The connected working
-folder, synced references, and sources/ are read-only; do not use the maintainer's
-active RStudio session. Execute checks only in an isolated workspace after
+folder and synced references are read-only; do not use the maintainer's active
+RStudio session. These mean the maintainer's connected checkout and externally
+synced reference locations, including a `sources/` directory if present; they
+are not assumed repository paths. Identify applicable locations at intake.
+Execute checks only in an isolated workspace after
 inspecting startup files, configuration, paths, and test guards. Do not edit or
 regenerate data/. Inspect data-raw/ source without running regeneration.
 If provenance is uncertain, report the path and request verification without
 reproducing values. Only provenance-confirmed public metadata and obviously
 synthetic fixtures may be supplied to reviewers.
+
+Before loading package code or tests, the isolated runner must set
+`SRTR_LIVE_TESTS=false` and unset `SRTR_WD`. Launch a fresh process with startup
+profiles and environment files disabled; do not rely on the caller's environment.
+For Rscript use `--vanilla`, and make the runner's first R statements:
+
+```r
+Sys.setenv(SRTR_LIVE_TESTS = "false")
+Sys.unsetenv("SRTR_WD")
+```
+
+Apply the same isolation to spawned R processes. Inspect startup, helper, setup,
+and test code beforehand for alternate data paths or code that restores live
+settings. Check the effective guards before test execution; if real-data access
+cannot be excluded, do not execute that check. Record the blocker. These measures
+do not authorize opening SAFs or modifying the maintainer's configuration.
 
 ## Review team
 
@@ -72,6 +97,42 @@ Use available package-development, critical-code-review, test-review, testthat,
 design, and accessibility guidance where relevant. Apply pkgdown and R package
 requirements rather than importing analysis-project Quarto or reporting rules
 that do not fit this repository. Record unavailable capabilities.
+
+## Reference resources and reviewer packets
+
+Use the existing [reference catalogue](reference/README.md); do not create a
+competing catalogue:
+
+- [repositories.md](reference/repositories.md): external code repositories,
+  reviewed revisions, and discoveries still awaiting inspection.
+- [web-sources.md](reference/web-sources.md): official methods and papers,
+  distinguishing retrieved sources from unverified citations.
+- [codebook-notes.md](reference/codebook-notes.md): prior code-table checks to
+  reverify against the applicable registry documentation.
+- [methodology-review.md](reference/methodology-review.md): prior methodological
+  comparisons and issue links, for reconciliation after independent discovery.
+
+The coordinator and scientific librarian prepare role-specific source packets
+from these records before the initial passes. Supply source links, pinned code
+locations, relevant primary methods and factual scope metadata; withhold the
+catalogue's existing diagnoses, judgments about sRtr, and issue conclusions until
+reconciliation. If a reviewer has already seen them, record that exposure.
+Do not forward the annotated reference files wholesale and call the pass blind.
+
+For each source identify organ, population/era, outcome or method, relevant SAF
+fields, exact paper section or script/function, retrieval/review status, and the
+package capability it informs. Reviewers may discover additional sources; record
+these in the shared source manifest and reconcile additions into the existing
+catalogue as proposed documentation changes. Verify historical claims rather
+than treating a prior review or external code as authoritative. Inspect external
+code only after checking provenance; never open uncertain data or outputs.
+
+If the maintainer later supplies a PMC paper list, inventory its actual location
+and revision and incorporate relevant papers into these packets. Do not assume
+that file exists or wait for it to begin. Reviewers should fill organ/method
+coverage gaps with primary literature, including PMC full text and supplements
+where available; record unresolved access or evidence gaps. Distinguish papers
+linked to their own code from separate comparison implementations.
 
 ## 1. Freeze and inventory the review target
 
@@ -182,7 +243,9 @@ operations merely to fill the ledger.
 Write meaningful new synthetic tests for uncovered high-risk behavior and
 suspected defects during the audit; do not defer all test creation to later
 implementation. Preserve reusable test files, small documented synthetic
-fixtures or fixture generators, and an exact runner with the report. Keep audit
+fixtures or fixture generators, and an exact runner with the report. Any committed
+synthetic fixture must follow `tests/testthat/fixtures/synthetic-*` and the data
+guard; audit artifacts are not an exception. Keep audit
 additions distinct from the frozen baseline and identify which checks are
 existing tests versus new audit tests. A later test author must be able to rerun
 them against the same revision without reconstructing the review conversation.
@@ -220,8 +283,12 @@ warranted, state that conclusion and its evidence rather than inventing work.
 
 Show complete proposed new files and readable diffs for changed files. Preserve
 patches and test artifacts with the report in durable, maintainer-accessible
-storage allowed by the session. Record locations in the coverage ledger. Do not
-rely on temporary workspace paths as the only retained copies.
+storage: an authorized task branch or PR in this repository, with commit-pinned
+links in the coverage ledger. Store workflow proposals as inert patch artifacts,
+not active workflow files. If repository publication is not authorized, deliver
+maintainer-accessible files using the session's permitted durable storage and
+record that location; do not publish private material to satisfy this requirement.
+Do not rely on temporary workspace paths as the only retained copies.
 
 Preparing CI patches does not authorize activating workflows, changing repository
 settings, using secrets, or executing untrusted PR code with elevated permissions.
@@ -318,6 +385,12 @@ The planned follow-up is a substantive comment on every still-open issue and
 new issues for accepted findings. Prepare all drafts in the report first.
 Before posting, refresh revisions and discussions, check for duplicate comments
 and issues, and revise drafts when intervening work changes the conclusion.
+A prior substantive issue comment does not substitute for this audit's assessment.
+Retain a draft for every open issue as commissioned; when the conclusion is
+unchanged, explain the newly checked revision, evidence and remaining work
+concisely instead of repeating the earlier comment. Propose withholding a
+redundant post to the maintainer in the report, but do not silently omit that
+issue or change the commissioned posting scope.
 Confirm writes succeeded and map report IDs to posted URLs.
 
 Review-created tests and proposed CI patches are report deliverables. Installing
