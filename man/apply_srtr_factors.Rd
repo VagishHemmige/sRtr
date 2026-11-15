@@ -70,7 +70,9 @@ A column converted by an earlier call carries an \code{srtr_format} attribute
 and is left as it is, so calling the function twice changes nothing. dplyr
 and tibble operations keep the attribute; base R subsetting such as
 \code{df[rows, ]} on a data frame drops it, and the column is then read as codes
-again, with every value reported as outside the format. Convert again from
+again, with every value reported as outside the format (also when the
+format has a catch-all: for a factor input, values given the catch-all label
+are reported too; raw codes get it silently, as in SAS). Convert again from
 the raw codes, or keep working with dplyr. Attributes on each column, such
 as a variable label, are kept.
 }
