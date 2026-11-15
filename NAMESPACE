@@ -12,6 +12,7 @@ export(load_srtr_file)
 export(rank_individual_coverage_gains)
 export(set_srtr_wd)
 export(srtr_composite_death)
+export(srtr_dictionary)
 export(srtr_normalize_missing)
 export(srtr_time_to_event)
 importFrom(rlang,
