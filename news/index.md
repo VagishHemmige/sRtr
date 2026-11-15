@@ -116,3 +116,9 @@
   [\#59](https://github.com/VagishHemmige/sRtr/issues/59)). A missing
   column now gives a clear error instead of a failed
   [`stopifnot()`](https://rdrr.io/r/base/stopifnot.html).
+
+- [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
+  keeps the order of factor levels and removes only the replaced missing
+  codes from them, so the reference level no longer depends on which
+  value comes first in the data. Ordered factors and variable labels are
+  kept ([\#20](https://github.com/VagishHemmige/sRtr/issues/20)).

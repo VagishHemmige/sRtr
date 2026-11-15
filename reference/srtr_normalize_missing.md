@@ -38,7 +38,11 @@ srtr_normalize_missing(
   `NA`. If a string is provided (e.g., `"Missing"`), both missing codes
   and `NA` values will be replaced. If the column is a factor and
   `replacement` is not `NA`, the replacement will be added as a new
-  factor level.
+  factor level. For factors, the replaced codes are removed from the
+  levels; the other levels keep their order, so the reference level does
+  not depend on the order of the rows. Ordered factors stay ordered, and
+  attributes such as variable labels are kept. A new `replacement` level
+  goes last.
 
 - verbose:
 
