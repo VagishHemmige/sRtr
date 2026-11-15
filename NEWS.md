@@ -18,6 +18,11 @@
 * Loading sRtr no longer warns when `SRTR_WD` is not set, and no longer sets
   `options(arrow.skip_nul = TRUE)` for the session (#62).
 
+* The bundled `dictionary` now names the original MELD exception tumors file
+  `MPEXCEPT_ORIG_TUMORS`, as the SRTR data file is named, instead of the
+  shortened `MPEXCEPT_ORIG_TUMO`, so loading and labeling that file find its
+  dictionary entries.
+
 * `add_pdri()` is now exported (#50).
 
 * `add_txf_outcomes()` no longer fails unless dplyr is attached (#17).
