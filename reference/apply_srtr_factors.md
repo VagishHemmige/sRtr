@@ -6,7 +6,14 @@ using the SRTR data dictionary and associated format tables.
 ## Usage
 
 ``` r
-apply_srtr_factors(df, file_key = NULL, verbose = FALSE)
+apply_srtr_factors(
+  df,
+  file_key = NULL,
+  verbose = FALSE,
+  range_formats = c("keep", "bin"),
+  unknown_codes = c("keep", "na", "error"),
+  other = c("sas", "keep")
+)
 ```
 
 ## Arguments
@@ -23,6 +30,32 @@ apply_srtr_factors(df, file_key = NULL, verbose = FALSE)
 - verbose:
 
   Logical. If TRUE, print each variable being labeled.
+
+- range_formats:
+
+  What to do with numeric variables whose format is a set of bands
+  rather than a code list: the age formats `AGE8A`, `AGE8C` and `AGE9A`,
+  used by `REC_AGE_AT_TX` and `CAN_AGE_AT_LISTING`. `"keep"` (the
+  default) leaves the numbers as they are. `"bin"` turns them into a
+  factor of bands. The page lists only each band's lower bound, so
+  `"bin"` treats each listed code as the start of a band that runs to
+  the next one; this reading is a convention, not stated by SRTR.
+
+- unknown_codes:
+
+  What to do with a value that is not a code in the variable's format
+  (and is not covered by a catch-all entry, see `other`). `"keep"` (the
+  default) keeps it as an extra level named by the raw code; `"na"`
+  turns it into `NA`. Both warn (class `sRtr_warning_unknown_codes`).
+  `"error"` stops (class `sRtr_error_unknown_codes`).
+
+- other:
+
+  What to do with a format's catch-all entry (`**OTHER**`, as in `RACE`,
+  where it means "Multi-Racial"). `"sas"` (the default) gives every
+  value not otherwise listed the catch-all label, as a SAS format does.
+  `"keep"` ignores the catch-all, so those values are handled by
+  `unknown_codes`.
 
 ## Value
 
@@ -44,6 +77,11 @@ bundled
 or a key that cannot be worked out (no attribute and no object name, as
 when `df` is an expression), gives a warning. A known key whose columns
 are not in `df` is not a problem: nothing is changed.
+
+A column that is already a factor of this format's labels, for example
+from an earlier call, is left as it is, so calling the function twice
+changes nothing. Attributes on each column, such as a variable label,
+are kept.
 
 ## Examples
 

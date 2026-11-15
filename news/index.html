@@ -53,6 +53,13 @@
 <li><p><code><a href="../reference/apply_srtr_factors.html">apply_srtr_factors()</a></code> and <code><a href="../reference/apply_srtr_varlabels.html">apply_srtr_varlabels()</a></code> no longer fail when called as <code>sRtr::fun()</code> without sRtr attached (<a href="https://github.com/VagishHemmige/sRtr/issues/90" class="external-link">#90</a>).</p></li>
 <li><p><code><a href="../reference/apply_srtr_factors.html">apply_srtr_factors()</a></code> and <code><a href="../reference/apply_srtr_varlabels.html">apply_srtr_varlabels()</a></code> now set a <code>file_key</code> attribute on their result, so a chain such as <code>TX_KI |&gt; apply_srtr_factors() |&gt; apply_srtr_varlabels()</code> labels both steps. <code>file_key</code> is matched in upper case. A key that is not in the bundled dictionary, or that cannot be worked out, now gives a warning instead of silently returning unlabeled data (<a href="https://github.com/VagishHemmige/sRtr/issues/89" class="external-link">#89</a>).</p></li>
 <li>
+<p><code><a href="../reference/apply_srtr_factors.html">apply_srtr_factors()</a></code>, and so <code><a href="../reference/load_srtr_file.html">load_srtr_file()</a></code> with its default <code>factor_labels = TRUE</code>, no longer turns values into <code>NA</code> (<a href="https://github.com/VagishHemmige/sRtr/issues/15" class="external-link">#15</a>):</p>
+<ul><li>Ages with an age-band format (<code>REC_AGE_AT_TX</code>, <code>CAN_AGE_AT_LISTING</code>) stay numeric; before, every age that was not a band’s lower bound became <code>NA</code>. <code>range_formats = "bin"</code> bands them instead.</li>
+<li>A value not listed in a format with a catch-all entry gets the catch-all label, as in SAS: race code 24 (White and Black) becomes “Multi-Racial”. <code>other = "keep"</code> turns this off.</li>
+<li>Any other value not listed in its format is kept as its own level with a warning; <code>unknown_codes = "na"</code> or <code>"error"</code> choose otherwise.</li>
+<li>Calling it again on its own result changes nothing, and attributes on each column, such as a variable label, are kept.</li>
+</ul></li>
+<li>
 <p><code><a href="../reference/calculate_geography_coverage_gain.html">calculate_geography_coverage_gain()</a></code> now does what its arguments say (<a href="https://github.com/VagishHemmige/sRtr/issues/58" class="external-link">#58</a>):</p>
 <ul><li>
 <code>method = "centroid"</code> and <code>method = "areal"</code> are implemented. Before, every method gave intersection results. The default is <code>"areal"</code>.</li>
