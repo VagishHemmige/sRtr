@@ -33,6 +33,12 @@
   no longer fails unless dplyr is attached
   ([\#17](https://github.com/VagishHemmige/sRtr/issues/17)).
 
+- [`apply_srtr_factors()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.md)
+  and
+  [`apply_srtr_varlabels()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.md)
+  no longer fail when called as `sRtr::fun()` without sRtr attached
+  ([\#90](https://github.com/VagishHemmige/sRtr/issues/90)).
+
 - [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
   now does what its arguments say
   ([\#58](https://github.com/VagishHemmige/sRtr/issues/58)):
