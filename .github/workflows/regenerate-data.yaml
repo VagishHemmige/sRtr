@@ -6,9 +6,12 @@
 # for branches in this repository, never for pull requests from forks,
 # because it pushes to the branch.
 #
-# Each generated object is compared with the committed one; a file is only
-# replaced when its content differs, so serialization noise never shows up
-# as a change. The commit is made by github-actions[bot] and names this run.
+# Each generated object is compared with the same file on the base branch
+# (master, or the pull request's base) using all.equal(), so a file differs
+# from master only when its content does. Serialization differences and
+# floating-point noise from other sf/PROJ versions (map coordinates moved by
+# nanometres on the first run) are not changes. The commit is made by
+# github-actions[bot] and names this run.
 # Pushes made with the workflow's own token do not start other workflows, so
 # this workflow starts R-CMD-check, document-check and data-guard on the
 # branch afterwards.
@@ -46,6 +49,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
 
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -62,10 +66,18 @@ jobs:
             any::readxl
             any::sf
 
-      - name: Keep the committed data for comparison
+      - name: Keep the base branch's data for comparison
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
+          base="${BASE_SHA:-$(git merge-base HEAD origin/master)}"
+          echo "Comparing with $base"
           mkdir -p "$RUNNER_TEMP/committed"
-          cp data/*.rda R/sysdata.rda "$RUNNER_TEMP/committed/"
+          for f in data/*.rda R/sysdata.rda; do
+            if git cat-file -e "$base:$f" 2>/dev/null; then
+              git show "$base:$f" > "$RUNNER_TEMP/committed/$(basename "$f")"
+            fi
+          done
 
       - name: Build dictionary and formats
         run: |
@@ -96,7 +108,7 @@ jobs:
             load(old_path, envir = old)
             load(path, envir = new)
             same <- setequal(ls(old), ls(new)) &&
-              all(vapply(ls(new), function(n) identical(old[[n]], new[[n]]), logical(1)))
+              all(vapply(ls(new), function(n) isTRUE(all.equal(old[[n]], new[[n]])), logical(1)))
             if (same) {
               file.copy(old_path, path, overwrite = TRUE)
             } else {

@@ -49,7 +49,7 @@ Cite a source according to what it does for the code:
 
 Maintaining sRtr needs no local runs. Every routine step runs in GitHub Actions:
 
-- **Generated data:** `regenerate-data.yaml` runs on pull requests that change `data-raw/` (and by hand from the Actions tab). It rebuilds every object from `data-raw/`, replaces a file only when the object differs from the committed one, commits as github-actions[bot] with a link to the run, and starts the other checks on the new commit. After it commits, pull the branch before pushing to it again.
+- **Generated data:** `regenerate-data.yaml` runs on pull requests that change `data-raw/` (and by hand from the Actions tab). It rebuilds every object from `data-raw/`, keeps the base branch's file unless the object differs from it (`all.equal()`, so floating-point noise is not a change), commits as github-actions[bot] with a link to the run, and starts the other checks on the new commit. After it commits, pull the branch before pushing to it again.
 - **SRTR dictionary:** `dictionary-check.yaml` runs monthly (and by hand). When the live page has changed, it adds the page to `data-raw/dictionary-versions/` and opens a pull request listing what changed.
 - **Documentation:** comment `/document` on a pull request (`pr-commands.yaml`) to regenerate `man/`, `NAMESPACE` and `RoxygenNote`; `document-check.yaml` fails a PR whose generated documentation is out of date.
 
