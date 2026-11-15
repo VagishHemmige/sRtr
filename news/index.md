@@ -72,8 +72,9 @@
   - A value not listed in a format with a catch-all entry gets the
     catch-all label, as in SAS: race code 24 (White and Black) becomes
     “Multi-Racial”. `other = "keep"` turns this off.
-  - Any other value not listed in its format is kept as its own level
-    with a warning; `unknown_codes = "na"` or `"error"` choose
+  - Any other value not listed in its format is kept as its own level,
+    named `"<code>: not in format"` so it cannot be mistaken for a
+    label, with a warning; `unknown_codes = "na"` or `"error"` choose
     otherwise.
   - Calling it again on its own result changes nothing, and attributes
     on each column, such as a variable label, are kept.

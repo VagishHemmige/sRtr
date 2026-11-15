@@ -45,7 +45,8 @@ apply_srtr_factors(
 
   What to do with a value that is not a code in the variable's format
   (and is not covered by a catch-all entry, see `other`). `"keep"` (the
-  default) keeps it as an extra level named by the raw code; `"na"`
+  default) keeps it as an extra level named by the raw code followed by
+  `": not in format"`, so it cannot be mistaken for a label; `"na"`
   turns it into `NA`. Both warn (class `sRtr_warning_unknown_codes`).
   `"error"` stops (class `sRtr_error_unknown_codes`).
 
