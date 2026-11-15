@@ -1,0 +1,33 @@
+# Temporary, for issue #26 design work only. Not for merging.
+# Fetches the live SRTR SAF data dictionary page so its structure can be
+# compared with the bundled 2203 snapshot. The page is public metadata
+# (variable and format definitions), not patient data.
+on:
+  push:
+    branches: [claude/wip-dictionary-fetch]
+
+name: fetch-dictionary-wip.yaml
+
+permissions: read-all
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the live dictionary
+        run: |
+          mkdir -p out
+          curl -sS -L --fail -A "sRtr-dictionary-check (github.com/VagishHemmige/sRtr)" \
+            -D out/headers.txt -o out/datadictionary.html \
+            https://www.srtr.org/docs/datadictionary.html
+          curl -sS -L -A "sRtr-dictionary-check (github.com/VagishHemmige/sRtr)" \
+            -o out/robots.txt -w "%{http_code}\n" https://www.srtr.org/robots.txt > out/robots_status.txt || true
+          ls -l out
+          sha256sum out/datadictionary.html
+          grep -o '<title>[^<]*' out/datadictionary.html
+          cat out/headers.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: srtr-dictionary
+          path: out/
+          retention-days: 7
