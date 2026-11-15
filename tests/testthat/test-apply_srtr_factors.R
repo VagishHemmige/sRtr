@@ -263,17 +263,49 @@ test_that("a code outside the format stays distinct from a label it matches", {
 
   expect_warning(
     out <- .srtr_factor_column(
-      c("FAKE_CODE", "FAKE_LABEL", "FAKE_OTHER"),
+      c("FAKE_CODE", "FAKE_LABEL"),
       fmt_map,
       fmt = "FAKEFMT",
       var = "FAKE_VAR"
     ),
     class = "sRtr_warning_unknown_codes"
   )
+  expect_equal(as.character(out), c("FAKE_LABEL", "FAKE_LABEL: not in format"))
 
+  expect_error(
+    .srtr_factor_column(
+      c("FAKE_CODE", "FAKE_LABEL"),
+      fmt_map,
+      fmt = "FAKEFMT",
+      var = "FAKE_VAR",
+      unknown_codes = "error"
+    ),
+    class = "sRtr_error_unknown_codes"
+  )
+})
+
+test_that("a raw value that looks like a kept code is still a code outside the format", {
+  df <- tibble::tibble(CAN_ABO = c("FAKE_X", "FAKE_X: not in format"))
+
+  expect_warning(
+    out <- apply_srtr_factors(df, file_key = "TX_KI"),
+    class = "sRtr_warning_unknown_codes"
+  )
   expect_equal(
-    as.character(out),
-    c("FAKE_LABEL", "FAKE_LABEL", "FAKE_OTHER: not in format")
+    as.character(out$CAN_ABO),
+    c("FAKE_X: not in format", "FAKE_X: not in format: not in format")
+  )
+  expect_error(
+    apply_srtr_factors(df, file_key = "TX_KI", unknown_codes = "error"),
+    class = "sRtr_error_unknown_codes"
+  )
+  expect_error(
+    apply_srtr_factors(
+      tibble::tibble(CAN_ABO = factor("FAKE_X: not in format")),
+      file_key = "TX_KI",
+      unknown_codes = "error"
+    ),
+    class = "sRtr_error_unknown_codes"
   )
 })
 
@@ -298,20 +330,20 @@ test_that("an unconverted factor of codes outside the format is handled like tex
   )
 })
 
-test_that("a factor mixing labels and codes outside the format is converted", {
-  df <- tibble::tibble(CAN_ABO = factor(c("A: A", "FAKE_ABO")))
+test_that("an unconverted factor is read as codes, labels included", {
+  df <- tibble::tibble(CAN_ABO = factor(c("A", "A: A")))
 
   expect_warning(
     out <- apply_srtr_factors(df, file_key = "TX_KI"),
     class = "sRtr_warning_unknown_codes"
   )
-  expect_equal(as.character(out$CAN_ABO), c("A: A", "FAKE_ABO: not in format"))
+  expect_equal(as.character(out$CAN_ABO), c("A: A", "A: A: not in format"))
   expect_error(
     apply_srtr_factors(df, file_key = "TX_KI", unknown_codes = "error"),
     class = "sRtr_error_unknown_codes"
   )
 
-  race <- tibble::tibble(CAN_RACE = factor(c("8: White", "24")))
+  race <- tibble::tibble(CAN_RACE = factor(c("8", "24")))
   out <- apply_srtr_factors(race, file_key = "TX_KI")
   expect_equal(as.character(out$CAN_RACE), c("8: White", "Multi-Racial"))
 })
@@ -323,4 +355,13 @@ test_that("a converted column that lost its marker is still not converted again"
 
   expect_no_warning(twice <- apply_srtr_factors(once, file_key = "TX_KI"))
   expect_equal(as.character(twice$CAN_ABO), as.character(once$CAN_ABO))
+})
+
+test_that("a converted column subset with base R is not converted again", {
+  df <- data.frame(CAN_ABO = c("A", "FAKE_ABO", "B"))
+  once <- suppressWarnings(apply_srtr_factors(df, file_key = "TX_KI"))
+  subset <- once[c(1, 2), , drop = FALSE]
+
+  expect_no_warning(twice <- apply_srtr_factors(subset, file_key = "TX_KI"))
+  expect_equal(as.character(twice$CAN_ABO), c("A: A", "FAKE_ABO: not in format"))
 })

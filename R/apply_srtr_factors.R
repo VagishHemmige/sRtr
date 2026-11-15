@@ -37,10 +37,14 @@
 #'   `unknown_codes`.
 #'
 #' @details
-#' A column that is already a factor of this format's labels, for example
-#' from an earlier call, is left as it is, so calling the function twice
-#' changes nothing. Attributes on each column, such as a variable label, are
-#' kept.
+#' Values are read as codes. A value that is not a code in the format is
+#' outside it, even if it reads like one of the format's labels.
+#'
+#' A column converted by an earlier call is left as it is, so calling the
+#' function twice changes nothing. Such a column carries an `srtr_format`
+#' attribute; if that was dropped (base R subsetting drops it), a factor whose
+#' levels begin with the format's labels in order is also taken as converted.
+#' Attributes on each column, such as a variable label, are kept.
 #'
 #' @return A data frame with factor levels applied to coded variables, and a
 #'   `file_key` attribute holding the dataset key in upper case, so the key
@@ -166,17 +170,18 @@ apply_srtr_factors <- function(
 .srtr_other_code <- "**OTHER**"
 
 # Added to a code that is not in its format when it is kept as a level, so
-# it can never be mistaken for one of the format's labels.
+# it cannot equal one of the format's labels. It is a name only: text ending
+# in it is never taken as a sign of an earlier conversion.
 .srtr_unknown_suffix <- ": not in format"
 
 # Convert one column with its format's codes. `fmt_map` has columns Value
 # (code) and Label, in the format's order.
 #
-# Each value is read as a code first, since SAF columns hold codes. A value
-# that is not a code but is already one of the format's labels (or a code
-# kept by an earlier call) stays as it is. Anything else is outside the
-# format: it gets the catch-all label when `other = "sas"` and the format has
-# one, and otherwise follows `unknown_codes`.
+# A column that was not converted already is read as codes, since SAF columns
+# hold codes: a value that is not a code is outside the format, even when it
+# reads like one of the format's labels. It gets the catch-all label when
+# `other = "sas"` and the format has one, and otherwise follows
+# `unknown_codes`.
 .srtr_factor_column <- function(
   x,
   fmt_map,
@@ -187,9 +192,6 @@ apply_srtr_factors <- function(
   other = "sas",
   call = rlang::caller_env()
 ) {
-  if (.srtr_already_factored(x, fmt_map)) {
-    return(x)
-  }
   if (fmt %in% .srtr_range_formats) {
     if (range_formats == "keep" || !is.numeric(x)) {
       return(x)
@@ -204,42 +206,57 @@ apply_srtr_factors <- function(
   labels <- listed$Label[listed$Value != .srtr_other_code]
   all_labels <- unique(listed$Label)
 
+  if (.srtr_already_factored(x, all_labels)) {
+    return(x)
+  }
+
   values <- as.character(x)
   mapped <- labels[match(values, codes)]
-  is_label <- is.na(mapped) & values %in% all_labels
-  is_kept <- is.na(mapped) & !is_label & endsWith(values, .srtr_unknown_suffix)
-  mapped[is_label | is_kept] <- values[is_label | is_kept]
   outside <- !is.na(values) & is.na(mapped)
 
   if (has_other) {
     mapped[outside] <- other_label
-    levels_out <- all_labels
   } else {
     unknown <- sort(unique(values[outside]))
     if (length(unknown) > 0) {
       .srtr_report_unknown_codes(unknown, sum(outside), var, fmt, unknown_codes, call)
     }
     if (unknown_codes == "keep") {
-      mapped[outside] <- paste0(values[outside], .srtr_unknown_suffix)
+      mapped[outside] <- .srtr_unknown_name(values[outside], all_labels)
     }
-    levels_out <- all_labels
   }
-  extra <- sort(setdiff(unique(mapped[!is.na(mapped)]), levels_out))
-  .srtr_keep_attributes(factor(mapped, levels = c(levels_out, extra)), x, fmt)
+  extra <- sort(setdiff(unique(mapped[!is.na(mapped)]), all_labels))
+  .srtr_keep_attributes(factor(mapped, levels = c(all_labels, extra)), x, fmt)
 }
 
-# Positive evidence that a column was converted already: the marker set by
-# this function, or a factor whose levels are all this format's labels or
-# codes kept by an earlier call. Raw SAF columns are never factors.
-.srtr_already_factored <- function(x, fmt_map) {
+# The level name for kept codes: the code plus the suffix, with the suffix
+# added again in the unlikely case the result is one of the labels. Distinct
+# codes always get distinct names.
+.srtr_unknown_name <- function(codes, labels) {
+  out <- paste0(codes, .srtr_unknown_suffix)
+  clash <- out %in% labels
+  while (any(clash)) {
+    out[clash] <- paste0(out[clash], .srtr_unknown_suffix)
+    clash <- out %in% labels
+  }
+  out
+}
+
+# Evidence that a column was converted already: the marker this function
+# sets, or a factor whose levels begin with the format's complete label set
+# in order, the shape this function always produces. The second covers a
+# column whose marker was dropped, for example by base R subsetting. Raw SAF
+# columns are never factors.
+.srtr_already_factored <- function(x, all_labels) {
   if (!is.null(attr(x, "srtr_format"))) {
     return(TRUE)
   }
-  if (!is.factor(x)) {
+  if (!is.factor(x) || length(all_labels) == 0) {
     return(FALSE)
   }
   lev <- levels(x)
-  all(lev %in% fmt_map$Label | endsWith(lev, .srtr_unknown_suffix))
+  length(lev) >= length(all_labels) &&
+    identical(lev[seq_along(all_labels)], all_labels)
 }
 
 # Band numeric values by the format's numeric codes, read as lower bounds.
