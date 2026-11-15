@@ -25,6 +25,13 @@
 * `apply_srtr_factors()` and `apply_srtr_varlabels()` no longer fail when
   called as `sRtr::fun()` without sRtr attached (#90).
 
+* `apply_srtr_factors()` and `apply_srtr_varlabels()` now set a `file_key`
+  attribute on their result, so a chain such as
+  `TX_KI |> apply_srtr_factors() |> apply_srtr_varlabels()` labels both
+  steps. `file_key` is matched in upper case. A key that is not in the bundled
+  dictionary, or that cannot be worked out, now gives a warning instead of
+  silently returning unlabeled data (#89).
+
 * `calculate_geography_coverage_gain()` now does what its arguments say
   (#58):
   * `method = "centroid"` and `method = "areal"` are implemented. Before,

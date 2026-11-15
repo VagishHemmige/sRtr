@@ -7,12 +7,20 @@
 #' for a `file_key` attribute on the data frame (e.g., from `load_srtr_file()`).
 #' If not found, it will attempt to infer it from the object name.
 #'
+#' The key is matched in upper case. A key that is not a dataset in the
+#' bundled [dictionary], or a key that cannot be worked out (no attribute and
+#' no object name, as when `df` is an expression), gives a warning. A known key
+#' whose columns are not in `df` is not a problem: nothing is changed.
+#'
 #' @param df A data frame loaded from an SRTR SAF file.
 #' @param file_key Optional. The dataset name (e.g., "CAND_KIPA", "TX_KI").
 #'   If not provided, the function will use a `file_key` attribute or object name.
 #' @param verbose Logical. If TRUE, print each variable being labeled.
 #'
-#' @return A data frame with factor levels applied to coded variables.
+#' @return A data frame with factor levels applied to coded variables, and a
+#'   `file_key` attribute holding the dataset key in upper case, so the key
+#'   carries through a chain of calls. If no usable key is found, `df` is
+#'   returned unchanged with a warning.
 #' @export
 #'
 #' @examples
@@ -31,27 +39,12 @@
 #' }
 
 apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
-  # ---- Infer file_key if not provided ----
+  # ---- Work out the dataset ----
+  file_key <- .srtr_resolve_file_key(df, file_key, substitute(df), verbose)
   if (is.null(file_key)) {
-    attr_key <- attr(df, "file_key")
-    if (!is.null(attr_key)) {
-      file_key <- toupper(attr_key)
-      if (verbose) {
-        srtr_inform(
-          "Using {.arg file_key} {.val {file_key}} from the data frame's attribute.",
-          class = "file_key_inferred"
-        )
-      }
-    } else {
-      file_key <- toupper(deparse(substitute(df)))
-      if (verbose) {
-        srtr_inform(
-          "Using {.arg file_key} {.val {file_key}} from the object name.",
-          class = "file_key_inferred"
-        )
-      }
-    }
+    return(df)
   }
+  attr(df, "file_key") <- file_key
 
   # ---- Bundled dictionary and formats ----
   dictionary <- sRtr::dictionary

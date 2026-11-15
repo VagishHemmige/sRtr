@@ -61,6 +61,17 @@ load_fake <- function(file_key) {
   )
 }
 
+test_that("labeling a file the dictionary does not list is skipped quietly", {
+  local_srtr_folder("FAKE_EXTRA_FILE.sas7bdat")
+  local_mocked_bindings(read_sas = fake_read_sas, .package = "haven")
+
+  expect_no_warning(
+    out <- load_srtr_file("FAKE_EXTRA_FILE", column_check = "none")
+  )
+  expect_equal(out$SOURCE, "FAKE_EXTRA_FILE.sas7bdat")
+  expect_equal(attr(out, "file_key"), "FAKE_EXTRA_FILE")
+})
+
 test_that("the folder is scanned on first use, without set_srtr_wd()", {
   local_srtr_folder("TX_KI.sas7bdat")
   local_mocked_bindings(read_sas = fake_read_sas, .package = "haven")
