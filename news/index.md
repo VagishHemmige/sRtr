@@ -21,6 +21,12 @@
   ([\#102](https://github.com/VagishHemmige/sRtr/issues/102),
   [\#103](https://github.com/VagishHemmige/sRtr/issues/103)).
 
+- `formats`: four code meanings (three in `BILICOMP`, one in `DGN`)
+  showed a control character where SRTR’s page has an en dash or an
+  apostrophe. The dictionary page is now read as Windows-1252, the
+  encoding it uses, so they show the intended character
+  ([\#26](https://github.com/VagishHemmige/sRtr/issues/26)).
+
 - Loading sRtr no longer warns when `SRTR_WD` is not set, and no longer
   sets `options(arrow.skip_nul = TRUE)` for the session
   ([\#62](https://github.com/VagishHemmige/sRtr/issues/62)).
