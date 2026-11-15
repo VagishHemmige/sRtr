@@ -56,7 +56,7 @@
 <ul><li>
 <strong>No patient data.</strong> Nothing in this repository (code, tests, fixtures, examples, vignettes, PR descriptions, commit messages, review comments) contains real or real-looking patient-level SRTR data. Test data is synthetic, built from data dictionary column names, obviously fake and small. Synthetic fixture files live only under <code>tests/testthat/fixtures/synthetic-*</code>. CI (<code>data-guard.yaml</code>) fails on SAF formats, on files with SRTR ID columns elsewhere, and on files over 5 MB.</li>
 <li>
-<strong><code>data/</code> is never edited by hand or by an assistant.</strong> Change <code>data-raw/</code>; the maintainer regenerates <code>data/</code>.</li>
+<strong>Generated data are built only by the regenerate-data workflow.</strong> <code>data/*.rda</code> and <code>R/sysdata.rda</code> are never edited by hand and never written by an assistant. Change <code>data-raw/</code>; on a pull request, <code>.github/workflows/regenerate-data.yaml</code> rebuilds them on GitHub and commits any change as github-actions[bot] (see “Maintenance runs on GitHub”).</li>
 <li>
 <strong>No writes outside <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.</strong> Package code never writes to the user’s home folder or anywhere outside <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> unless the user passes an explicit path argument.</li>
 <li>
@@ -93,6 +93,18 @@
 <li>Every PR description has a “Needs SAF check” section (yes or no). If yes, it says what was checked only on made-up data and gives the exact commands to run.</li>
 <li>The maintainer works on Windows. Point out anything that may behave differently there (paths, encodings, case sensitivity, line endings, locale).</li>
 </ul></div>
+<div class="section level3">
+<h3 id="maintenance-runs-on-github">Maintenance runs on GitHub<a class="anchor" aria-label="anchor" href="#maintenance-runs-on-github"></a></h3>
+<p>Maintaining sRtr needs no local runs. Every routine step runs in GitHub Actions:</p>
+<ul><li>
+<strong>Generated data:</strong> <code>regenerate-data.yaml</code> runs on pull requests that change <code>data-raw/</code> (and by hand from the Actions tab). It rebuilds every object from <code>data-raw/</code>, keeps the base branch’s file unless the object differs from it (<code><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal()</a></code>, so floating-point noise is not a change), commits as github-actions[bot] with a link to the run, and starts the other checks on the new commit. After it commits, pull the branch before pushing to it again.</li>
+<li>
+<strong>SRTR dictionary:</strong> <code>dictionary-check.yaml</code> runs monthly (and by hand). When the live page has changed, it adds the page to <code>data-raw/dictionary-versions/</code> and opens a pull request listing what changed.</li>
+<li>
+<strong>Documentation:</strong> comment <code>/document</code> on a pull request (<code>pr-commands.yaml</code>) to regenerate <code>man/</code>, <code>NAMESPACE</code> and <code>RoxygenNote</code>; <code>document-check.yaml</code> fails a PR whose generated documentation is out of date.</li>
+</ul><p>No workflow approves or merges a pull request; the maintainer reviews and merges every one, including those opened or updated by workflows.</p>
+<p>The one step that cannot run on GitHub is validation against real SAFs, which never leave the data use agreement’s environment (see “Testing without SAFs”).</p>
+</div>
 <div class="section level3">
 <h3 id="package-code-conventions">Package code conventions<a class="anchor" aria-label="anchor" href="#package-code-conventions"></a></h3>
 <ul><li>Call every non-base function as <code>pkg::fun()</code>; no <code>@importFrom</code>. The one exception is <code>@importFrom rlang .data :=</code> in <code>R/zzz.R</code>.</li>
@@ -176,7 +188,7 @@
 <li>Internal functions should not get an Rd file. A roxygen block marked <code>@noRd</code> is fine.</li>
 <li>Wrap roxygen2 comments to 80 characters.</li>
 <li>Whenever you add a new (non-internal) documentation topic, also add the topic to <code>_pkgdown.yml</code>.</li>
-<li>Always re-document the package after changing a roxygen2 comment. If your roxygen2 is older than the one in <code>DESCRIPTION</code>’s <code>RoxygenNote</code>, commit only the Rd files your change needs, and never <code>DESCRIPTION</code> or <code>NAMESPACE</code> changes from that run. The maintainer regenerates those with a current roxygen2, locally or with the <code>/document</code> PR comment.</li>
+<li>Always re-document the package after changing a roxygen2 comment. If your roxygen2 is older than the one in <code>DESCRIPTION</code>’s <code>RoxygenNote</code>, commit only the Rd files your change needs, and never <code>DESCRIPTION</code> or <code>NAMESPACE</code> changes from that run. Those are regenerated with a current roxygen2 by the <code>/document</code> PR comment.</li>
 <li>Use <code><a href="https://pkgdown.r-lib.org/reference/check_pkgdown.html" class="external-link">pkgdown::check_pkgdown()</a></code> to check that all topics are included in the reference index.</li>
 </ul></div>
 <div class="section level3">

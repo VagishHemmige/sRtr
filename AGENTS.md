@@ -28,8 +28,12 @@ These rules take precedence over anything later in this file.
   `tests/testthat/fixtures/synthetic-*`. CI (`data-guard.yaml`) fails on
   SAF formats, on files with SRTR ID columns elsewhere, and on files
   over 5 MB.
-- **`data/` is never edited by hand or by an assistant.** Change
-  `data-raw/`; the maintainer regenerates `data/`.
+- **Generated data are built only by the regenerate-data workflow.**
+  `data/*.rda` and `R/sysdata.rda` are never edited by hand and never
+  written by an assistant. Change `data-raw/`; on a pull request,
+  `.github/workflows/regenerate-data.yaml` rebuilds them on GitHub and
+  commits any change as github-actions\[bot\] (see “Maintenance runs on
+  GitHub”).
 - **No writes outside
   [`tempdir()`](https://rdrr.io/r/base/tempfile.html).** Package code
   never writes to the user’s home folder or anywhere outside
@@ -104,6 +108,36 @@ Cite a source according to what it does for the code:
 - The maintainer works on Windows. Point out anything that may behave
   differently there (paths, encodings, case sensitivity, line endings,
   locale).
+
+### Maintenance runs on GitHub
+
+Maintaining sRtr needs no local runs. Every routine step runs in GitHub
+Actions:
+
+- **Generated data:** `regenerate-data.yaml` runs on pull requests that
+  change `data-raw/` (and by hand from the Actions tab). It rebuilds
+  every object from `data-raw/`, keeps the base branch’s file unless the
+  object differs from it
+  ([`all.equal()`](https://rdrr.io/r/base/all.equal.html), so
+  floating-point noise is not a change), commits as
+  github-actions\[bot\] with a link to the run, and starts the other
+  checks on the new commit. After it commits, pull the branch before
+  pushing to it again.
+- **SRTR dictionary:** `dictionary-check.yaml` runs monthly (and by
+  hand). When the live page has changed, it adds the page to
+  `data-raw/dictionary-versions/` and opens a pull request listing what
+  changed.
+- **Documentation:** comment `/document` on a pull request
+  (`pr-commands.yaml`) to regenerate `man/`, `NAMESPACE` and
+  `RoxygenNote`; `document-check.yaml` fails a PR whose generated
+  documentation is out of date.
+
+No workflow approves or merges a pull request; the maintainer reviews
+and merges every one, including those opened or updated by workflows.
+
+The one step that cannot run on GitHub is validation against real SAFs,
+which never leave the data use agreement’s environment (see “Testing
+without SAFs”).
 
 ### Package code conventions
 
@@ -244,8 +278,8 @@ desirability:
 - Always re-document the package after changing a roxygen2 comment. If
   your roxygen2 is older than the one in `DESCRIPTION`’s `RoxygenNote`,
   commit only the Rd files your change needs, and never `DESCRIPTION` or
-  `NAMESPACE` changes from that run. The maintainer regenerates those
-  with a current roxygen2, locally or with the `/document` PR comment.
+  `NAMESPACE` changes from that run. Those are regenerated with a
+  current roxygen2 by the `/document` PR comment.
 - Use
   [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
   to check that all topics are included in the reference index.

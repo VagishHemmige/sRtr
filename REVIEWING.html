@@ -67,7 +67,7 @@
 <li>CI is still being built. Report relevant failures as introduced by the PR, pre-existing, or of uncertain origin; do not attribute them to the PR without evidence. Say when a check looks unreliable rather than treating it as evidence.</li>
 </ul><p><strong>Never softer:</strong></p>
 <ul><li>Wrong results, and anything that could give a silent wrong result.</li>
-<li>Patient-data safety and the <code>data/</code> rule.</li>
+<li>Patient-data safety and the generated-data rule.</li>
 <li>Epidemiologic definitions and their sources.</li>
 <li>Real-SAF test skips, and writes outside <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.</li>
 </ul></div>
@@ -122,7 +122,7 @@ Check a claimed fix on every similar path, not just the example shown.</li>
 <div class="section level2">
 <h2 id="srtr-checks">sRtr checks<a class="anchor" aria-label="anchor" href="#srtr-checks"></a></h2>
 <ul><li>
-<strong><code>data/</code>:</strong> a PR that changes <code>data/</code> is Must fix unless its description says the maintainer regenerated the files from <code>data-raw/</code>.</li>
+<strong>Generated data:</strong> a change to <code>data/*.rda</code> or <code>R/sysdata.rda</code> is Must fix unless it is in a commit by github-actions[bot] from the regenerate-data workflow (its message links the run), made after the PR’s last change to <code>data-raw/</code> or the code it uses, and that run passed. A hand-made or assistant-made change to those files is Must fix whatever the description says. Review the change to <code>data-raw/</code> that caused it, not the binary files.</li>
 <li>
 <strong>Sources:</strong> a change to epidemiologic logic needs its source named in the PR description (see <code>AGENTS.md</code>). Flag a missing or unverifiable source.</li>
 <li>
@@ -131,6 +131,8 @@ Check a claimed fix on every similar path, not just the example shown.</li>
 <strong>“Needs SAF check”:</strong> flag a change to file loading, labeling, derived variables, joins or vignettes whose PR description does not say what was checked only on made-up data, with the commands to run.</li>
 <li>
 <strong>Conventions:</strong> check the package code, test, documentation and NEWS conventions in <code>AGENTS.md</code>.</li>
+<li>
+<strong>Monthly dictionary PRs</strong> (head branch <code>dictionary/&lt;snapshot&gt;</code>, opened by the dictionary-check workflow): check that only <code>data-raw/dictionary-versions/</code> and workflow-built data changed, that the listed changes match the stored runs, and that any problems the parser reported are explained before merging.</li>
 <li>
 <strong>Generated files:</strong> check that <code>man/*.Rd</code> and <code>NAMESPACE</code> match their roxygen comments; do not review them line by line. An assistant may push R files first and the generated files in a later commit. Note missing generated files once, under Consider. This covers documentation only: a missing or wrong export, import or dependency declaration that breaks use or installation keeps the severity of its impact, and a PR still waiting for generated files is not ready to merge.</li>
 </ul></div>
