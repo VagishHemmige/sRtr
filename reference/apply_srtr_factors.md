@@ -79,10 +79,18 @@ or a key that cannot be worked out (no attribute and no object name, as
 when `df` is an expression), gives a warning. A known key whose columns
 are not in `df` is not a problem: nothing is changed.
 
-A column that is already a factor of this format's labels, for example
-from an earlier call, is left as it is, so calling the function twice
-changes nothing. Attributes on each column, such as a variable label,
-are kept.
+Values are read as codes. A value that is not a code in the format is
+outside it, even if it reads like one of the format's labels.
+
+A column converted by an earlier call carries an `srtr_format` attribute
+and is left as it is, so calling the function twice changes nothing.
+dplyr and tibble operations keep the attribute; base R subsetting such
+as `df[rows, ]` on a data frame drops it, and the column is then read as
+codes again, with every value reported as outside the format (also when
+the format has a catch-all: for a factor input, values given the
+catch-all label are reported too; raw codes get it silently, as in SAS).
+Convert again from the raw codes, or keep working with dplyr. Attributes
+on each column, such as a variable label, are kept.
 
 ## Examples
 
