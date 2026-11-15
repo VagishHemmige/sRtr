@@ -128,7 +128,13 @@ jobs:
               for wf in regenerate-data.yaml R-CMD-check.yaml document-check.yaml data-guard.yaml; do
                 started=0
                 waiting=0
-                for id in $(gh run list --workflow "$wf" --commit "$head" --json databaseId --jq '.[].databaseId'); do
+                # Checked on its own: a failed lookup must stop the run, not
+                # look like "no runs".
+                if ! ids=$(gh run list --workflow "$wf" --commit "$head" --json databaseId --jq '.[].databaseId'); then
+                  echo "::error::Could not list $wf runs for $head; not starting it, to avoid a duplicate."
+                  exit 1
+                fi
+                for id in $ids; do
                   state=$(gh run view "$id" --json status,conclusion,jobs --jq '"\(.status) \(.conclusion) \(.jobs | length)"')
                   set -- $state
                   if [ "$2" = "action_required" ] || [ "$1" = "waiting" ]; then
