@@ -66,11 +66,13 @@ whose columns are not in \code{df} is not a problem: nothing is changed.
 Values are read as codes. A value that is not a code in the format is
 outside it, even if it reads like one of the format's labels.
 
-A column converted by an earlier call is left as it is, so calling the
-function twice changes nothing. Such a column carries an \code{srtr_format}
-attribute; if that was dropped (base R subsetting drops it), a factor whose
-levels begin with the format's labels in order is also taken as converted.
-Attributes on each column, such as a variable label, are kept.
+A column converted by an earlier call carries an \code{srtr_format} attribute
+and is left as it is, so calling the function twice changes nothing. dplyr
+and tibble operations keep the attribute; base R subsetting such as
+\code{df[rows, ]} on a data frame drops it, and the column is then read as codes
+again, with every value reported as outside the format. Convert again from
+the raw codes, or keep working with dplyr. Attributes on each column, such
+as a variable label, are kept.
 }
 \examples{
 \dontrun{
