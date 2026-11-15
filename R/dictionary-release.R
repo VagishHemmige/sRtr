@@ -204,53 +204,59 @@
   )
 }
 
-# Entries for release `r` (an integer) that falls between stored snapshots.
-#   * Runs that cover `r` (their first snapshot's release is before it and
-#     their last one's after it) are kept.
-#   * A key with no covering run but runs on both sides is kept with the
-#     earlier side's value (the latest revision before `r`); if the two sides
-#     differ, it is listed in `uncertain`.
-#   * A key seen on only one side is kept when `keep_one_sided` says so.
-# Snapshots are compared by their place in `snapshots` (release, then
-# revision), so the latest revision of a release is preferred.
+# Entries for release `r` (an integer) that falls between stored snapshots,
+# from the two boundary snapshots: the latest revision of the last release
+# before `r` and of the first release after it.
+#   * An entry in both with the same attributes is kept.
+#   * An entry in both that differs is kept with the earlier value and listed
+#     in `uncertain`.
+#   * An entry in only one is kept when `keep_one_sided` says so.
 .srtr_interpolate <- function(runs, snapshots, r, key, keep_one_sided) {
-  first_pos <- match(runs$first, snapshots)
-  last_pos <- match(runs$last, snapshots)
-  first_rel <- as.integer(substr(runs$first, 1, 4))
-  last_rel <- as.integer(substr(runs$last, 1, 4))
-  attrs <- setdiff(names(runs), c(key, "first", "last"))
-  keys <- do.call(paste, c(runs[key], sep = "\r"))
+  release_of <- as.integer(substr(snapshots, 1, 4))
+  earlier_id <- utils::tail(snapshots[release_of < r], 1)
+  later_id <- snapshots[release_of > r][
+    release_of[release_of > r] == min(release_of[release_of > r])
+  ]
+  later_id <- utils::tail(later_id, 1)
+  earlier <- .srtr_runs_at(runs, snapshots, earlier_id)
+  later <- .srtr_runs_at(runs, snapshots, later_id)
+  attrs <- setdiff(names(earlier), key)
+  # A code's position within its format moves whenever a code is added
+  # before it, so it is not compared; the earlier position is kept.
+  compared <- setdiff(attrs, "Position")
 
-  covers <- first_rel <= r & last_rel >= r
-  covered <- unique(keys[covers])
-  chosen <- list(runs[covers, ])
-  uncertain <- character()
+  earlier_keys <- do.call(paste, c(earlier[key], sep = "\r"))
+  later_keys <- do.call(paste, c(later[key], sep = "\r"))
+  in_both <- earlier_keys %in% later_keys
+  matched <- later[match(earlier_keys[in_both], later_keys), compared]
+  same <- vapply(
+    seq_len(sum(in_both)),
+    function(i) {
+      isTRUE(all.equal(
+        as.list(earlier[in_both, compared][i, ]),
+        as.list(matched[i, ]),
+        check.attributes = FALSE
+      ))
+    },
+    logical(1)
+  )
+  uncertain <- vapply(
+    which(in_both)[!same],
+    function(i) paste(unlist(earlier[i, key]), collapse = " "),
+    character(1)
+  )
 
-  gap_rows <- which(!covers & !keys %in% covered)
-  for (k in unique(keys[gap_rows])) {
-    rows <- gap_rows[keys[gap_rows] == k]
-    before <- rows[last_rel[rows] < r]
-    after <- rows[first_rel[rows] > r]
-    earlier <- if (length(before) > 0) before[which.max(last_pos[before])] else NA
-    later <- if (length(after) > 0) after[which.min(first_pos[after])] else NA
-    if (!is.na(earlier) && !is.na(later)) {
-      a <- as.list(runs[earlier, attrs])
-      b <- as.list(runs[later, attrs])
-      if (!isTRUE(all.equal(a, b, check.attributes = FALSE))) {
-        uncertain <- c(uncertain, paste(unlist(runs[earlier, key]), collapse = " "))
-      }
-      chosen[[length(chosen) + 1]] <- runs[earlier, ]
-    } else {
-      pick <- if (!is.na(earlier)) earlier else later
-      if (keep_one_sided(runs[pick, ])) {
-        chosen[[length(chosen) + 1]] <- runs[pick, ]
-      }
-    }
-  }
-  table <- dplyr::bind_rows(chosen)
+  only_earlier <- earlier[!in_both, ]
+  only_later <- later[!later_keys %in% earlier_keys, ]
+  one_sided <- dplyr::bind_rows(only_earlier, only_later)
+  keep <- vapply(
+    seq_len(nrow(one_sided)),
+    function(i) isTRUE(keep_one_sided(one_sided[i, ])),
+    logical(1)
+  )
   list(
-    table = table[setdiff(names(table), c("first", "last"))],
-    uncertain = uncertain
+    table = dplyr::bind_rows(earlier[in_both, ], one_sided[keep, ]),
+    uncertain = unname(uncertain)
   )
 }
 

@@ -275,3 +275,21 @@ test_that("factors use the release given to them", {
   expect_equal(as.character(old$REC_FAKE_CHANGED), "1: Meaning 1")
   expect_equal(new$REC_FAKE_CHANGED, "1")
 })
+
+test_that("a revision of the later release is compared too", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  pages <- fake_two_releases()
+  pages[[2]]$data$TX_KI$Label[3] <- "Same label"
+  revised <- pages[[2]]
+  revised$data$TX_KI$Label[3] <- "Revised later label"
+  versions <- local_versions(list(pages[[1]], pages[[2]], revised))
+
+  cnd <- expect_error(
+    .srtr_dictionary_for("9902", versions, columns = "REC_FAKE_SAME", file_key = "TX_KI", gaps = "error"),
+    class = "sRtr_error_dictionary_gap"
+  )
+  expect_contains(cnd$entries, "TX_KI REC_FAKE_SAME")
+  out <- .srtr_dictionary_for("9902", versions, gaps = "nearest")
+  expect_equal(out$dictionary$Label[out$dictionary$Variable == "REC_FAKE_SAME"], "Same label")
+})
