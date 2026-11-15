@@ -34,3 +34,51 @@ test_that("already-labelled data is left alone, with a warning", {
   )
   expect_equal(labelled::var_label(out$CAN_ABO), "A made-up label")
 })
+
+test_that("the result carries the upper-case file_key", {
+  df <- tibble::tibble(CAN_ABO = "A")
+  out <- apply_srtr_varlabels(df, file_key = "tx_ki")
+  expect_equal(attr(out, "file_key"), "TX_KI")
+  expect_equal(labelled::var_label(out$CAN_ABO), "Patient/s Blood Type")
+})
+
+test_that("a chain with no file_key keeps the key from the object name", {
+  TX_KI <- tibble::tibble(CAN_ABO = "A")
+  out <- TX_KI |>
+    apply_srtr_factors() |>
+    apply_srtr_varlabels()
+  expect_s3_class(out$CAN_ABO, "factor")
+  expect_equal(labelled::var_label(out$CAN_ABO), "Patient/s Blood Type")
+  expect_equal(attr(out, "file_key"), "TX_KI")
+
+  out <- TX_KI |>
+    apply_srtr_varlabels() |>
+    apply_srtr_factors()
+  expect_s3_class(out$CAN_ABO, "factor")
+  expect_equal(attr(out, "file_key"), "TX_KI")
+})
+
+test_that("an unknown file_key warns and returns the data unchanged", {
+  df <- tibble::tibble(CAN_ABO = "A")
+  expect_warning(
+    out <- apply_srtr_varlabels(df, file_key = "NOT_A_FILE"),
+    class = "sRtr_warning_unknown_file_key"
+  )
+  expect_identical(out, df)
+  expect_snapshot(out <- apply_srtr_varlabels(df, file_key = "NOT_A_FILE"))
+})
+
+test_that("a file_key that cannot be worked out warns", {
+  expect_warning(
+    out <- apply_srtr_varlabels(tibble::tibble(CAN_ABO = "A")),
+    class = "sRtr_warning_file_key_not_inferred"
+  )
+  expect_null(labelled::var_label(out$CAN_ABO))
+  expect_snapshot(out <- apply_srtr_varlabels(tibble::tibble(CAN_ABO = "A")))
+})
+
+test_that("a known file_key with no matching columns does not warn", {
+  df <- tibble::tibble(FAKE_COLUMN = 1)
+  expect_no_warning(out <- apply_srtr_varlabels(df, file_key = "TX_KI"))
+  expect_equal(attr(out, "file_key"), "TX_KI")
+})

@@ -206,12 +206,15 @@ load_srtr_file <- function(
   }
 
   # ---- Apply factor labels ----
-  if (factor_labels) {
+  # Files the bundled dictionary does not list have nothing to label, so they
+  # are skipped quietly, as in the column check.
+  in_dictionary <- file_key_input %in% sRtr::dictionary$Dataset
+  if (factor_labels && in_dictionary) {
     df <- apply_srtr_factors(df, file_key = file_key_input)
   }
 
   # ---- Apply variable labels ----
-  if (var_labels) {
+  if (var_labels && in_dictionary) {
     df <- apply_srtr_varlabels(df, file_key = file_key_input)
   }
 
