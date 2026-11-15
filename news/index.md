@@ -25,6 +25,11 @@
   sets `options(arrow.skip_nul = TRUE)` for the session
   ([\#62](https://github.com/VagishHemmige/sRtr/issues/62)).
 
+- The bundled `dictionary` now names the original MELD exception tumors
+  file `MPEXCEPT_ORIG_TUMORS`, as the SRTR data file is named, instead
+  of the shortened `MPEXCEPT_ORIG_TUMO`, so loading and labeling that
+  file find its dictionary entries.
+
 - [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
   is now exported
   ([\#50](https://github.com/VagishHemmige/sRtr/issues/50)).
