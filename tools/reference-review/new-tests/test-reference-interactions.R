@@ -23,7 +23,7 @@ testthat::test_that("report dates resist form order and duplicated reporting", {
   testthat::expect_equal(nrow(original), 1L)
 })
 
-testthat::test_that("person and donor membership do not collapse transplant episodes", {
+testthat::test_that("follow-up reports attach by transplant ID while person and donor metadata are preserved", {
   cohort <- tibble::tibble(
     TRR_ID = c("SYNTHETIC-TX-B", "SYNTHETIC-TX-A", "SYNTHETIC-TX-C"),
     PERS_ID = c("SYNTHETIC-PERSON-1", "SYNTHETIC-PERSON-1", "SYNTHETIC-PERSON-2"),

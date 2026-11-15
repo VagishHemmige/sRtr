@@ -21,7 +21,7 @@ the runner has only been exercised on Linux.
 | Repeated person and shared donor | Keep separate transplant episodes and attach reports to the correct episode. | Candidate permanent test; does not validate real identifier mappings. |
 | Ascertainment extension | Extending mortality coverage should leave other outcomes unchanged. | Candidate permanent test. |
 | Death-composite overwrite | Demonstrate the pipeline replacing a selected earliest composite with precedence. | Characterization only; do not adopt overwrite as a permanent guarantee. |
-| Missing admission duration, KI and KP | Preserve affirmative rejection evidence despite missing inpatient length of stay. | Two regression cases; onset-date policy remains undecided. |
+| Missing admission duration, KI and KP | Preserve affirmative rejection evidence despite missing inpatient length of stay. | Two proposed regression cases assuming a dated fallback; that policy is not approved. |
 
 The runner returns nonzero for failed expectations. At the original tested
 revision `c36dcc26bfa4d5b7cc9b7762d150bff44b01fb51`, the two rejection cases
@@ -44,5 +44,9 @@ not clinical validity.
 - [PMC11972892](https://pmc.ncbi.nlm.nih.gov/articles/PMC11972892/), Methods:
   Mortality Ascertainment, supplies an earliest-death use case, not a universal
   default. The composition probe compares existing package options.
-- Missing-duration cases test the package's affirmative-rejection contract.
-  They do not choose an imputed onset date or a clinical rejection definition.
+- Missing-duration cases assert that the existing date-derived `_BINARY` outputs
+  equal one. Under the current helper, this requires a nonmissing event date:
+  the cases therefore assume a dated fallback, without specifying its exact date.
+  This is a proposed policy, not an approved onset rule. A design that retains
+  unknown onset and records affirmative evidence separately would require revised
+  assertions against that evidence output; these cases cannot judge that design.

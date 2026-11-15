@@ -1,5 +1,6 @@
 # Reconciliation reproducer: all values below are invented, not SAF records.
-# Positive later reporting establishes evidence, not the true onset date.
+# Binary assertions assume a dated fallback under the current date-derived API.
+# This policy is not approved; a separate-evidence design needs different assertions.
 
 testthat::test_that("KI missing admission duration does not erase dated positive follow-up", {
   yes <- "1: Yes, at least one episode treated with anti-rejection agent"
