@@ -41,3 +41,35 @@ test_that("verbose = TRUE reports processed and skipped columns", {
   )
   expect_equal(out$FAKE_A, c(1, NA))
 })
+
+test_that("labelled default missing codes match the variable's formats", {
+  dict <- sRtr::dictionary
+  fmts <- sRtr::formats
+  bad <- character()
+  for (var in names(default_missing_vars)) {
+    labelled <- grep(": ", as.character(default_missing_vars[[var]]),
+                     value = TRUE)
+    var_formats <- dict$FormatID[dict$Variable == var]
+    meanings <- fmts$Meaning[fmts$Format %in% var_formats]
+    missing <- setdiff(labelled, meanings)
+    if (length(missing) > 0) {
+      bad <- c(bad, paste0(var, ": ", missing))
+    }
+  }
+  expect_equal(bad, character())
+})
+
+test_that("SRLSTT variables keep all labelled SRLSTT missing codes", {
+  srlstt <- c("C: Cannot Disclose", "ND: Not Done", "PD: Pending",
+              "U: Unknown")
+  vars <- unique(sRtr::dictionary$Variable[
+    sRtr::dictionary$FormatID == "SRLSTT"
+  ])
+  vars <- intersect(vars, names(default_missing_vars))
+  lacking <- vars[!vapply(
+    vars,
+    \(v) all(srlstt %in% default_missing_vars[[v]]),
+    logical(1)
+  )]
+  expect_equal(lacking, character())
+})

@@ -78,3 +78,9 @@
   dates, so the `parse` argument is removed; the conversion could misread
   `MM/DD/YYYY` text and SAS day counts (#23, #59). A missing column now gives a
   clear error instead of a failed `stopifnot()`.
+
+* `srtr_normalize_missing()` now recognizes the default unknown codes of 18
+  variables it used to miss. Thirteen defaults did not match their formats'
+  labels (`"998: UNKNOWN"` for `"998: Unknown"`, `"97: Unknown"` for the
+  WKGRPHLA code `"998: Unknown"`), and five SRLSTT variables (CMV, EBV and
+  hepatitis B results) had their labelled codes replaced by raw ones (#19).
