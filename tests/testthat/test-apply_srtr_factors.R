@@ -237,12 +237,13 @@ test_that("applying factors twice changes nothing", {
   expect_identical(twice, once)
 })
 
-test_that("a factor that already holds labels is not converted again", {
+test_that("a marked factor whose labels reuse codes is not converted again", {
   fmt_map <- tibble::tibble(
     Value = c("3", "10"),
     Label = c("1", "3")
   )
   labelled <- factor(c("1", "3"), levels = c("1", "3"))
+  attr(labelled, "srtr_format") <- "FAKEFMT"
 
   out <- .srtr_factor_column(labelled, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR")
 
@@ -348,20 +349,54 @@ test_that("an unconverted factor is read as codes, labels included", {
   expect_equal(as.character(out$CAN_RACE), c("8: White", "Multi-Racial"))
 })
 
-test_that("a converted column that lost its marker is still not converted again", {
-  df <- tibble::tibble(CAN_ABO = c("A", "FAKE_ABO"))
-  once <- suppressWarnings(apply_srtr_factors(df, file_key = "TX_KI"))
+test_that("a column that lost its marker is read as codes again, loudly", {
+  df <- data.frame(CAN_ABO = c("A", "B"))
+  once <- apply_srtr_factors(df, file_key = "TX_KI")
   attr(once$CAN_ABO, "srtr_format") <- NULL
 
-  expect_no_warning(twice <- apply_srtr_factors(once, file_key = "TX_KI"))
-  expect_equal(as.character(twice$CAN_ABO), as.character(once$CAN_ABO))
+  expect_warning(
+    twice <- apply_srtr_factors(once, file_key = "TX_KI"),
+    class = "sRtr_warning_unknown_codes"
+  )
+  expect_equal(
+    as.character(twice$CAN_ABO),
+    c("A: A: not in format", "B: B: not in format")
+  )
+  expect_error(
+    apply_srtr_factors(once, file_key = "TX_KI", unknown_codes = "error"),
+    class = "sRtr_error_unknown_codes"
+  )
 })
 
-test_that("a converted column subset with base R is not converted again", {
-  df <- data.frame(CAN_ABO = c("A", "FAKE_ABO", "B"))
-  once <- suppressWarnings(apply_srtr_factors(df, file_key = "TX_KI"))
-  subset <- once[c(1, 2), , drop = FALSE]
+test_that("an unmarked factor with every label as a level is still read as codes", {
+  fmt_map <- tibble::tibble(Value = "FAKE_CODE", Label = "FAKE_LABEL")
+  x <- factor("FAKE_RAW", levels = c("FAKE_LABEL", "FAKE_RAW"))
 
-  expect_no_warning(twice <- apply_srtr_factors(subset, file_key = "TX_KI"))
-  expect_equal(as.character(twice$CAN_ABO), c("A: A", "FAKE_ABO: not in format"))
+  expect_error(
+    .srtr_factor_column(x, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR", unknown_codes = "error"),
+    class = "sRtr_error_unknown_codes"
+  )
+  expect_warning(
+    out <- .srtr_factor_column(x, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR", unknown_codes = "na"),
+    class = "sRtr_warning_unknown_codes"
+  )
+  expect_equal(as.character(out), NA_character_)
+})
+
+test_that("kept names never merge two codes, even next to a label like a kept name", {
+  fmt_map <- tibble::tibble(Value = "FAKE_CODE", Label = "FAKE_X: not in format")
+
+  expect_warning(
+    out <- .srtr_factor_column(
+      c("FAKE_X", "FAKE_X: not in format", "FAKE_X"),
+      fmt_map,
+      fmt = "FAKEFMT",
+      var = "FAKE_VAR"
+    ),
+    class = "sRtr_warning_unknown_codes"
+  )
+
+  expect_length(unique(as.character(out)), 2)
+  expect_equal(as.character(out)[1], as.character(out)[3])
+  expect_false(as.character(out)[1] %in% c(fmt_map$Label, as.character(out)[2]))
 })
