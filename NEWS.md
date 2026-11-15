@@ -79,6 +79,11 @@
   `MM/DD/YYYY` text and SAS day counts (#23, #59). A missing column now gives a
   clear error instead of a failed `stopifnot()`.
 
+* `srtr_normalize_missing()` keeps the order of factor levels and removes only
+  the replaced missing codes from them, so the reference level no longer
+  depends on which value comes first in the data. Ordered factors and variable
+  labels are kept (#20).
+
 * `srtr_normalize_missing()` now recognizes the default unknown codes of 18
   variables it used to miss. Thirteen defaults did not match their formats'
   labels (`"998: UNKNOWN"` for `"998: Unknown"`, `"97: Unknown"` for the

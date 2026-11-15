@@ -21,7 +21,11 @@ Any values matched will be replaced by \code{replacement}. Columns not present i
 
 \item{replacement}{The value to use in place of the missing representations. Defaults to \code{NA}.
 If a string is provided (e.g., \code{"Missing"}), both missing codes and \code{NA} values will be replaced.
-If the column is a factor and \code{replacement} is not \code{NA}, the replacement will be added as a new factor level.}
+If the column is a factor and \code{replacement} is not \code{NA}, the replacement will be added as a new factor level.
+For factors, the replaced codes are removed from the levels; the other
+levels keep their order, so the reference level does not depend on the
+order of the rows. Ordered factors stay ordered, and attributes such as
+variable labels are kept. A new \code{replacement} level goes last.}
 
 \item{verbose}{Logical. If \code{TRUE}, the function prints a message for each column it modifies,
 including skipped columns that are not found in \code{df}.}
