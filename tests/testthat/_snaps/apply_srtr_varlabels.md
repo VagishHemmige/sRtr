@@ -17,3 +17,11 @@
       i The data frame has no `file_key` attribute and was not passed by name.
       i Supply `file_key`, for example `file_key = "TX_KI"`.
 
+# file_key must be a single string
+
+    Code
+      apply_srtr_varlabels(df, file_key = 1)
+    Condition
+      Error in `apply_srtr_varlabels()`:
+      ! `file_key` must be a single string.
+

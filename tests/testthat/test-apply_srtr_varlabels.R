@@ -82,3 +82,36 @@ test_that("a known file_key with no matching columns does not warn", {
   expect_no_warning(out <- apply_srtr_varlabels(df, file_key = "TX_KI"))
   expect_equal(attr(out, "file_key"), "TX_KI")
 })
+
+test_that("file_key must be a single string", {
+  df <- tibble::tibble(CAN_ABO = "A")
+  for (bad in list(1, NA_character_, c("TX_KI", "TX_LI"))) {
+    expect_error(
+      apply_srtr_varlabels(df, file_key = bad),
+      class = "sRtr_error_invalid_file_key"
+    )
+    expect_error(
+      apply_srtr_factors(df, file_key = bad),
+      class = "sRtr_error_invalid_file_key"
+    )
+  }
+  expect_snapshot(error = TRUE, apply_srtr_varlabels(df, file_key = 1))
+})
+
+test_that("an explicit file_key overrides the attribute", {
+  df <- tibble::tibble(CAN_ABO = "A")
+  attr(df, "file_key") <- "NOT_A_FILE"
+  out <- apply_srtr_factors(df, file_key = "TX_KI") |>
+    apply_srtr_varlabels(file_key = "TX_KI")
+  expect_equal(attr(out, "file_key"), "TX_KI")
+  expect_s3_class(out$CAN_ABO, "factor")
+  expect_equal(labelled::var_label(out$CAN_ABO), "Patient/s Blood Type")
+})
+
+test_that("other attributes on the data frame are kept", {
+  df <- tibble::tibble(CAN_ABO = "A")
+  attr(df, "source_path") <- "made/up/path.sas7bdat"
+  out <- apply_srtr_factors(df, file_key = "TX_KI") |>
+    apply_srtr_varlabels(file_key = "TX_KI")
+  expect_equal(attr(out, "source_path"), "made/up/path.sas7bdat")
+})
