@@ -38,7 +38,7 @@
       out <- apply_srtr_factors(df, file_key = "TX_KI")
     Condition
       Warning:
-      `CAN_ABO`: 1 value with 1 code not in format "ABO", kept as its own level: "FAKE_ABO".
+      `CAN_ABO`: 1 value with 1 code not in format "ABO", kept as its own level: "FAKE_ABO: not in format".
 
 # unknown_codes = 'error' stops on a code outside the format
 

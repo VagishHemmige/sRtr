@@ -25,7 +25,8 @@
 #'   next one; this reading is a convention, not stated by SRTR.
 #' @param unknown_codes What to do with a value that is not a code in the
 #'   variable's format (and is not covered by a catch-all entry, see `other`).
-#'   `"keep"` (the default) keeps it as an extra level named by the raw code;
+#'   `"keep"` (the default) keeps it as an extra level named by the raw code
+#'   followed by `": not in format"`, so it cannot be mistaken for a label;
 #'   `"na"` turns it into `NA`. Both warn
 #'   (class `sRtr_warning_unknown_codes`). `"error"` stops
 #'   (class `sRtr_error_unknown_codes`).
@@ -164,8 +165,18 @@ apply_srtr_factors <- function(
 
 .srtr_other_code <- "**OTHER**"
 
+# Added to a code that is not in its format when it is kept as a level, so
+# it can never be mistaken for one of the format's labels.
+.srtr_unknown_suffix <- ": not in format"
+
 # Convert one column with its format's codes. `fmt_map` has columns Value
 # (code) and Label, in the format's order.
+#
+# Each value is read as a code first, since SAF columns hold codes. A value
+# that is not a code but is already one of the format's labels (or a code
+# kept by an earlier call) stays as it is. Anything else is outside the
+# format: it gets the catch-all label when `other = "sas"` and the format has
+# one, and otherwise follows `unknown_codes`.
 .srtr_factor_column <- function(
   x,
   fmt_map,
@@ -191,32 +202,35 @@ apply_srtr_factors <- function(
   listed <- fmt_map[fmt_map$Value != .srtr_other_code | has_other, ]
   codes <- listed$Value[listed$Value != .srtr_other_code]
   labels <- listed$Label[listed$Value != .srtr_other_code]
+  all_labels <- unique(listed$Label)
 
   values <- as.character(x)
-  outside <- !is.na(values) & !values %in% codes
-  if (has_other) {
-    out <- factor(
-      ifelse(outside, other_label, labels[match(values, codes)]),
-      levels = unique(listed$Label)
-    )
-    return(.srtr_keep_attributes(out, x, fmt))
-  }
-
-  unknown <- sort(unique(values[outside]))
-  if (length(unknown) > 0) {
-    .srtr_report_unknown_codes(unknown, sum(outside), var, fmt, unknown_codes, call)
-  }
-  levels_out <- unique(labels)
   mapped <- labels[match(values, codes)]
-  if (unknown_codes == "keep" && length(unknown) > 0) {
-    mapped[outside] <- values[outside]
-    levels_out <- c(levels_out, setdiff(unknown, levels_out))
+  is_label <- is.na(mapped) & values %in% all_labels
+  is_kept <- is.na(mapped) & !is_label & endsWith(values, .srtr_unknown_suffix)
+  mapped[is_label | is_kept] <- values[is_label | is_kept]
+  outside <- !is.na(values) & is.na(mapped)
+
+  if (has_other) {
+    mapped[outside] <- other_label
+    levels_out <- all_labels
+  } else {
+    unknown <- sort(unique(values[outside]))
+    if (length(unknown) > 0) {
+      .srtr_report_unknown_codes(unknown, sum(outside), var, fmt, unknown_codes, call)
+    }
+    if (unknown_codes == "keep") {
+      mapped[outside] <- paste0(values[outside], .srtr_unknown_suffix)
+    }
+    levels_out <- all_labels
   }
-  .srtr_keep_attributes(factor(mapped, levels = levels_out), x, fmt)
+  extra <- sort(setdiff(unique(mapped[!is.na(mapped)]), levels_out))
+  .srtr_keep_attributes(factor(mapped, levels = c(levels_out, extra)), x, fmt)
 }
 
-# A factor whose levels are this format's labels (and no code that maps to a
-# different label) was converted already. Raw SAF columns are never factors.
+# Positive evidence that a column was converted already: the marker set by
+# this function, or a factor whose levels are all this format's labels or
+# codes kept by an earlier call. Raw SAF columns are never factors.
 .srtr_already_factored <- function(x, fmt_map) {
   if (!is.null(attr(x, "srtr_format"))) {
     return(TRUE)
@@ -225,8 +239,7 @@ apply_srtr_factors <- function(
     return(FALSE)
   }
   lev <- levels(x)
-  code_only <- lev %in% fmt_map$Value & !lev %in% fmt_map$Label
-  !any(code_only)
+  all(lev %in% fmt_map$Label | endsWith(lev, .srtr_unknown_suffix))
 }
 
 # Band numeric values by the format's numeric codes, read as lower bounds.
@@ -266,6 +279,9 @@ apply_srtr_factors <- function(
     )
   }
   what <- if (action == "keep") "kept as {?its/their} own level{?s}" else "set to {.code NA}"
+  if (action == "keep") {
+    shown <- paste0(shown, .srtr_unknown_suffix)
+  }
   srtr_warn(
     c(
       paste0(

@@ -31,7 +31,8 @@ next one; this reading is a convention, not stated by SRTR.}
 
 \item{unknown_codes}{What to do with a value that is not a code in the
 variable's format (and is not covered by a catch-all entry, see \code{other}).
-\code{"keep"} (the default) keeps it as an extra level named by the raw code;
+\code{"keep"} (the default) keeps it as an extra level named by the raw code
+followed by \code{": not in format"}, so it cannot be mistaken for a label;
 \code{"na"} turns it into \code{NA}. Both warn
 (class \code{sRtr_warning_unknown_codes}). \code{"error"} stops
 (class \code{sRtr_error_unknown_codes}).}
