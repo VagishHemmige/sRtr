@@ -7,7 +7,7 @@ variable `SRTR_WD`.
 ## Usage
 
 ``` r
-set_srtr_wd(path, permanent = FALSE)
+set_srtr_wd(path, permanent = FALSE, release = NULL)
 ```
 
 ## Arguments
@@ -20,6 +20,19 @@ set_srtr_wd(path, permanent = FALSE)
 
   Logical; if TRUE, appends the setting to `.Renviron` for persistence
 
+- release:
+
+  Optional. The SAF release the folder holds, as year and month
+  (`"2609"` for September 2026). Files loaded from the folder use the
+  SRTR data dictionary for that release. If `NULL` (the default), the
+  release is read from a folder name like `pubsaf2609` (the folder or
+  its parent); if there is none, files use the bundled
+  [dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
+  and
+  [formats](https://vagishhemmige.github.io/sRtr/reference/formats.md).
+  A `release` that differs from the folder name wins, with a warning.
+  Only the folder is saved by `permanent = TRUE`, not the release.
+
 ## Value
 
 The normalized path, invisibly
@@ -30,5 +43,6 @@ The normalized path, invisibly
 if (FALSE) { # \dontrun{
 set_srtr_wd("C:/Data/SRTR")          # Session only
 set_srtr_wd("C:/Data/SRTR", TRUE)    # Persistent across sessions
+set_srtr_wd("C:/Data/SRTR", release = "2609")  # Files are release 2609
 } # }
 ```

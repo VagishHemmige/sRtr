@@ -12,7 +12,8 @@ apply_srtr_factors(
   verbose = FALSE,
   range_formats = c("keep", "bin"),
   unknown_codes = c("keep", "na", "error"),
-  other = c("sas", "keep")
+  other = c("sas", "keep"),
+  release = NULL
 )
 ```
 
@@ -57,6 +58,19 @@ apply_srtr_factors(
   value not otherwise listed the catch-all label, as a SAS format does.
   `"keep"` ignores the catch-all, so those values are handled by
   `unknown_codes`.
+
+- release:
+
+  Optional. The SAF release `df` comes from, as year and month
+  (`"2609"`), to use that release's dictionary and formats (see
+  [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)).
+  If `NULL` (the default), the release recorded by
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+  is used, or the bundled
+  [dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
+  and
+  [formats](https://vagishhemmige.github.io/sRtr/reference/formats.md)
+  if there is none.
 
 ## Value
 

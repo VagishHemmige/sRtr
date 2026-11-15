@@ -6,7 +6,7 @@ data dictionary.
 ## Usage
 
 ``` r
-apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE)
+apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE, release = NULL)
 ```
 
 ## Arguments
@@ -24,6 +24,17 @@ apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE)
 - verbose:
 
   Logical. If TRUE, print each variable being labeled.
+
+- release:
+
+  Optional. The SAF release `df` comes from, as year and month
+  (`"2609"`), to label it with that release's dictionary (see
+  [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)).
+  If `NULL` (the default), the release recorded by
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+  is used, or the bundled
+  [dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
+  if there is none.
 
 ## Value
 

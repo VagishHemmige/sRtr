@@ -16,6 +16,8 @@ load_srtr_file(
   var_labels = TRUE,
   col_select = NULL,
   column_check = c("warn", "error", "none"),
+  release = NULL,
+  gaps = c("warn", "error", "nearest"),
   ...
 )
 ```
@@ -65,6 +67,30 @@ load_srtr_file(
   file from a different SAF release than the dictionary can differ in
   its columns.
 
+- release:
+
+  Optional. The SAF release the file comes from, as year and month
+  (`"2609"`). If `NULL` (the default), the release given to
+  [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md)
+  is used, or one read from a folder name like `pubsaf2609`; with none,
+  the bundled
+  [dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
+  and
+  [formats](https://vagishhemmige.github.io/sRtr/reference/formats.md)
+  are used. Labels, factor levels and the column check then use that
+  release's dictionary (see
+  [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)).
+  The release and the dictionary used are recorded in the result's
+  `srtr_release` attribute.
+
+- gaps:
+
+  For a release between two stored dictionary snapshots, what to do
+  about an entry whose definition changed between them, so its value at
+  that release is not known: `"warn"` (the default) uses the earlier
+  snapshot's value with a warning, `"nearest"` does so silently, and
+  `"error"` stops.
+
 - ...:
 
   Additional arguments passed to the file reader
@@ -76,7 +102,8 @@ load_srtr_file(
 ## Value
 
 A tibble with the loaded file contents, optionally labeled. The tibble
-includes attributes `source_path` and `file_key`.
+includes attributes `source_path`, `file_key` and `srtr_release` (a
+list: `release`, `dictionary`, `basis`).
 
 ## Details
 

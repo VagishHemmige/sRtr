@@ -56,7 +56,8 @@ using the SRTR data dictionary and associated format tables.</p>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  range_formats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"keep"</span>, <span class="st">"bin"</span><span class="op">)</span>,</span>
 <span>  unknown_codes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"keep"</span>, <span class="st">"na"</span>, <span class="st">"error"</span><span class="op">)</span>,</span>
-<span>  other <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sas"</span>, <span class="st">"keep"</span><span class="op">)</span></span>
+<span>  other <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sas"</span>, <span class="st">"keep"</span><span class="op">)</span>,</span>
+<span>  release <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,6 +104,14 @@ followed by <code>": not in format"</code>, so it cannot be mistaken for a label
 value not otherwise listed the catch-all label, as a SAS format does.
 <code>"keep"</code> ignores the catch-all, so those values are handled by
 <code>unknown_codes</code>.</p></dd>
+
+
+<dt id="arg-release">release<a class="anchor" aria-label="anchor" href="#arg-release"></a></dt>
+<dd><p>Optional. The SAF release <code>df</code> comes from, as year and month
+(<code>"2609"</code>), to use that release's dictionary and formats (see
+<code><a href="srtr_dictionary.html">srtr_dictionary()</a></code>). If <code>NULL</code> (the default), the release recorded by
+<code><a href="load_srtr_file.html">load_srtr_file()</a></code> is used, or the bundled <a href="dictionary.html">dictionary</a> and <a href="formats.html">formats</a> if
+there is none.</p></dd>
 
 </dl></div>
     <div class="section level2">

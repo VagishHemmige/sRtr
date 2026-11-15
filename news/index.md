@@ -79,6 +79,26 @@
   - Calling it again on its own result changes nothing, and attributes
     on each column, such as a variable label, are kept.
 
+- [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md),
+  [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md),
+  [`apply_srtr_factors()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.md)
+  and
+  [`apply_srtr_varlabels()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.md)
+  gain a `release` argument, so a file is labelled with the SRTR data
+  dictionary of the SAF release it comes from. The release can also come
+  from a folder named like `pubsaf2609`; with none, the bundled
+  `dictionary` and `formats` are used as before. A release between two
+  stored dictionary versions uses the entries that are the same in both,
+  and decides the rest from the file’s columns (`gaps` says what to do
+  when an entry changed). The release and dictionary used are recorded
+  in the `srtr_release` attribute
+  ([\#26](https://github.com/VagishHemmige/sRtr/issues/26)).
+
+- [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)
+  returns the dictionary or format code lists for a SAF release, from
+  the new `dictionary_versions` dataset of stored SRTR dictionary
+  versions ([\#26](https://github.com/VagishHemmige/sRtr/issues/26)).
+
 - [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
   now does what its arguments say
   ([\#58](https://github.com/VagishHemmige/sRtr/issues/58)):

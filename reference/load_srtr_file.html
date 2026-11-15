@@ -63,6 +63,8 @@ Variable labels using the dictionary dataset
 <span>  var_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  col_select <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  column_check <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  release <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gaps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"nearest"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -112,6 +114,24 @@ lists. A file from a different SAF release than the dictionary can differ
 in its columns.</p></dd>
 
 
+<dt id="arg-release">release<a class="anchor" aria-label="anchor" href="#arg-release"></a></dt>
+<dd><p>Optional. The SAF release the file comes from, as year and
+month (<code>"2609"</code>). If <code>NULL</code> (the default), the release given to
+<code><a href="set_srtr_wd.html">set_srtr_wd()</a></code> is used, or one read from a folder name like
+<code>pubsaf2609</code>; with none, the bundled <a href="dictionary.html">dictionary</a> and <a href="formats.html">formats</a> are used.
+Labels, factor levels and the column check then use that release's
+dictionary (see <code><a href="srtr_dictionary.html">srtr_dictionary()</a></code>). The release and the dictionary
+used are recorded in the result's <code>srtr_release</code> attribute.</p></dd>
+
+
+<dt id="arg-gaps">gaps<a class="anchor" aria-label="anchor" href="#arg-gaps"></a></dt>
+<dd><p>For a release between two stored dictionary snapshots, what to
+do about an entry whose definition changed between them, so its value
+at that release is not known: <code>"warn"</code> (the default) uses the earlier
+snapshot's value with a warning, <code>"nearest"</code> does so silently, and
+<code>"error"</code> stops.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to the file reader
 (<code><a href="https://haven.tidyverse.org/reference/read_sas.html" class="external-link">haven::read_sas()</a></code> or <code><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">arrow::read_parquet()</a></code>), e.g. <code>encoding</code> for
@@ -121,7 +141,8 @@ in its columns.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with the loaded file contents, optionally labeled.
-The tibble includes attributes <code>source_path</code> and <code>file_key</code>.</p>
+The tibble includes attributes <code>source_path</code>, <code>file_key</code> and
+<code>srtr_release</code> (a list: <code>release</code>, <code>dictionary</code>, <code>basis</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

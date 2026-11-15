@@ -66,3 +66,7 @@ Helpers for composing event dates and simple time-to-event calculations
   : SRTR Format Lookup Table
 - [`dictionary`](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
   : SRTR Variable Dictionary
+- [`dictionary_versions`](https://vagishhemmige.github.io/sRtr/reference/dictionary_versions.md)
+  : Stored versions of the SRTR data dictionary
+- [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)
+  : SRTR data dictionary for a SAF release
