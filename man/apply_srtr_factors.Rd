@@ -63,10 +63,14 @@ bundled \link{dictionary}, or a key that cannot be worked out (no attribute and
 no object name, as when \code{df} is an expression), gives a warning. A known key
 whose columns are not in \code{df} is not a problem: nothing is changed.
 
-A column that is already a factor of this format's labels, for example
-from an earlier call, is left as it is, so calling the function twice
-changes nothing. Attributes on each column, such as a variable label, are
-kept.
+Values are read as codes. A value that is not a code in the format is
+outside it, even if it reads like one of the format's labels.
+
+A column converted by an earlier call is left as it is, so calling the
+function twice changes nothing. Such a column carries an \code{srtr_format}
+attribute; if that was dropped (base R subsetting drops it), a factor whose
+levels begin with the format's labels in order is also taken as converted.
+Attributes on each column, such as a variable label, are kept.
 }
 \examples{
 \dontrun{
