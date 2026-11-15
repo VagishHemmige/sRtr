@@ -1,29 +1,14 @@
 ## code to prepare `formats` dataset goes here
 
-library(rvest)
-library(dplyr)
-library(purrr)
-library(stringr)
+# Built from the stored dictionary versions in data-raw/dictionary-versions/
+# (#26); see dictionary_file_creator.R. Codes keep their order on the page.
 
-# Load saved HTML snapshot of SRTR SAF Data Dictionary
-html <- read_html("data-raw/dataDictionary.html")
+# The release the bundled `formats` describes. It stays 2203 until a newer
+# release has been checked against real SAFs.
+snapshot <- "2203-1"
 
-# Extract format tables (e.g., ABO, CIT, etc.)
-formats <- html %>%
-  html_elements("div[id^='fmt_']") %>%
-  map_df(function(div) {
-    fmt <- div %>% html_attr("id") %>% str_remove("^fmt_")
-    div %>% html_elements("table.dataTable tr") %>% .[-1] %>%
-      map_df(~{
-        cells <- .x %>% html_elements("td")
-        tibble(
-          Format = fmt,
-          Code   = html_text(cells[1], trim = TRUE),
-          Meaning= html_text(cells[2], trim = TRUE)
-        )
-      })
-  })
-
+source("data-raw/dictionary_versions_view.R")
+formats <- formats_view(snapshot)
 
 # Save to package
 usethis::use_data(formats, overwrite = TRUE)
