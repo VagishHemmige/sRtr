@@ -29,9 +29,15 @@ jobs:
           echo "robots.txt status: $(cat out/robots_status.txt)"
       - name: List Wayback Machine captures (distinct contents only)
         run: |
-          curl -sS -L "https://web.archive.org/cdx/search/cdx?url=srtr.org/docs/datadictionary.html&fl=timestamp,statuscode,digest,length&collapse=digest" || true
-          echo "--- any capture under srtr.org/docs/ with dictionary in the name"
-          curl -sS -L "https://web.archive.org/cdx/search/cdx?url=srtr.org/docs/*&fl=original,timestamp,statuscode&collapse=urlkey&filter=original:.*[Dd]ictionary.*" || true
+          for u in srtr.org/docs/datadictionary.html www.srtr.org/docs/datadictionary.html; do
+            echo "--- exact $u"
+            curl -sS -g -L "https://web.archive.org/cdx/search/cdx?url=$u&fl=timestamp,statuscode,digest,length&collapse=digest" || true
+          done
+          echo "--- prefix srtr.org/docs/, dictionary in the name"
+          curl -sS -g -L "https://web.archive.org/cdx/search/cdx?url=srtr.org/docs/&matchType=prefix&fl=original,timestamp,statuscode&collapse=urlkey&filter=original:.*ictionary.*&limit=200" || true
+          echo "--- prefix srtr.org/, dictionary in the name"
+          curl -sS -g -L "https://web.archive.org/cdx/search/cdx?url=srtr.org/&matchType=domain&fl=original,timestamp,statuscode&collapse=urlkey&filter=original:.*ictionary.*&limit=200" || true
+          echo "--- end wayback"
       - name: Print the page as gzip + base64 (artifact downloads are blocked in the workspace)
         run: |
           echo "BEGIN-B64"
