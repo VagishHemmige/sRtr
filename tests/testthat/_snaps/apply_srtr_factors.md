@@ -32,3 +32,20 @@
       i The data frame has no `file_key` attribute and was not passed by name.
       i Supply `file_key`, for example `file_key = "TX_KI"`.
 
+# a code outside the format is kept as its own level, with a warning
+
+    Code
+      out <- apply_srtr_factors(df, file_key = "TX_KI")
+    Condition
+      Warning:
+      `CAN_ABO`: 1 value with 1 code not in format "ABO", kept as its own level: "FAKE_ABO".
+
+# unknown_codes = 'error' stops on a code outside the format
+
+    Code
+      apply_srtr_factors(df, file_key = "TX_KI", unknown_codes = "error")
+    Condition
+      Error in `apply_srtr_factors()`:
+      ! `CAN_ABO` has 1 code not in format "ABO": "FAKE_ABO".
+      i Use `unknown_codes = "keep"` or `"na"` to continue.
+
