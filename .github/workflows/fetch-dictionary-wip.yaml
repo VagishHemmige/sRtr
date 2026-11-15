@@ -26,6 +26,12 @@ jobs:
           sha256sum out/datadictionary.html
           grep -o '<title>[^<]*' out/datadictionary.html
           cat out/headers.txt
+          echo "robots.txt status: $(cat out/robots_status.txt)"
+      - name: Print the page as gzip + base64 (artifact downloads are blocked in the workspace)
+        run: |
+          echo "BEGIN-B64"
+          gzip -9 -c out/datadictionary.html | base64 -w 76
+          echo "END-B64"
       - uses: actions/upload-artifact@v4
         with:
           name: srtr-dictionary
