@@ -122,7 +122,7 @@ Check a claimed fix on every similar path, not just the example shown.</li>
 <div class="section level2">
 <h2 id="srtr-checks">sRtr checks<a class="anchor" aria-label="anchor" href="#srtr-checks"></a></h2>
 <ul><li>
-<strong>Generated data:</strong> a change to <code>data/*.rda</code> or <code>R/sysdata.rda</code> is Must fix unless it is in a commit by github-actions[bot] from the regenerate-data workflow (its message links the run), made after the PR’s last change to <code>data-raw/</code> or the code it uses, and that run passed. A hand-made or assistant-made change to those files is Must fix whatever the description says. Review the change to <code>data-raw/</code> that caused it, not the binary files.</li>
+<strong>Generated data:</strong> a change to <code>data/*.rda</code> or <code>R/sysdata.rda</code> is Must fix unless it is in a commit by github-actions[bot] from the regenerate-data workflow (its message links the run) and regenerate-data passed on the PR’s latest commit that changes <code>data-raw/</code> or the code it uses. That run either commits a change or confirms the generated objects already match, so a later <code>data-raw/</code> edit that changes no object needs no new data commit. A hand-made or assistant-made change to those files is Must fix whatever the description says. Review the change to <code>data-raw/</code> that caused it, not the binary files.</li>
 <li>
 <strong>Sources:</strong> a change to epidemiologic logic needs its source named in the PR description (see <code>AGENTS.md</code>). Flag a missing or unverifiable source.</li>
 <li>

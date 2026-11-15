@@ -150,11 +150,14 @@ A major review also requires:
 
 - **Generated data:** a change to `data/*.rda` or `R/sysdata.rda` is
   Must fix unless it is in a commit by github-actions\[bot\] from the
-  regenerate-data workflow (its message links the run), made after the
-  PR’s last change to `data-raw/` or the code it uses, and that run
-  passed. A hand-made or assistant-made change to those files is Must
-  fix whatever the description says. Review the change to `data-raw/`
-  that caused it, not the binary files.
+  regenerate-data workflow (its message links the run) and
+  regenerate-data passed on the PR’s latest commit that changes
+  `data-raw/` or the code it uses. That run either commits a change or
+  confirms the generated objects already match, so a later `data-raw/`
+  edit that changes no object needs no new data commit. A hand-made or
+  assistant-made change to those files is Must fix whatever the
+  description says. Review the change to `data-raw/` that caused it, not
+  the binary files.
 - **Sources:** a change to epidemiologic logic needs its source named in
   the PR description (see `AGENTS.md`). Flag a missing or unverifiable
   source.
