@@ -420,3 +420,61 @@ test_that("a page with a missing or empty table is not stored", {
   )
   expect_equal(tools::md5sum(list.files(dir, recursive = TRUE, full.names = TRUE)), before)
 })
+
+test_that("two stored snapshots are compared entry by entry", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  dir <- withr::local_tempdir()
+  old <- local_dictionary_page(
+    release = "9901",
+    data = list(TX_KI = fake_vars(
+      c("REC_FAKE_GONE", "REC_FAKE_SAME", "REC_FAKE_TYPE"),
+      Type = c("num", "char", "num")
+    )),
+    formats = list(FAKEFMT = fake_codes(c("1", "2", "3"), c("1: A", "2: B", "3: C")))
+  )
+  new <- local_dictionary_page(
+    release = "9904",
+    data = list(TX_KI = fake_vars(
+      c("REC_FAKE_NEW", "REC_FAKE_SAME", "REC_FAKE_TYPE"),
+      Type = c("num", "char", "char")
+    )),
+    formats = list(FAKEFMT = fake_codes(c("1", "3", "2", "4"), c("1: A", "3: C", "2: B2", "4: D")))
+  )
+  .srtr_versions_add_page(dir, old, source = "fake")
+  .srtr_versions_add_page(dir, new, source = "fake")
+
+  cmp <- .srtr_versions_compare(.srtr_versions_read(dir), "9901-1", "9904-1")
+
+  expect_equal(cmp$dictionary$added$Variable, "REC_FAKE_NEW")
+  expect_equal(cmp$dictionary$removed$Variable, "REC_FAKE_GONE")
+  expect_equal(cmp$dictionary$changed$Variable, "REC_FAKE_TYPE")
+  expect_equal(cmp$dictionary$changed$fields, "Type")
+  expect_equal(cmp$formats$added$Code, "4")
+  expect_equal(cmp$formats$removed$Code, character())
+  expect_equal(cmp$formats$changed$Code, c("2", "3"))
+  expect_equal(cmp$formats$changed$fields, c("Meaning, Position", "Position"))
+})
+
+test_that("the comparison can be written as a short report", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  dir <- withr::local_tempdir()
+  old <- local_dictionary_page(
+    release = "9901",
+    data = list(TX_KI = fake_vars(c("REC_FAKE_A", "REC_FAKE_GONE"))),
+    formats = list(FAKEFMT = fake_codes("1"))
+  )
+  new <- local_dictionary_page(
+    release = "9904",
+    data = list(TX_KI = fake_vars(c("REC_FAKE_A", "REC_FAKE_NEW"))),
+    formats = list(FAKEFMT = fake_codes("1"))
+  )
+  .srtr_versions_add_page(dir, old, source = "fake")
+  .srtr_versions_add_page(dir, new, source = "fake")
+  versions <- .srtr_versions_read(dir)
+
+  expect_snapshot(
+    writeLines(.srtr_versions_report(versions, "9901-1", "9904-1", problems = NULL))
+  )
+})

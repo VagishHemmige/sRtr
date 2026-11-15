@@ -1,0 +1,129 @@
+# Rebuilds the package's generated data from data-raw/ and commits any change
+# to the pull request branch, so nobody has to regenerate data/ locally.
+#
+# Runs on pull requests that change data-raw/ (or the code it uses), and by
+# hand from the Actions tab ("Run workflow", choosing a branch). It runs only
+# for branches in this repository, never for pull requests from forks,
+# because it pushes to the branch.
+#
+# Each generated object is compared with the committed one; a file is only
+# replaced when its content differs, so serialization noise never shows up
+# as a change. The commit is made by github-actions[bot] and names this run.
+# Pushes made with the workflow's own token do not start other workflows, so
+# this workflow starts R-CMD-check, document-check and data-guard on the
+# branch afterwards.
+#
+# Nothing here approves or merges a pull request; the maintainer reviews and
+# merges every one.
+on:
+  pull_request:
+    paths:
+      - "data-raw/**"
+      - "R/dictionary-versions.R"
+      - ".github/workflows/regenerate-data.yaml"
+  workflow_dispatch:
+
+name: regenerate-data.yaml
+
+permissions: read-all
+
+concurrency:
+  group: regenerate-data-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BRANCH: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::pkgload
+            any::usethis
+            any::xml2
+            any::digest
+            any::tidyverse
+            any::readxl
+            any::sf
+
+      - name: Keep the committed data for comparison
+        run: |
+          mkdir -p "$RUNNER_TEMP/committed"
+          cp data/*.rda R/sysdata.rda "$RUNNER_TEMP/committed/"
+
+      - name: Build dictionary and formats
+        run: |
+          Rscript data-raw/dictionary_file_creator.R
+          Rscript data-raw/formats_file_creator.R
+
+      - name: Install the branch with the new dictionary
+        run: R CMD INSTALL --no-docs --no-multiarch .
+
+      - name: Build default missing codes and maps
+        run: |
+          Rscript data-raw/create_default_missing_values.R
+          Rscript data-raw/DATASET.R
+
+      - name: Keep only files whose objects changed
+        shell: Rscript {0}
+        run: |
+          committed <- file.path(Sys.getenv("RUNNER_TEMP"), "committed")
+          files <- c(Sys.glob("data/*.rda"), "R/sysdata.rda")
+          for (path in files) {
+            old_path <- file.path(committed, basename(path))
+            if (!file.exists(old_path)) {
+              cat("New file:", path, "\n")
+              next
+            }
+            old <- new.env()
+            new <- new.env()
+            load(old_path, envir = old)
+            load(path, envir = new)
+            same <- setequal(ls(old), ls(new)) &&
+              all(vapply(ls(new), function(n) identical(old[[n]], new[[n]]), logical(1)))
+            if (same) {
+              file.copy(old_path, path, overwrite = TRUE)
+            } else {
+              cat("Changed:", path, "\n")
+            }
+          }
+
+      - name: Commit and push
+        id: commit
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data R/sysdata.rda
+          if git diff --cached --quiet; then
+            echo "Generated data already match data-raw/."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git diff --cached --stat
+          git commit -m "Regenerate data from data-raw" \
+            -m "Built by the regenerate-data workflow, run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+          git push origin "HEAD:${BRANCH}"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Start checks on the new commit
+        if: steps.commit.outputs.pushed == 'true'
+        run: |
+          for wf in R-CMD-check.yaml document-check.yaml data-guard.yaml; do
+            gh workflow run "$wf" --ref "$BRANCH"
+          done

@@ -27,7 +27,7 @@ sRtr is in development (see "Project stage" in `AGENTS.md`). That changes how ha
 **Never softer:**
 
 - Wrong results, and anything that could give a silent wrong result.
-- Patient-data safety and the `data/` rule.
+- Patient-data safety and the generated-data rule.
 - Epidemiologic definitions and their sources.
 - Real-SAF test skips, and writes outside `tempdir()`.
 
@@ -71,11 +71,12 @@ A major review also requires:
 
 ## sRtr checks
 
-- **`data/`:** a PR that changes `data/` is Must fix unless its description says the maintainer regenerated the files from `data-raw/`.
+- **Generated data:** a change to `data/*.rda` or `R/sysdata.rda` is Must fix unless it is in a commit by github-actions[bot] from the regenerate-data workflow (its message links the run), made after the PR's last change to `data-raw/` or the code it uses, and that run passed. A hand-made or assistant-made change to those files is Must fix whatever the description says. Review the change to `data-raw/` that caused it, not the binary files.
 - **Sources:** a change to epidemiologic logic needs its source named in the PR description (see `AGENTS.md`). Flag a missing or unverifiable source.
 - **Citations in code:** check them against "Citing sources in code" in `AGENTS.md`. Flag a `@references` entry that only used a similar choice rather than defining it, an option documented as a published definition when it is a convention, and an internal comment that cites `reference/` by file path instead of PMC ID or repository name. When a PR changes a choice that an internal comment explains, check that the comment still matches.
 - **"Needs SAF check":** flag a change to file loading, labeling, derived variables, joins or vignettes whose PR description does not say what was checked only on made-up data, with the commands to run.
 - **Conventions:** check the package code, test, documentation and NEWS conventions in `AGENTS.md`.
+- **Monthly dictionary PRs** (head branch `dictionary/<snapshot>`, opened by the dictionary-check workflow): check that only `data-raw/dictionary-versions/` and workflow-built data changed, that the listed changes match the stored runs, and that any problems the parser reported are explained before merging.
 - **Generated files:** check that `man/*.Rd` and `NAMESPACE` match their roxygen comments; do not review them line by line. An assistant may push R files first and the generated files in a later commit. Note missing generated files once, under Consider. This covers documentation only: a missing or wrong export, import or dependency declaration that breaks use or installation keeps the severity of its impact, and a PR still waiting for generated files is not ready to merge.
 
 ## Reporting

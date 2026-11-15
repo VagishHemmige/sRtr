@@ -550,3 +550,84 @@
 
   invisible(list(status = "added", snapshot = id, problems = page$problems))
 }
+
+# Compare two stored snapshots. Returns, for "dictionary" and "formats", a
+# list of three tibbles: added and removed entries (key columns), and changed
+# entries (key columns plus `fields`, the attributes that differ, joined by
+# ", "). A code's position within its format counts as an attribute.
+.srtr_versions_compare <- function(versions, from, to) {
+  out <- list()
+  for (table in c("dictionary", "formats")) {
+    key <- .srtr_versions_keys[[table]]
+    runs <- versions[[table]]
+    order <- versions$releases$snapshot
+    a <- .srtr_runs_at(runs, order, from)
+    b <- .srtr_runs_at(runs, order, to)
+    attrs <- setdiff(names(a), key)
+    both <- dplyr::inner_join(a, b, by = key, suffix = c(".from", ".to"))
+    differs <- vapply(attrs, function(col) {
+      both[[paste0(col, ".from")]] != both[[paste0(col, ".to")]]
+    }, logical(nrow(both)))
+    differs <- matrix(differs, nrow = nrow(both))
+    fields <- apply(differs, 1, function(row) paste(attrs[row], collapse = ", "))
+    changed <- both[rowSums(differs) > 0, key]
+    changed$fields <- fields[rowSums(differs) > 0]
+    out[[table]] <- list(
+      added = dplyr::anti_join(b, a, by = key)[key],
+      removed = dplyr::anti_join(a, b, by = key)[key],
+      changed = changed
+    )
+  }
+  out
+}
+
+# A short Markdown report of what changed between two snapshots, for a pull
+# request description. Lists at most `max_rows` entries per section.
+.srtr_versions_report <- function(versions, from, to, problems, max_rows = 50) {
+  cmp <- .srtr_versions_compare(versions, from, to)
+  title <- versions$releases$title[versions$releases$snapshot == to]
+  lines <- c(
+    paste0("Compared with the stored snapshot `", from, "`, the dictionary page `", to, "` (", title, ") has:"),
+    "",
+    paste0(
+      "- Variables: ", nrow(cmp$dictionary$added), " added, ",
+      nrow(cmp$dictionary$removed), " removed, ",
+      nrow(cmp$dictionary$changed), " changed."
+    ),
+    paste0(
+      "- Format codes: ", nrow(cmp$formats$added), " added, ",
+      nrow(cmp$formats$removed), " removed, ",
+      nrow(cmp$formats$changed), " changed."
+    )
+  )
+  section <- function(heading, rows, key) {
+    if (nrow(rows) == 0) {
+      return(character())
+    }
+    shown <- utils::head(rows, max_rows)
+    items <- paste0("- `", shown[[key[1]]], "` `", shown[[key[2]]], "`")
+    if ("fields" %in% names(shown)) {
+      items <- paste0(items, ": ", shown$fields)
+    }
+    more <- if (nrow(rows) > max_rows) paste0("- and ", nrow(rows) - max_rows, " more") else character()
+    c("", paste0("### ", heading), "", items, more)
+  }
+  dk <- .srtr_versions_keys$dictionary
+  fk <- .srtr_versions_keys$formats
+  lines <- c(
+    lines,
+    section("Variables added", cmp$dictionary$added, dk),
+    section("Variables removed", cmp$dictionary$removed, dk),
+    section("Variables changed", cmp$dictionary$changed, dk),
+    section("Format codes added", cmp$formats$added, fk),
+    section("Format codes removed", cmp$formats$removed, fk),
+    section("Format codes changed", cmp$formats$changed, fk)
+  )
+  if (!is.null(problems) && nrow(problems) > 0) {
+    lines <- c(
+      lines, "", "### Problems found on the page", "",
+      paste0("- ", problems$problem, ": ", problems$table, " `", problems$key, "` (", problems$detail, ")")
+    )
+  }
+  lines
+}

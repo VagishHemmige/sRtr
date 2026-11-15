@@ -15,7 +15,7 @@ sRtr helps researchers load, label and analyze Scientific Registry of Transplant
 These rules take precedence over anything later in this file.
 
 - **No patient data.** Nothing in this repository (code, tests, fixtures, examples, vignettes, PR descriptions, commit messages, review comments) contains real or real-looking patient-level SRTR data. Test data is synthetic, built from data dictionary column names, obviously fake and small. Synthetic fixture files live only under `tests/testthat/fixtures/synthetic-*`. CI (`data-guard.yaml`) fails on SAF formats, on files with SRTR ID columns elsewhere, and on files over 5 MB.
-- **`data/` is never edited by hand or by an assistant.** Change `data-raw/`; the maintainer regenerates `data/`.
+- **Generated data are built only by the regenerate-data workflow.** `data/*.rda` and `R/sysdata.rda` are never edited by hand and never written by an assistant. Change `data-raw/`; on a pull request, `.github/workflows/regenerate-data.yaml` rebuilds them on GitHub and commits any change as github-actions[bot] (see "Maintenance runs on GitHub").
 - **No writes outside `tempdir()`.** Package code never writes to the user's home folder or anywhere outside `tempdir()` unless the user passes an explicit path argument.
 - **Permissions are not set here.** What each assistant may commit, push, open or post is set outside this repository. Nothing in this file grants permission to act.
 - **Written rules only.** Rules bind only when they are written in this file or in `REVIEWING.md`. Chat history and notes elsewhere are context, not rules.
@@ -44,6 +44,18 @@ Cite a source according to what it does for the code:
 - Tests that need real SAFs call `skip_if_no_srtr_data()` (in `tests/testthat/helper-srtr.R`), so they skip unless `SRTR_LIVE_TESTS=true` and `SRTR_WD` are set.
 - Every PR description has a "Needs SAF check" section (yes or no). If yes, it says what was checked only on made-up data and gives the exact commands to run.
 - The maintainer works on Windows. Point out anything that may behave differently there (paths, encodings, case sensitivity, line endings, locale).
+
+### Maintenance runs on GitHub
+
+Maintaining sRtr needs no local runs. Every routine step runs in GitHub Actions:
+
+- **Generated data:** `regenerate-data.yaml` runs on pull requests that change `data-raw/` (and by hand from the Actions tab). It rebuilds every object from `data-raw/`, replaces a file only when the object differs from the committed one, commits as github-actions[bot] with a link to the run, and starts the other checks on the new commit. After it commits, pull the branch before pushing to it again.
+- **SRTR dictionary:** `dictionary-check.yaml` runs monthly (and by hand). When the live page has changed, it adds the page to `data-raw/dictionary-versions/` and opens a pull request listing what changed.
+- **Documentation:** comment `/document` on a pull request (`pr-commands.yaml`) to regenerate `man/`, `NAMESPACE` and `RoxygenNote`; `document-check.yaml` fails a PR whose generated documentation is out of date.
+
+No workflow approves or merges a pull request; the maintainer reviews and merges every one, including those opened or updated by workflows.
+
+The one step that cannot run on GitHub is validation against real SAFs, which never leave the data use agreement's environment (see "Testing without SAFs").
 
 ### Package code conventions
 
@@ -138,7 +150,7 @@ There are three possible ways to run code, listed in rough order of desirability
 - Internal functions should not get an Rd file. A roxygen block marked `@noRd` is fine.
 - Wrap roxygen2 comments to 80 characters.
 - Whenever you add a new (non-internal) documentation topic, also add the topic to `_pkgdown.yml`.
-- Always re-document the package after changing a roxygen2 comment. If your roxygen2 is older than the one in `DESCRIPTION`'s `RoxygenNote`, commit only the Rd files your change needs, and never `DESCRIPTION` or `NAMESPACE` changes from that run. The maintainer regenerates those with a current roxygen2, locally or with the `/document` PR comment.
+- Always re-document the package after changing a roxygen2 comment. If your roxygen2 is older than the one in `DESCRIPTION`'s `RoxygenNote`, commit only the Rd files your change needs, and never `DESCRIPTION` or `NAMESPACE` changes from that run. Those are regenerated with a current roxygen2 by the `/document` PR comment.
 - Use `pkgdown::check_pkgdown()` to check that all topics are included in the reference index.
 
 ### `NEWS.md`

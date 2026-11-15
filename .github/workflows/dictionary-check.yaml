@@ -1,0 +1,121 @@
+# Checks the live SRTR SAF data dictionary once a month and, when the page has
+# changed, opens a pull request that adds it to data-raw/dictionary-versions/
+# (#26). The page is public metadata (variable and format definitions), not
+# patient data.
+#
+# Also runs by hand from the Actions tab ("Run workflow" on master).
+#
+# Steps: download the page; add it with data-raw/dictionary_versions_add.R
+# (a page whose hash is already stored changes nothing; a page that was not
+# read completely fails the run, so the maintainer is told by GitHub's
+# failed-run email); if something was added, push a branch named
+# dictionary/<snapshot>, open a pull request whose description lists what
+# changed, and start regenerate-data and the usual checks on that branch.
+#
+# Opening the pull request needs the repository setting
+# Settings > Actions > General > "Allow GitHub Actions to create and approve
+# pull requests".
+#
+# Nothing here approves or merges a pull request; the maintainer reviews and
+# merges every one.
+on:
+  schedule:
+    - cron: "23 7 4 * *"
+  workflow_dispatch:
+
+name: dictionary-check.yaml
+
+permissions: read-all
+
+concurrency:
+  group: dictionary-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PAGE_URL: https://www.srtr.org/docs/datadictionary.html
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
+
+      - name: Download the dictionary page
+        run: |
+          mkdir -p "$RUNNER_TEMP/page"
+          curl -sS -L --fail --retry 3 \
+            -A "sRtr-dictionary-check (github.com/${GITHUB_REPOSITORY})" \
+            -D "$RUNNER_TEMP/page/headers.txt" \
+            -o "$RUNNER_TEMP/page/datadictionary.html" \
+            "$PAGE_URL"
+          last_modified=$(grep -i '^last-modified:' "$RUNNER_TEMP/page/headers.txt" | tail -1 | cut -d' ' -f2- | tr -d '\r')
+          if [ -n "$last_modified" ]; then
+            last_modified=$(date -u -d "$last_modified" +%Y-%m-%dT%H:%M:%SZ)
+          fi
+          echo "LAST_MODIFIED=$last_modified" >> "$GITHUB_ENV"
+          echo "RETRIEVED=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+          sha256sum "$RUNNER_TEMP/page/datadictionary.html"
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::pkgload
+            any::xml2
+            any::digest
+
+      - name: Add the page to the stored versions
+        run: |
+          Rscript data-raw/dictionary_versions_add.R \
+            "$RUNNER_TEMP/page/datadictionary.html" \
+            "$PAGE_URL" "$LAST_MODIFIED" "$RETRIEVED" \
+            "$RUNNER_TEMP/report.md"
+
+      - name: Open a pull request if the page changed
+        run: |
+          if [ ! -f "$RUNNER_TEMP/report.md.snapshot" ]; then
+            echo "The page is already stored; nothing to do."
+            exit 0
+          fi
+          snapshot=$(cat "$RUNNER_TEMP/report.md.snapshot")
+          branch="dictionary/${snapshot}"
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "Branch $branch already exists; its pull request is still open or was closed by hand."
+            exit 0
+          fi
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add data-raw/dictionary-versions
+          git commit -m "Add SRTR dictionary snapshot ${snapshot}" \
+            -m "Fetched by the dictionary-check workflow, run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+          git push origin "$branch"
+          {
+            echo "The monthly dictionary check found a new copy of ${PAGE_URL} (Last-Modified: ${LAST_MODIFIED:-not given}) and added it as snapshot \`${snapshot}\` in \`data-raw/dictionary-versions/\`."
+            echo
+            cat "$RUNNER_TEMP/report.md"
+            echo
+            echo "## For the maintainer"
+            echo
+            echo "- This pull request changes \`data-raw/\` only. The bundled \`dictionary\` and \`formats\` stay at the release set in \`data-raw/dictionary_file_creator.R\`; moving the default to a new release is a separate change, made after a check against real SAFs."
+            echo "- regenerate-data runs on this branch and commits any change to generated data; CI is started on the branch."
+            echo "- Needs SAF check: no for storing the snapshot."
+            echo
+            echo "Opened by the dictionary-check workflow, run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base master --head "$branch" \
+            --title "Add SRTR dictionary snapshot ${snapshot}" \
+            --body-file "$RUNNER_TEMP/body.md"
+          for wf in regenerate-data.yaml R-CMD-check.yaml document-check.yaml data-guard.yaml; do
+            gh workflow run "$wf" --ref "$branch"
+          done
