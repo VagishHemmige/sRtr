@@ -171,7 +171,7 @@ test_that("load_srtr_file() records the release and dictionary it used", {
   expect_equal(.srtr_current_release()$release, "9904")
 })
 
-test_that("labels and factors use the release given to them", {
+test_that("variable labels use the release given to them", {
   skip_if_not_installed("xml2")
   skip_if_not_installed("digest")
   versions <- local_versions(fake_two_releases())
@@ -199,4 +199,79 @@ test_that("srtr_dictionary() returns a release's table and says where it came fr
   expect_equal(attr(dict, "basis"), "observed")
   expect_equal(fmt$Code, "1")
   expect_equal(attr(srtr_dictionary(), "basis"), "default")
+})
+
+test_that("gaps = 'error' is applied even after a lenient load of the same file", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  versions <- local_versions(fake_two_releases())
+  local_mocked_bindings(.srtr_bundled_versions = function() versions)
+  withr::local_envvar(SRTR_WD = NA)
+  dir <- file.path(withr::local_tempdir(), "pubsaf9902")
+  dir.create(dir)
+  withr::local_options(lifecycle_verbosity = "quiet")
+  haven::write_sas(
+    data.frame(REC_FAKE_CHANGED = "x", REC_FAKE_SAME = "y"),
+    file.path(dir, "TX_KI.sas7bdat")
+  )
+  set_srtr_wd(dir)
+
+  expect_no_warning(load_srtr_file("TX_KI", column_check = "none", gaps = "nearest"))
+  expect_error(
+    load_srtr_file("TX_KI", column_check = "none", gaps = "error"),
+    class = "sRtr_error_dictionary_gap"
+  )
+  expect_no_warning(
+    load_srtr_file("TX_KI", column_check = "none", gaps = "nearest", col_select = "REC_FAKE_CHANGED")
+  )
+})
+
+test_that("a release between snapshots uses the latest revision of the earlier one", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  pages <- fake_two_releases()
+  revised <- pages[[1]]
+  revised$data$TX_KI$Label[1] <- "Revised old label"
+  versions <- local_versions(list(pages[[1]], revised, pages[[2]]))
+
+  out <- .srtr_dictionary_for(
+    "9902", versions, columns = "REC_FAKE_CHANGED", file_key = "TX_KI", gaps = "nearest"
+  )
+
+  expect_equal(
+    out$dictionary$Label[out$dictionary$Variable == "REC_FAKE_CHANGED"],
+    "Revised old label"
+  )
+})
+
+test_that("srtr_dictionary() keeps a variable that changed between versions and reports it", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  versions <- local_versions(fake_two_releases())
+  local_mocked_bindings(.srtr_bundled_versions = function() versions)
+
+  expect_warning(
+    dict <- srtr_dictionary("9902"),
+    class = "sRtr_warning_dictionary_gap"
+  )
+  expect_equal(dict$Variable, c("REC_FAKE_CHANGED", "REC_FAKE_SAME"))
+  expect_equal(dict$Label[1], "Old label")
+  expect_error(srtr_dictionary("9902", gaps = "error"), class = "sRtr_error_dictionary_gap")
+})
+
+test_that("factors use the release given to them", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  pages <- fake_two_releases()
+  pages[[1]]$data$TX_KI$FormatID <- c("FAKEFMT", "", "")
+  pages[[2]]$data$TX_KI$FormatID <- c("", "", "")
+  versions <- local_versions(pages)
+  local_mocked_bindings(.srtr_bundled_versions = function() versions)
+  df <- tibble::tibble(REC_FAKE_CHANGED = "1")
+
+  old <- apply_srtr_factors(df, file_key = "TX_KI", release = "9901")
+  new <- apply_srtr_factors(df, file_key = "TX_KI", release = "9904")
+
+  expect_equal(as.character(old$REC_FAKE_CHANGED), "1: Meaning 1")
+  expect_equal(new$REC_FAKE_CHANGED, "1")
 })

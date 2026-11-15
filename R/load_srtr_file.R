@@ -248,13 +248,21 @@ load_srtr_file <- function(
   # Files the bundled dictionary does not list have nothing to label, so they
   # are skipped quietly, as in the column check.
   in_dictionary <- file_key_input %in% sRtr::dictionary$Dataset
+  # The label functions use the tables resolved above (from the file's full
+  # column list, with this call's `gaps`), not a lookup of their own.
   if (factor_labels && in_dictionary) {
-    df <- apply_srtr_factors(df, file_key = file_key_input, release = release_used)
+    df <- .srtr_with_tables(
+      tables,
+      apply_srtr_factors(df, file_key = file_key_input)
+    )
   }
 
   # ---- Apply variable labels ----
   if (var_labels && in_dictionary) {
-    df <- apply_srtr_varlabels(df, file_key = file_key_input, release = release_used)
+    df <- .srtr_with_tables(
+      tables,
+      apply_srtr_varlabels(df, file_key = file_key_input)
+    )
   }
 
   # ---- Attach metadata ----

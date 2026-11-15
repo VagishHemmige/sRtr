@@ -87,11 +87,12 @@
   invisible(state)
 }
 
-# The dictionary and formats for a release. `columns` and `file_key`: the
-# file's column names and dataset, used to decide entries seen on only one
-# side of a gap; without them, such entries are left out. Returns
-# list(dictionary, formats, snapshot, basis); `snapshot` is the stored
-# snapshot used, or NA when none is used as a whole.
+# The dictionary and formats for a release, with the `gaps` policy and the
+# warning for a release outside the stored snapshots applied on every call.
+# `columns` and `file_key`: the file's column names and dataset, used to
+# decide entries seen on only one side of a gap; without them, such entries
+# are left out. Returns list(dictionary, formats, snapshot, basis); `snapshot`
+# is the stored snapshot used, or NA when none is used as a whole.
 .srtr_dictionary_for <- function(
   release = NULL,
   versions = .srtr_bundled_versions(),
@@ -101,61 +102,26 @@
   call = rlang::caller_env()
 ) {
   gaps <- rlang::arg_match(gaps)
-  if (is.null(release)) {
-    return(list(
-      dictionary = sRtr::dictionary,
-      formats = sRtr::formats,
-      snapshot = NA_character_,
-      basis = "default"
-    ))
-  }
-  release <- .srtr_check_release(release, call = call)
+  resolved <- .srtr_resolve_release(release, versions, columns, file_key, call = call)
+  .srtr_enforce_release(resolved, gaps, call = call)
+}
 
-  snapshots <- .srtr_sort_snapshots(versions$releases$snapshot)
-  snapshot_release <- substr(snapshots, 1, 4)
-  whole <- function(id, basis) {
-    list(
-      dictionary = .srtr_versions_view(versions, id, "dictionary"),
-      formats = .srtr_versions_view(versions, id, "formats"),
-      snapshot = id,
-      basis = basis
-    )
-  }
-
-  if (release %in% snapshot_release) {
-    return(whole(utils::tail(snapshots[snapshot_release == release], 1), "observed"))
-  }
-  r <- as.integer(release)
-  if (r > max(as.integer(snapshot_release)) || r < min(as.integer(snapshot_release))) {
-    id <- if (r > max(as.integer(snapshot_release))) utils::tail(snapshots, 1) else snapshots[1]
+# The checks made on every use of a resolved release.
+.srtr_enforce_release <- function(resolved, gaps, call = rlang::caller_env()) {
+  if (!is.null(resolved$outside)) {
     srtr_warn(
       c(
-        "No stored SRTR dictionary is close to release {.val {release}}; using snapshot {.val {id}}.",
-        "i" = "Stored snapshots: {.val {snapshots}}."
+        "No stored SRTR dictionary is close to release {.val {resolved$release}}; using snapshot {.val {resolved$snapshot}}.",
+        "i" = "Stored snapshots: {.val {resolved$outside}}."
       ),
       class = "release_outside_snapshots",
-      release = release,
-      snapshot = id
+      release = resolved$release,
+      snapshot = resolved$snapshot
     )
-    return(whole(id, "nearest snapshot"))
   }
-
-  dictionary <- .srtr_interpolate(
-    versions$dictionary, snapshots, r, .srtr_versions_keys$dictionary,
-    keep_gap = function(gap) {
-      gap$Variable %in% columns && (is.null(file_key) || gap$Dataset %in% toupper(file_key))
-    }
-  )
-  formats <- .srtr_interpolate(
-    versions$formats, snapshots, r, .srtr_versions_keys$formats,
-    keep_gap = function(gap) rep(TRUE, nrow(gap))
-  )
-  uncertain <- c(
-    paste(dictionary$uncertain[[1]], dictionary$uncertain[[2]]),
-    paste(formats$uncertain[[1]], formats$uncertain[[2]])
-  )
-  uncertain <- uncertain[nzchar(trimws(uncertain))]
+  uncertain <- resolved$uncertain
   if (length(uncertain) > 0 && gaps != "nearest") {
+    release <- resolved$release
     text <- c(
       "{length(uncertain)} dictionary entr{?y/ies} changed between the stored snapshots around release {.val {release}}, so {?its/their} value at that release is not known: {.val {uncertain}}.",
       "i" = "Using the earlier snapshot's value. Set {.code gaps = \"nearest\"} to do so without this warning, or {.code gaps = \"error\"} to stop."
@@ -165,6 +131,63 @@
     }
     srtr_warn(text, class = "dictionary_gap", entries = uncertain)
   }
+  resolved[c("dictionary", "formats", "snapshot", "basis")]
+}
+
+# Work out the tables for a release without warning. Also returns `release`,
+# `uncertain` (entries that changed across a gap) and `outside` (the stored
+# snapshots, when the release is outside them).
+.srtr_resolve_release <- function(release, versions, columns, file_key,
+                                  call = rlang::caller_env()) {
+  if (is.null(release)) {
+    return(list(
+      dictionary = sRtr::dictionary,
+      formats = sRtr::formats,
+      snapshot = NA_character_,
+      basis = "default",
+      release = NA_character_,
+      uncertain = character(),
+      outside = NULL
+    ))
+  }
+  release <- .srtr_check_release(release, call = call)
+
+  snapshots <- .srtr_sort_snapshots(versions$releases$snapshot)
+  snapshot_release <- as.integer(substr(snapshots, 1, 4))
+  r <- as.integer(release)
+  whole <- function(id, basis, outside = NULL) {
+    list(
+      dictionary = .srtr_versions_view(versions, id, "dictionary"),
+      formats = .srtr_versions_view(versions, id, "formats"),
+      snapshot = id,
+      basis = basis,
+      release = release,
+      uncertain = character(),
+      outside = outside
+    )
+  }
+
+  if (r %in% snapshot_release) {
+    return(whole(utils::tail(snapshots[snapshot_release == r], 1), "observed"))
+  }
+  if (r > max(snapshot_release)) {
+    return(whole(utils::tail(snapshots, 1), "nearest snapshot", outside = snapshots))
+  }
+  if (r < min(snapshot_release)) {
+    return(whole(snapshots[1], "nearest snapshot", outside = snapshots))
+  }
+
+  dictionary <- .srtr_interpolate(
+    versions$dictionary, snapshots, r, .srtr_versions_keys$dictionary,
+    keep_one_sided = function(entry) {
+      entry$Variable %in% columns &&
+        (is.null(file_key) || entry$Dataset %in% toupper(file_key))
+    }
+  )
+  formats <- .srtr_interpolate(
+    versions$formats, snapshots, r, .srtr_versions_keys$formats,
+    keep_one_sided = function(entry) TRUE
+  )
 
   dict <- dictionary$table
   dict <- dict[order(dict$Dataset, dict$Variable, method = "radix"), ]
@@ -174,64 +197,74 @@
     dictionary = dict,
     formats = fmt[setdiff(names(fmt), "Position")],
     snapshot = NA_character_,
-    basis = "interpolated"
+    basis = "interpolated",
+    release = release,
+    uncertain = c(dictionary$uncertain, formats$uncertain),
+    outside = NULL
   )
 }
 
-# Entries for release `r` (an integer) between stored snapshots: runs that
-# cover `r`, plus, for keys with no covering run that `keep_gap` keeps, the
-# nearest run (the earlier one when there is one). Keys whose earlier and
-# later runs differ are returned in `uncertain`.
-.srtr_interpolate <- function(runs, snapshots, r, key, keep_gap) {
-  first <- as.integer(substr(runs$first, 1, 4))
-  last <- as.integer(substr(runs$last, 1, 4))
+# Entries for release `r` (an integer) that falls between stored snapshots.
+#   * Runs that cover `r` (their first snapshot's release is before it and
+#     their last one's after it) are kept.
+#   * A key with no covering run but runs on both sides is kept with the
+#     earlier side's value (the latest revision before `r`); if the two sides
+#     differ, it is listed in `uncertain`.
+#   * A key seen on only one side is kept when `keep_one_sided` says so.
+# Snapshots are compared by their place in `snapshots` (release, then
+# revision), so the latest revision of a release is preferred.
+.srtr_interpolate <- function(runs, snapshots, r, key, keep_one_sided) {
+  first_pos <- match(runs$first, snapshots)
+  last_pos <- match(runs$last, snapshots)
+  first_rel <- as.integer(substr(runs$first, 1, 4))
+  last_rel <- as.integer(substr(runs$last, 1, 4))
   attrs <- setdiff(names(runs), c(key, "first", "last"))
-  covering <- runs[first <= r & last >= r, ]
-  rest <- runs[!(first <= r & last >= r), ]
-  rest_first <- first[!(first <= r & last >= r)]
-  rest_last <- last[!(first <= r & last >= r)]
-  covered_keys <- do.call(paste, c(covering[key], sep = "\r"))
-  rest_keys <- do.call(paste, c(rest[key], sep = "\r"))
-  gap <- rest[!rest_keys %in% covered_keys, ]
-  gap_first <- rest_first[!rest_keys %in% covered_keys]
-  gap_last <- rest_last[!rest_keys %in% covered_keys]
-  gap_keys <- rest_keys[!rest_keys %in% covered_keys]
+  keys <- do.call(paste, c(runs[key], sep = "\r"))
 
-  chosen <- list()
-  uncertain <- rep(list(character()), length(key))
-  for (k in unique(gap_keys)) {
-    rows <- which(gap_keys == k)
-    before <- rows[gap_last[rows] < r]
-    after <- rows[gap_first[rows] > r]
-    pick <- if (length(before) > 0) before[which.max(gap_last[before])] else after[which.min(gap_first[after])]
-    if (!keep_gap(gap[pick, ])) {
-      next
-    }
-    if (length(before) > 0 && length(after) > 0) {
-      a <- gap[before[which.max(gap_last[before])], attrs]
-      b <- gap[after[which.min(gap_first[after])], attrs]
-      if (!isTRUE(all.equal(as.list(a), as.list(b), check.attributes = FALSE))) {
-        for (i in seq_along(key)) {
-          uncertain[[i]] <- c(uncertain[[i]], gap[[key[i]]][pick])
-        }
+  covers <- first_rel <= r & last_rel >= r
+  covered <- unique(keys[covers])
+  chosen <- list(runs[covers, ])
+  uncertain <- character()
+
+  gap_rows <- which(!covers & !keys %in% covered)
+  for (k in unique(keys[gap_rows])) {
+    rows <- gap_rows[keys[gap_rows] == k]
+    before <- rows[last_rel[rows] < r]
+    after <- rows[first_rel[rows] > r]
+    earlier <- if (length(before) > 0) before[which.max(last_pos[before])] else NA
+    later <- if (length(after) > 0) after[which.min(first_pos[after])] else NA
+    if (!is.na(earlier) && !is.na(later)) {
+      a <- as.list(runs[earlier, attrs])
+      b <- as.list(runs[later, attrs])
+      if (!isTRUE(all.equal(a, b, check.attributes = FALSE))) {
+        uncertain <- c(uncertain, paste(unlist(runs[earlier, key]), collapse = " "))
+      }
+      chosen[[length(chosen) + 1]] <- runs[earlier, ]
+    } else {
+      pick <- if (!is.na(earlier)) earlier else later
+      if (keep_one_sided(runs[pick, ])) {
+        chosen[[length(chosen) + 1]] <- runs[pick, ]
       }
     }
-    chosen[[length(chosen) + 1]] <- gap[pick, ]
   }
-  table <- dplyr::bind_rows(c(list(covering), chosen))
+  table <- dplyr::bind_rows(chosen)
   list(
     table = table[setdiff(names(table), c("first", "last"))],
     uncertain = uncertain
   )
 }
 
-# The dictionary and formats for a data frame: the `release` argument, else
-# the release recorded on `df` by load_srtr_file(), else the bundled tables.
-# Results are cached for the session by release, dataset and columns, so a
-# warning about a gap is given once, by the first function that meets it.
+# The dictionary and formats for a data frame: the tables load_srtr_file() is
+# using, while it labels the file; else the `release` argument, else the
+# release recorded on `df` by load_srtr_file(), else the bundled tables. The
+# resolution is cached for the session; the `gaps` policy is applied on every
+# call.
 .srtr_tables_for <- function(df, release, file_key, gaps = "warn",
                              columns = names(df),
                              call = rlang::caller_env()) {
+  if (!is.null(.srtr_env$loading_tables)) {
+    return(.srtr_env$loading_tables)
+  }
   if (is.null(release)) {
     recorded <- attr(df, "srtr_release")$release
     if (!is.null(recorded) && !is.na(recorded)) {
@@ -241,26 +274,27 @@
   if (is.null(release)) {
     return(.srtr_dictionary_for(NULL))
   }
+  versions <- .srtr_bundled_versions()
   columns <- sort(toupper(columns))
-  stored <- paste(.srtr_bundled_versions()$releases$sha256, collapse = ",")
+  stored <- paste(versions$releases$sha256, collapse = ",")
   key <- paste(stored, release, toupper(file_key), paste(columns, collapse = ","), sep = "|")
   cache <- .srtr_env$dictionary_cache
   if (is.null(cache)) {
     cache <- list()
   }
-  if (!is.null(cache[[key]])) {
-    return(cache[[key]])
+  if (is.null(cache[[key]])) {
+    cache[[key]] <- .srtr_resolve_release(release, versions, columns, file_key, call = call)
+    .srtr_env$dictionary_cache <- cache
   }
-  out <- .srtr_dictionary_for(
-    release,
-    columns = columns,
-    file_key = file_key,
-    gaps = gaps,
-    call = call
-  )
-  cache[[key]] <- out
-  .srtr_env$dictionary_cache <- cache
-  out
+  .srtr_enforce_release(cache[[key]], gaps, call = call)
+}
+
+# Run `code` with the label and factor functions using `tables` (the
+# loader's), instead of looking the dictionary up themselves.
+.srtr_with_tables <- function(tables, code) {
+  .srtr_env$loading_tables <- tables
+  on.exit(.srtr_env$loading_tables <- NULL, add = TRUE)
+  force(code)
 }
 
 #' SRTR data dictionary for a SAF release
@@ -275,11 +309,12 @@
 #' @param table `"dictionary"` (the default) for variables, or `"formats"` for
 #'   format code lists.
 #' @param gaps For a release between two stored versions, what to do about a
-#'   format code whose meaning changed between them: `"warn"` (the default)
-#'   uses the earlier version with a warning, `"nearest"` does so silently, and
-#'   `"error"` stops. Variables seen in only one of the two versions are left
-#'   out, since whether they existed at that release cannot be known without
-#'   the file; [load_srtr_file()] decides them from the file's columns.
+#'   variable or format code whose definition changed between them: `"warn"`
+#'   (the default) uses the earlier version with a warning, `"nearest"` does
+#'   so silently, and `"error"` stops. Variables seen in only one of the two
+#'   versions are left out, since whether they existed at that release cannot
+#'   be known without the file; [load_srtr_file()] decides them from the file's
+#'   columns. Format codes seen in only one are kept.
 #'
 #' @return A tibble with the columns of [dictionary] or [formats]. Its
 #'   attributes `snapshot` (the stored version used, or `NA`) and `basis`
