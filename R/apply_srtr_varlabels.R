@@ -54,14 +54,8 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
     }
   }
 
-  # ---- Ensure dictionary exists ----
-  if (!exists("dictionary", envir = asNamespace("sRtr"))) {
-    srtr_abort(
-      "The {.pkg sRtr} {.code dictionary} dataset is not available.",
-      class = "internal_data_missing"
-    )
-  }
-  dict <- get("dictionary", envir = asNamespace("sRtr"))
+  # ---- Bundled dictionary ----
+  dict <- sRtr::dictionary
 
   # ---- Check if already labeled ----
   already_labelled <- any(

@@ -22,6 +22,9 @@
 
 * `add_txf_outcomes()` no longer fails unless dplyr is attached (#17).
 
+* `apply_srtr_factors()` and `apply_srtr_varlabels()` no longer fail when
+  called as `sRtr::fun()` without sRtr attached (#90).
+
 * `calculate_geography_coverage_gain()` now does what its arguments say
   (#58):
   * `method = "centroid"` and `method = "areal"` are implemented. Before,
