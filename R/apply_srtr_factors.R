@@ -53,19 +53,9 @@ apply_srtr_factors <- function(df, file_key = NULL, verbose = FALSE) {
     }
   }
 
-  # ---- Check dictionary and formats availability ----
-  if (
-    !exists("dictionary", envir = asNamespace("sRtr")) ||
-      !exists("formats", envir = asNamespace("sRtr"))
-  ) {
-    srtr_abort(
-      "The {.pkg sRtr} {.code dictionary} and {.code formats} datasets are not available.",
-      class = "internal_data_missing"
-    )
-  }
-
-  dictionary <- get("dictionary", envir = asNamespace("sRtr"))
-  formats <- get("formats", envir = asNamespace("sRtr")) |>
+  # ---- Bundled dictionary and formats ----
+  dictionary <- sRtr::dictionary
+  formats <- sRtr::formats |>
     dplyr::rename_with(tolower) |>
     dplyr::rename(
       Format = "format",
