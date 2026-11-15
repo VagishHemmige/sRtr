@@ -11,6 +11,10 @@
 # failed-run email); if something was added, push a branch named
 # dictionary/<snapshot>, open a pull request whose description lists what
 # changed, and start regenerate-data and the usual checks on that branch.
+# A run that stopped after pushing the branch is finished by the next run:
+# if the branch holds the same page and has no pull request, the pull
+# request is opened and the checks started. A branch holding a different
+# page fails the run instead of being overwritten.
 #
 # Opening the pull request needs the repository setting
 # Settings > Actions > General > "Allow GitHub Actions to create and approve
@@ -89,17 +93,7 @@ jobs:
           fi
           snapshot=$(cat "$RUNNER_TEMP/report.md.snapshot")
           branch="dictionary/${snapshot}"
-          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
-            echo "Branch $branch already exists; its pull request is still open or was closed by hand."
-            exit 0
-          fi
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git switch -c "$branch"
-          git add data-raw/dictionary-versions
-          git commit -m "Add SRTR dictionary snapshot ${snapshot}" \
-            -m "Fetched by the dictionary-check workflow, run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
-          git push origin "$branch"
+          sha=$(sha256sum "$RUNNER_TEMP/page/datadictionary.html" | cut -d' ' -f1)
           {
             echo "The monthly dictionary check found a new copy of ${PAGE_URL} (Last-Modified: ${LAST_MODIFIED:-not given}) and added it as snapshot \`${snapshot}\` in \`data-raw/dictionary-versions/\`."
             echo
@@ -113,6 +107,36 @@ jobs:
             echo
             echo "Opened by the dictionary-check workflow, run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
           } > "$RUNNER_TEMP/body.md"
+
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            # An earlier run got this far. Finish its work if the branch holds
+            # this same page; otherwise stop and say so.
+            git fetch --depth=1 origin "$branch"
+            if ! git show "FETCH_HEAD:data-raw/dictionary-versions/releases.csv" | grep -q "$sha"; then
+              echo "::error::Branch $branch holds a different page from the one just downloaded. Merge or close its pull request, delete the branch, and run this workflow again."
+              exit 1
+            fi
+            open_pr=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+            if [ -n "$open_pr" ]; then
+              echo "Pull request #$open_pr for this page is already open."
+              exit 0
+            fi
+            closed_pr=$(gh pr list --head "$branch" --state closed --json number --jq '.[0].number // empty')
+            if [ -n "$closed_pr" ]; then
+              echo "::notice::Pull request #$closed_pr for this page was closed without merging; not reopening it. Delete branch $branch to have it opened again."
+              exit 0
+            fi
+            echo "Branch $branch exists with this page but has no pull request; opening it."
+          else
+            git config --local user.name "github-actions[bot]"
+            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git switch -c "$branch"
+            git add data-raw/dictionary-versions
+            git commit -m "Add SRTR dictionary snapshot ${snapshot}" \
+              -m "Fetched by the dictionary-check workflow, run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+            git push origin "$branch"
+          fi
+
           gh pr create --base master --head "$branch" \
             --title "Add SRTR dictionary snapshot ${snapshot}" \
             --body-file "$RUNNER_TEMP/body.md"
