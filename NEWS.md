@@ -78,3 +78,8 @@
   dates, so the `parse` argument is removed; the conversion could misread
   `MM/DD/YYYY` text and SAS day counts (#23, #59). A missing column now gives a
   clear error instead of a failed `stopifnot()`.
+
+* `srtr_normalize_missing()` keeps the order of factor levels and removes only
+  the replaced missing codes from them, so the reference level no longer
+  depends on which value comes first in the data. Ordered factors and variable
+  labels are kept (#20).

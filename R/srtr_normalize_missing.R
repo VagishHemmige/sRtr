@@ -16,6 +16,10 @@
 #' @param replacement The value to use in place of the missing representations. Defaults to `NA`.
 #'   If a string is provided (e.g., `"Missing"`), both missing codes and `NA` values will be replaced.
 #'   If the column is a factor and `replacement` is not `NA`, the replacement will be added as a new factor level.
+#'   For factors, the replaced codes are removed from the levels; the other
+#'   levels keep their order, so the reference level does not depend on the
+#'   order of the rows. Ordered factors stay ordered, and attributes such as
+#'   variable labels are kept. A new `replacement` level goes last.
 #' @param verbose Logical. If `TRUE`, the function prints a message for each column it modifies,
 #'   including skipped columns that are not found in `df`.
 #'
@@ -80,13 +84,32 @@ srtr_normalize_missing <- function(
       vec[is.na(vec)] <- replacement
     }
 
-    # Assign back
-    df[[col]] <- if (is.factor(df[[col]])) {
-      factor(vec, levels = unique(vec))
-    } else {
-      vec
+    # Drop only the replaced codes from the levels, keeping the format's
+    # order (so reference levels do not depend on row order), the ordered
+    # class, and other attributes such as variable labels.
+    if (is.factor(vec)) {
+      vec <- .srtr_drop_levels(vec, values_to_replace)
     }
+
+    df[[col]] <- vec
   }
 
   df
+}
+
+# Remove `drop` from the levels of factor `x`. Values must already have been
+# replaced, so no observation holds a dropped level. Attributes other than
+# levels (class, variable label, ...) are kept; contrasts are removed because
+# they are tied to the old set of levels.
+.srtr_drop_levels <- function(x, drop) {
+  keep <- setdiff(levels(x), as.character(drop))
+  if (identical(keep, levels(x))) {
+    return(x)
+  }
+  attrs <- attributes(x)
+  attrs$contrasts <- NULL
+  attrs$levels <- keep
+  codes <- match(levels(x)[x], keep)
+  attributes(codes) <- attrs
+  codes
 }
