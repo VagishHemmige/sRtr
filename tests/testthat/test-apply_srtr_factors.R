@@ -400,3 +400,37 @@ test_that("kept names never merge two codes, even next to a label like a kept na
   expect_equal(as.character(out)[1], as.character(out)[3])
   expect_false(as.character(out)[1] %in% c(fmt_map$Label, as.character(out)[2]))
 })
+
+test_that("an unmarked factor sent to the catch-all is reported", {
+  fmt_map <- tibble::tibble(
+    Value = c("FAKE_CODE", "**OTHER**"),
+    Label = c("FAKE_LABEL", "FAKE_OTHER")
+  )
+  once <- .srtr_factor_column("FAKE_CODE", fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR")
+  attr(once, "srtr_format") <- NULL
+
+  expect_warning(
+    kept <- .srtr_factor_column(once, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR"),
+    class = "sRtr_warning_unknown_codes"
+  )
+  expect_equal(as.character(kept), "FAKE_OTHER")
+  expect_warning(
+    dropped <- .srtr_factor_column(once, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR", unknown_codes = "na"),
+    class = "sRtr_warning_unknown_codes"
+  )
+  expect_equal(as.character(dropped), NA_character_)
+  expect_error(
+    .srtr_factor_column(once, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR", unknown_codes = "error"),
+    class = "sRtr_error_unknown_codes"
+  )
+  expect_snapshot(
+    out <- .srtr_factor_column(once, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR")
+  )
+})
+
+test_that("raw codes sent to the catch-all are not reported", {
+  df <- tibble::tibble(CAN_RACE = c(8, 24))
+
+  expect_no_warning(out <- apply_srtr_factors(df, file_key = "TX_KI"))
+  expect_equal(as.character(out$CAN_RACE), c("8: White", "Multi-Racial"))
+})

@@ -49,3 +49,11 @@
       ! `CAN_ABO` has 1 code not in format "ABO": "FAKE_ABO".
       i Use `unknown_codes = "keep"` or `"na"` to continue.
 
+# an unmarked factor sent to the catch-all is reported
+
+    Code
+      out <- .srtr_factor_column(once, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR")
+    Condition
+      Warning:
+      `FAKE_VAR`: 1 value with 1 code not in format "FAKEFMT", given the catch-all label "FAKE_OTHER": "FAKE_LABEL".
+

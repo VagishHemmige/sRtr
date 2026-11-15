@@ -44,7 +44,9 @@
 #' and is left as it is, so calling the function twice changes nothing. dplyr
 #' and tibble operations keep the attribute; base R subsetting such as
 #' `df[rows, ]` on a data frame drops it, and the column is then read as codes
-#' again, with every value reported as outside the format. Convert again from
+#' again, with every value reported as outside the format (also when the
+#' format has a catch-all: for a factor input, values given the catch-all label
+#' are reported too; raw codes get it silently, as in SAS). Convert again from
 #' the raw codes, or keep working with dplyr. Attributes on each column, such
 #' as a variable label, are kept.
 #'
@@ -216,8 +218,23 @@ apply_srtr_factors <- function(
   mapped <- labels[match(values, codes)]
   outside <- !is.na(values) & is.na(mapped)
 
-  if (has_other) {
+  if (has_other && !is.factor(x)) {
+    # Raw codes: as a SAS format does, values not listed get the catch-all
+    # label without comment.
     mapped[outside] <- other_label
+  } else if (has_other) {
+    # A factor without the marker may be an earlier result that lost it, so
+    # its labels would land in the catch-all; report them.
+    unknown <- sort(unique(values[outside]))
+    if (length(unknown) > 0) {
+      .srtr_report_unknown_codes(
+        unknown, sum(outside), var, fmt, unknown_codes, call,
+        kept_as = other_label
+      )
+    }
+    if (unknown_codes == "keep") {
+      mapped[outside] <- other_label
+    }
   } else {
     unknown <- sort(unique(values[outside]))
     if (length(unknown) > 0) {
@@ -280,7 +297,7 @@ apply_srtr_factors <- function(
   new
 }
 
-.srtr_report_unknown_codes <- function(unknown, n, var, fmt, action, call) {
+.srtr_report_unknown_codes <- function(unknown, n, var, fmt, action, call, kept_as = NULL) {
   shown <- utils::head(unknown, 5)
   if (action == "error") {
     srtr_abort(
@@ -295,8 +312,14 @@ apply_srtr_factors <- function(
       call = call
     )
   }
-  what <- if (action == "keep") "kept as {?its/their} own level{?s}" else "set to {.code NA}"
-  if (action == "keep") {
+  what <- if (action != "keep") {
+    "set to {.code NA}"
+  } else if (!is.null(kept_as)) {
+    "given the catch-all label {.val {kept_as}}"
+  } else {
+    "kept as {?its/their} own level{?s}"
+  }
+  if (action == "keep" && is.null(kept_as)) {
     shown <- paste0(shown, .srtr_unknown_suffix)
   }
   srtr_warn(
