@@ -7,13 +7,21 @@
 #   with columns Code and Meaning.
 # `data_file`: optional named character vector giving the "Data File:" text
 #   for a dataset whose section id is cut short.
+# `broken`: dataset or format names whose table loses its `dataTable` class,
+#   as if the page layout changed.
+# `charset`: if given, declared in a <meta> tag.
 fake_dictionary_page <- function(
   release = "9901",
   data = list(),
   formats = list(),
   data_file = character(),
+  broken = character(),
+  charset = NULL,
   title = paste("SRTR", release, "Public SAFs Data Dictionary")
 ) {
+  table_open <- function(name) {
+    if (name %in% broken) '<table class="otherTable">' else '<table class="dataTable">'
+  }
   cell <- function(x) {
     paste0('<td class="dataTableCell dataValue">', x, " </td>")
   }
@@ -50,7 +58,7 @@ fake_dictionary_page <- function(
         '<div id="data_General_', ds, '" style="display: none">',
         '<table><tbody><tr><td class="sectionTitle">Data File: ',
         file_name, "</td></tr></tbody></table>",
-        '<table class="dataTable"><thead><tr><th>Variable</th><th>Type</th>',
+        table_open(ds), "<thead><tr><th>Variable</th><th>Type</th>",
         "<th>Length</th><th>Format</th><th>Label</th></tr></thead><tbody>",
         paste(rows, collapse = ""),
         "</tbody></table></div>"
@@ -73,7 +81,7 @@ fake_dictionary_page <- function(
         '<div id="fmt_', fmt, '" class="fmtDiv">',
         '<table><tbody><tr><td class="sectionTitle">Format: $', fmt,
         "</td></tr></tbody></table>",
-        '<table class="dataTable"><thead><tr><th>Code</th>',
+        table_open(fmt), "<thead><tr><th>Code</th>",
         "<th>Description</th></tr></thead><tbody>",
         paste(rows, collapse = ""),
         "</tbody></table></div>"
@@ -82,7 +90,9 @@ fake_dictionary_page <- function(
     character(1)
   )
   paste0(
-    "<!doctype html><html><head><title>", title, "</title></head><body>",
+    "<!doctype html><html><head>",
+    if (!is.null(charset)) paste0('<meta charset="', charset, '">'),
+    "<title>", title, "</title></head><body>",
     '<div id="grp_General">',
     paste(data_divs, collapse = ""),
     "</div>",
@@ -91,20 +101,22 @@ fake_dictionary_page <- function(
   )
 }
 
+# Written as UTF-8 bytes, whatever the session's locale.
 local_dictionary_page <- function(..., env = parent.frame()) {
   path <- withr::local_tempfile(fileext = ".html", .local_envir = env)
-  writeLines(fake_dictionary_page(...), path)
+  writeBin(charToRaw(enc2utf8(fake_dictionary_page(...))), path)
   path
 }
 
 fake_vars <- function(Variable, Type = "char", Length = "1", FormatID = "",
                       Label = paste("Label of", Variable)) {
+  n <- length(Variable)
   data.frame(
     Variable = Variable,
-    Type = Type,
-    Length = Length,
-    FormatID = FormatID,
-    Label = Label
+    Type = rep_len(Type, n),
+    Length = rep_len(Length, n),
+    FormatID = rep_len(FormatID, n),
+    Label = rep_len(Label, n)
   )
 }
 

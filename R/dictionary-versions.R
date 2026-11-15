@@ -36,7 +36,9 @@
 #     page ("undefined_format"), per table row with the wrong number of
 #     cells ("malformed_row"), and per entry whose text has control
 #     characters, a sign the page was read in the wrong encoding
-#     ("control_character"). Problems are reported, not fixed.
+#     ("control_character"), and per section with no dataTable
+#     ("missing_table") or with no rows ("empty_table"). Problems are
+#     reported, not fixed.
 #
 # Errors when the page has no release in its title or has no dataset or
 # format sections, since it is then not a dictionary page this parser knows.
@@ -120,15 +122,17 @@
   declared
 }
 
-# The cells of every body row of the section's table.dataTable.
+# The cells of every body row of the section's table.dataTable, or NULL when
+# the section has no such table.
 .srtr_table_cells <- function(div) {
-  rows <- xml2::xml_find_all(
+  tables <- xml2::xml_find_all(
     div,
-    paste0(
-      ".//table[contains(concat(' ', normalize-space(@class), ' '), ' dataTable ')]",
-      "//tr[td]"
-    )
+    ".//table[contains(concat(' ', normalize-space(@class), ' '), ' dataTable ')]"
   )
+  if (length(tables) == 0) {
+    return(NULL)
+  }
+  rows <- xml2::xml_find_all(tables, ".//tr[td]")
   lapply(rows, function(row) {
     xml2::xml_text(xml2::xml_find_all(row, "./td"), trim = TRUE)
   })
@@ -176,7 +180,18 @@
   list(rows = rows, malformed = .srtr_malformed(cells, ok, "formats", format))
 }
 
+# Rows that could not be read, and a section whose table is missing or has
+# no rows. A missing table would otherwise look like every entry in the
+# section had been removed.
 .srtr_malformed <- function(cells, ok, table, section) {
+  if (is.null(cells) || length(cells) == 0) {
+    return(tibble::tibble(
+      problem = if (is.null(cells)) "missing_table" else "empty_table",
+      table = table,
+      key = section,
+      detail = if (is.null(cells)) "no dataTable" else "no rows"
+    ))
+  }
   tibble::tibble(
     problem = rep("malformed_row", sum(!ok)),
     table = rep(table, sum(!ok)),
@@ -349,4 +364,189 @@
     runs = .srtr_runs_build(snapshots, key),
     order = .srtr_sort_snapshots(names(snapshots))
   )
+}
+
+# Stored versions on disk ---------------------------------------------------
+#
+# A versions folder (data-raw/dictionary-versions/ in the repository) holds:
+#   * releases.csv: one row per snapshot (snapshot, release, revision, title,
+#     sha256, encoding, last_modified, retrieved, source);
+#   * dictionary_runs.csv: Dataset, Variable, Type, Length, FormatID, Label,
+#     first, last;
+#   * formats_runs.csv: Format, Code, Meaning, Position, first, last. Position
+#     is the code's place within its format on the page, which sets factor
+#     level order, so a code that moves starts a new run;
+#   * pages/<snapshot>.html.gz: each page exactly as received.
+# All text is UTF-8. These functions write only inside the folder they are
+# given.
+
+.srtr_versions_columns <- list(
+  releases = c(
+    "snapshot", "release", "revision", "title", "sha256", "encoding",
+    "last_modified", "retrieved", "source"
+  ),
+  dictionary = c(
+    "Dataset", "Variable", "Type", "Length", "FormatID", "Label", "first", "last"
+  ),
+  formats = c("Format", "Code", "Meaning", "Position", "first", "last")
+)
+
+.srtr_versions_files <- c(
+  releases = "releases.csv",
+  dictionary = "dictionary_runs.csv",
+  formats = "formats_runs.csv"
+)
+
+.srtr_versions_keys <- list(
+  dictionary = c("Dataset", "Variable"),
+  formats = c("Format", "Code")
+)
+
+# Problems that mean the page was not read completely, so storing it would
+# record entries as removed when they were only unreadable.
+.srtr_structure_problems <- c("missing_table", "empty_table", "malformed_row")
+
+# Read a versions folder. A missing folder or file gives empty tables.
+.srtr_versions_read <- function(dir) {
+  out <- lapply(names(.srtr_versions_files), function(name) {
+    path <- file.path(dir, .srtr_versions_files[[name]])
+    cols <- .srtr_versions_columns[[name]]
+    if (!file.exists(path)) {
+      return(tibble::as_tibble(
+        stats::setNames(rep(list(character()), length(cols)), cols)
+      ))
+    }
+    table <- tibble::as_tibble(utils::read.csv(
+      path,
+      colClasses = "character",
+      na.strings = character(),
+      check.names = FALSE,
+      encoding = "UTF-8"
+    ))
+    table[cols]
+  })
+  stats::setNames(out, names(.srtr_versions_files))
+}
+
+# Write the three tables as UTF-8 CSV, every field quoted, whatever the
+# session's locale (write.csv's fileEncoding re-encodes from the locale).
+.srtr_versions_write <- function(versions, dir) {
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  quote <- function(v) {
+    paste0('"', gsub('"', '""', enc2utf8(as.character(v)), fixed = TRUE), '"')
+  }
+  for (name in names(.srtr_versions_files)) {
+    table <- versions[[name]][.srtr_versions_columns[[name]]]
+    lines <- paste(quote(names(table)), collapse = ",")
+    if (nrow(table) > 0) {
+      lines <- c(lines, do.call(paste, c(lapply(table, quote), sep = ",")))
+    }
+    con <- file(file.path(dir, .srtr_versions_files[[name]]), open = "wb")
+    writeLines(enc2utf8(lines), con, useBytes = TRUE)
+    close(con)
+  }
+  invisible(dir)
+}
+
+# The dictionary or formats table of one stored snapshot, in page order:
+# datasets and variables sorted, codes in their position within the format.
+.srtr_versions_view <- function(versions, snapshot,
+                                table = c("dictionary", "formats"),
+                                call = rlang::caller_env()) {
+  table <- rlang::arg_match(table)
+  view <- .srtr_runs_at(
+    versions[[table]],
+    versions$releases$snapshot,
+    snapshot,
+    call = call
+  )
+  if (table == "dictionary") {
+    return(view[order(view$Dataset, view$Variable, method = "radix"), ])
+  }
+  view <- view[order(view$Format, as.integer(view$Position), method = "radix"), ]
+  view[setdiff(names(view), "Position")]
+}
+
+# Add one saved dictionary page to a versions folder.
+#
+# A page whose sha256 is already stored changes nothing. A new page for a
+# stored release becomes that release's next revision. A page that was not
+# read completely (see .srtr_structure_problems) is an error and nothing is
+# written. Other problems are stored as they are and returned.
+#
+# Returns, invisibly, list(status = "added" or "unchanged", snapshot, problems).
+.srtr_versions_add_page <- function(dir, page_path, source,
+                                    last_modified = "",
+                                    retrieved = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+                                    call = rlang::caller_env()) {
+  rlang::check_installed("digest", "to record a dictionary page's hash.")
+  versions <- .srtr_versions_read(dir)
+  sha256 <- digest::digest(file = page_path, algo = "sha256")
+  stored <- versions$releases$snapshot[versions$releases$sha256 == sha256]
+  if (length(stored) > 0) {
+    return(invisible(list(status = "unchanged", snapshot = stored[[1]], problems = NULL)))
+  }
+
+  page <- .srtr_parse_dictionary_page(page_path, call = call)
+  structure <- page$problems[page$problems$problem %in% .srtr_structure_problems, ]
+  if (nrow(structure) > 0) {
+    where <- paste0(structure$table, " ", structure$key, " (", structure$problem, ")")
+    srtr_abort(
+      c(
+        "This dictionary page was not read completely, so it was not stored:",
+        " " = "{.file {page_path}}",
+        "x" = "{.val {where}}",
+        "i" = "Check whether the page layout changed before adding it."
+      ),
+      class = "dictionary_page_incomplete",
+      call = call
+    )
+  }
+
+  revision <- sum(versions$releases$release == page$release) + 1L
+  id <- paste0(page$release, "-", revision)
+  formats <- page$formats |>
+    dplyr::mutate(Position = as.character(dplyr::row_number()), .by = "Format")
+  tables <- list(dictionary = page$dictionary, formats = formats)
+  for (name in names(tables)) {
+    key <- .srtr_versions_keys[[name]]
+    versions[[name]] <- if (nrow(versions$releases) == 0) {
+      .srtr_runs_build(stats::setNames(list(tables[[name]]), id), key)
+    } else {
+      .srtr_runs_add(
+        versions[[name]],
+        versions$releases$snapshot,
+        tables[[name]],
+        id,
+        key,
+        call = call
+      )$runs
+    }
+  }
+
+  releases <- dplyr::bind_rows(
+    versions$releases,
+    tibble::tibble(
+      snapshot = id,
+      release = page$release,
+      revision = as.character(revision),
+      title = page$title,
+      sha256 = sha256,
+      encoding = page$encoding,
+      last_modified = last_modified,
+      retrieved = retrieved,
+      source = source
+    )
+  )
+  versions$releases <- releases[
+    match(.srtr_sort_snapshots(releases$snapshot), releases$snapshot),
+  ]
+
+  dir.create(file.path(dir, "pages"), recursive = TRUE, showWarnings = FALSE)
+  gz <- gzfile(file.path(dir, "pages", paste0(id, ".html.gz")), "wb")
+  writeBin(readBin(page_path, "raw", file.size(page_path)), gz)
+  close(gz)
+  .srtr_versions_write(versions, dir)
+
+  invisible(list(status = "added", snapshot = id, problems = page$problems))
 }

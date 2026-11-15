@@ -18,3 +18,14 @@
         '<page>'
       i Found 0 dataset sections and 1 format section.
 
+# a page with a missing or empty table is not stored
+
+    Code
+      .srtr_versions_add_page(dir, broken, source = "fake")
+    Condition
+      Error:
+      ! This dictionary page was not read completely, so it was not stored:
+        '<page>'
+      x "dictionary TX_LI (missing_table)"
+      i Check whether the page layout changed before adding it.
+
