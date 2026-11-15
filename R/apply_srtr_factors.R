@@ -35,6 +35,11 @@
 #'   value not otherwise listed the catch-all label, as a SAS format does.
 #'   `"keep"` ignores the catch-all, so those values are handled by
 #'   `unknown_codes`.
+#' @param release Optional. The SAF release `df` comes from, as year and month
+#'   (`"2609"`), to use that release's dictionary and formats (see
+#'   [srtr_dictionary()]). If `NULL` (the default), the release recorded by
+#'   [load_srtr_file()] is used, or the bundled [dictionary] and [formats] if
+#'   there is none.
 #'
 #' @details
 #' A column that is already a factor of this format's labels, for example
@@ -69,7 +74,8 @@ apply_srtr_factors <- function(
   verbose = FALSE,
   range_formats = c("keep", "bin"),
   unknown_codes = c("keep", "na", "error"),
-  other = c("sas", "keep")
+  other = c("sas", "keep"),
+  release = NULL
 ) {
   range_formats <- rlang::arg_match(range_formats)
   unknown_codes <- rlang::arg_match(unknown_codes)
@@ -82,9 +88,10 @@ apply_srtr_factors <- function(
   }
   attr(df, "file_key") <- file_key
 
-  # ---- Bundled dictionary and formats ----
-  dictionary <- sRtr::dictionary
-  formats <- sRtr::formats |>
+  # ---- Dictionary and formats for the release ----
+  tables <- .srtr_tables_for(df, release, file_key)
+  dictionary <- tables$dictionary
+  formats <- tables$formats |>
     dplyr::rename_with(tolower) |>
     dplyr::rename(
       Format = "format",

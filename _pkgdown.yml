@@ -55,6 +55,8 @@ reference:
     contents:
       - formats
       - dictionary
+      - dictionary_versions
+      - srtr_dictionary
 
 articles:
   - title: Getting Started
