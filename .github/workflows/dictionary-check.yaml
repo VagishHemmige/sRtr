@@ -11,9 +11,9 @@
 # failed-run email); if something was added, push a branch named
 # dictionary/<snapshot>, open a pull request whose description lists what
 # changed, and start regenerate-data and the usual checks on that branch.
-# A run that stopped after pushing the branch is finished by the next run:
-# if the branch holds the same page and has no pull request, the pull
-# request is opened and the checks started. A branch holding a different
+# A run that stopped part way is finished by the next run: if the branch
+# holds the same page, a missing pull request is opened, and checks that
+# never ran on the pull request's latest commit are started. A branch holding a different
 # page fails the run instead of being overwritten.
 #
 # Opening the pull request needs the repository setting
@@ -118,7 +118,18 @@ jobs:
             fi
             open_pr=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
             if [ -n "$open_pr" ]; then
-              echo "Pull request #$open_pr for this page is already open."
+              # The pull request exists; start any check that never ran on
+              # its latest commit (an earlier run may have stopped before or
+              # during the dispatches).
+              head=$(gh pr view "$open_pr" --json headRefOid --jq .headRefOid)
+              echo "Pull request #$open_pr for this page is already open (head $head)."
+              for wf in regenerate-data.yaml R-CMD-check.yaml document-check.yaml data-guard.yaml; do
+                runs=$(gh run list --workflow "$wf" --commit "$head" --json databaseId --jq length)
+                if [ "$runs" = "0" ]; then
+                  echo "Starting $wf, which has not run on $head."
+                  gh workflow run "$wf" --ref "$branch"
+                fi
+              done
               exit 0
             fi
             closed_pr=$(gh pr list --head "$branch" --state closed --json number --jq '.[0].number // empty')
