@@ -141,3 +141,119 @@ test_that("a known file_key with no matching columns does not warn", {
   expect_no_warning(out <- apply_srtr_factors(df, file_key = "TX_KI"))
   expect_equal(attr(out, "file_key"), "TX_KI")
 })
+
+# ---- Codes outside the format, age bands, catch-all codes, reruns ----
+
+test_that("ages with an age-band format stay numeric by default", {
+  df <- tibble::tibble(REC_AGE_AT_TX = c(0, 1, 6, 40, 72, NA))
+
+  out <- apply_srtr_factors(df, file_key = "TX_KI")
+
+  expect_equal(out$REC_AGE_AT_TX, c(0, 1, 6, 40, 72, NA))
+})
+
+test_that("range_formats = 'bin' bands ages from each band's lower bound", {
+  df <- tibble::tibble(REC_AGE_AT_TX = c(0, 0.5, 1, 5.9, 6, 40, 72, NA))
+
+  out <- apply_srtr_factors(df, file_key = "TX_KI", range_formats = "bin")
+
+  expect_equal(
+    as.character(out$REC_AGE_AT_TX),
+    c("<1", "<1", "1-5", "1-5", "6-11", "35-49", "65+", NA)
+  )
+  expect_equal(
+    levels(out$REC_AGE_AT_TX),
+    c("<1", "1-5", "6-11", "12-17", "18-34", "35-49", "50-64", "65+", "Unknown")
+  )
+})
+
+test_that("a code outside the format is kept as its own level, with a warning", {
+  df <- tibble::tibble(CAN_ABO = c("A", "FAKE_ABO", NA))
+
+  expect_warning(
+    out <- apply_srtr_factors(df, file_key = "TX_KI"),
+    class = "sRtr_warning_unknown_codes"
+  )
+  expect_equal(as.character(out$CAN_ABO), c("A: A", "FAKE_ABO", NA))
+  expect_equal(utils::tail(levels(out$CAN_ABO), 1), "FAKE_ABO")
+  expect_snapshot(out <- apply_srtr_factors(df, file_key = "TX_KI"))
+})
+
+test_that("unknown_codes = 'na' drops codes outside the format, with a warning", {
+  df <- tibble::tibble(CAN_ABO = c("A", "FAKE_ABO"))
+
+  expect_warning(
+    out <- apply_srtr_factors(df, file_key = "TX_KI", unknown_codes = "na"),
+    class = "sRtr_warning_unknown_codes"
+  )
+  expect_equal(as.character(out$CAN_ABO), c("A: A", NA))
+  expect_false("FAKE_ABO" %in% levels(out$CAN_ABO))
+})
+
+test_that("unknown_codes = 'error' stops on a code outside the format", {
+  df <- tibble::tibble(CAN_ABO = c("A", "FAKE_ABO"))
+
+  expect_snapshot(
+    apply_srtr_factors(df, file_key = "TX_KI", unknown_codes = "error"),
+    error = TRUE
+  )
+  expect_error(
+    apply_srtr_factors(df, file_key = "TX_KI", unknown_codes = "error"),
+    class = "sRtr_error_unknown_codes"
+  )
+})
+
+test_that("codes outside a format with a catch-all get the catch-all label", {
+  df <- tibble::tibble(CAN_RACE = c(8, 24, 16))
+
+  expect_no_warning(out <- apply_srtr_factors(df, file_key = "TX_KI"))
+
+  expect_equal(
+    as.character(out$CAN_RACE),
+    c("8: White", "Multi-Racial", "16: Black or African American")
+  )
+})
+
+test_that("other = 'keep' treats codes outside a catch-all format as unknown", {
+  df <- tibble::tibble(CAN_RACE = c(8, 24))
+
+  expect_warning(
+    out <- apply_srtr_factors(df, file_key = "TX_KI", other = "keep"),
+    class = "sRtr_warning_unknown_codes"
+  )
+  expect_equal(as.character(out$CAN_RACE), c("8: White", "24"))
+})
+
+test_that("applying factors twice changes nothing", {
+  df <- tibble::tibble(
+    CAN_ABO = c("A", "B", "FAKE_ABO", NA),
+    CAN_RACE = c(8, 24, 16, NA),
+    REC_AGE_AT_TX = c(30, 40, 50, NA)
+  )
+  once <- suppressWarnings(apply_srtr_factors(df, file_key = "TX_KI"))
+
+  expect_no_warning(twice <- apply_srtr_factors(once, file_key = "TX_KI"))
+
+  expect_identical(twice, once)
+})
+
+test_that("a factor that already holds labels is not converted again", {
+  fmt_map <- tibble::tibble(
+    Value = c("3", "10"),
+    Label = c("1", "3")
+  )
+  labelled <- factor(c("1", "3"), levels = c("1", "3"))
+
+  out <- .srtr_factor_column(labelled, fmt_map, fmt = "FAKEFMT", var = "FAKE_VAR")
+
+  expect_identical(out, labelled)
+})
+
+test_that("variable labels on a column are kept", {
+  df <- tibble::tibble(CAN_ABO = c("A", "B"))
+  attr(df$CAN_ABO, "label") <- "Fake label"
+
+  out <- apply_srtr_factors(df, file_key = "TX_KI")
+
+  expect_equal(attr(out$CAN_ABO, "label"), "Fake label")
+})

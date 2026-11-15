@@ -484,3 +484,16 @@ test_that("a parquet column not in the dictionary gives a message naming it", {
   expect_equal(cnd$extra, "NOT_A_DICTIONARY_COLUMN")
   expect_equal(out$NOT_A_DICTIONARY_COLUMN, c(7, 8))
 })
+
+test_that("loading with factor labels keeps ages numeric", {
+  local_sas_file(fake_tx(), "TX_KI")
+
+  out <- load_srtr_file(
+    "TX_KI",
+    factor_labels = TRUE,
+    var_labels = FALSE,
+    column_check = "none"
+  )
+
+  expect_equal(out$REC_AGE_AT_TX, fake_tx()$REC_AGE_AT_TX)
+})

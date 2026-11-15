@@ -4,7 +4,14 @@
 \alias{apply_srtr_factors}
 \title{Apply SRTR factor labels to a data frame}
 \usage{
-apply_srtr_factors(df, file_key = NULL, verbose = FALSE)
+apply_srtr_factors(
+  df,
+  file_key = NULL,
+  verbose = FALSE,
+  range_formats = c("keep", "bin"),
+  unknown_codes = c("keep", "na", "error"),
+  other = c("sas", "keep")
+)
 }
 \arguments{
 \item{df}{A data frame loaded from an SRTR SAF file.}
@@ -13,6 +20,27 @@ apply_srtr_factors(df, file_key = NULL, verbose = FALSE)
 If not provided, the function will use a \code{file_key} attribute or object name.}
 
 \item{verbose}{Logical. If TRUE, print each variable being labeled.}
+
+\item{range_formats}{What to do with numeric variables whose format is a
+set of bands rather than a code list: the age formats \code{AGE8A}, \code{AGE8C}
+and \code{AGE9A}, used by \code{REC_AGE_AT_TX} and \code{CAN_AGE_AT_LISTING}.
+\code{"keep"} (the default) leaves the numbers as they are. \code{"bin"} turns them
+into a factor of bands. The page lists only each band's lower bound, so
+\code{"bin"} treats each listed code as the start of a band that runs to the
+next one; this reading is a convention, not stated by SRTR.}
+
+\item{unknown_codes}{What to do with a value that is not a code in the
+variable's format (and is not covered by a catch-all entry, see \code{other}).
+\code{"keep"} (the default) keeps it as an extra level named by the raw code;
+\code{"na"} turns it into \code{NA}. Both warn
+(class \code{sRtr_warning_unknown_codes}). \code{"error"} stops
+(class \code{sRtr_error_unknown_codes}).}
+
+\item{other}{What to do with a format's catch-all entry (\verb{**OTHER**}, as in
+\code{RACE}, where it means "Multi-Racial"). \code{"sas"} (the default) gives every
+value not otherwise listed the catch-all label, as a SAS format does.
+\code{"keep"} ignores the catch-all, so those values are handled by
+\code{unknown_codes}.}
 }
 \value{
 A data frame with factor levels applied to coded variables, and a
@@ -33,6 +61,11 @@ The key is matched in upper case. A key that is not a dataset in the
 bundled \link{dictionary}, or a key that cannot be worked out (no attribute and
 no object name, as when \code{df} is an expression), gives a warning. A known key
 whose columns are not in \code{df} is not a problem: nothing is changed.
+
+A column that is already a factor of this format's labels, for example
+from an earlier call, is left as it is, so calling the function twice
+changes nothing. Attributes on each column, such as a variable label, are
+kept.
 }
 \examples{
 \dontrun{
