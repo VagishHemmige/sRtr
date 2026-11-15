@@ -18,11 +18,12 @@ srtr_dictionary(
 format code lists.}
 
 \item{gaps}{For a release between two stored versions, what to do about a
-format code whose meaning changed between them: \code{"warn"} (the default)
-uses the earlier version with a warning, \code{"nearest"} does so silently, and
-\code{"error"} stops. Variables seen in only one of the two versions are left
-out, since whether they existed at that release cannot be known without
-the file; \code{\link[=load_srtr_file]{load_srtr_file()}} decides them from the file's columns.}
+variable or format code whose definition changed between them: \code{"warn"}
+(the default) uses the earlier version with a warning, \code{"nearest"} does
+so silently, and \code{"error"} stops. Variables seen in only one of the two
+versions are left out, since whether they existed at that release cannot
+be known without the file; \code{\link[=load_srtr_file]{load_srtr_file()}} decides them from the file's
+columns. Format codes seen in only one are kept.}
 }
 \value{
 A tibble with the columns of \link{dictionary} or \link{formats}. Its
