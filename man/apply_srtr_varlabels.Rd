@@ -16,7 +16,10 @@ should be unnecessary.}
 \item{verbose}{Logical. If TRUE, print each variable being labeled.}
 }
 \value{
-A data frame with variable labels applied.
+A data frame with variable labels applied, and a \code{file_key}
+attribute holding the dataset key in upper case, so the key carries
+through a chain of calls. If no usable key is found, \code{df} is returned
+unchanged with a warning.
 }
 \description{
 Adds human-readable variable labels to an SRTR dataset using the SRTR data
@@ -26,6 +29,11 @@ dictionary.
 If \code{file_key} is not explicitly provided, the function will first check
 for a \code{file_key} attribute on the data frame. If not found, it will attempt
 to infer it from the object name.
+
+The key is matched in upper case. A key that is not a dataset in the
+bundled \link{dictionary}, or a key that cannot be worked out (no attribute and
+no object name, as when \code{df} is an expression), gives a warning. A known key
+whose columns are not in \code{df} is not a problem: nothing is changed.
 }
 \examples{
 \dontrun{
