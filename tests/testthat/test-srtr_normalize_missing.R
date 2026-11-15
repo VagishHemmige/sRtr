@@ -82,3 +82,16 @@ test_that("ordered factors and variable labels are kept", {
   expect_equal(levels(out$FAKE_F), c("Low", "High"))
   expect_equal(attr(out$FAKE_F, "label"), "Fake variable label")
 })
+
+test_that("a replacement that is also a missing code is kept", {
+  df <- tibble::tibble(
+    FAKE_F = factor(c("A", "U", NA), levels = c("A", "U", "Unknown"))
+  )
+  out <- srtr_normalize_missing(
+    df,
+    missing_vals = list(FAKE_F = c("U", "Unknown")),
+    replacement = "Unknown"
+  )
+  expect_equal(levels(out$FAKE_F), c("A", "Unknown"))
+  expect_equal(as.character(out$FAKE_F), c("A", "Unknown", "Unknown"))
+})

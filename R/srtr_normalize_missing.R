@@ -87,8 +87,15 @@ srtr_normalize_missing <- function(
     # Drop only the replaced codes from the levels, keeping the format's
     # order (so reference levels do not depend on row order), the ordered
     # class, and other attributes such as variable labels.
+    # A non-NA replacement may itself be listed as a missing code; its level
+    # now holds the replaced values, so it must not be dropped.
     if (is.factor(vec)) {
-      vec <- .srtr_drop_levels(vec, values_to_replace)
+      drop <- if (is.na(replacement)) {
+        values_to_replace
+      } else {
+        setdiff(as.character(values_to_replace), replacement)
+      }
+      vec <- .srtr_drop_levels(vec, drop)
     }
 
     df[[col]] <- vec
