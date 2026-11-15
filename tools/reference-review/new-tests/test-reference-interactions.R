@@ -1,5 +1,5 @@
 # Review-only proposals. Every identifier and date below is invented.
-# Run only through the isolated synthetic runner described in design.md.
+# Run only through the isolated synthetic runner described in ../README.md.
 
 testthat::test_that("report dates resist form order and duplicated reporting", {
   cohort <- tibble::tibble(TRR_ID = "SYNTHETIC-TX-A")
