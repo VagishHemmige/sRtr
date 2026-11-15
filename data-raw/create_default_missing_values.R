@@ -144,9 +144,11 @@ cols <- c("DON_GENDER", "DON_PRERECOV_DIURETICS", "DON_DDAVP",
           "DON_INTRACRANIAL_CANCER_TYPE", "DON_EXTRACRANIAL_CANCER_TYPE", "DON_SKIN_CANCER_TYPE", "DON_PREV_GASTRO_DISEASE"
 )
 
-# Assign to the internal default_missing_vals list
+# Assign to the internal default_missing_vals list. Add to, rather than
+# replace, codes set earlier: some of these variables use the SRLSTT format,
+# and replacing would lose its labelled codes (e.g. "U: Unknown").
 for (var in cols) {
-  default_missing_vars[[var]] <- c("", "ND", "U", "u")
+  default_missing_vars[[var]] <- union(default_missing_vars[[var]], c("", "ND", "U", "u"))
 }
 
 #Repeat for variables whose missingness indicator is numeric 998
@@ -180,11 +182,11 @@ for (var in cols) {
 }
 
 #Repeat for variables whose missingness indicator is 998: UNKNOWN
-cols<-c("CAN_DIAB", "CAN_EDUCATION", "CAN_PEPTIC_ULCER", "DON_CAD_DON_COD", "DON_CITIZENSHIP",
+cols<-c("CAN_DIAB", "CAN_EDUCATION", "DON_CAD_DON_COD",
         "DON_DEATH_CIRCUM", "DON_DEATH_MECH", "DON_HAPLO_TY_MATCH", "DON_HIST_CANCER", "DON_HIST_DIAB",
         "DON_HIST_INSULIN_DEPND", "DON_HIST_HYPERTEN", "PERS_OPTN_COD", "REC_COD", "REC_COD2", "REC_COD3",
-        "REC_EMPL_STAT_PRE04", "REC_FUNCTN_STAT", "REC_PHYSC_CAPACITY", "CAN_PHYSC_CAPACITY", "REC_PREV_PREG",
-        "REC_WORK_NO_STAT", "TFL_COD", "TFL_EMPL_STAT_PRE04", "TFL_FUNCTN_STAT", "CAN_EMPL_STAT", "TFL_DIAL_TY",
+        "REC_EMPL_STAT_PRE04", "REC_PREV_PREG",
+        "TFL_COD", "TFL_EMPL_STAT_PRE04", "CAN_EMPL_STAT", "TFL_DIAL_TY",
         "DON_FLUSH_INIT", "DON_FLUSH_FINAL", "DON_FLUSH_BACK_TABLE", "DON_STORAGE", "DON_MED_EXAMINER",
         "DON_TXFUS_TERMINAL_HOSP_NUM")
 for (var in cols) {
@@ -195,7 +197,12 @@ for (var in cols) {
 cols<-c("REC_KI_DON_TY", "TFL_PHYSC_CAPACITY", "TFL_ACUTE_REJ_EPISODE", "TFL_BRONC_OBLITERANS",
         "TFL_KI_DON_TY", "TFL_WORK_NO_STAT", "TFL_DISEASE_RECUR", "CAN_FUNCTN_STAT", "CAN_WORK_NO_STAT",
         "DFL_FUNCTN_STAT", "DFL_PHYSC_CAPACITY", "DFL_WORK_NO_STAT", "DFL_URINE_PROTEIN", "DON_MARITAL_STAT",
-        "DON_FUNCTN_STAT", "DON_PHYSC_CAPACITY", "DON_WORK_NO_STAT")
+        "DON_FUNCTN_STAT", "DON_PHYSC_CAPACITY", "DON_WORK_NO_STAT",
+        # Formats PEPULCER, CITIZEN, FUNCSTAT, PHYSCP, NOTWRK and BPSCNFMF label
+        # code 998 "Unknown" (data dictionary formats)
+        "CAN_PEPTIC_ULCER", "DON_CITIZENSHIP", "REC_FUNCTN_STAT", "TFL_FUNCTN_STAT",
+        "REC_PHYSC_CAPACITY", "CAN_PHYSC_CAPACITY", "REC_WORK_NO_STAT",
+        "TFL_ACUTE_REJ_BIOPSY_CONFIRMED")
 for (var in cols) {
   default_missing_vars[[var]] <- c("998: Unknown")
 }
@@ -214,7 +221,7 @@ for (var in cols) {
 
 #Repeat for variables whose missingness indicator is "998: Status Unknown"
 cols<-c("REC_ACADEMIC_LEVEL", "REC_ACADEMIC_PROGRESS", "CAN_ACADEMIC_PROGRESS", "CAN_ANGINA_CAD",
-        "TFL_ACADEMIC_LEVEL", "TFL_ACADEMIC_PROGRESS", "TFL_ACUTE_REJ_BIOPSY_CONFIRMED", "CAN_ACADEMIC_LEVEL")
+        "TFL_ACADEMIC_LEVEL", "TFL_ACADEMIC_PROGRESS", "CAN_ACADEMIC_LEVEL")
 for (var in cols) {
   default_missing_vars[[var]] <- c("998: Status Unknown")
 }
@@ -250,10 +257,16 @@ for (var in cols) {
 #Repeat for HLA variables
 cols<-c("DON_A1", "DON_A2", "DON_B1", "DON_B2", "DON_DR1", "DON_DR2", "REC_A1", "REC_A2", "REC_B1",
         "REC_B2", "REC_DR1", "REC_DR2", "CAN_WLKIPA_A1", "CAN_WLKIPA_A2", "CAN_WLKIPA_B1", "CAN_WLKIPA_B2",
-        "CAN_WLKIPA_DR1", "CAN_WLKIPA_DR2", "DON_BW4", "DON_BW6", "DON_DR51", "DON_DR52", "DON_DR53", "DON_C1",
+        "CAN_WLKIPA_DR1", "CAN_WLKIPA_DR2", "DON_C1",
         "DON_C2", "DON_DQ1", "DON_DQ2", "DON_DP1", "DON_DP2")
 for (var in cols) {
   default_missing_vars[[var]] <- c("97: Unknown","99: Not Tested")
+}
+
+#Repeat for HLA variables in format WKGRPHLA, where Unknown is code 998
+cols<-c("DON_BW4", "DON_BW6", "DON_DR51", "DON_DR52", "DON_DR53")
+for (var in cols) {
+  default_missing_vars[[var]] <- c("998: Unknown","99: Not Tested")
 }
 
 #Repeat for f/u status
