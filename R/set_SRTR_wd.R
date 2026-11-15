@@ -5,6 +5,13 @@
 #'
 #' @param path Path to the SRTR data folder
 #' @param permanent Logical; if TRUE, appends the setting to `.Renviron` for persistence
+#' @param release Optional. The SAF release the folder holds, as year and
+#'   month (`"2609"` for September 2026). Files loaded from the folder use the
+#'   SRTR data dictionary for that release. If `NULL` (the default), the
+#'   release is read from a folder name like `pubsaf2609` (the folder or its
+#'   parent); if there is none, files use the bundled [dictionary] and
+#'   [formats]. A `release` that differs from the folder name wins, with a
+#'   warning. Only the folder is saved by `permanent = TRUE`, not the release.
 #' @return The normalized path, invisibly
 #' @export
 #'
@@ -12,18 +19,23 @@
 #' \dontrun{
 #' set_srtr_wd("C:/Data/SRTR")          # Session only
 #' set_srtr_wd("C:/Data/SRTR", TRUE)    # Persistent across sessions
+#' set_srtr_wd("C:/Data/SRTR", release = "2609")  # Files are release 2609
 #' }
-set_srtr_wd <- function(path, permanent = FALSE) {
+set_srtr_wd <- function(path, permanent = FALSE, release = NULL) {
   if (!dir.exists(path)) {
     srtr_abort(
       c("The folder does not exist:", " " = "{.path {path}}"),
       class = "folder_missing"
     )
   }
+  if (!is.null(release)) {
+    .srtr_check_release(release)
+  }
   normalized <- normalizePath(path, winslash = "/", mustWork = TRUE)
 
   # Set for current session
   Sys.setenv(SRTR_WD = normalized)
+  .srtr_set_release_state(normalized, release)
 
   if (permanent) {
     renv_path <- path.expand("~/.Renviron")

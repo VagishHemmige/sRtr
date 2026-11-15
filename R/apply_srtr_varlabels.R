@@ -17,6 +17,10 @@
 #' If the file was loaded via the `load_srtr_file` function, this argument
 #' should be unnecessary.
 #' @param verbose Logical. If TRUE, print each variable being labeled.
+#' @param release Optional. The SAF release `df` comes from, as year and month
+#'   (`"2609"`), to label it with that release's dictionary (see
+#'   [srtr_dictionary()]). If `NULL` (the default), the release recorded by
+#'   [load_srtr_file()] is used, or the bundled [dictionary] if there is none.
 #'
 #' @return A data frame with variable labels applied, and a `file_key`
 #'   attribute holding the dataset key in upper case, so the key carries
@@ -39,7 +43,8 @@
 #' TX_KI <- apply_srtr_varlabels(TX_KI)
 #' }
 
-apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
+apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE,
+                                 release = NULL) {
   # ---- Work out the dataset ----
   file_key <- .srtr_resolve_file_key(df, file_key, substitute(df), verbose)
   if (is.null(file_key)) {
@@ -47,8 +52,8 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE) {
   }
   attr(df, "file_key") <- file_key
 
-  # ---- Bundled dictionary ----
-  dict <- sRtr::dictionary
+  # ---- Dictionary for the release ----
+  dict <- .srtr_tables_for(df, release, file_key)$dictionary
 
   # ---- Check if already labeled ----
   already_labelled <- any(

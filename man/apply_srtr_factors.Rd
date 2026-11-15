@@ -10,7 +10,8 @@ apply_srtr_factors(
   verbose = FALSE,
   range_formats = c("keep", "bin"),
   unknown_codes = c("keep", "na", "error"),
-  other = c("sas", "keep")
+  other = c("sas", "keep"),
+  release = NULL
 )
 }
 \arguments{
@@ -42,6 +43,12 @@ followed by \code{": not in format"}, so it cannot be mistaken for a label;
 value not otherwise listed the catch-all label, as a SAS format does.
 \code{"keep"} ignores the catch-all, so those values are handled by
 \code{unknown_codes}.}
+
+\item{release}{Optional. The SAF release \code{df} comes from, as year and month
+(\code{"2609"}), to use that release's dictionary and formats (see
+\code{\link[=srtr_dictionary]{srtr_dictionary()}}). If \code{NULL} (the default), the release recorded by
+\code{\link[=load_srtr_file]{load_srtr_file()}} is used, or the bundled \link{dictionary} and \link{formats} if
+there is none.}
 }
 \value{
 A data frame with factor levels applied to coded variables, and a

@@ -37,12 +37,25 @@
 #'   column is read (`col_select = NULL`) and only for file keys the dictionary
 #'   lists. A file from a different SAF release than the dictionary can differ
 #'   in its columns.
+#' @param release Optional. The SAF release the file comes from, as year and
+#'   month (`"2609"`). If `NULL` (the default), the release given to
+#'   [set_srtr_wd()] is used, or one read from a folder name like
+#'   `pubsaf2609`; with none, the bundled [dictionary] and [formats] are used.
+#'   Labels, factor levels and the column check then use that release's
+#'   dictionary (see [srtr_dictionary()]). The release and the dictionary
+#'   used are recorded in the result's `srtr_release` attribute.
+#' @param gaps For a release between two stored dictionary snapshots, what to
+#'   do about an entry whose definition changed between them, so its value
+#'   at that release is not known: `"warn"` (the default) uses the earlier
+#'   snapshot's value with a warning, `"nearest"` does so silently, and
+#'   `"error"` stops.
 #' @param ... Additional arguments passed to the file reader
 #'   ([haven::read_sas()] or [arrow::read_parquet()]), e.g. `encoding` for
 #'   `read_sas()`.
 #'
 #' @return A tibble with the loaded file contents, optionally labeled.
-#'   The tibble includes attributes `source_path` and `file_key`.
+#'   The tibble includes attributes `source_path`, `file_key` and
+#'   `srtr_release` (a list: `release`, `dictionary`, `basis`).
 #' @export
 #'
 #' @examples
@@ -57,9 +70,17 @@ load_srtr_file <- function(
   var_labels = TRUE,
   col_select = NULL,
   column_check = c("warn", "error", "none"),
+  release = NULL,
+  gaps = c("warn", "error", "nearest"),
   ...
 ) {
   column_check <- match.arg(column_check)
+  gaps <- rlang::arg_match(gaps)
+  release_info <- if (!is.null(release)) {
+    list(release = .srtr_check_release(release), basis = "supplied")
+  } else {
+    .srtr_current_release()
+  }
 
   # ---- Lookup metadata ----
   # Scans SRTR_WD on first use; rescans once if the file is not in the list
@@ -170,11 +191,29 @@ load_srtr_file <- function(
   # ---- Standardize column names ----
   names(df) <- toupper(names(df))
 
+  # ---- Dictionary for the file's release ----
+  # The file's full column list decides entries seen on only one side of a
+  # gap between stored snapshots, even when only some columns are read.
+  release_used <- if (is.na(release_info$release)) NULL else release_info$release
+  all_columns <- if (rlang::quo_is_null(col_select)) names(df) else upper_names
+  tables <- .srtr_tables_for(
+    df,
+    release_used,
+    file_key_input,
+    gaps = gaps,
+    columns = all_columns
+  )
+
   # ---- Compare columns with the data dictionary ----
   # Only when every column is read: with col_select, a selected column the
   # file lacks is already an error from tidyselect.
   if (rlang::quo_is_null(col_select)) {
-    .srtr_check_dictionary_columns(names(df), file_key_input, column_check)
+    .srtr_check_dictionary_columns(
+      names(df),
+      file_key_input,
+      column_check,
+      dictionary = tables$dictionary
+    )
   }
 
   # ---- Apply TRR_ID filter -----
@@ -209,18 +248,37 @@ load_srtr_file <- function(
   # Files the bundled dictionary does not list have nothing to label, so they
   # are skipped quietly, as in the column check.
   in_dictionary <- file_key_input %in% sRtr::dictionary$Dataset
+  # The label functions use the tables resolved above (from the file's full
+  # column list, with this call's `gaps`), not a lookup of their own.
   if (factor_labels && in_dictionary) {
-    df <- apply_srtr_factors(df, file_key = file_key_input)
+    df <- .srtr_with_tables(
+      tables,
+      apply_srtr_factors(df, file_key = file_key_input)
+    )
   }
 
   # ---- Apply variable labels ----
   if (var_labels && in_dictionary) {
-    df <- apply_srtr_varlabels(df, file_key = file_key_input)
+    df <- .srtr_with_tables(
+      tables,
+      apply_srtr_varlabels(df, file_key = file_key_input)
+    )
   }
 
   # ---- Attach metadata ----
   attr(df, "source_path") <- full_path
   attr(df, "file_key") <- file_key_input
+  attr(df, "srtr_release") <- list(
+    release = release_info$release,
+    dictionary = if (!is.na(tables$snapshot)) {
+      tables$snapshot
+    } else if (tables$basis == "default") {
+      "bundled"
+    } else {
+      "interpolated"
+    },
+    basis = release_info$basis
+  )
 
   return(df)
 }
@@ -245,12 +303,12 @@ load_srtr_file <- function(
   file_names,
   file_key,
   column_check,
+  dictionary = sRtr::dictionary,
   call = rlang::caller_env()
 ) {
   if (column_check == "none") {
     return(invisible())
   }
-  dictionary <- sRtr::dictionary
   expected <- dictionary$Variable[dictionary$Dataset == file_key]
   if (length(expected) == 0) {
     return(invisible())

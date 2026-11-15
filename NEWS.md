@@ -56,6 +56,20 @@
   - Calling it again on its own result changes nothing, and attributes on
     each column, such as a variable label, are kept.
 
+* `load_srtr_file()`, `set_srtr_wd()`, `apply_srtr_factors()` and
+  `apply_srtr_varlabels()` gain a `release` argument, so a file is labelled
+  with the SRTR data dictionary of the SAF release it comes from. The release
+  can also come from a folder named like `pubsaf2609`; with none, the bundled
+  `dictionary` and `formats` are used as before. A release between two stored
+  dictionary versions uses the entries that are the same in both, and decides
+  the rest from the file's columns (`gaps` says what to do when an entry
+  changed). The release and dictionary used are recorded in the
+  `srtr_release` attribute (#26).
+
+* `srtr_dictionary()` returns the dictionary or format code lists for a SAF
+  release, from the new `dictionary_versions` dataset of stored SRTR
+  dictionary versions (#26).
+
 * `calculate_geography_coverage_gain()` now does what its arguments say
   (#58):
   * `method = "centroid"` and `method = "areal"` are implemented. Before,

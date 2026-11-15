@@ -4,12 +4,20 @@
 \alias{set_srtr_wd}
 \title{Set the SRTR working directory}
 \usage{
-set_srtr_wd(path, permanent = FALSE)
+set_srtr_wd(path, permanent = FALSE, release = NULL)
 }
 \arguments{
 \item{path}{Path to the SRTR data folder}
 
 \item{permanent}{Logical; if TRUE, appends the setting to \code{.Renviron} for persistence}
+
+\item{release}{Optional. The SAF release the folder holds, as year and
+month (\code{"2609"} for September 2026). Files loaded from the folder use the
+SRTR data dictionary for that release. If \code{NULL} (the default), the
+release is read from a folder name like \code{pubsaf2609} (the folder or its
+parent); if there is none, files use the bundled \link{dictionary} and
+\link{formats}. A \code{release} that differs from the folder name wins, with a
+warning. Only the folder is saved by \code{permanent = TRUE}, not the release.}
 }
 \value{
 The normalized path, invisibly
@@ -22,5 +30,6 @@ in the user's \code{.Renviron} file as the environment variable \code{SRTR_WD}.
 \dontrun{
 set_srtr_wd("C:/Data/SRTR")          # Session only
 set_srtr_wd("C:/Data/SRTR", TRUE)    # Persistent across sessions
+set_srtr_wd("C:/Data/SRTR", release = "2609")  # Files are release 2609
 }
 }

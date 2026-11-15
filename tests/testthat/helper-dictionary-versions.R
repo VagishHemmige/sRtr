@@ -146,3 +146,39 @@ fake_snapshot <- function(Variable, Label) {
   }
   out
 }
+
+# Stored versions built from made-up pages, one per element of `pages` (each
+# a list of arguments to fake_dictionary_page()), read back from a temporary
+# folder.
+local_versions <- function(pages, env = parent.frame()) {
+  dir <- withr::local_tempdir(.local_envir = env)
+  for (page in pages) {
+    path <- withr::local_tempfile(fileext = ".html", .local_envir = env)
+    writeBin(charToRaw(enc2utf8(do.call(fake_dictionary_page, page))), path)
+    .srtr_versions_add_page(dir, path, source = "fake")
+  }
+  .srtr_versions_read(dir)
+}
+
+# Two releases: REC_FAKE_SAME unchanged, REC_FAKE_OLD only in 9901,
+# REC_FAKE_NEW only in 9904, REC_FAKE_CHANGED with a different label.
+fake_two_releases <- function() {
+  list(
+    list(
+      release = "9901",
+      data = list(TX_KI = fake_vars(
+        c("REC_FAKE_CHANGED", "REC_FAKE_OLD", "REC_FAKE_SAME"),
+        Label = c("Old label", "Old only", "Same label")
+      )),
+      formats = list(FAKEFMT = fake_codes("1"))
+    ),
+    list(
+      release = "9904",
+      data = list(TX_KI = fake_vars(
+        c("REC_FAKE_CHANGED", "REC_FAKE_NEW", "REC_FAKE_SAME"),
+        Label = c("New label", "New only", "Same label")
+      )),
+      formats = list(FAKEFMT = fake_codes("1"))
+    )
+  )
+}

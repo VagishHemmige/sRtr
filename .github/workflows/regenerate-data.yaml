@@ -94,6 +94,7 @@ jobs:
         run: |
           Rscript data-raw/dictionary_file_creator.R
           Rscript data-raw/formats_file_creator.R
+          Rscript data-raw/dictionary_versions_data.R
 
       - name: Install the branch with the new dictionary
         run: R CMD INSTALL --no-docs --no-multiarch .

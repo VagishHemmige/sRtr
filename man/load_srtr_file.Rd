@@ -11,6 +11,8 @@ load_srtr_file(
   var_labels = TRUE,
   col_select = NULL,
   column_check = c("warn", "error", "none"),
+  release = NULL,
+  gaps = c("warn", "error", "nearest"),
   ...
 )
 }
@@ -44,13 +46,28 @@ column is read (\code{col_select = NULL}) and only for file keys the dictionary
 lists. A file from a different SAF release than the dictionary can differ
 in its columns.}
 
+\item{release}{Optional. The SAF release the file comes from, as year and
+month (\code{"2609"}). If \code{NULL} (the default), the release given to
+\code{\link[=set_srtr_wd]{set_srtr_wd()}} is used, or one read from a folder name like
+\code{pubsaf2609}; with none, the bundled \link{dictionary} and \link{formats} are used.
+Labels, factor levels and the column check then use that release's
+dictionary (see \code{\link[=srtr_dictionary]{srtr_dictionary()}}). The release and the dictionary
+used are recorded in the result's \code{srtr_release} attribute.}
+
+\item{gaps}{For a release between two stored dictionary snapshots, what to
+do about an entry whose definition changed between them, so its value
+at that release is not known: \code{"warn"} (the default) uses the earlier
+snapshot's value with a warning, \code{"nearest"} does so silently, and
+\code{"error"} stops.}
+
 \item{...}{Additional arguments passed to the file reader
 (\code{\link[haven:read_sas]{haven::read_sas()}} or \code{\link[arrow:read_parquet]{arrow::read_parquet()}}), e.g. \code{encoding} for
 \code{read_sas()}.}
 }
 \value{
 A tibble with the loaded file contents, optionally labeled.
-The tibble includes attributes \code{source_path} and \code{file_key}.
+The tibble includes attributes \code{source_path}, \code{file_key} and
+\code{srtr_release} (a list: \code{release}, \code{dictionary}, \code{basis}).
 }
 \description{
 Loads a file from the SRTR dataset registry and optionally applies:
