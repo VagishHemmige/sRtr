@@ -72,13 +72,20 @@ If not provided, the function will use a <code>file_key</code> attribute or obje
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame with factor levels applied to coded variables.</p>
+    <p>A data frame with factor levels applied to coded variables, and a
+<code>file_key</code> attribute holding the dataset key in upper case, so the key
+carries through a chain of calls. If no usable key is found, <code>df</code> is
+returned unchanged with a warning.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>If <code>file_key</code> is not explicitly provided, the function will first check
 for a <code>file_key</code> attribute on the data frame (e.g., from <code><a href="load_srtr_file.html">load_srtr_file()</a></code>).
 If not found, it will attempt to infer it from the object name.</p>
+<p>The key is matched in upper case. A key that is not a dataset in the
+bundled <a href="dictionary.html">dictionary</a>, or a key that cannot be worked out (no attribute and
+no object name, as when <code>df</code> is an expression), gives a warning. A known key
+whose columns are not in <code>df</code> is not a problem: nothing is changed.</p>
     </div>
 
     <div class="section level2">

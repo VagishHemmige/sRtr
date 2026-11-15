@@ -27,13 +27,23 @@ apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE)
 
 ## Value
 
-A data frame with variable labels applied.
+A data frame with variable labels applied, and a `file_key` attribute
+holding the dataset key in upper case, so the key carries through a
+chain of calls. If no usable key is found, `df` is returned unchanged
+with a warning.
 
 ## Details
 
 If `file_key` is not explicitly provided, the function will first check
 for a `file_key` attribute on the data frame. If not found, it will
 attempt to infer it from the object name.
+
+The key is matched in upper case. A key that is not a dataset in the
+bundled
+[dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md),
+or a key that cannot be worked out (no attribute and no object name, as
+when `df` is an expression), gives a warning. A known key whose columns
+are not in `df` is not a problem: nothing is changed.
 
 ## Examples
 
