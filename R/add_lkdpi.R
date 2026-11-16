@@ -14,7 +14,7 @@
 #' | Donor age | `DON_AGE` |
 #' | Donor eGFR | computed with [add_donor_egfr()] from `creatinine`, `DON_AGE`, `DON_GENDER` and race |
 #' | Donor BMI | `DON_WGT_KG`, `DON_HGT_CM` |
-#' | Donor African American | `DON_RACE_BLACK_AFRICAN_AMERICAN` (Y/N), or `DON_RACE` = 16 |
+#' | Donor African American | `DON_RACE_BLACK_AFRICAN_AMERICAN` (Y/N), or `DON_RACE` = 16 (1024 = unknown) |
 #' | Donor cigarette use | `DON_HIST_CIGARETTE` (Y/N) |
 #' | Donor systolic blood pressure | `DON_BP_PREOP_SYST` |
 #' | Male donor to male recipient | `DON_GENDER`, `CAN_GENDER` |
@@ -94,11 +94,7 @@ add_lkdpi <- function(
   )$.lkdpi_egfr)
   age <- as.numeric(df$DON_AGE)
   bmi <- as.numeric(df$DON_WGT_KG) / (as.numeric(df$DON_HGT_CM) / 100)^2
-  black <- if ("DON_RACE_BLACK_AFRICAN_AMERICAN" %in% names(df)) {
-    as.numeric(.srtr_yes(df$DON_RACE_BLACK_AFRICAN_AMERICAN))
-  } else {
-    as.numeric(.srtr_code(df$DON_RACE) == 16)
-  }
+  black <- .donor_black(df)
   sex <- function(x) toupper(trimws(sub(":.*$", "", as.character(x))))
   don_sex <- sex(df$DON_GENDER)
   rec_sex <- sex(df$CAN_GENDER)

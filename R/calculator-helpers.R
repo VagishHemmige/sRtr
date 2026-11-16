@@ -35,6 +35,37 @@
   )
 }
 
+# 1 for codes in `yes`, 0 for codes in `no`, NA for anything else, including
+# unknown codes (such as 998) and values that are not codes.
+.srtr_code_in <- function(x, yes, no) {
+  code <- .srtr_code(x)
+  ifelse(code %in% yes, 1, ifelse(code %in% no, 0, NA_real_))
+}
+
+# Donor recorded as Black or African American: 1, 0 or NA. Uses
+# DON_RACE_BLACK_AFRICAN_AMERICAN (Y/N) when present, otherwise DON_RACE
+# (format RACE): 16 is 1; the other single codes and 2000 (Hispanic/Latino)
+# are 0; 1024 (unknown) and anything unrecognised are NA. A multiracial donor,
+# coded as a sum of single codes, is 0: the sum is not decomposed here.
+.donor_black <- function(df) {
+  if ("DON_RACE_BLACK_AFRICAN_AMERICAN" %in% names(df)) {
+    return(as.numeric(.srtr_yes(df$DON_RACE_BLACK_AFRICAN_AMERICAN)))
+  }
+  code <- .srtr_code(df$DON_RACE)
+  single <- c(8, 32, 64, 128, 256, 512, 2000)
+  multi <- !is.na(code) & code > 0 & code < 1024 & code %% 8 == 0 &
+    !code %in% c(single, 16)
+  ifelse(code %in% 16, 1, ifelse(code %in% single | multi, 0, NA_real_))
+}
+
+# Numeric values that must be positive and finite (creatinine, for example);
+# anything else becomes NA.
+.positive_finite <- function(x) {
+  x <- as.numeric(x)
+  x[!is.finite(x) | x <= 0] <- NA_real_
+  x
+}
+
 # Warn once if the output column is about to be overwritten.
 .warn_overwrite <- function(df, cols) {
   hit <- intersect(cols, names(df))
@@ -47,9 +78,10 @@
   invisible(NULL)
 }
 
-# Report rows whose score could not be computed because an input is missing.
+# Report rows whose score could not be computed because an input is missing
+# or unusable.
 .inform_missing_score <- function(value, score) {
-  n <- sum(is.na(value))
+  n <- sum(!is.finite(value))
   if (n > 0) {
     srtr_inform(
       "{score} is missing for {n} row{?s} with a missing or unusable input.",
@@ -117,21 +149,30 @@
 #
 # "latest": the newest stored table (for KDPI, the newest built with
 # `kdri_formula`).
-# "in_force": the table built from the year before `date`. OPTN states that
-# KDPI is scaled to donors recovered in the previous calendar year, and that
-# each EPTS table is built from the waiting list on December 31 of the year
-# before it is used. Rows whose table is not stored get NA.
+# "in_force": the table in effect in allocation on `date`, from the
+# `effective` element of optn_mapping_tables. For KDPI, Rao 2009 tables end
+# when the refit took effect. Rows before the first table, or whose table is
+# not stored or not usable, get NA.
 .optn_pick_labels <- function(table, score, n, date = NULL, kdri_formula = NULL) {
   if (!table %in% c("latest", "in_force")) {
     return(rep(table, n))
   }
-  labels <- .optn_labels(score, kdri_formula)
+  usable <- .optn_labels(score, kdri_formula)
   if (table == "latest") {
-    return(rep(utils::tail(labels, 1), n))
+    return(rep(utils::tail(usable, 1), n))
   }
-  tabs <- sRtr::optn_mapping_tables$tables
-  tabs <- tabs[tabs$score == score & tabs$label %in% labels, ]
-  ref_year <- as.integer(substr(tabs$reference, 1, 4))
-  want <- as.integer(format(date, "%Y")) - 1L
-  tabs$label[match(want, ref_year)]
+  eff <- sRtr::optn_mapping_tables$effective
+  eff <- eff[eff$score == score, ]
+  if (!is.null(kdri_formula)) {
+    refit_start <- min(eff$effective_from[eff$kdri_formula == "refit2024"])
+    eff <- eff[eff$kdri_formula %in% kdri_formula, ]
+  }
+  eff <- eff[order(eff$effective_from), ]
+  i <- findInterval(as.numeric(date), as.numeric(eff$effective_from))
+  out <- ifelse(is.na(i) | i == 0, NA_character_, eff$label[pmax(i, 1)])
+  if (identical(kdri_formula, "rao2009")) {
+    out[!is.na(date) & date >= refit_start] <- NA_character_
+  }
+  out[!out %in% usable] <- NA_character_
+  out
 }

@@ -96,15 +96,39 @@ test_that("transplant EPTS uses the recipient columns", {
   )
 })
 
-test_that("in_force uses the waiting list of the year before", {
-  cands <- candidates()[1, ][rep(1, 2), ]
-  cands$CAN_LISTING_DT <- as.Date(c("2019-05-01", "2013-05-01"))
+test_that("in_force uses the table in force on the date scored", {
+  dates <- as.Date(c("2024-05-28", "2024-05-29", "2025-05-21", "2014-12-01", "2026-06-01"))
+  cands <- candidates()[rep(1, length(dates)), ]
+  cands$CAN_LISTING_DT <- dates
   cands$CAN_DIAL_DT <- as.Date("2012-01-01")
   expect_warning(
     out <- add_epts(cands, table = "in_force"),
     class = "sRtr_warning_table_not_stored"
   )
-  expect_equal(attr(out$EPTS, "optn_table"), c("2018", NA))
+  expect_equal(attr(out$EPTS, "optn_table"), c("2022", "2023", "2024", NA, "current"))
+})
+
+test_that("prior transplant counts are read as any or none", {
+  cands <- candidates()[rep(1, 3), ]
+  cands$CAN_PREV_KI <- c(2, 0, NA)
+  cands$CAN_PREV_LI <- c(0, 0, 0)
+  out <- suppressMessages(add_epts(cands, return_terms = TRUE))
+  prior <- vapply(out$EPTS_terms, `[[`, numeric(1), "prior_tx")
+  expect_equal(prior, c(1, 0, NA))
+})
+
+test_that("transplant EPTS reads prior transplants at transplant", {
+  recips <- tibble::tibble(
+    REC_AGE_IN_MONTHS_AT_TX = 600,
+    REC_TX_DT = as.Date("2025-06-01"),
+    REC_DIAL_DT = as.Date("2020-06-01"),
+    REC_DIAL_TY = 2,
+    CAN_DIAB_TY = 1,
+    CAN_PREV_KI = 0,
+    REC_PREV_KI = 1
+  )
+  out <- add_epts(recips, at = "transplant", return_terms = TRUE)
+  expect_equal(out$EPTS_terms[[1]][["prior_tx"]], 1)
 })
 
 test_that("an unknown table label is refused", {

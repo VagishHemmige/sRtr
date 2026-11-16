@@ -2,7 +2,8 @@
 
 * New dataset `optn_mapping_tables`: the OPTN KDRI-to-KDPI (2010 onward) and
   EPTS (2014 onward) mapping tables, parsed from OPTN's PDFs, with each
-  source file's address and sha256 (#171, #172).
+  source file's address and sha256, and the date each table took effect in
+  allocation (#171, #172).
 
 * sRtr now needs R 4.1.0 or later and dplyr 1.1.0 or later, and no longer
   depends on magrittr. Package code calls every function as `pkg::fun()`

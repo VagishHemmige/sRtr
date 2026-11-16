@@ -17,7 +17,7 @@
 #' EPTS table's label is the year of its December 31 waiting-list snapshot.
 #' The newest table of each kind is labelled `"current"`.
 #'
-#' @format A list of two tibbles:
+#' @format A list of three tibbles:
 #' \describe{
 #'   \item{tables}{One row per table: `score` (`"kdpi"` or `"epts"`),
 #'     `label`, `reference` (donor recovery year for KDPI; snapshot date for
@@ -29,6 +29,12 @@
 #'     `formula_basis`, and the source `file`, `url` and `sha256`.}
 #'   \item{rows}{One row per interval: `score`, `label`, `row`, `lower`,
 #'     `upper` and `percentile`.}
+#'   \item{effective}{When each table took effect in allocation: `score`,
+#'     `label`, `kdri_formula`, `effective_from`, `basis` and `stored`. The
+#'     basis is either an OPTN publication or, where none was found, the June 1
+#'     deadline in OPTN Policy 8.4.B, labelled as a convention. It includes the
+#'     2024-donor KDPI table (`label = "2024-donors"`, `stored = FALSE`), so
+#'     the period when that table was in force is known.}
 #' }
 #' @source OPTN KDRI-to-KDPI and EPTS mapping tables, retrieved 2026-11-16
 #'   from

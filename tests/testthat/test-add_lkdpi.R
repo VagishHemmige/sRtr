@@ -67,3 +67,14 @@ test_that("a missing input gives NA and a message", {
   )
   expect_equal(is.na(as.numeric(out$LKDPI)), c(FALSE, TRUE))
 })
+
+test_that("zero creatinine or unknown race gives NA, not an infinite value", {
+  d <- pairs()
+  d$DON_KI_CREAT_PREOP[1] <- 0
+  d$DON_RACE[2] <- 1024
+  expect_message(
+    out <- add_lkdpi(d),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(as.numeric(out$LKDPI), c(NA_real_, NA_real_))
+})

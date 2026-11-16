@@ -119,20 +119,85 @@ test_that("a table built with the other formula is refused", {
   )
 })
 
-test_that("in_force uses the table built from the year before recovery", {
-  donors <- guide_donor()[rep(1, 3), ]
-  donors$DON_RECOV_DT <- as.Date(c("2019-06-01", "2012-01-10", "2009-05-01"))
+test_that("in_force uses the table in force on the recovery date", {
+  dates <- as.Date(c(
+    "2024-05-28", "2024-05-29", "2024-10-30", "2024-10-31", "2013-03-01"
+  ))
+  donors <- guide_donor()[rep(1, length(dates)), ]
+  donors$DON_RECOV_DT <- dates
   expect_warning(
-    out <- add_kdpi(donors, version = "rao2009", table = "in_force"),
+    rao <- add_kdpi(donors, version = "rao2009", table = "in_force"),
     class = "sRtr_warning_table_not_stored"
   )
+  # 2024-05-29 is OPTN's published switch; Rao 2009 ends with the refit on
+  # 2024-10-31; in March 2013 the 2011 table, which has no scaling factor.
+  expect_equal(attr(rao$KDPI, "optn_table"), c("2022", "2023", "2023", NA, NA))
   expect_equal(
-    out$KDPI[[1]],
-    add_kdpi(donors[1, ], version = "rao2009", table = "2018")$KDPI[[1]]
+    rao$KDPI[[2]],
+    add_kdpi(donors[2, ], version = "rao2009", table = "2023")$KDPI[[1]]
   )
-  # The 2011 table has no printed scaling factor, and no 2008 table is stored.
-  expect_equal(as.numeric(out$KDPI[2:3]), c(NA_real_, NA_real_))
-  expect_equal(attr(out$KDPI, "optn_table"), c("2018", NA, NA))
+
+  dates <- as.Date(c(
+    "2024-10-30", "2024-10-31", "2025-05-20", "2025-05-21", "2026-06-01"
+  ))
+  donors <- guide_donor()[rep(1, length(dates)), ]
+  donors$DON_RECOV_DT <- dates
+  expect_warning(
+    refit <- add_kdpi(donors, version = "refit2024", table = "in_force"),
+    class = "sRtr_warning_table_not_stored"
+  )
+  # From 2025-05-21 the 2024-donor table, which OPTN has not archived.
+  expect_equal(attr(refit$KDPI, "optn_table"), c(NA, "2024", "2024", NA, "current"))
+  expect_equal(is.na(as.numeric(refit$KDPI)), c(TRUE, FALSE, FALSE, TRUE, FALSE))
+})
+
+test_that("unknown codes give NA rather than a negative", {
+  donors <- guide_donor()[rep(1, 3), ]
+  donors$DON_CAD_DON_COD <- c(998, 3, 1)
+  expect_message(
+    out <- add_kdpi(donors),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(is.na(out$KDRI_RAO), c(TRUE, FALSE, FALSE))
+
+  labelled <- guide_donor()
+  labelled$DON_CAD_DON_COD <- factor("998: UNKNOWN")
+  expect_message(
+    out <- add_kdpi(labelled),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(out$KDRI_RAO[[1]], NA_real_)
+
+  stroke <- guide_donor(DON_CAD_DON_COD = NULL)
+  stroke$DON_CAD_DON_COD <- NULL
+  stroke <- stroke[rep(1, 2), ]
+  stroke$DON_COD_DON_STROKE <- c(9, NA)
+  expect_message(
+    out <- add_kdpi(stroke),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(as.numeric(out$KDRI_RAO), c(NA_real_, NA_real_))
+})
+
+test_that("Rao 2009 race: unknown is NA, multiracial is not counted", {
+  donors <- guide_donor()[rep(1, 3), ]
+  donors$DON_RACE <- c(1024, NA, 24)
+  expect_message(
+    out <- add_kdpi(donors, version = "rao2009", table = "2018", return_terms = TRUE),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(is.na(out$KDRI_RAO), c(TRUE, TRUE, FALSE))
+  expect_equal(out$KDRI_terms[[3]][["race"]], 0)
+})
+
+test_that("creatinine that is zero, negative or not finite gives NA", {
+  donors <- guide_donor()[rep(1, 3), ]
+  donors$DON_CREAT <- c(0, -1, Inf)
+  expect_message(
+    out <- add_kdpi(donors),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(as.numeric(out$KDRI_RAO), rep(NA_real_, 3))
 })
 
 test_that("the table used is recorded on the KDPI column", {

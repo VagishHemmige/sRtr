@@ -72,6 +72,27 @@ test_that("unknown sex gives NA", {
   expect_equal(out$DON_EGFR, NA_real_, ignore_attr = TRUE)
 })
 
+test_that("creatinine that is zero, negative or not finite gives NA", {
+  d <- donors()[rep(3, 3), ]
+  d$DON_CREAT <- c(0, -0.5, Inf)
+  expect_message(
+    out <- add_donor_egfr(d),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(as.numeric(out$DON_EGFR), rep(NA_real_, 3))
+})
+
+test_that("unknown race gives NA in the 2009 equation", {
+  d <- donors()[rep(1, 2), ]
+  d$DON_RACE <- c(1024, NA)
+  expect_message(
+    out <- add_donor_egfr(d, equation = "ckd_epi_2009"),
+    class = "sRtr_message_score_missing_inputs"
+  )
+  expect_equal(as.numeric(out$DON_EGFR), c(NA_real_, NA_real_))
+  expect_false(anyNA(add_donor_egfr(d)$DON_EGFR))
+})
+
 test_that("results match kidney.epi where both apply", {
   skip_if_not_installed("kidney.epi")
   d <- donors()

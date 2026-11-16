@@ -41,13 +41,32 @@ tables$sha256 <- manifest$sha256[match(tables$file, manifest$file)]
 tables$url <- manifest$url[match(tables$file, manifest$file)]
 stopifnot(!anyNA(tables$sha256))
 
+# When each table took effect in allocation. OPTN does not print this on the
+# tables; the dates and their basis are kept by hand in effective_dates.csv.
+effective <- utils::read.csv(
+  file.path(dir, "effective_dates.csv"),
+  colClasses = c(
+    score = "character",
+    label = "character",
+    kdri_formula = "character",
+    effective_from = "Date",
+    basis = "character"
+  ),
+  na.strings = ""
+)
+effective$stored <- paste(effective$score, effective$label) %in%
+  paste(tables$score, tables$label)
+stored_tables <- paste(tables$score, tables$label)
+stopifnot(all(stored_tables %in% paste(effective$score, effective$label)))
+
 optn_mapping_tables <- list(
   tables = tibble::as_tibble(tables[, c(
     "score", "label", "reference", "data_as_of", "scaling_factor",
     "diabetes_pct", "hypertension_pct", "kdri_formula", "formula_basis",
     "file", "url", "sha256"
   )]),
-  rows = tibble::as_tibble(rows)
+  rows = tibble::as_tibble(rows),
+  effective = tibble::as_tibble(effective[order(effective$score, effective$effective_from), ])
 )
 
 usethis::use_data(optn_mapping_tables, overwrite = TRUE)

@@ -7,7 +7,9 @@
 #' Input columns: `DON_AGE` (years), `DON_GENDER` (`F` or `M`), and the serum
 #' creatinine column named by `creatinine` (mg/dL). The 2009 equation also
 #' needs `DON_RACE_BLACK_AFRICAN_AMERICAN` (Y/N), or `DON_RACE` (16 = Black or
-#' African American) when that column is absent.
+#' African American; 1024 = unknown) when that column is absent. A creatinine
+#' that is not a positive number, an unknown sex and, for the 2009 equation, an
+#' unknown race give a missing value.
 #'
 #' A deceased donor's creatinine is often not at a steady state, so this
 #' value describes the creatinine more than the kidney's filtration rate.
@@ -59,7 +61,7 @@ add_donor_egfr <- function(
   .warn_overwrite(df, egfr_col)
 
   age <- as.numeric(df$DON_AGE)
-  scr <- as.numeric(df[[creatinine]])
+  scr <- .positive_finite(df[[creatinine]])
   sex <- toupper(trimws(sub(":.*$", "", as.character(df$DON_GENDER))))
   female <- ifelse(sex == "F", TRUE, ifelse(sex == "M", FALSE, NA))
 
@@ -72,12 +74,7 @@ add_donor_egfr <- function(
     co[["age"]]^age *
     ifelse(female, co[["female"]], 1)
   if (equation == "ckd_epi_2009") {
-    black <- if ("DON_RACE_BLACK_AFRICAN_AMERICAN" %in% names(df)) {
-      .srtr_yes(df$DON_RACE_BLACK_AFRICAN_AMERICAN)
-    } else {
-      .srtr_code(df$DON_RACE) == 16
-    }
-    egfr <- egfr * ifelse(black, co[["black"]], 1)
+    egfr <- egfr * ifelse(.donor_black(df) == 1, co[["black"]], 1)
   }
   if (adults_only) {
     egfr[!is.na(age) & age < 18] <- NA_real_

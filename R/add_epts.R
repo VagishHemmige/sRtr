@@ -18,9 +18,14 @@
 #'
 #' Diabetes comes from `CAN_DIAB_TY` (1 no; 2 to 5 yes; 998 unknown), or
 #' `CAN_DIAB` when that column is absent. A prior solid organ transplant is
-#' any `Y` among `CAN_PREV_HL`, `CAN_PREV_HR`, `CAN_PREV_IN`, `CAN_PREV_KI`,
-#' `CAN_PREV_KP`, `CAN_PREV_LI`, `CAN_PREV_LU` and `CAN_PREV_PA` (those
-#' present), or `CAN_PREV_TX` when none are.
+#' any value above 0 (or `Y`) among the organ columns `*_PREV_HL`, `*_PREV_HR`,
+#' `*_PREV_IN`, `*_PREV_KI`, `*_PREV_KP`, `*_PREV_LI`, `*_PREV_LU` and
+#' `*_PREV_PA` that are present: `REC_PREV_*` at transplant when any are
+#' present, otherwise `CAN_PREV_*`. It is none when every column present is 0
+#' (or `N`), and missing otherwise. `CAN_PREV_TX` is used only when no organ
+#' column is present, because it may count non-organ transplants. The
+#' dictionary gives these columns no format, so whether they are counts or
+#' flags is read the same way.
 #'
 #' OPTN measures age in fractional years from the date of birth. SAFs carry
 #' age in whole months, so age here is months / 12, which can differ from
@@ -32,12 +37,13 @@
 #' @param at Score the candidate at `"listing"` (default) or at
 #'   `"transplant"`.
 #' @param table Which mapping table to use: `"latest"` (default), the newest
-#'   stored table; `"in_force"`, for each row the table built from the
-#'   waiting list on December 31 of the year before the date scored, as OPTN
-#'   does (EPTS guide); or a table label such as `"2018"`. OPTN releases each
-#'   table in the spring, so rows scored between January and that release
-#'   follow a convention. Rows whose table is not stored get a missing score,
-#'   with a warning.
+#'   stored table; `"in_force"`, for each row the table OPTN was using on the
+#'   date scored; or a table label such as `"2018"`. For `"in_force"`, each
+#'   table's start date is OPTN's published date where one exists
+#'   (2024-05-29 and 2025-05-21); otherwise it is June 1 of the year after
+#'   the snapshot, the deadline in OPTN Policy 8.4.B, which is a convention.
+#'   Rows with no stored table in force get a missing score, with a warning.
+#'   The dates and their basis are in `optn_mapping_tables$effective`.
 #' @param unknown_diabetes How to treat unknown diabetes status (code 998).
 #'   `"na"` (default) gives a missing score. `"no"` counts it as no diabetes;
 #'   this is a convention some analyses use, not part of the OPTN definition.
@@ -110,10 +116,11 @@ add_epts <- function(
   if (!any(c("CAN_DIAB_TY", "CAN_DIAB") %in% names(df))) {
     check_columns(df, "CAN_DIAB_TY", why = "Or supply {.field CAN_DIAB}.")
   }
-  organ_cols <- intersect(
-    paste0("CAN_PREV_", c("HL", "HR", "IN", "KI", "KP", "LI", "LU", "PA")),
-    names(df)
-  )
+  organs <- c("HL", "HR", "IN", "KI", "KP", "LI", "LU", "PA")
+  organ_cols <- intersect(paste0("REC_PREV_", organs), names(df))
+  if (at == "listing" || !length(organ_cols)) {
+    organ_cols <- intersect(paste0("CAN_PREV_", organs), names(df))
+  }
   if (!length(organ_cols) && !"CAN_PREV_TX" %in% names(df)) {
     check_columns(df, "CAN_PREV_KI", why = "Supply the {.field CAN_PREV_*} columns or {.field CAN_PREV_TX}.")
   }
@@ -144,13 +151,13 @@ add_epts <- function(
   }
 
   prior_tx <- if (length(organ_cols)) {
-    flags <- vapply(organ_cols, function(col) .srtr_yes(df[[col]]), logical(nrow(df)))
+    flags <- vapply(organ_cols, function(col) .any_prior(df[[col]]), numeric(nrow(df)))
     flags <- matrix(flags, nrow = nrow(df))
-    any_yes <- rowSums(!is.na(flags) & flags) > 0
+    any_yes <- rowSums(!is.na(flags) & flags == 1) > 0
     all_known <- rowSums(is.na(flags)) == 0
     ifelse(any_yes, 1, ifelse(all_known, 0, NA_real_))
   } else {
-    as.numeric(.srtr_yes(df$CAN_PREV_TX))
+    .any_prior(df$CAN_PREV_TX)
   }
 
   raw <- .epts_raw(age, diabetes, prior_tx, years)
@@ -164,8 +171,8 @@ add_epts <- function(
     stored <- .optn_labels("epts")
     srtr_warn(
       c(
-        "No stored EPTS table for {n_missing} row{?s}; EPTS set to {.val {NA}}.",
-        "i" = "Stored tables: {.val {stored}}."
+        "No stored EPTS table was in force on the date scored for {n_missing} row{?s}; EPTS set to {.val {NA}}.",
+        "i" = "Stored tables: {.val {stored}}. See {.code optn_mapping_tables$effective} for the dates."
       ),
       class = "table_not_stored"
     )
@@ -205,4 +212,15 @@ add_epts <- function(
     0.130 * none -
     0.348 * diabetes * none +
     1.262 * diabetes
+}
+
+# Prior transplants from a count or a flag: 1 for any (a number above 0, or
+# Y), 0 for none (0 or N), NA otherwise.
+.any_prior <- function(x) {
+  if (is.numeric(x)) {
+    return(ifelse(x > 0, 1, ifelse(x == 0, 0, NA_real_)))
+  }
+  code <- .srtr_code(x)
+  flag <- as.numeric(.srtr_yes(x))
+  ifelse(!is.na(code), as.numeric(code > 0), flag)
 }

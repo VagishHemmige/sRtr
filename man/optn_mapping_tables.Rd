@@ -5,7 +5,7 @@
 \alias{optn_mapping_tables}
 \title{OPTN KDPI and EPTS mapping tables}
 \format{
-A list of two tibbles:
+A list of three tibbles:
 \describe{
 \item{tables}{One row per table: \code{score} (\code{"kdpi"} or \code{"epts"}),
 \code{label}, \code{reference} (donor recovery year for KDPI; snapshot date for
@@ -17,6 +17,12 @@ printed from 2014), \code{kdri_formula} (\code{"rao2009"} or \code{"refit2024"})
 \code{formula_basis}, and the source \code{file}, \code{url} and \code{sha256}.}
 \item{rows}{One row per interval: \code{score}, \code{label}, \code{row}, \code{lower},
 \code{upper} and \code{percentile}.}
+\item{effective}{When each table took effect in allocation: \code{score},
+\code{label}, \code{kdri_formula}, \code{effective_from}, \code{basis} and \code{stored}. The
+basis is either an OPTN publication or, where none was found, the June 1
+deadline in OPTN Policy 8.4.B, labelled as a convention. It includes the
+2024-donor KDPI table (\code{label = "2024-donors"}, \code{stored = FALSE}), so
+the period when that table was in force is known.}
 }
 }
 \source{

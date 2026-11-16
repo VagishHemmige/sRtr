@@ -52,7 +52,7 @@ kidney transplant file (\code{TX_KI}), so join them first:\tabular{ll}{
    Donor age \tab \code{DON_AGE} \cr
    Donor eGFR \tab computed with \code{\link[=add_donor_egfr]{add_donor_egfr()}} from \code{creatinine}, \code{DON_AGE}, \code{DON_GENDER} and race \cr
    Donor BMI \tab \code{DON_WGT_KG}, \code{DON_HGT_CM} \cr
-   Donor African American \tab \code{DON_RACE_BLACK_AFRICAN_AMERICAN} (Y/N), or \code{DON_RACE} = 16 \cr
+   Donor African American \tab \code{DON_RACE_BLACK_AFRICAN_AMERICAN} (Y/N), or \code{DON_RACE} = 16 (1024 = unknown) \cr
    Donor cigarette use \tab \code{DON_HIST_CIGARETTE} (Y/N) \cr
    Donor systolic blood pressure \tab \code{DON_BP_PREOP_SYST} \cr
    Male donor to male recipient \tab \code{DON_GENDER}, \code{CAN_GENDER} \cr

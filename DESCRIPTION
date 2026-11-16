@@ -52,7 +52,8 @@ Suggests:
     flowchart,
     withr,
     xml2,
-    digest
+    digest,
+    kidney.epi
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true

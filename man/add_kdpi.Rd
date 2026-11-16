@@ -21,14 +21,17 @@ add_kdpi(
 \item{version}{KDRI formula: \code{"refit2024"} (default) or \code{"rao2009"}.}
 
 \item{table}{Which mapping table to use: \code{"latest"} (default), the newest
-stored table for \code{version}; \code{"in_force"}, for each row the table built
-from donors recovered the year before \code{DON_RECOV_DT}; or a table label
-such as \code{"2018"} (see \link{optn_mapping_tables}). Mapping each donor to the
-previous year's table follows the OPTN guide's statement that KDRI is
-scaled to donors recovered in the previous calendar year; the date OPTN
-switched to each new table each spring is not published, so donors
-recovered between January and that switch are a convention. Rows whose
-table is not stored get a missing KDPI, with a warning.}
+stored table for \code{version}; \code{"in_force"}, for each row the table OPTN was
+using on \code{DON_RECOV_DT}; or a table label such as \code{"2018"} (see
+\link{optn_mapping_tables}). For \code{"in_force"}, each table's start date is
+OPTN's published date where one exists (2024-05-29, the refit on
+2024-10-31, and 2025-05-21); otherwise it is June 1 of the year after
+the reference year, the deadline OPTN Policy 8.4.B sets, which is a
+convention. Rao 2009 tables end on 2024-10-31 and refit tables start
+then. Rows with no stored table in force, such as refit KDPI from
+2025-05-21, when OPTN used a table it has not archived, get a missing
+KDPI, with a warning. The dates and their basis are in
+\code{optn_mapping_tables$effective}.}
 
 \item{unknown_history}{How to treat unknown hypertension or diabetes
 history (code 998). \code{"optn"} (default) follows the OPTN calculator: the
@@ -65,11 +68,13 @@ Input columns (codes as in the SRTR data dictionary; labelled factors from
 \itemize{
 \item \code{DON_AGE} (years), \code{DON_HGT_CM}, \code{DON_WGT_KG}, \code{DON_CREAT} (mg/dL);
 \item \code{DON_HIST_HYPERTEN}, \code{DON_HIST_DIAB}: 1 no, 2 to 5 yes, 998 unknown;
-\item \code{DON_CAD_DON_COD} (2 = cerebrovascular/stroke), or \code{DON_COD_DON_STROKE}
-(1 = yes) when \code{DON_CAD_DON_COD} is absent;
+\item \code{DON_CAD_DON_COD} (2 = cerebrovascular/stroke; 1, 3, 4, 999 = other;
+998 = unknown), or \code{DON_COD_DON_STROKE} (1 = yes, 0 = no) when
+\code{DON_CAD_DON_COD} is absent;
 \item \code{DON_NON_HR_BEAT} (Y = donation after circulatory death);
 \item for \code{"rao2009"} only: \code{DON_RACE_BLACK_AFRICAN_AMERICAN} (Y/N), or
-\code{DON_RACE} (16 = Black or African American) when that column is absent;
+\code{DON_RACE} (16 = Black or African American; 1024 = unknown) when that
+column is absent;
 and at least one of \code{DON_ANTI_HCV}, \code{DON_HCV_NAT} (P = positive) and
 \code{DON_HCV_STAT} (1 = positive);
 \item for \code{table = "in_force"}: \code{DON_RECOV_DT}.
@@ -77,7 +82,10 @@ and at least one of \code{DON_ANTI_HCV}, \code{DON_HCV_NAT} (P = positive) and
 
 As in the OPTN calculator, creatinine above 8 mg/dL counts as 8, and for
 \code{"rao2009"} an unknown, pending or not-done HCV result counts as negative.
-Any other missing input gives a missing KDRI and KDPI.
+Any other missing or unknown input, including an unknown cause of death or
+race and a creatinine that is not a positive number, gives a missing KDRI
+and KDPI. A multiracial donor (a \code{DON_RACE} code that is a sum of single
+codes) is not counted as Black by the \code{DON_RACE} fallback.
 }
 \examples{
 donors <- data.frame(

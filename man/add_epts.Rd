@@ -23,12 +23,13 @@ add_epts(
 \code{"transplant"}.}
 
 \item{table}{Which mapping table to use: \code{"latest"} (default), the newest
-stored table; \code{"in_force"}, for each row the table built from the
-waiting list on December 31 of the year before the date scored, as OPTN
-does (EPTS guide); or a table label such as \code{"2018"}. OPTN releases each
-table in the spring, so rows scored between January and that release
-follow a convention. Rows whose table is not stored get a missing score,
-with a warning.}
+stored table; \code{"in_force"}, for each row the table OPTN was using on the
+date scored; or a table label such as \code{"2018"}. For \code{"in_force"}, each
+table's start date is OPTN's published date where one exists
+(2024-05-29 and 2025-05-21); otherwise it is June 1 of the year after
+the snapshot, the deadline in OPTN Policy 8.4.B, which is a convention.
+Rows with no stored table in force get a missing score, with a warning.
+The dates and their basis are in \code{optn_mapping_tables$effective}.}
 
 \item{unknown_diabetes}{How to treat unknown diabetes status (code 998).
 \code{"na"} (default) gives a missing score. \code{"no"} counts it as no diabetes;
@@ -72,9 +73,14 @@ transplant, and years on dialysis. They are read from these columns
 
 Diabetes comes from \code{CAN_DIAB_TY} (1 no; 2 to 5 yes; 998 unknown), or
 \code{CAN_DIAB} when that column is absent. A prior solid organ transplant is
-any \code{Y} among \code{CAN_PREV_HL}, \code{CAN_PREV_HR}, \code{CAN_PREV_IN}, \code{CAN_PREV_KI},
-\code{CAN_PREV_KP}, \code{CAN_PREV_LI}, \code{CAN_PREV_LU} and \code{CAN_PREV_PA} (those
-present), or \code{CAN_PREV_TX} when none are.
+any value above 0 (or \code{Y}) among the organ columns \verb{*_PREV_HL}, \verb{*_PREV_HR},
+\verb{*_PREV_IN}, \verb{*_PREV_KI}, \verb{*_PREV_KP}, \verb{*_PREV_LI}, \verb{*_PREV_LU} and
+\verb{*_PREV_PA} that are present: \verb{REC_PREV_*} at transplant when any are
+present, otherwise \verb{CAN_PREV_*}. It is none when every column present is 0
+(or \code{N}), and missing otherwise. \code{CAN_PREV_TX} is used only when no organ
+column is present, because it may count non-organ transplants. The
+dictionary gives these columns no format, so whether they are counts or
+flags is read the same way.
 
 OPTN measures age in fractional years from the date of birth. SAFs carry
 age in whole months, so age here is months / 12, which can differ from

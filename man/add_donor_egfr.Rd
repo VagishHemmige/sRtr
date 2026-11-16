@@ -40,7 +40,9 @@ mL/min/1.73 m\eqn{^2}) for donors with a CKD-EPI equation and appends it
 Input columns: \code{DON_AGE} (years), \code{DON_GENDER} (\code{F} or \code{M}), and the serum
 creatinine column named by \code{creatinine} (mg/dL). The 2009 equation also
 needs \code{DON_RACE_BLACK_AFRICAN_AMERICAN} (Y/N), or \code{DON_RACE} (16 = Black or
-African American) when that column is absent.
+African American; 1024 = unknown) when that column is absent. A creatinine
+that is not a positive number, an unknown sex and, for the 2009 equation, an
+unknown race give a missing value.
 
 A deceased donor's creatinine is often not at a steady state, so this
 value describes the creatinine more than the kidney's filtration rate.

@@ -16,30 +16,38 @@
 #' [apply_srtr_factors()] also work):
 #' * `DON_AGE` (years), `DON_HGT_CM`, `DON_WGT_KG`, `DON_CREAT` (mg/dL);
 #' * `DON_HIST_HYPERTEN`, `DON_HIST_DIAB`: 1 no, 2 to 5 yes, 998 unknown;
-#' * `DON_CAD_DON_COD` (2 = cerebrovascular/stroke), or `DON_COD_DON_STROKE`
-#'   (1 = yes) when `DON_CAD_DON_COD` is absent;
+#' * `DON_CAD_DON_COD` (2 = cerebrovascular/stroke; 1, 3, 4, 999 = other;
+#'   998 = unknown), or `DON_COD_DON_STROKE` (1 = yes, 0 = no) when
+#'   `DON_CAD_DON_COD` is absent;
 #' * `DON_NON_HR_BEAT` (Y = donation after circulatory death);
 #' * for `"rao2009"` only: `DON_RACE_BLACK_AFRICAN_AMERICAN` (Y/N), or
-#'   `DON_RACE` (16 = Black or African American) when that column is absent;
+#'   `DON_RACE` (16 = Black or African American; 1024 = unknown) when that
+#'   column is absent;
 #'   and at least one of `DON_ANTI_HCV`, `DON_HCV_NAT` (P = positive) and
 #'   `DON_HCV_STAT` (1 = positive);
 #' * for `table = "in_force"`: `DON_RECOV_DT`.
 #'
 #' As in the OPTN calculator, creatinine above 8 mg/dL counts as 8, and for
 #' `"rao2009"` an unknown, pending or not-done HCV result counts as negative.
-#' Any other missing input gives a missing KDRI and KDPI.
+#' Any other missing or unknown input, including an unknown cause of death or
+#' race and a creatinine that is not a positive number, gives a missing KDRI
+#' and KDPI. A multiracial donor (a `DON_RACE` code that is a sum of single
+#' codes) is not counted as Black by the `DON_RACE` fallback.
 #'
 #' @param df A data frame of deceased donors or transplants, one row each.
 #' @param version KDRI formula: `"refit2024"` (default) or `"rao2009"`.
 #' @param table Which mapping table to use: `"latest"` (default), the newest
-#'   stored table for `version`; `"in_force"`, for each row the table built
-#'   from donors recovered the year before `DON_RECOV_DT`; or a table label
-#'   such as `"2018"` (see [optn_mapping_tables]). Mapping each donor to the
-#'   previous year's table follows the OPTN guide's statement that KDRI is
-#'   scaled to donors recovered in the previous calendar year; the date OPTN
-#'   switched to each new table each spring is not published, so donors
-#'   recovered between January and that switch are a convention. Rows whose
-#'   table is not stored get a missing KDPI, with a warning.
+#'   stored table for `version`; `"in_force"`, for each row the table OPTN was
+#'   using on `DON_RECOV_DT`; or a table label such as `"2018"` (see
+#'   [optn_mapping_tables]). For `"in_force"`, each table's start date is
+#'   OPTN's published date where one exists (2024-05-29, the refit on
+#'   2024-10-31, and 2025-05-21); otherwise it is June 1 of the year after
+#'   the reference year, the deadline OPTN Policy 8.4.B sets, which is a
+#'   convention. Rao 2009 tables end on 2024-10-31 and refit tables start
+#'   then. Rows with no stored table in force, such as refit KDPI from
+#'   2025-05-21, when OPTN used a table it has not archived, get a missing
+#'   KDPI, with a warning. The dates and their basis are in
+#'   `optn_mapping_tables$effective`.
 #' @param unknown_history How to treat unknown hypertension or diabetes
 #'   history (code 998). `"optn"` (default) follows the OPTN calculator: the
 #'   term is weighted by the share of reference donors with that history,
@@ -123,8 +131,8 @@ add_kdpi <- function(
     stored <- .optn_labels("kdpi", version)
     srtr_warn(
       c(
-        "No stored KDPI table for {n_missing} row{?s}; KDPI set to {.val {NA}}.",
-        "i" = "Stored {version} tables: {.val {stored}}."
+        "No stored {version} KDPI table was in force on the recovery date for {n_missing} row{?s}; KDPI set to {.val {NA}}.",
+        "i" = "Stored {version} tables: {.val {stored}}. See {.code optn_mapping_tables$effective} for the dates."
       ),
       class = "table_not_stored"
     )
@@ -140,7 +148,7 @@ add_kdpi <- function(
   age <- as.numeric(df$DON_AGE)
   hgt <- as.numeric(df$DON_HGT_CM)
   wgt <- as.numeric(df$DON_WGT_KG)
-  creat <- pmin(as.numeric(df$DON_CREAT), 8)
+  creat <- pmin(.positive_finite(df$DON_CREAT), 8)
 
   history <- function(x, share) {
     code <- .srtr_code(x)
@@ -153,10 +161,12 @@ add_kdpi <- function(
   hyp <- history(df$DON_HIST_HYPERTEN, hyp_share)
   diab <- history(df$DON_HIST_DIAB, diab_share)
 
+  # Cause of death (format DONCOD): 2 is cerebrovascular/stroke; 1, 3, 4 and
+  # 999 are other known causes; 998 (unknown) gives NA.
   cva <- if ("DON_CAD_DON_COD" %in% names(df)) {
-    as.numeric(.srtr_code(df$DON_CAD_DON_COD) == 2)
+    .srtr_code_in(df$DON_CAD_DON_COD, yes = 2, no = c(1, 3, 4, 999))
   } else {
-    as.numeric(.srtr_code(df$DON_COD_DON_STROKE) == 1)
+    .srtr_code_in(df$DON_COD_DON_STROKE, yes = 1, no = 0)
   }
   dcd <- as.numeric(.srtr_yes(df$DON_NON_HR_BEAT))
 
@@ -174,12 +184,7 @@ add_kdpi <- function(
     dcd = coef[["dcd"]] * dcd
   )
   if (version == "rao2009") {
-    black <- if ("DON_RACE_BLACK_AFRICAN_AMERICAN" %in% names(df)) {
-      as.numeric(.srtr_yes(df$DON_RACE_BLACK_AFRICAN_AMERICAN))
-    } else {
-      as.numeric(.srtr_code(df$DON_RACE) == 16)
-    }
-    terms$race <- coef[["black"]] * black
+    terms$race <- coef[["black"]] * .donor_black(df)
     terms$hcv <- coef[["hcv"]] * .kdri_hcv_positive(df, hcv_cols)
   }
 
