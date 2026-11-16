@@ -2,6 +2,13 @@
 
 ## sRtr (development version)
 
+- New dataset `optn_mapping_tables`: the OPTN KDRI-to-KDPI (2010 onward)
+  and EPTS (2014 onward) mapping tables, parsed from OPTN’s PDFs, with
+  each source file’s address and sha256, and the date each table took
+  effect in allocation
+  ([\#171](https://github.com/VagishHemmige/sRtr/issues/171),
+  [\#172](https://github.com/VagishHemmige/sRtr/issues/172)).
+
 - sRtr now needs R 4.1.0 or later and dplyr 1.1.0 or later, and no
   longer depends on magrittr. Package code calls every function as
   `pkg::fun()`
@@ -36,9 +43,36 @@
   of the shortened `MPEXCEPT_ORIG_TUMO`, so loading and labeling that
   file find its dictionary entries.
 
+- [`add_donor_egfr()`](https://vagishhemmige.github.io/sRtr/reference/add_donor_egfr.md)
+  is a new function that adds a donor’s eGFR from the CKD-EPI 2021
+  equation, or the 2009 equation for comparison with older work
+  ([\#173](https://github.com/VagishHemmige/sRtr/issues/173)).
+
+- [`add_epts()`](https://vagishhemmige.github.io/sRtr/reference/add_epts.md)
+  is a new function that adds the raw EPTS and the EPTS score for adult
+  kidney candidates at listing or at transplant, using the mapping table
+  of your choice
+  ([\#172](https://github.com/VagishHemmige/sRtr/issues/172)).
+
+- [`add_kdpi()`](https://vagishhemmige.github.io/sRtr/reference/add_kdpi.md)
+  is a new function that adds KDRI and KDPI for deceased kidney donors,
+  with the refit formula OPTN has used since October 2024 or the
+  original Rao 2009 formula, and the mapping table of your choice
+  ([\#171](https://github.com/VagishHemmige/sRtr/issues/171)).
+
+- [`add_lkdpi()`](https://vagishhemmige.github.io/sRtr/reference/add_lkdpi.md)
+  is a new function that adds the Living Kidney Donor Profile Index for
+  living donor kidney transplants
+  ([\#178](https://github.com/VagishHemmige/sRtr/issues/178)).
+
 - [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
   is now exported
   ([\#50](https://github.com/VagishHemmige/sRtr/issues/50)).
+
+- [`add_pvr()`](https://vagishhemmige.github.io/sRtr/reference/add_pvr.md)
+  is a new function that adds pulmonary vascular resistance from the
+  catheterization values recorded at listing or at transplant
+  ([\#179](https://github.com/VagishHemmige/sRtr/issues/179)).
 
 - [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
   no longer fails unless dplyr is attached

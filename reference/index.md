@@ -16,8 +16,18 @@
 
 ## Risk and Score Calculators
 
+- [`add_kdpi()`](https://vagishhemmige.github.io/sRtr/reference/add_kdpi.md)
+  : Add the Kidney Donor Risk Index and Kidney Donor Profile Index
+- [`add_epts()`](https://vagishhemmige.github.io/sRtr/reference/add_epts.md)
+  : Add the Estimated Post-Transplant Survival score
+- [`add_donor_egfr()`](https://vagishhemmige.github.io/sRtr/reference/add_donor_egfr.md)
+  : Add a donor's estimated glomerular filtration rate
+- [`add_lkdpi()`](https://vagishhemmige.github.io/sRtr/reference/add_lkdpi.md)
+  : Add the Living Kidney Donor Profile Index
 - [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
   : Add Pancreas Donor Risk Index (PDRI)
+- [`add_pvr()`](https://vagishhemmige.github.io/sRtr/reference/add_pvr.md)
+  : Add pulmonary vascular resistance
 
 ## Missing data
 
@@ -70,3 +80,5 @@ Helpers for composing event dates and simple time-to-event calculations
   : Stored versions of the SRTR data dictionary
 - [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)
   : SRTR data dictionary for a SAF release
+- [`optn_mapping_tables`](https://vagishhemmige.github.io/sRtr/reference/optn_mapping_tables.md)
+  : OPTN KDPI and EPTS mapping tables
