@@ -24,7 +24,12 @@ reference:
 
   - title: Risk and Score Calculators
     contents:
+      - add_kdpi
+      - add_epts
+      - add_donor_egfr
+      - add_lkdpi
       - add_pdri
+      - add_pvr
 
   - title: Missing data
     contents:
@@ -57,6 +62,7 @@ reference:
       - dictionary
       - dictionary_versions
       - srtr_dictionary
+      - optn_mapping_tables
 
 articles:
   - title: Getting Started

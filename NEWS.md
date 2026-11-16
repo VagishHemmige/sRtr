@@ -1,5 +1,10 @@
 # sRtr (development version)
 
+* New dataset `optn_mapping_tables`: the OPTN KDRI-to-KDPI (2010 onward) and
+  EPTS (2014 onward) mapping tables, parsed from OPTN's PDFs, with each
+  source file's address and sha256, and the date each table took effect in
+  allocation (#171, #172).
+
 * sRtr now needs R 4.1.0 or later and dplyr 1.1.0 or later, and no longer
   depends on magrittr. Package code calls every function as `pkg::fun()`
   (#55).
@@ -28,7 +33,25 @@
   shortened `MPEXCEPT_ORIG_TUMO`, so loading and labeling that file find its
   dictionary entries.
 
+* `add_donor_egfr()` is a new function that adds a donor's eGFR from the
+  CKD-EPI 2021 equation, or the 2009 equation for comparison with older work
+  (#173).
+
+* `add_epts()` is a new function that adds the raw EPTS and the EPTS score
+  for adult kidney candidates at listing or at transplant, using the mapping
+  table of your choice (#172).
+
+* `add_kdpi()` is a new function that adds KDRI and KDPI for deceased kidney
+  donors, with the refit formula OPTN has used since October 2024 or the
+  original Rao 2009 formula, and the mapping table of your choice (#171).
+
+* `add_lkdpi()` is a new function that adds the Living Kidney Donor Profile
+  Index for living donor kidney transplants (#178).
+
 * `add_pdri()` is now exported (#50).
+
+* `add_pvr()` is a new function that adds pulmonary vascular resistance from
+  the catheterization values recorded at listing or at transplant (#179).
 
 * `add_txf_outcomes()` no longer fails unless dplyr is attached (#17).
 

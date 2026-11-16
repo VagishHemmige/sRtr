@@ -1,0 +1,30 @@
+score,label,kdri_formula,effective_from,basis
+kdpi,2010,rao2009,2011-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2011,rao2009,2012-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2012,rao2009,2013-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2013,rao2009,2014-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2014,rao2009,2015-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2015,rao2009,2016-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2016,rao2009,2017-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2017,rao2009,2018-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2018,rao2009,2019-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2019,rao2009,2020-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2020,rao2009,2021-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2021,rao2009,2022-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2022,rao2009,2023-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+kdpi,2023,rao2009,2024-05-29,published: https://www.hrsa.gov/optn/news-events/news/annual-kidney-allocation-calculator-updates
+kdpi,2024,refit2024,2024-10-31,"published: OPTN KDPI guide (2026-04-23), refit implemented 2024-10-31"
+kdpi,2024-donors,refit2024,2025-05-21,"published: https://www.hrsa.gov/optn/news-events/news/may-2025-annual-kidney-allocation-calculator-updates; table not in OPTN's archive, not stored"
+kdpi,current,refit2024,2026-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2014,,2015-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2015,,2016-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2016,,2017-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2017,,2018-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2018,,2019-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2019,,2020-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2020,,2021-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2021,,2022-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2022,,2023-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found
+epts,2023,,2024-05-29,published: https://www.hrsa.gov/optn/news-events/news/annual-kidney-allocation-calculator-updates
+epts,2024,,2025-05-21,published: https://www.hrsa.gov/optn/news-events/news/may-2025-annual-kidney-allocation-calculator-updates
+epts,current,,2026-06-01,convention: OPTN Policy 8.4.B deadline (by June 1); no published date found

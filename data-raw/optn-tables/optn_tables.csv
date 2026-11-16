@@ -1,0 +1,29 @@
+"score","label","reference","data_as_of","scaling_factor","diabetes_pct","hypertension_pct","kdri_formula","formula_basis","file","n_rows"
+"epts","2014","2014-12-31","2015-03-20",,,,,,"epts_mapping_table-31dec2014.pdf",102
+"epts","2015","2015-12-31","2016-03-04",,,,,,"epts-mapping-table-31dec2015.pdf",102
+"epts","2016","2016-12-31","2017-03-03",,,,,,"epts_mapping_table-31dec2016.pdf",102
+"epts","2017","2017-12-31","2018-03-09",,,,,,"epts_mapping_table_2017.pdf",102
+"epts","2018","2018-12-31","2019-03-08",,,,,,"epts_mapping_table_2018.pdf",102
+"epts","2019","2019-12-31","2020-03-06",,,,,,"epts_mapping_table_2019.pdf",102
+"epts","2020","2020-12-31","2021-03-05",,,,,,"epts_mapping_table_2020.pdf",102
+"epts","2021","2021-12-31","2022-03-04",,,,,,"epts_mapping_table_2021.pdf",102
+"epts","2022","2022-12-31","2023-04-07",,,,,,"epts_mapping_table_2022.pdf",102
+"epts","2023","2023-12-31","2024-04-05",,,,,,"epts_mapping_table_2023.pdf",102
+"epts","2024","2024-12-31","2025-04-04",,,,,,"epts_mapping_table_2024.pdf",102
+"epts","current","2025-12-31","2026-04-03",,,,,,"epts_mapping_table.pdf",102
+"kdpi","2010","2010","2011-05-20",,,,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2010.pdf",102
+"kdpi","2011","2011","2012-03-09",,,,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2011.pdf",102
+"kdpi","2012","2012","2013-03-01",1.22219212347775,,,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2012.pdf",102
+"kdpi","2013","2013","2014-03-21",1.22339526866095,,,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2013.pdf",102
+"kdpi","2014","2014","2015-03-13",1.22176923395624,9.65081819353176,30.5501868315939,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2014.pdf",102
+"kdpi","2015","2015","2016-03-04",1.2175005163,9.17464549751545,30.2993576536177,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2015.pdf",102
+"kdpi","2016","2016","2017-03-03",1.20659821120231,8.973233874506,30.912681000439,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2016.pdf",102
+"kdpi","2017","2017","2018-03-09",1.21083136234747,9.786192958196,31.358366131263,"rao2009","before the refit (2024-10-31)","kdri-to-kdpi-mapping-table-2017.pdf",102
+"kdpi","2018","2018","2019-03-15",1.2506957544151,10.479375696767,32.796189317928,"rao2009","before the refit (2024-10-31)","kdpi_mapping_table_2018.pdf",102
+"kdpi","2019","2019","2020-03-06",1.28991045343964,10.786335515108,32.941809378643,"rao2009","before the refit (2024-10-31)","kdpi_mapping_table_2019.pdf",102
+"kdpi","2020","2020","2021-03-05",1.28654071484779,11.689727463312,34.280922431866,"rao2009","before the refit (2024-10-31)","kdpi_mapping_table_2020.pdf",102
+"kdpi","2021","2021","2022-03-04",1.318253823684,12.267292265779,34.925079461178,"rao2009","before the refit (2024-10-31)","kdpi_mapping_table_2021.pdf",102
+"kdpi","2022","2022","2023-04-07",1.33586831546044,12.573798144504,35.809671071127,"rao2009","before the refit (2024-10-31)","kdpi_mapping_table_2022.pdf",102
+"kdpi","2023","2023","2024-04-05",1.38165215935453,14.911770409153,38.103548574753,"rao2009","before the refit (2024-10-31)","kdpi_mapping_table_2023.pdf",102
+"kdpi","2024","2023","2024-09-06",1.30900852563932,14.911770409153,38.116475987331,"refit2024","inferred: 2023 donors re-mapped 2024-09-06","kdpi_mapping_table_2024.pdf",102
+"kdpi","current","2025","2026-04-03",1.45737870501158,18.698441796517,46.628257169045,"refit2024","printed after the refit (KDPI guide, 2026)","kdpi_mapping_table.pdf",102
