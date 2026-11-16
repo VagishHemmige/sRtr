@@ -104,5 +104,6 @@ test_that("results match kidney.epi where both apply", {
     label_sex_male = "M",
     label_sex_female = "F"
   )
-  expect_equal(add_donor_egfr(d)$DON_EGFR, ref, tolerance = 1e-6, ignore_attr = TRUE)
+  # kidney.epi returns eGFR rounded to two decimals.
+  expect_equal(round(as.numeric(add_donor_egfr(d)$DON_EGFR), 2), ref, ignore_attr = TRUE)
 })
