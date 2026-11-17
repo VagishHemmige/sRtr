@@ -226,6 +226,15 @@
   projection of `UNOS_regions_sf`. Its documentation wrongly said it
   kept that projection.
 
+- [`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md)
+  gains `noncontiguous`: `"exclude"` (the default) leaves out Alaska,
+  Hawaii and Puerto Rico as before; `"shift"` includes them, moved below
+  the contiguous states for national maps; `"include"` keeps them at
+  their real locations. `UNOS_regions_sf` gains the three rows (52 in
+  all). Its documentation now names the three states OPTN splits between
+  regions (Virginia, Vermont, Ohio), which it assigns whole
+  ([\#197](https://github.com/VagishHemmige/sRtr/issues/197)).
+
 - [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
   finds the folder set with
   [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md)
@@ -267,6 +276,12 @@
   now defaults to `method = "areal"`, like
   [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
   ([\#58](https://github.com/VagishHemmige/sRtr/issues/58)).
+
+- New
+  [`shift_noncontiguous()`](https://vagishhemmige.github.io/sRtr/reference/shift_noncontiguous.md)
+  moves Alaska, Hawaii and Puerto Rico below the contiguous states for
+  national maps, offline, so points and polygons in those areas land
+  together.
 
 - [`srtr_composite_death()`](https://vagishhemmige.github.io/sRtr/reference/srtr_composite_death.md)
   now requires its three death date columns to be `Date`, which is how

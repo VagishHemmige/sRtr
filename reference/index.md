@@ -59,6 +59,9 @@ Helpers for composing event dates and simple time-to-event calculations
   : Get OPTN/UNOS Region Boundaries
 - [`get_hrsa_opo_service_areas()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_opo_service_areas.md)
   : Download HRSA OPO Service Area Boundaries
+- [`shift_noncontiguous()`](https://vagishhemmige.github.io/sRtr/reference/shift_noncontiguous.md)
+  : Move Alaska, Hawaii and Puerto Rico below the contiguous United
+  States
 - [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
   : Calculate net geographic coverage gain from adding new coverage
   areas to an existing coverage base

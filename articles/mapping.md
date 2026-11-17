@@ -141,15 +141,20 @@ transplant_centers_sf
 ## Plotting UNOS/OPTN regions
 
 The object `UNOS_regions_sf` contains state-level geometries with a
-`Region` field. `Region` is stored as text, so a plot sorts it
-alphabetically (Region 1, Region 10, Region 11, Region 2, …). Convert it
-to a factor first so the legend runs from Region 1 to Region 11.
+`Region` field. It includes Alaska and Hawaii (Region 6) and Puerto Rico
+(Region 3), which stretch a national map far beyond the contiguous
+states, so the maps in this section leave them out.
+
+`Region` is stored as text, so a plot sorts it alphabetically (Region 1,
+Region 10, Region 11, Region 2, …). Convert it to a factor first so the
+legend runs from Region 1 to Region 11.
 
 ``` r
 
 region_levels <- paste("Region", 1:11)
+noncontiguous <- c("Alaska", "Hawaii", "Puerto Rico")
 
-unos_regions <- UNOS_regions_sf
+unos_regions <- UNOS_regions_sf[!UNOS_regions_sf$State %in% noncontiguous, ]
 unos_regions$Region <- factor(unos_regions$Region, levels = region_levels)
 
 plot(unos_regions["Region"], key.pos = 4)
@@ -158,13 +163,14 @@ plot(unos_regions["Region"], key.pos = 4)
 ![](mapping_files/figure-html/plot-unos-regions-1.png)
 
 To plot dissolved region boundaries, use
-[`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md).
+[`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md);
+`noncontiguous = "exclude"` leaves out Alaska, Hawaii and Puerto Rico.
 Putting the legend on the right (`key.pos = 4`) leaves room to label all
 11 regions.
 
 ``` r
 
-optn_regions <- get_hrsa_optn_regions()
+optn_regions <- get_hrsa_optn_regions(noncontiguous = "exclude")
 optn_regions$Region <- factor(optn_regions$Region, levels = region_levels)
 
 plot(optn_regions["Region"], key.pos = 4)
@@ -187,20 +193,19 @@ rather than requiring an internet connection.
 
 ``` r
 
-plot(sf::st_geometry(UNOS_regions_sf), border = "grey70")
+plot(sf::st_geometry(unos_regions), border = "grey70")
 plot(sf::st_geometry(transplant_centers_sf), add = TRUE, pch = 16, cex = 0.5)
 ```
 
 ![](mapping_files/figure-html/plot-centers-1.png)
 
-`UNOS_regions_sf` covers the contiguous United States and the District
-of Columbia, and the first layer drawn sets the map’s frame. Centers
-outside that frame, such as those in Hawaii and Puerto Rico, are not
-shown. To list them:
+The first layer drawn sets the map’s frame, here the contiguous states
+and the District of Columbia. Centers outside that frame, such as those
+in Hawaii and Puerto Rico, are not shown. To list them:
 
 ``` r
 
-frame <- sf::st_as_sfc(sf::st_bbox(UNOS_regions_sf))
+frame <- sf::st_as_sfc(sf::st_bbox(unos_regions))
 outside <- lengths(sf::st_intersects(transplant_centers_sf, frame)) == 0
 
 transplant_centers_sf$OTCName[outside]
