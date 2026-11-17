@@ -1,5 +1,26 @@
 # sRtr (development version)
 
+* `srtr_normalize_missing()` is rebuilt on `missing_codes`. It recognises
+  codes by what they mean in each variable's own format, for raw codes and
+  labelled columns alike, and a `policy` chooses which kinds become `NA`:
+  `"analysis"` (the default), `"strict"` or `"tag_only"`. `actions` changes
+  the policy by kind and `overrides` by variable. A `_MISS` column records
+  why each value became `NA`. Also new: `output = "append"`, `na_level`,
+  `extra_codes`, `cols`, `file_key` and `release`.
+
+  Changes from the earlier version:
+  * The `missing_vals` list and `replacement` are removed. Use
+    `extra_codes` for your own codes and `na_level` for an explicit
+    "Missing" level.
+  * Raw codes of formatted variables are now recognised; before, most were
+    recognised only after labelling.
+  * 59 more variables are normalized by default, because their format has
+    an unknown, not-done or pending code that the earlier list did not
+    include (93 code meanings in 64 variables in all).
+  * Reason columns are added by default; `reason = "none"` turns them off.
+  * Not done and not tested still become `NA` by default;
+    `actions = c(not_done = "keep")` keeps them (#28).
+
 * New `srtr_missing_report()` counts, for each variable, the values that
   stand for missing information and of which kind (unknown, not done, not
   applicable, ...), using `missing_codes`. It changes nothing in the data,

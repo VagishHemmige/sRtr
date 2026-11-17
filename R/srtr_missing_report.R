@@ -29,6 +29,10 @@
 #'   whether the codes in [missing_codes] match the data.
 #' @param release The SAF release, as in [load_srtr_file()]. `NULL` uses
 #'   the release recorded on `df`, or else the bundled dictionary.
+#' @param extra_codes Your own codes, for values that [missing_codes] does
+#'   not cover: a named list with one element per column, each a named
+#'   character vector giving the type of each value, such as
+#'   `list(MY_VAR = c("9" = "unknown"))`. These win over [missing_codes].
 #'
 #' @return A tibble with one row per variable and kind of missing value:
 #' \describe{
@@ -59,10 +63,11 @@ srtr_missing_report <- function(
   cols = NULL,
   file_key = NULL,
   detail = c("type", "code"),
-  release = NULL
+  release = NULL,
+  extra_codes = NULL
 ) {
   detail <- rlang::arg_match(detail)
-  lookup <- .srtr_missing_lookup(df, cols, file_key, release)
+  lookup <- .srtr_missing_lookup(df, cols, file_key, release, extra_codes)
   total <- nrow(df)
 
   rows <- lapply(lookup, function(column) {
@@ -70,7 +75,8 @@ srtr_missing_report <- function(
       df[[column$name]],
       column$format_rows,
       column$variable_rows,
-      column$format
+      column$format,
+      column$extra_rows
     )
     .srtr_missing_count(found, column, detail)
   })
@@ -125,6 +131,11 @@ srtr_missing_report <- function(
       Code = column$variable_rows$Code,
       Meaning = rep(NA_character_, nrow(column$variable_rows)),
       missing_type = column$variable_rows$missing_type
+    ),
+    data.frame(
+      Code = column$extra_rows$Code,
+      Meaning = rep(NA_character_, NROW(column$extra_rows)),
+      missing_type = column$extra_rows$missing_type
     )
   )
   seen <- unique(data.frame(

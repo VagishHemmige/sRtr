@@ -8,11 +8,14 @@
 #   format_rows   the format's codes (Code, Meaning, missing_type); the type
 #                 is NA for an ordinary code
 #   variable_rows the variable's rows of the variables table
+#   extra_rows    the caller's own codes for the variable (Code,
+#                 missing_type); these win over the two tables
 .srtr_missing_lookup <- function(
   df,
   cols,
   file_key,
   release,
+  extra_codes = NULL,
   call = rlang::caller_env()
 ) {
   if (!is.data.frame(df)) {
@@ -34,6 +37,8 @@
       )
     }
   }
+
+  extra_codes <- .srtr_missing_extra(extra_codes, names(df), call)
 
   if (is.null(file_key)) {
     file_key <- attr(df, "file_key")
@@ -117,14 +122,20 @@
       by_variable$Variable == upper,
       c("Code", "missing_type")
     ]
-    if (all(is.na(format_rows$missing_type)) && nrow(variable_rows) == 0) {
+    extra_rows <- extra_codes[[name]]
+    if (
+      all(is.na(format_rows$missing_type)) &&
+        nrow(variable_rows) == 0 &&
+        is.null(extra_rows)
+    ) {
       next
     }
     lookup[[length(lookup) + 1]] <- list(
       name = name,
       format = format,
       format_rows = format_rows,
-      variable_rows = variable_rows
+      variable_rows = variable_rows,
+      extra_rows = extra_rows
     )
   }
 
@@ -155,13 +166,19 @@
 # missing meaning doubles as an ordinary code of the same format. A value
 # the format does not list takes the type of the format's catch-all when
 # that is classified, and is "not_in_format" when there is no catch-all.
-.srtr_missing_match <- function(x, format_rows, variable_rows, format) {
+.srtr_missing_match <- function(
+  x,
+  format_rows,
+  variable_rows,
+  format,
+  extra_rows = NULL,
+  labelled = .srtr_already_factored(x)
+) {
   is_na <- is.na(x)
   values <- as.character(x)
   type <- rep(NA_character_, length(values))
   code <- rep(NA_character_, length(values))
   outside <- rep(FALSE, length(values))
-  labelled <- .srtr_already_factored(x)
 
   banded <- format %in% .srtr_range_formats && !labelled
   if (!is.null(format_rows) && nrow(format_rows) > 0 && !banded) {
@@ -193,9 +210,60 @@
     outside[use] <- FALSE
   }
 
+  if (!is.null(extra_rows) && nrow(extra_rows) > 0) {
+    row <- match(values, extra_rows$Code)
+    use <- !is.na(row)
+    type[use] <- extra_rows$missing_type[row[use]]
+    code[use] <- extra_rows$Code[row[use]]
+    outside[use] <- FALSE
+  }
+
   type[outside] <- "not_in_format"
   code[outside] <- values[outside]
   type[is_na] <- "na"
   code[is_na] <- NA_character_
   list(type = type, code = code)
+}
+
+# Check the caller's own codes: a named list, one element per column of the
+# data, each a named character vector of the form c(value = "type").
+# Returns a list of data frames (Code, missing_type) by column name.
+.srtr_missing_extra <- function(extra_codes, columns, call) {
+  if (is.null(extra_codes)) {
+    return(list())
+  }
+  allowed <- setdiff(.srtr_missing_types, c("none", "partial"))
+  well_formed <- is.list(extra_codes) &&
+    rlang::is_named(extra_codes) &&
+    all(vapply(
+      extra_codes,
+      function(codes) {
+        is.character(codes) &&
+          rlang::is_named(codes) &&
+          all(codes %in% allowed)
+      },
+      logical(1)
+    ))
+  if (!well_formed) {
+    srtr_abort(
+      c(
+        "{.arg extra_codes} must be a named list of named character vectors.",
+        "i" = "For example {.code list(MY_VAR = c(\"9\" = \"unknown\"))}.",
+        "i" = "Allowed types: {.val {allowed}}."
+      ),
+      class = "invalid_extra_codes",
+      call = call
+    )
+  }
+  absent <- setdiff(names(extra_codes), columns)
+  if (length(absent) > 0) {
+    srtr_abort(
+      "Column{?s} in {.arg extra_codes} not in {.arg df}: {.field {absent}}.",
+      class = "columns_not_found",
+      call = call
+    )
+  }
+  lapply(extra_codes, function(codes) {
+    data.frame(Code = names(codes), missing_type = unname(codes))
+  })
 }

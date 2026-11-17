@@ -12,7 +12,7 @@ testthat::test_that("missing race propagates across encodings", {
 })
 testthat::test_that("no-op normalization preserves factor analysis coding", {
   x <- data.frame(FAKE = ordered(c("B", "A"), levels = c("A", "B", "C")))
-  y <- srtr_normalize_missing(x, missing_vals = list(FAKE = "UNKNOWN"))
+  y <- srtr_normalize_missing(x, extra_codes = list(FAKE = c(UNKNOWN = "unknown")))
   testthat::expect_identical(y$FAKE, x$FAKE)
 })
 testthat::test_that("reapplying factor labels preserves observations", {
