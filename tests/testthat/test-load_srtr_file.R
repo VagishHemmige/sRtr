@@ -10,7 +10,7 @@
 # SRTR_WD are set (see helper-srtr.R).
 
 test_that("load_srtr_file loads expected data and attaches metadata", {
-  skip_if_no_srtr_data()
+  skip_if_no_srtr_file("TX_HR")
 
   result <- load_srtr_file("TX_HR", factor_labels = TRUE, var_labels = TRUE)
 
@@ -25,6 +25,62 @@ test_that("load_srtr_file loads expected data and attaches metadata", {
   expect_match(attr(result, "file_key"), "TX_HR", ignore.case = TRUE)
   expect_type(attr(result, "source_path"), "character")
   expect_true(file.exists(attr(result, "source_path")))
+})
+
+test_that("live: the liver SAFs load with their key columns", {
+  key_columns <- list(
+    TX_LI = c("TRR_ID", "PX_ID", "DONOR_ID"),
+    TXF_LI = c("TRR_ID", "PX_ID"),
+    CAND_LIIN = "PX_ID",
+    DONOR_DECEASED = "DONOR_ID"
+  )
+  keys <- srtr_live_keys_present(names(key_columns))
+
+  for (key in keys) {
+    df <- load_live(key)
+    expect_gt(nrow(df), 0)
+    expect_contains(names(df), key_columns[[key]])
+    expect_equal(attr(df, "file_key"), key)
+  }
+})
+
+test_that("live: TX_LI has no blank text and no blank factor level", {
+  skip_if_no_srtr_file("TX_LI")
+
+  tx <- load_live("TX_LI")
+
+  text <- tx[vapply(tx, is.character, logical(1))]
+  expect_equal(sum(text == "", na.rm = TRUE), 0)
+  blank_level <- vapply(
+    tx,
+    \(x) is.factor(x) && any(grepl("^\\s*: not in format$", levels(x))),
+    logical(1)
+  )
+  expect_equal(names(tx)[blank_level], character())
+})
+
+test_that("live: death dates load as Date", {
+  death_columns <- list(
+    TX_LI = c("PERS_OPTN_DEATH_DT", "PERS_SSA_DEATH_DT", "TFL_DEATH_DT"),
+    CAND_LIIN = c("PERS_OPTN_DEATH_DT", "PERS_SSA_DEATH_DT")
+  )
+  keys <- srtr_live_keys_present(names(death_columns))
+
+  for (key in keys) {
+    df <- load_live(key, col_select = death_columns[[key]])
+    for (col in death_columns[[key]]) {
+      expect_s3_class(df[[col]], "Date")
+    }
+  }
+})
+
+test_that("live: TX_LI columns carry variable labels", {
+  skip_if_no_srtr_file("TX_LI")
+
+  tx <- load_live("TX_LI", col_select = c("TRR_ID", "REC_TX_DT", "REC_FUNCTN_STAT"))
+
+  labels <- vapply(tx, \(x) is.character(attr(x, "label")), logical(1))
+  expect_equal(labels, c(TRR_ID = TRUE, REC_TX_DT = TRUE, REC_FUNCTN_STAT = TRUE))
 })
 
 # Offline tests below: empty placeholder files in a temporary folder, with the
@@ -527,4 +583,21 @@ test_that("blank_text must be \"na\" or \"keep\"", {
   local_sas_file(fake_tx_blank_text(), "TX_LI")
 
   expect_error(load_cols("TX_LI", blank_text = "drop"), class = "rlang_error")
+})
+
+test_that("only text that is empty or all whitespace counts as blank", {
+  x <- c(
+    "Y", "", "  ", "\t", "\v", "\f", "\r\n", " \t", NA,
+    " a ", "a ", "caf\xe9", "é"
+  )
+  df <- tibble::tibble(x = x, n = seq_along(x))
+
+  out <- .srtr_blank_text_to_na(df)
+
+  expect_equal(
+    is.na(out$x),
+    c(FALSE, rep(TRUE, 8), FALSE, FALSE, FALSE, FALSE)
+  )
+  expect_equal(out$x[c(1, 10:13)], x[c(1, 10:13)])
+  expect_equal(out$n, df$n)
 })

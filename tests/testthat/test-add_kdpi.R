@@ -205,3 +205,13 @@ test_that("the table used is recorded on the KDPI column", {
   expect_equal(attr(out$KDPI, "optn_table"), "current")
   expect_equal(attr(out$KDPI, "kdri_formula"), "refit2024")
 })
+
+test_that("live: KDPI on DONOR_DECEASED lies between 0 and 100", {
+  skip_if_no_srtr_file("DONOR_DECEASED")
+  dd <- load_live("DONOR_DECEASED")
+
+  out <- add_kdpi(dd)
+
+  expect_equal(sum(out$KDPI < 0 | out$KDPI > 100, na.rm = TRUE), 0)
+  expect_lt(mean(is.na(out$KDPI)), 1)
+})
