@@ -41,6 +41,41 @@ test_that("add_txf_outcomes() runs for a single-organ file without dplyr attache
   )
 })
 
+test_that("add_txf_outcomes() reads only the follow-up columns it uses", {
+  asked <- NULL
+  local_mocked_bindings(load_srtr_file = function(file_key, ..., col_select) {
+    asked <<- rlang::as_label(rlang::enquo(col_select))
+    fake_txf("KI")
+  })
+
+  add_txf_outcomes(fake_tx("TX_KI"))
+
+  for (col in c("TRR_ID", "ORG_TY", "TFL_MALIG", "TFL_ACUTE_REJ_EPISODE", "TFL_PX_STAT_DT")) {
+    expect_match(asked, col, fixed = TRUE)
+  }
+})
+
+test_that("add_txf_outcomes() gives the same result from a real TXF file", {
+  local_sas_file(
+    tibble::tibble(
+      TRR_ID = c(900001, 900001, 900002),
+      ORG_TY = "KI",
+      TFL_MALIG = c("N", "Y", "N"),
+      TFL_ACUTE_REJ_EPISODE = c(1, 3, 1),
+      TFL_PX_STAT_DT = as.Date(c("2001-01-01", "2002-01-01", "2003-01-01")),
+      TFL_GRAFT_STAT = c("Y", "Y", "Y")
+    ),
+    "TXF_KI"
+  )
+  tx <- tibble::tibble(TRR_ID = c(900001, 900002, 900003))
+  attr(tx, "file_key") <- "TX_KI"
+
+  out <- suppressWarnings(add_txf_outcomes(tx))
+
+  expect_equal(out$FIRST_FU_MALIG_DATE, as.Date(c("2002-01-01", NA, NA)))
+  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2001-01-01", "2003-01-01", NA)))
+})
+
 test_that("add_time_to_event_outcomes() builds rejection dates without dplyr attached", {
   expect_equal(intersect(search(), "package:dplyr"), character())
   # Isolate the rejection step: the other helpers are tested separately (#25).

@@ -192,8 +192,17 @@ add_txf_outcomes <- function(
     dplyr::pull()
 
   #Create follow up data set with malignancy and acute rejection episode variables
+  #Read only the columns used here: the follow-up files are large, and
+  #labelling every column took most of the run time.
   follow_up_df <- load_srtr_file(
     follow_up_key,
+    col_select = c(
+      "TRR_ID",
+      "ORG_TY",
+      "TFL_MALIG",
+      "TFL_ACUTE_REJ_EPISODE",
+      "TFL_PX_STAT_DT"
+    ),
     trr_id_filter = filter_vector
   ) |>
     dplyr::mutate(ORG_TYPE = stringr::str_sub(.data$ORG_TY, 1, 2)) |>
