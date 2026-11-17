@@ -107,3 +107,13 @@ test_that("results match kidney.epi where both apply", {
   # kidney.epi returns eGFR rounded to two decimals.
   expect_equal(round(as.numeric(add_donor_egfr(d)$DON_EGFR), 2), ref, ignore_attr = TRUE)
 })
+
+test_that("live: donor eGFR on DONOR_DECEASED is never negative", {
+  skip_if_no_srtr_file("DONOR_DECEASED")
+  dd <- load_live("DONOR_DECEASED")
+
+  out <- add_donor_egfr(dd)
+
+  expect_equal(sum(out$DON_EGFR < 0, na.rm = TRUE), 0)
+  expect_lt(mean(is.na(out$DON_EGFR)), 1)
+})
