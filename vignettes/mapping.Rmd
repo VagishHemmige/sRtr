@@ -192,9 +192,9 @@ ggplot() +
 
 ### With tmap
 
-tmap draws the inset itself with `tm_inset()` and marks the corridor on the national map. This needs tmap 4.1 or later.
+tmap draws the inset itself with `tm_inset()` and marks the corridor on the national map. This needs tmap 4.2 or later, the first version whose `tm_inset()` takes the frame colours.
 
-```{r tmap-corridor, eval = requireNamespace("tmap", quietly = TRUE) && utils::packageVersion("tmap") >= "4.1", fig.width = 9, fig.height = 5.5}
+```{r tmap-corridor, eval = requireNamespace("tmap", quietly = TRUE) && utils::packageVersion("tmap") >= "4.2", fig.width = 9, fig.height = 5.5}
 library(tmap)
 
 tm_shape(regions_shifted) +
