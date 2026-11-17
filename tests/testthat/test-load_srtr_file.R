@@ -325,6 +325,22 @@ test_that("TX_KP without col_select still gets TFL_LAFUDATE", {
   )
 })
 
+test_that("the derived TX_KP TFL_LAFUDATE gets a label when labels are applied", {
+  fake <- fake_tx_kp()
+  attr(fake$TFL_LAFUDATEKI, "label") <- "A made-up kidney label"
+  attr(fake$TFL_LAFUDATEPA, "label") <- "A made-up pancreas label"
+  local_sas_file(fake, "TX_KP")
+
+  out <- load_srtr_file("TX_KP", factor_labels = FALSE, column_check = "none")
+  unlabelled <- load_cols("TX_KP")
+
+  expect_equal(
+    labelled::var_label(out$TFL_LAFUDATE),
+    "Last follow-up date: the later of TFL_LAFUDATEKI and TFL_LAFUDATEPA (derived by sRtr)"
+  )
+  expect_null(labelled::var_label(unlabelled$TFL_LAFUDATE))
+})
+
 test_that("a TX_KP subset without the follow-up dates loads", {
   local_sas_file(fake_tx_kp(), "TX_KP")
 

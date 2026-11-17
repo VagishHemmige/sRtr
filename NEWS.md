@@ -18,7 +18,9 @@
   labels a SAS file already carries and label only the columns without one,
   without a warning. Before, any existing label made it warn and label
   nothing, which happened on every real SAF. The new `overwrite = TRUE`
-  replaces the file's labels with the dictionary's.
+  replaces the file's labels with the dictionary's. `load_srtr_file()` also
+  labels the `TFL_LAFUDATE` it derives for TX_KP, which the dictionary does
+  not list.
 
 * `srtr_normalize_missing()` is rebuilt on `missing_codes`. It recognises
   codes by what they mean in each variable's own format, for raw codes and

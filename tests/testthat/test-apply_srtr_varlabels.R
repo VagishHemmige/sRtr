@@ -157,3 +157,13 @@ test_that("other attributes on the data frame are kept", {
     apply_srtr_varlabels(file_key = "TX_KI")
   expect_equal(attr(out, "source_path"), "made/up/path.sas7bdat")
 })
+
+test_that("a kept label is not overwritten through a column differing only in case", {
+  df <- tibble::tibble(CAN_ABO = "A", can_abo = "B")
+  labelled::var_label(df$CAN_ABO) <- "A made-up label"
+
+  out <- apply_srtr_varlabels(df, file_key = "TX_KI")
+
+  expect_equal(labelled::var_label(out$CAN_ABO), "A made-up label")
+  expect_equal(labelled::var_label(out$can_abo), "Patient/s Blood Type")
+})

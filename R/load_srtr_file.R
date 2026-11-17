@@ -294,6 +294,14 @@ load_srtr_file <- function(
       apply_srtr_varlabels(df, file_key = file_key_input)
     )
   }
+  # The dictionary has no entry for the derived TX_KP date, so sRtr labels it.
+  if (var_labels && derive_kp && "TFL_LAFUDATE" %in% names(df) &&
+    is.null(labelled::var_label(df$TFL_LAFUDATE))) {
+    labelled::var_label(df$TFL_LAFUDATE) <- paste(
+      "Last follow-up date: the later of TFL_LAFUDATEKI and TFL_LAFUDATEPA",
+      "(derived by sRtr)"
+    )
+  }
 
   # ---- Attach metadata ----
   attr(df, "source_path") <- full_path
