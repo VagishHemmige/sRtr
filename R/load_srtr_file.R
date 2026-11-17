@@ -307,11 +307,22 @@ load_srtr_file <- function(
 # cannot make grepl() fail; only ASCII spaces count as blank.
 .srtr_blank_text_to_na <- function(df) {
   is_text <- vapply(df, is.character, logical(1))
-  df[is_text] <- lapply(df[is_text], function(x) {
-    x[!is.na(x) & grepl("^[[:space:]]*$", x, useBytes = TRUE)] <- NA_character_
-    x
-  })
+  df[is_text] <- lapply(df[is_text], .srtr_blank_to_na)
   df
+}
+
+# haven trims trailing spaces, so a SAS blank arrives as "" and the cheap
+# nzchar() test finds it. The pattern match runs only on values that start
+# with whitespace, which can still come from parquet files made elsewhere.
+.srtr_blank_to_na <- function(x) {
+  blank <- !nzchar(x)
+  lead <- which(grepl("^[[:space:]]", x, perl = TRUE, useBytes = TRUE))
+  blank[lead] <- grepl("^[[:space:]]*$", x[lead], perl = TRUE, useBytes = TRUE)
+  idx <- which(blank)
+  if (length(idx) > 0) {
+    x[idx] <- NA_character_
+  }
+  x
 }
 
 # A zero-row data frame with the file's columns and types, read without
