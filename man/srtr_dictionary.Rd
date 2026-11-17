@@ -7,7 +7,8 @@
 srtr_dictionary(
   release = NULL,
   table = c("dictionary", "formats"),
-  gaps = c("warn", "error", "nearest")
+  gaps = c("warn", "error", "nearest"),
+  view = c("corrected", "web")
 )
 }
 \arguments{
@@ -24,13 +25,19 @@ so silently, and \code{"error"} stops. Variables seen in only one of the two
 versions are left out, since whether they existed at that release cannot
 be known without the file; \code{\link[=load_srtr_file]{load_srtr_file()}} decides them from the file's
 columns. Format codes seen in only one are kept.}
+
+\item{view}{\code{"corrected"} (the default) applies sRtr's corrections to SRTR's
+web dictionary; \code{"web"} returns the dictionary as SRTR's web page has it.
+The corrections are listed in the Corrections section below. They change
+only the dictionary table, never the format code lists.}
 }
 \value{
 A tibble with the columns of \link{dictionary} or \link{formats}. Its
 attributes \code{snapshot} (the stored version used, or \code{NA}) and \code{basis}
 (\code{"observed"}, \code{"interpolated"}, \code{"nearest snapshot"} or \code{"default"}) say
 where it came from. A release before the first or after the last stored
-version uses that version, with a warning.
+version uses that version, with a warning. Attribute \code{view} is the view
+used and \code{corrections} the IDs of the corrections applied.
 }
 \description{
 Returns the SRTR data dictionary, or its format code lists, as they were
@@ -38,6 +45,24 @@ for a SAF release. sRtr stores each version of SRTR's public dictionary
 page it has seen (see \link{dictionary_versions}); a release between two stored
 versions uses the entries that are the same in both.
 }
+\section{Corrections}{
+
+sRtr corrects a few entries of SRTR's web dictionary that do not match the
+SAFs, each under a stable ID:
+\itemize{
+\item \code{SRTR-DC-001}: \code{REC_COD} in every TX dataset uses the format \code{COD}, not
+\code{THCOD}. The thoracic format \code{THCOD} is a subset of \code{COD} with the same
+meanings (\code{COD} prefixes their labels with "TH:"), and liver recipients'
+causes of death are \code{COD} codes that \code{THCOD} lacks. This was checked on
+a real TX_LI file only; for other organs it is a generalization.
+}
+
+A correction is applied only when SRTR's entry still has the value sRtr
+expects; if SRTR has changed it, sRtr keeps SRTR's value and warns. Codes
+that appear in data but are in no format are not corrected: their meaning
+is not documented.
+}
+
 \examples{
 current <- srtr_dictionary("2609")
 attr(current, "snapshot")

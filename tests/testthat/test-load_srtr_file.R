@@ -86,22 +86,6 @@ test_that("live: TX_LI columns carry variable labels", {
 # Offline tests below: empty placeholder files in a temporary folder, with the
 # file readers mocked. No real or realistic SAF is read or written.
 
-local_srtr_folder <- function(files, env = parent.frame()) {
-  dir <- withr::local_tempdir(.local_envir = env)
-  file.create(file.path(dir, files))
-  withr::local_envvar(SRTR_WD = dir, .local_envir = env)
-  saved <- as.list(.srtr_env, all.names = TRUE)
-  rm(list = ls(.srtr_env, all.names = TRUE), envir = .srtr_env)
-  withr::defer(
-    {
-      rm(list = ls(.srtr_env, all.names = TRUE), envir = .srtr_env)
-      list2env(saved, envir = .srtr_env)
-    },
-    envir = env
-  )
-  dir
-}
-
 fake_read_sas <- function(data_file, ...) {
   tibble::tibble(trr_id = 900001, source = basename(data_file))
 }
@@ -247,13 +231,6 @@ fake_tx_kp <- function() {
     TFL_LAFUDATEKI = as.Date(c("2001-01-01", NA, "2001-01-01")),
     TFL_LAFUDATEPA = as.Date(c("2002-01-01", "2002-01-01", NA))
   )
-}
-
-local_sas_file <- function(data, file_key, env = parent.frame()) {
-  dir <- local_srtr_folder(character(), env = env)
-  withr::local_options(lifecycle_verbosity = "quiet")
-  haven::write_sas(data, file.path(dir, paste0(file_key, ".sas7bdat")))
-  dir
 }
 
 load_cols <- function(file_key, ..., column_check = "none") {
