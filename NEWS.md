@@ -159,6 +159,11 @@
   * All inputs are transformed to `crs` first.
   * It no longer fails unless dplyr and sf are attached (#55).
 
+* `get_hrsa_optn_regions()` gains `crs`. The default, `4326`, keeps the
+  longitude/latitude result it already returned; `crs = 5070` keeps the
+  NAD83 / Conus Albers projection of `UNOS_regions_sf`. Its documentation
+  wrongly said it kept that projection.
+
 * `load_srtr_file()` finds the folder set with `set_srtr_wd()` when it first
   needs it, and looks again if a file is not found, so files added during a
   session are picked up. Errors now say when `SRTR_WD` is not set and which
