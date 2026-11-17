@@ -11,8 +11,10 @@ get_hrsa_optn_regions(crs = 4326)
 \code{\link[sf:st_crs]{sf::st_crs()}} accepts, such as an EPSG code. The default, \code{4326}
 (longitude/latitude), matches the layers that
 \code{\link[=get_hrsa_transplant_centers]{get_hrsa_transplant_centers()}} and \code{\link[=get_hrsa_opo_service_areas]{get_hrsa_opo_service_areas()}}
-download. Use \code{5070} to keep the projection of \code{UNOS_regions_sf}, which
-suits area and distance calculations.}
+download. \code{5070} keeps the NAD83 / Conus Albers equal-area projection of
+\code{UNOS_regions_sf}. The boundaries are generalized Census cartographic
+files, drawn for maps, so areas and distances computed from them are
+approximate; use detailed boundaries for measurement.}
 }
 \value{
 An \code{sf} object with one feature per OPTN/UNOS region, in \code{crs}.
@@ -41,7 +43,7 @@ regions
 sf::st_crs(regions)
 plot(regions["Region"])
 
-# Keep the projection of UNOS_regions_sf, for areas and distances
+# Keep the Albers projection of UNOS_regions_sf, as the bundled maps use
 regions_albers <- get_hrsa_optn_regions(crs = 5070)
 }
 
