@@ -91,6 +91,24 @@ jobs:
             fi
           done
 
+      - name: Remove retired generated files
+        run: |
+          # data-raw/retired-data.txt names generated files that no script
+          # builds any more. They are removed here, before anything is
+          # built, so that generated data are changed only by this workflow
+          # and a file that a script still builds is caught by the check
+          # after the build steps.
+          while IFS= read -r f; do
+            if ! printf '%s\n' "$f" | grep -qE '^(data/[A-Za-z0-9_.]+\.rda|R/sysdata\.rda)$'; then
+              echo "::error::data-raw/retired-data.txt: '$f' is not data/<name>.rda or R/sysdata.rda."
+              exit 1
+            fi
+            if [ -e "$f" ]; then
+              git rm -q "$f"
+              echo "Retired $f"
+            fi
+          done < <(tr -d '\r' < data-raw/retired-data.txt | grep -vE '^[[:space:]]*(#|$)')
+
       - name: Build dictionary and formats
         run: |
           Rscript data-raw/dictionary_file_creator.R
@@ -130,16 +148,16 @@ jobs:
             }
           }
 
-      - name: Retire internal data that no script builds
+      - name: Check that no retired file was rebuilt
         run: |
-          # R/sysdata.rda is written only by a data-raw/ script that calls
-          # usethis::use_data(internal = TRUE). When no script does, the
-          # file is left over from a removed one, so it is removed here:
-          # generated data are changed only by this workflow.
-          if [ -e R/sysdata.rda ] && ! grep -rqE "internal *= *TRUE" --include='*.R' data-raw; then
-            git rm -q R/sysdata.rda
-            echo "Retired R/sysdata.rda: no data-raw/ script builds it."
-          fi
+          rebuilt=0
+          while IFS= read -r f; do
+            if [ -e "$f" ]; then
+              echo "::error::$f is listed in data-raw/retired-data.txt, but a script built it. Remove its line there, or the script."
+              rebuilt=1
+            fi
+          done < <(tr -d '\r' < data-raw/retired-data.txt | grep -vE '^[[:space:]]*(#|$)')
+          exit "$rebuilt"
 
       - name: Commit and push
         id: commit

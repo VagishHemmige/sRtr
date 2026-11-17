@@ -1,0 +1,10 @@
+# Generated files that have been retired: no script in data-raw/ builds
+# them any more. The regenerate-data workflow removes each file listed
+# here, and stops with an error if a script builds one again.
+#
+# One path per line. Only data/<name>.rda and R/sysdata.rda are allowed.
+# To bring a file back, remove its line in the same pull request that adds
+# the script that builds it.
+
+# Held only default_missing_vars; replaced by the missing_codes dataset.
+R/sysdata.rda
