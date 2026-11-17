@@ -12,9 +12,11 @@
 #' have no format are recognised from the `variables` table of
 #' [missing_codes], which is not taken from the SRTR dictionary.
 #'
-#' The report holds counts only, never values from individual rows. Counts
-#' from SRTR data can still be small cells; treat them as you would any
-#' other table made from the data.
+#' The report holds counts, and the codes and meanings that [missing_codes]
+#' lists. It never holds a value taken from the data: values a format does
+#' not list are counted together and not shown. Counts from SRTR data can
+#' still be small cells; treat them as you would any other table made from
+#' the data.
 #'
 #' @param df A data frame from an SRTR SAF file.
 #' @param cols Names of the columns to report. `NULL` (the default) reports
@@ -44,7 +46,8 @@
 #'   \item{n}{The number of rows.}
 #'   \item{percent}{`n` as a percentage of all rows of `df`.}
 #' }
-#' With `detail = "code"`, `code` and `meaning` columns identify each code.
+#' With `detail = "code"`, `code` and `meaning` columns identify each code;
+#' they are `NA` in the `"not_in_format"` and `"na"` rows.
 #' Partly known codes (type `"partial"`) are reported too, although they
 #' are not wholly missing.
 #' @seealso [missing_codes], [srtr_normalize_missing()]

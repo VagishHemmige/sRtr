@@ -288,3 +288,22 @@ test_that("verbose reports how many values changed", {
     class = "sRtr_message_missing_normalized"
   )
 })
+
+test_that("labelling does not change what becomes NA for unlisted codes", {
+  # DON_EBV_IGG has format SRLSTT in DONOR_DECEASED, which lists neither a
+  # blank nor "u"; the variables table classifies both.
+  raw <- tibble::tibble(DON_EBV_IGG = c("P", "", "u", "ZQ", "U", NA))
+  labelled <- suppressWarnings(
+    apply_srtr_factors(raw, file_key = "DONOR_DECEASED")
+  )
+
+  from_raw <- srtr_normalize_missing(raw, file_key = "DONOR_DECEASED")
+  from_labelled <- srtr_normalize_missing(labelled)
+
+  expect_equal(is.na(from_raw$DON_EBV_IGG), c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE))
+  expect_equal(is.na(from_labelled$DON_EBV_IGG), is.na(from_raw$DON_EBV_IGG))
+  expect_equal(
+    levels(from_labelled$DON_EBV_IGG),
+    c("I: Indeterminate", "N: Negative", "P: Positive", "ZQ: not in format")
+  )
+})

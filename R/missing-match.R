@@ -158,14 +158,22 @@
 
 # What each value of one column stands for. Returns list(type, code), each
 # as long as `x`: `type` is a missing type, "not_in_format", "na" for a
-# value that is already NA, or NA for an ordinary value; `code` is the code
-# that matched.
+# value that is already NA, or NA for an ordinary value; `code` is the
+# classified code that matched, and NA otherwise. `code` never holds a value
+# from the data that is not a classified code, so that nothing but
+# documented codes can reach a report.
 #
 # A value is compared with both the codes and the meanings of the format,
 # so raw and labelled columns give the same answer; a test checks that no
 # missing meaning doubles as an ordinary code of the same format. A value
 # the format does not list takes the type of the format's catch-all when
 # that is classified, and is "not_in_format" when there is no catch-all.
+#
+# apply_srtr_factors() keeps a code its format does not list under a name
+# made of the code and a suffix. In a column it converted (the `srtr_format`
+# marker is the proof), that name is turned back into the code before the
+# variables table and the caller's own codes are consulted, so labelling
+# does not change the answer.
 .srtr_missing_match <- function(
   x,
   format_rows,
@@ -202,8 +210,17 @@
     }
   }
 
+  plain <- values
+  if (labelled) {
+    plain <- sub(
+      paste0("(", .srtr_unknown_suffix, ")+$"),
+      "",
+      values
+    )
+  }
+
   if (!is.null(variable_rows) && nrow(variable_rows) > 0) {
-    row <- match(values, variable_rows$Code)
+    row <- match(plain, variable_rows$Code)
     use <- !is.na(row) & is.na(type)
     type[use] <- variable_rows$missing_type[row[use]]
     code[use] <- variable_rows$Code[row[use]]
@@ -211,7 +228,7 @@
   }
 
   if (!is.null(extra_rows) && nrow(extra_rows) > 0) {
-    row <- match(values, extra_rows$Code)
+    row <- match(plain, extra_rows$Code)
     use <- !is.na(row)
     type[use] <- extra_rows$missing_type[row[use]]
     code[use] <- extra_rows$Code[row[use]]
@@ -219,7 +236,7 @@
   }
 
   type[outside] <- "not_in_format"
-  code[outside] <- values[outside]
+  code[outside] <- NA_character_
   type[is_na] <- "na"
   code[is_na] <- NA_character_
   list(type = type, code = code)
