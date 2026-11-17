@@ -22,6 +22,21 @@ library(sf)
 library(dplyr)
 ```
 
+```{r hrsa-available, include = FALSE}
+# The chunks that download from HRSA run only when SRTR_HRSA_MAPS is "true"
+# (set by the website build) and HRSA's map service answers. Elsewhere,
+# including R CMD check and CRAN, they are shown but not run.
+hrsa_url <- paste0(
+  "https://gisportal.hrsa.gov/server/rest/services/",
+  "Organs/OrganProcurementAndTransplantation_FS/MapServer?f=json"
+)
+hrsa_ok <- identical(Sys.getenv("SRTR_HRSA_MAPS"), "true") &&
+  !inherits(
+    try(suppressWarnings(readLines(hrsa_url, n = 1, warn = FALSE)), silent = TRUE),
+    "try-error"
+  )
+```
+
 ## Overview
 
 The `sRtr` package includes helper functions and spatial datasets for working with transplant geography in R.
@@ -230,7 +245,7 @@ To retrieve the current HRSA transplant center layer:
 
 Base `plot()` does not reproject layers. A layer added with `add = TRUE` must already use the coordinate reference system of the first layer drawn, or it is drawn in the wrong place or not at all. The same holds for spatial joins, which need both layers in one coordinate reference system. So transform the downloaded centers to match `optn_regions` before using them together:
 
-```{r current-centers, eval=FALSE}
+```{r current-centers, eval = hrsa_ok}
 centers <- get_hrsa_transplant_centers() |>
   sf::st_transform(sf::st_crs(optn_regions))
 
@@ -240,7 +255,7 @@ centers |>
 
 A simple map:
 
-```{r current-centers-map, eval=FALSE}
+```{r current-centers-map, eval = hrsa_ok}
 plot(sf::st_geometry(optn_regions), border = "grey70")
 plot(sf::st_geometry(centers), add = TRUE, pch = 16, cex = 0.5)
 ```
@@ -251,21 +266,29 @@ The HRSA service also includes Organ Procurement Organization service area geogr
 
 The detailed OPO service-area layer can be downloaded with:
 
-```{r get-opo-service-areas, eval=FALSE}
+```{r get-opo-service-areas, eval = hrsa_ok}
 opo_areas <- get_hrsa_opo_service_areas()
 ```
 
-A basic plot:
+The layer includes the OPOs serving Alaska, Hawaii and Puerto Rico, which stretch a national map, so crop it to the contiguous states before plotting. There are more than 50 OPOs, too many for a legend, so the plot leaves the key out.
 
-```{r plot-opo-service-areas, eval=FALSE}
-plot(opo_areas["OPO_PROVIDER_NM"])
+```{r plot-opo-service-areas, eval = hrsa_ok}
+opo_contiguous <- opo_areas |>
+  sf::st_make_valid() |>
+  sf::st_transform(sf::st_crs(unos_regions)) |>
+  sf::st_crop(sf::st_bbox(unos_regions))
+
+plot(opo_contiguous["OPO_PROVIDER_NM"], key.pos = NULL, main = "OPO service areas")
 ```
 
 For a less cluttered map, draw only the boundaries and overlay transplant centers.
 
-```{r plot-opo-with-centers, eval=FALSE}
-plot(sf::st_geometry(opo_areas), border = "grey70")
-plot(sf::st_geometry(centers), add = TRUE, pch = 16, cex = 0.4)
+```{r plot-opo-with-centers, eval = hrsa_ok}
+plot(sf::st_geometry(opo_contiguous), border = "grey70")
+plot(
+  sf::st_geometry(sf::st_transform(centers, sf::st_crs(opo_contiguous))),
+  add = TRUE, pch = 16, cex = 0.4
+)
 ```
 
 
@@ -291,7 +314,7 @@ plot(
 
 The HRSA transplant center layer includes a `Service_Lst` field. Depending on the analysis, this can be used to identify centers that list specific transplant services.
 
-```{r filter-service-list, eval=FALSE}
+```{r filter-service-list, eval = hrsa_ok}
 kidney_centers <- centers |>
   dplyr::filter(grepl("Kidney", Service_Lst, ignore.case = TRUE))
 
@@ -303,12 +326,14 @@ plot(sf::st_geometry(kidney_centers), add = TRUE, pch = 16, cex = 0.5)
 
 Because these are `sf` objects, they can be used with standard spatial operations.
 
-For example, you can check which transplant centers fall within a UNOS/OPTN region.
+For example, you can check which transplant centers fall within a UNOS/OPTN region. For a join, use the regions at their real locations with `noncontiguous = "include"`, so centers in Hawaii and Puerto Rico are assigned to Regions 6 and 3 rather than to none.
 
-```{r spatial-join, eval=FALSE}
+```{r spatial-join, eval = hrsa_ok}
+regions_all <- get_hrsa_optn_regions(noncontiguous = "include")
+
 centers_with_region <- sf::st_join(
-  centers,
-  optn_regions |> dplyr::select(Region)
+  sf::st_transform(centers, sf::st_crs(regions_all)),
+  regions_all |> dplyr::select(Region)
 )
 
 centers_with_region |>
@@ -318,6 +343,6 @@ centers_with_region |>
 
 ## Notes
 
-The HRSA transplant center and OPO functions download public GIS layers from HRSA. These layers may change over time as HRSA updates the source data.
+The HRSA transplant center and OPO functions download public GIS layers from HRSA. These layers may change over time as HRSA updates the source data. On the package website, the maps that use them are drawn from HRSA's layers at the time the site was last built.
 
 The built-in `UNOS_regions_sf` object is included with the package and is useful for reproducible examples and basic region mapping.
