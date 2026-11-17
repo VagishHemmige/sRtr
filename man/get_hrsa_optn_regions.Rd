@@ -4,7 +4,10 @@
 \alias{get_hrsa_optn_regions}
 \title{Get OPTN/UNOS Region Boundaries}
 \usage{
-get_hrsa_optn_regions(crs = 4326)
+get_hrsa_optn_regions(
+  crs = 4326,
+  noncontiguous = c("exclude", "shift", "include")
+)
 }
 \arguments{
 \item{crs}{Coordinate reference system of the result: anything
@@ -14,10 +17,20 @@ get_hrsa_optn_regions(crs = 4326)
 download. \code{5070} keeps the NAD83 / Conus Albers equal-area projection of
 \code{UNOS_regions_sf}. The boundaries are generalized Census cartographic
 files, drawn for maps, so areas and distances computed from them are
-approximate; use detailed boundaries for measurement.}
+approximate; use detailed boundaries for measurement. With
+\code{noncontiguous = "shift"} the result is always in \code{5070}.}
+
+\item{noncontiguous}{What to do with Alaska, Hawaii and Puerto Rico.
+\code{"exclude"} (the default) leaves them out, for maps of transplant
+centers. \code{"shift"} keeps them and moves them below the contiguous states
+for display; the moved coordinates are map positions, not locations.
+\code{"include"} keeps them at their real locations, as OPTN defines the
+regions. The default is a convention for center maps, not part of the
+OPTN definition.}
 }
 \value{
-An \code{sf} object with one feature per OPTN/UNOS region, in \code{crs}.
+An \code{sf} object with one feature per OPTN/UNOS region, in \code{crs} (EPSG:5070
+with \code{noncontiguous = "shift"}).
 }
 \description{
 Returns OPTN/UNOS region boundaries from the package's internal
@@ -34,6 +47,19 @@ represent 10 HRSA/HHS administrative regions, this function returns the
 
 The regions are dissolved in the projection of \code{UNOS_regions_sf}
 (NAD83 / Conus Albers, EPSG:5070) and then transformed to \code{crs}.
+
+Region 6 includes Alaska and Hawaii, and Region 3 includes Puerto Rico.
+Alaska has no transplant center, and on a national map these areas
+stretch the extent far beyond the contiguous states, so by default they
+are left out. \code{noncontiguous = "shift"} keeps them and moves them below the
+contiguous states with \code{\link[=shift_noncontiguous]{shift_noncontiguous()}}, for national maps of
+residents or donors; \code{noncontiguous = "include"} keeps them at their real
+locations, for spatial joins.
+
+The regions are built from whole states, but OPTN splits three: Northern
+Virginia is in Region 2, eastern Vermont in Region 1 and southern Ohio in
+Region 11. Here all of Virginia is in Region 11, all of Vermont in Region 9
+and all of Ohio in Region 10.
 }
 \examples{
 \dontrun{
@@ -45,10 +71,13 @@ plot(regions["Region"])
 
 # Keep the Albers projection of UNOS_regions_sf, as the bundled maps use
 regions_albers <- get_hrsa_optn_regions(crs = 5070)
+
+# All regions, with Alaska, Hawaii and Puerto Rico moved for a national map
+regions_shifted <- get_hrsa_optn_regions(noncontiguous = "shift")
 }
 
 }
 \seealso{
 \code{\link[sf:st_make_valid]{sf::st_make_valid()}}, \code{\link[dplyr:summarise]{dplyr::summarise()}},
-\code{\link[=get_hrsa_transplant_centers]{get_hrsa_transplant_centers()}}
+\code{\link[=get_hrsa_transplant_centers]{get_hrsa_transplant_centers()}}, \code{\link[=shift_noncontiguous]{shift_noncontiguous()}}
 }
