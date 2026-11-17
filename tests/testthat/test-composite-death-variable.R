@@ -63,3 +63,14 @@ test_that("srtr_composite_death() errors on death dates that are not Date", {
   expect_equal(cnd$columns, c("PERS_OPTN_DEATH_DT", "TFL_DEATH_DT"))
   expect_snapshot(error = TRUE, srtr_composite_death(df))
 })
+
+test_that("live: the TX_LI composite death date is NA only when every source is", {
+  skip_if_no_srtr_file("TX_LI")
+  sources <- c("PERS_OPTN_DEATH_DT", "PERS_SSA_DEATH_DT", "TFL_DEATH_DT")
+
+  tx <- srtr_composite_death(load_live("TX_LI", col_select = c("TRR_ID", sources)))
+
+  expect_s3_class(tx$REC_DEATH_DT_COMPOSITE, "Date")
+  every_source_na <- Reduce(`&`, lapply(tx[sources], is.na))
+  expect_equal(is.na(tx$REC_DEATH_DT_COMPOSITE), every_source_na)
+})

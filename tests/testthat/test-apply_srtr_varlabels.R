@@ -1,5 +1,5 @@
 test_that("apply_srtr_varlabels applies labels from dictionary", {
-  skip_if_no_srtr_data()
+  skip_if_no_srtr_file("TX_KI")
   df <- load_srtr_file("TX_KI", var_labels = FALSE)
   df_labeled <- apply_srtr_varlabels(df)
   expect_true(any(
@@ -8,7 +8,7 @@ test_that("apply_srtr_varlabels applies labels from dictionary", {
 })
 
 test_that("apply_srtr_varlabels uses file_key attribute", {
-  skip_if_no_srtr_data()
+  skip_if_no_srtr_file("TX_KI")
   df <- load_srtr_file("TX_KI", var_labels = FALSE)
   attr(df, "file_key") <- "TX_KI"
   result <- apply_srtr_varlabels(df)

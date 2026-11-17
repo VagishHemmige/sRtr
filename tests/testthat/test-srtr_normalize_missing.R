@@ -393,3 +393,12 @@ test_that("an extra code whose label another code shares must cover both", {
   )
   expect_equal(found$type, c("unknown", NA))
 })
+
+test_that("live: normalizing TX_LI leaves no 998 Unknown REC_FUNCTN_STAT level", {
+  skip_if_no_srtr_file("TX_LI")
+  tx <- load_live("TX_LI", col_select = c("TRR_ID", "REC_FUNCTN_STAT"))
+
+  out <- srtr_normalize_missing(tx, file_key = "TX_LI", release = srtr_live_release())
+
+  expect_equal(grep("^998:", levels(out$REC_FUNCTN_STAT), value = TRUE), character())
+})
