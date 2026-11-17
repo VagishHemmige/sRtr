@@ -10,16 +10,24 @@
 #' and a conflict flag when multiple sources disagree.
 #'
 #' @section How the sources compare in real data:
-#' In a 2023 liver transplant file, the follow-up date `TFL_DEATH_DT` matched
-#' the OPTN date on the same day in over 99% of recipients with both, so it
-#' rarely adds a death. The SSA date matched OPTN on the same day in about 82%
-#' and within a week in about 94%; differences ran in both directions. SSA
-#' deaths fell sharply after 2011, to under a quarter of OPTN deaths from 2015
-#' on, consistent with the 2011 restriction of state records in the SSA Death
-#' Master File. So for recent deaths SSA is not an independent check, and the
-#' conflict flag mostly reflects older transplants and differences of a few
-#' days. `prefer_earliest = TRUE` changed the date for under 5% of deaths,
-#' mostly by a week or less.
+#' In the 2303 liver transplant file (TX_LI):
+#'
+#' * Among recipients with both dates, `TFL_DEATH_DT` matched the OPTN date on
+#'   the same day in over 99%. Deaths recorded only in `TFL_DEATH_DT` were
+#'   very rare (19 of about 87,000 recipients with any death date).
+#' * Among recipients with both dates, the SSA date matched OPTN on the same
+#'   day in about 82% and within a week in about 94%; differences ran in both
+#'   directions.
+#' * SSA recorded far fewer deaths than OPTN in recent years (under a quarter
+#'   as many from 2015 on), consistent with the 2011 change to the SSA Death
+#'   Master File. So for recent deaths a missing SSA date is weak evidence
+#'   against a death reported to OPTN.
+#' * Conflicts between sources were more frequent among earlier transplants,
+#'   and most were differences of a few days.
+#' * `prefer_earliest = TRUE` changed the date for under 5% of recipients with
+#'   a death date, mostly by a week or less.
+#'
+#' Other releases and organs may differ.
 #'
 #' @param df A data frame.
 #' @param optn,ssa,tfl Character column names for OPTN, SSA, and TFL death
