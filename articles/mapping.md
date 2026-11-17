@@ -214,6 +214,157 @@ transplant_centers_sf$OTCName[outside]
 #> [3] "Auxilio Mutuo Hospital"
 ```
 
+## National maps with Alaska, Hawaii and Puerto Rico
+
+Region 6 includes Alaska and Hawaii, and Region 3 includes Puerto Rico.
+Hawaii has one transplant center, Puerto Rico two and Alaska none. On a
+national map these areas sit far from the contiguous states, so
+`get_hrsa_optn_regions(noncontiguous = "shift")` moves them below the
+contiguous states, and
+[`shift_noncontiguous()`](https://vagishhemmige.github.io/sRtr/reference/shift_noncontiguous.md)
+applies the same move to any other layer, such as the transplant
+centers. The shifted coordinates are positions on a map, not locations:
+use them for drawing only, never for spatial joins or distances.
+
+``` r
+
+regions_shifted <- get_hrsa_optn_regions(noncontiguous = "shift")
+regions_shifted$Region <- factor(regions_shifted$Region, levels = region_levels)
+centers_shifted <- shift_noncontiguous(transplant_centers_sf)
+
+plot(regions_shifted["Region"], key.pos = 4, reset = FALSE)
+plot(sf::st_geometry(centers_shifted), add = TRUE, pch = 16, cex = 0.4)
+```
+
+![](mapping_files/figure-html/national-shifted-1.png)
+
+## An inset for the Washington-to-Boston corridor
+
+Between Washington and Boston, transplant centers sit so close together
+that they overlap on a national map. An inset repeats that corridor at a
+larger scale. The corridor is given in longitude and latitude, then
+projected; taking the bounding box of the projected box makes sure the
+inset covers the whole corridor.
+
+``` r
+
+corridor_box <- sf::st_bbox(
+  c(xmin = -77.6, ymin = 38.6, xmax = -70.5, ymax = 42.9),
+  crs = sf::st_crs(4326)
+) |>
+  sf::st_as_sfc() |>
+  sf::st_transform(5070) |>
+  sf::st_bbox()
+
+region_colors <- grDevices::palette.colors(11, "Set 3")
+```
+
+### With ggplot2
+
+ggplot2 has no inset of its own, so the corridor is drawn as a second
+plot and placed beside the national map with
+[`annotation_custom()`](https://ggplot2.tidyverse.org/reference/annotation_custom.html).
+A red box marks the corridor on the national map.
+
+``` r
+
+library(ggplot2)
+
+map_layers <- list(
+  geom_sf(data = regions_shifted, aes(fill = Region), color = "white", linewidth = 0.2),
+  geom_sf(data = centers_shifted, size = 0.5),
+  scale_fill_manual(values = region_colors, drop = FALSE)
+)
+
+corridor_map <- ggplot() +
+  map_layers +
+  coord_sf(
+    crs = 5070, datum = NA, expand = FALSE,
+    xlim = corridor_box[c("xmin", "xmax")],
+    ylim = corridor_box[c("ymin", "ymax")]
+  ) +
+  theme_void() +
+  theme(
+    legend.position = "none",
+    panel.border = element_rect(color = "red", fill = NA, linewidth = 0.8)
+  )
+
+# Place the inset to the right of the national map, keeping its shape
+national <- sf::st_bbox(regions_shifted)
+national_width <- national[["xmax"]] - national[["xmin"]]
+inset_width <- 0.32 * national_width
+inset_height <- inset_width *
+  (corridor_box[["ymax"]] - corridor_box[["ymin"]]) /
+  (corridor_box[["xmax"]] - corridor_box[["xmin"]])
+inset_x <- national[["xmax"]] + 0.03 * national_width
+inset_y <- national[["ymax"]] - inset_height
+
+ggplot() +
+  map_layers +
+  annotate(
+    "rect",
+    xmin = corridor_box[["xmin"]], xmax = corridor_box[["xmax"]],
+    ymin = corridor_box[["ymin"]], ymax = corridor_box[["ymax"]],
+    fill = NA, color = "red", linewidth = 0.5
+  ) +
+  annotation_custom(
+    ggplotGrob(corridor_map),
+    xmin = inset_x, xmax = inset_x + inset_width,
+    ymin = inset_y, ymax = inset_y + inset_height
+  ) +
+  coord_sf(
+    crs = 5070, datum = NA, expand = FALSE,
+    xlim = c(national[["xmin"]], inset_x + inset_width),
+    ylim = national[c("ymin", "ymax")]
+  ) +
+  labs(fill = NULL) +
+  theme_void() +
+  theme(legend.position = "bottom")
+```
+
+![](mapping_files/figure-html/ggplot-corridor-1.png)
+
+### With tmap
+
+tmap draws the inset itself with
+[`tm_inset()`](https://r-tmap.github.io/tmap/reference/tm_inset.html)
+and marks the corridor on the national map. This needs tmap 4.2 or
+later, the first version whose
+[`tm_inset()`](https://r-tmap.github.io/tmap/reference/tm_inset.html)
+takes the frame colors.
+
+``` r
+
+library(tmap)
+
+tm_shape(regions_shifted) +
+  tm_polygons(
+    fill = "Region",
+    fill.scale = tm_scale_categorical(values = region_colors),
+    fill.legend = tm_legend(
+      title = "",
+      orientation = "landscape",
+      position = tm_pos_out("center", "bottom")
+    ),
+    col = "white",
+    lwd = 0.5
+  ) +
+  tm_shape(centers_shifted) +
+  tm_dots(size = 0.1) +
+  tm_inset(
+    corridor_box,
+    position = c("right", "bottom"),
+    box_frame.color = "red",
+    main_frame.color = "red"
+  ) +
+  tm_layout(frame = FALSE)
+#> [plot mode] fit legend/component: Some legend items or map compoments do not
+#> fit well, and are therefore rescaled.
+#> ℹ Set the tmap option `component.autoscale = FALSE` to disable rescaling.
+```
+
+![](mapping_files/figure-html/tmap-corridor-1.png)
+
 ## Downloading current HRSA transplant center locations
 
 To retrieve the current HRSA transplant center layer:

@@ -262,6 +262,142 @@ those in Hawaii and Puerto Rico, are not shown. To list them:</p>
 <span><span class="co">#&gt; [3] "Auxilio Mutuo Hospital"</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="national-maps-with-alaska-hawaii-and-puerto-rico">National maps with Alaska, Hawaii and Puerto Rico<a class="anchor" aria-label="anchor" href="#national-maps-with-alaska-hawaii-and-puerto-rico"></a>
+</h2>
+<p>Region 6 includes Alaska and Hawaii, and Region 3 includes Puerto
+Rico. Hawaii has one transplant center, Puerto Rico two and Alaska none.
+On a national map these areas sit far from the contiguous states, so
+<code>get_hrsa_optn_regions(noncontiguous = "shift")</code> moves them
+below the contiguous states, and <code><a href="../reference/shift_noncontiguous.html">shift_noncontiguous()</a></code>
+applies the same move to any other layer, such as the transplant
+centers. The shifted coordinates are positions on a map, not locations:
+use them for drawing only, never for spatial joins or distances.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">regions_shifted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_hrsa_optn_regions.html">get_hrsa_optn_regions</a></span><span class="op">(</span>noncontiguous <span class="op">=</span> <span class="st">"shift"</span><span class="op">)</span></span>
+<span><span class="va">regions_shifted</span><span class="op">$</span><span class="va">Region</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">regions_shifted</span><span class="op">$</span><span class="va">Region</span>, levels <span class="op">=</span> <span class="va">region_levels</span><span class="op">)</span></span>
+<span><span class="va">centers_shifted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_noncontiguous.html">shift_noncontiguous</a></span><span class="op">(</span><span class="va">transplant_centers_sf</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">regions_shifted</span><span class="op">[</span><span class="st">"Region"</span><span class="op">]</span>, key.pos <span class="op">=</span> <span class="fl">4</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">centers_shifted</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></code></pre></div>
+<p><img src="mapping_files/figure-html/national-shifted-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level2">
+<h2 id="an-inset-for-the-washington-to-boston-corridor">An inset for the Washington-to-Boston corridor<a class="anchor" aria-label="anchor" href="#an-inset-for-the-washington-to-boston-corridor"></a>
+</h2>
+<p>Between Washington and Boston, transplant centers sit so close
+together that they overlap on a national map. An inset repeats that
+corridor at a larger scale. The corridor is given in longitude and
+latitude, then projected; taking the bounding box of the projected box
+makes sure the inset covers the whole corridor.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">corridor_box</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="op">-</span><span class="fl">77.6</span>, ymin <span class="op">=</span> <span class="fl">38.6</span>, xmax <span class="op">=</span> <span class="op">-</span><span class="fl">70.5</span>, ymax <span class="op">=</span> <span class="fl">42.9</span><span class="op">)</span>,</span>
+<span>  crs <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">4326</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sfc.html" class="external-link">st_as_sfc</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fl">5070</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">region_colors</span> <span class="op">&lt;-</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palette.html" class="external-link">palette.colors</a></span><span class="op">(</span><span class="fl">11</span>, <span class="st">"Set 3"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="with-ggplot2">With ggplot2<a class="anchor" aria-label="anchor" href="#with-ggplot2"></a>
+</h3>
+<p>ggplot2 has no inset of its own, so the corridor is drawn as a second
+plot and placed beside the national map with
+<code><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html" class="external-link">annotation_custom()</a></code>. A red box marks the corridor on the
+national map.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">map_layers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">regions_shifted</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">Region</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">centers_shifted</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">region_colors</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">corridor_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">map_layers</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">coord_sf</a></span><span class="op">(</span></span>
+<span>    crs <span class="op">=</span> <span class="fl">5070</span>, datum <span class="op">=</span> <span class="cn">NA</span>, expand <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    xlim <span class="op">=</span> <span class="va">corridor_box</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"xmin"</span>, <span class="st">"xmax"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>    ylim <span class="op">=</span> <span class="va">corridor_box</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ymin"</span>, <span class="st">"ymax"</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>    legend.position <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>    panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"red"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Place the inset to the right of the national map, keeping its shape</span></span>
+<span><span class="va">national</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span><span class="va">regions_shifted</span><span class="op">)</span></span>
+<span><span class="va">national_width</span> <span class="op">&lt;-</span> <span class="va">national</span><span class="op">[[</span><span class="st">"xmax"</span><span class="op">]</span><span class="op">]</span> <span class="op">-</span> <span class="va">national</span><span class="op">[[</span><span class="st">"xmin"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">inset_width</span> <span class="op">&lt;-</span> <span class="fl">0.32</span> <span class="op">*</span> <span class="va">national_width</span></span>
+<span><span class="va">inset_height</span> <span class="op">&lt;-</span> <span class="va">inset_width</span> <span class="op">*</span></span>
+<span>  <span class="op">(</span><span class="va">corridor_box</span><span class="op">[[</span><span class="st">"ymax"</span><span class="op">]</span><span class="op">]</span> <span class="op">-</span> <span class="va">corridor_box</span><span class="op">[[</span><span class="st">"ymin"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span></span>
+<span>  <span class="op">(</span><span class="va">corridor_box</span><span class="op">[[</span><span class="st">"xmax"</span><span class="op">]</span><span class="op">]</span> <span class="op">-</span> <span class="va">corridor_box</span><span class="op">[[</span><span class="st">"xmin"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">inset_x</span> <span class="op">&lt;-</span> <span class="va">national</span><span class="op">[[</span><span class="st">"xmax"</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> <span class="va">national_width</span></span>
+<span><span class="va">inset_y</span> <span class="op">&lt;-</span> <span class="va">national</span><span class="op">[[</span><span class="st">"ymax"</span><span class="op">]</span><span class="op">]</span> <span class="op">-</span> <span class="va">inset_height</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">map_layers</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span></span>
+<span>    <span class="st">"rect"</span>,</span>
+<span>    xmin <span class="op">=</span> <span class="va">corridor_box</span><span class="op">[[</span><span class="st">"xmin"</span><span class="op">]</span><span class="op">]</span>, xmax <span class="op">=</span> <span class="va">corridor_box</span><span class="op">[[</span><span class="st">"xmax"</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>    ymin <span class="op">=</span> <span class="va">corridor_box</span><span class="op">[[</span><span class="st">"ymin"</span><span class="op">]</span><span class="op">]</span>, ymax <span class="op">=</span> <span class="va">corridor_box</span><span class="op">[[</span><span class="st">"ymax"</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>    fill <span class="op">=</span> <span class="cn">NA</span>, color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">0.5</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html" class="external-link">annotation_custom</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplotGrob.html" class="external-link">ggplotGrob</a></span><span class="op">(</span><span class="va">corridor_map</span><span class="op">)</span>,</span>
+<span>    xmin <span class="op">=</span> <span class="va">inset_x</span>, xmax <span class="op">=</span> <span class="va">inset_x</span> <span class="op">+</span> <span class="va">inset_width</span>,</span>
+<span>    ymin <span class="op">=</span> <span class="va">inset_y</span>, ymax <span class="op">=</span> <span class="va">inset_y</span> <span class="op">+</span> <span class="va">inset_height</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">coord_sf</a></span><span class="op">(</span></span>
+<span>    crs <span class="op">=</span> <span class="fl">5070</span>, datum <span class="op">=</span> <span class="cn">NA</span>, expand <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">national</span><span class="op">[[</span><span class="st">"xmin"</span><span class="op">]</span><span class="op">]</span>, <span class="va">inset_x</span> <span class="op">+</span> <span class="va">inset_width</span><span class="op">)</span>,</span>
+<span>    ylim <span class="op">=</span> <span class="va">national</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ymin"</span>, <span class="st">"ymax"</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="mapping_files/figure-html/ggplot-corridor-1.png" class="r-plt" alt="" width="864"></p>
+</div>
+<div class="section level3">
+<h3 id="with-tmap">With tmap<a class="anchor" aria-label="anchor" href="#with-tmap"></a>
+</h3>
+<p>tmap draws the inset itself with <code><a href="https://r-tmap.github.io/tmap/reference/tm_inset.html" class="external-link">tm_inset()</a></code> and marks
+the corridor on the national map. This needs tmap 4.2 or later, the
+first version whose <code><a href="https://r-tmap.github.io/tmap/reference/tm_inset.html" class="external-link">tm_inset()</a></code> takes the frame colors.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap" class="external-link">tmap</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">regions_shifted</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_polygons</a></span><span class="op">(</span></span>
+<span>    fill <span class="op">=</span> <span class="st">"Region"</span>,</span>
+<span>    fill.scale <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_scale_categorical.html" class="external-link">tm_scale_categorical</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">region_colors</span><span class="op">)</span>,</span>
+<span>    fill.legend <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_legend.html" class="external-link">tm_legend</a></span><span class="op">(</span></span>
+<span>      title <span class="op">=</span> <span class="st">""</span>,</span>
+<span>      orientation <span class="op">=</span> <span class="st">"landscape"</span>,</span>
+<span>      position <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_pos.html" class="external-link">tm_pos_out</a></span><span class="op">(</span><span class="st">"center"</span>, <span class="st">"bottom"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    col <span class="op">=</span> <span class="st">"white"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">0.5</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">centers_shifted</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_symbols.html" class="external-link">tm_dots</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_inset.html" class="external-link">tm_inset</a></span><span class="op">(</span></span>
+<span>    <span class="va">corridor_box</span>,</span>
+<span>    position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"right"</span>, <span class="st">"bottom"</span><span class="op">)</span>,</span>
+<span>    box_frame.color <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>    main_frame.color <span class="op">=</span> <span class="st">"red"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[plot mode]</span> fit legend/component: Some legend items or map compoments do not</span></span>
+<span><span class="co">#&gt; fit well, and are therefore rescaled.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Set the tmap option `component.autoscale = FALSE` to disable rescaling.</span></span></code></pre></div>
+<p><img src="mapping_files/figure-html/tmap-corridor-1.png" class="r-plt" alt="" width="864"></p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="downloading-current-hrsa-transplant-center-locations">Downloading current HRSA transplant center locations<a class="anchor" aria-label="anchor" href="#downloading-current-hrsa-transplant-center-locations"></a>
 </h2>
 <p>To retrieve the current HRSA transplant center layer:</p>
@@ -271,14 +407,14 @@ system of the first layer drawn, or it is drawn in the wrong place or
 not at all. The same holds for spatial joins, which need both layers in
 one coordinate reference system. So transform the downloaded centers to
 match <code>optn_regions</code> before using them together:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">centers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_hrsa_transplant_centers.html">get_hrsa_transplant_centers</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">optn_regions</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">centers</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">OTC_NM</span>, <span class="va">OTC_CITY</span>, <span class="va">STATE_ABBR</span>, <span class="va">OPO_PROVIDER_NM</span>, <span class="va">Service_Lst</span><span class="op">)</span></span></code></pre></div>
 <p>A simple map:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">optn_regions</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">centers</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -288,14 +424,14 @@ match <code>optn_regions</code> before using them together:</p>
 <p>The HRSA service also includes Organ Procurement Organization service
 area geography.</p>
 <p>The detailed OPO service-area layer can be downloaded with:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">opo_areas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_hrsa_opo_service_areas.html">get_hrsa_opo_service_areas</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>A basic plot:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">opo_areas</span><span class="op">[</span><span class="st">"OPO_PROVIDER_NM"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>For a less cluttered map, draw only the boundaries and overlay
 transplant centers.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">opo_areas</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">centers</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -304,7 +440,7 @@ transplant centers.</p>
 </h2>
 <p>The <code>tigris</code> package is useful for adding Census boundary
 layers, such as states or counties.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/walkerke/tigris" class="external-link">tigris</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">states</span> <span class="op">&lt;-</span> <span class="fu">tigris</span><span class="fu">::</span><span class="fu">states</span><span class="op">(</span>cb <span class="op">=</span> <span class="cn">TRUE</span>, year <span class="op">=</span> <span class="fl">2023</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -323,7 +459,7 @@ layers, such as states or counties.</p>
 <p>The HRSA transplant center layer includes a <code>Service_Lst</code>
 field. Depending on the analysis, this can be used to identify centers
 that list specific transplant services.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kidney_centers</span> <span class="op">&lt;-</span> <span class="va">centers</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Kidney"</span>, <span class="va">Service_Lst</span>, ignore.case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -337,7 +473,7 @@ that list specific transplant services.</p>
 standard spatial operations.</p>
 <p>For example, you can check which transplant centers fall within a
 UNOS/OPTN region.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">centers_with_region</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html" class="external-link">st_join</a></span><span class="op">(</span></span>
 <span>  <span class="va">centers</span>,</span>
 <span>  <span class="va">optn_regions</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
