@@ -55,10 +55,11 @@ no format:
 - source:
 
   Where the row comes from. `"hand list"` rows were carried over from
-  the list
+  the hand-written list that
   [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
-  has used so far. The SRTR dictionary does not document these values,
-  and they have not yet been checked against SAF data.
+  used before this dataset existed. The SRTR dictionary does not
+  document these values, and they have not yet been checked against SAF
+  data.
 
 - note:
 

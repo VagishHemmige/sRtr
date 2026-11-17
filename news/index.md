@@ -25,6 +25,9 @@
   - Not done and not tested still become `NA` by default;
     `actions = c(not_done = "keep")` keeps them
     ([\#28](https://github.com/VagishHemmige/sRtr/issues/28)).
+  - The internal list of default missing codes (`R/sysdata.rda`) is
+    gone; everything it held is in `missing_codes`, where it can be
+    read.
 
 - New
   [`srtr_missing_report()`](https://vagishhemmige.github.io/sRtr/reference/srtr_missing_report.md)
