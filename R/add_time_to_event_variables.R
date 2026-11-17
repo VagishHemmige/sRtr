@@ -322,6 +322,20 @@ add_txf_outcomes <- function(
 #' censoring time, not a graft failure. A graft failure dated after the last
 #' follow-up date but before death is still counted, at its own date.
 #'
+#' First rejection (`FIRST_REJ_DATE`, and `FIRST_REJ_DATE_PA` for `TX_KP`)
+#' counts a treated rejection (code 1 of format `ACREJEP`, raw or labelled)
+#' during the transplant admission (`REC_ACUTE_REJ_EPISODE`, or
+#' `REC_ACUTE_REJ_EPISODE_PA`) first, else the first follow-up form reporting
+#' one. An admission rejection is dated at discharge, a proxy: the transplant
+#' date plus `REC_POSTX_LOS`, else `REC_DISCHRG_DT`; a date before the
+#' transplant is not used. `FIRST_REJ_DATE_SOURCE` (`"admission_los"`,
+#' `"admission_discharge"`, `"admission_undated"` or `"follow_up"`) says which
+#' rule applied. Here a missing date does not always mean no event: an
+#' admission rejection with no usable date keeps `_BINARY = 1` with a missing
+#' censoring date and time, with a warning, so it drops out of time-to-event
+#' models instead of counting as rejection-free. A later follow-up rejection
+#' stays in `FIRST_FU_REJ_DATE` and is never used in its place.
+#'
 add_time_to_event_outcomes <- function(
   df,
   death_window = c("follow_up", "ascertainment"),
@@ -534,11 +548,16 @@ add_time_to_event_outcomes <- function(
     c("REC_TX_DT", "REC_POSTX_LOS", episode_col),
     why = "They date a rejection during the transplant admission."
   )
-  treated <- "1: Yes, at least one episode treated with anti-rejection agent"
-  at_admission <- as.character(df[[episode_col]]) %in% treated
-  los_date <- df$REC_TX_DT + df$REC_POSTX_LOS
+  #Code 1 of format ACREJEP: at least one episode treated with an
+  #anti-rejection agent. Raw codes and labelled columns alike.
+  at_admission <- .srtr_has_code(df[[episode_col]], "1", "ACREJEP")
+  #A date before the transplant cannot date an admission event.
+  usable <- function(date) {
+    dplyr::if_else(!is.na(date) & date >= df$REC_TX_DT, date, as.Date(NA))
+  }
+  los_date <- usable(df$REC_TX_DT + df$REC_POSTX_LOS)
   discharge_date <- if ("REC_DISCHRG_DT" %in% names(df)) {
-    df$REC_DISCHRG_DT
+    usable(df$REC_DISCHRG_DT)
   } else {
     rep(as.Date(NA), nrow(df))
   }
@@ -555,6 +574,19 @@ add_time_to_event_outcomes <- function(
     follow_up_date
   )
   list(date = date, source = source)
+}
+
+#' Which values of a coded column are a given format code
+#'
+#' A raw column holds the code; a labelled one holds the code's meaning in
+#' the format. Both are matched, so raw and labelled columns give the same
+#' answer. The meaning comes from the bundled [formats].
+#' @noRd
+.srtr_has_code <- function(x, code, format) {
+  meaning <- sRtr::formats$Meaning[
+    sRtr::formats$Format == format & sRtr::formats$Code == code
+  ]
+  as.character(x) %in% c(code, meaning)
 }
 
 #' Keep an undated admission rejection as a rejection

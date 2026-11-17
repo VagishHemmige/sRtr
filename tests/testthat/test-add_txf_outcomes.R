@@ -336,3 +336,45 @@ test_that("a recipient whose positive forms are all undated gets NA, not Inf", {
 
   expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2001-01-01", NA, NA)))
 })
+
+test_that("an admission rejection is found in raw codes as well as labels", {
+  local_mocked_bindings(load_srtr_file = function(...) admission_rejection_txf())
+  labelled <- admission_rejection_cohort()
+  raw <- labelled
+  raw$REC_ACUTE_REJ_EPISODE <- c(1, 1, 1, 3)
+
+  out_labelled <- suppressWarnings(add_time_to_event_outcomes(labelled))
+  out_raw <- suppressWarnings(add_time_to_event_outcomes(raw))
+
+  expect_equal(out_raw$FIRST_REJ_DATE_SOURCE, out_labelled$FIRST_REJ_DATE_SOURCE)
+  expect_equal(out_raw$FIRST_REJ_DATE, out_labelled$FIRST_REJ_DATE)
+  expect_equal(out_raw$FIRST_REJ_DATE_BINARY, c(1L, 1L, 1L, 0L))
+})
+
+test_that("raw TX_KP pancreas codes are read like labelled ones", {
+  local_mocked_bindings(load_srtr_file = function(...) fake_cohort_txf("PA")[0, ])
+  df <- fake_cohort("TX_KP")
+  df$REC_ACUTE_REJ_EPISODE <- c(3, 3)
+  df$REC_ACUTE_REJ_EPISODE_PA <- c(1, 3)
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$FIRST_REJ_DATE_PA_SOURCE, c("admission_los", NA))
+  expect_equal(out$FIRST_REJ_DATE_PA, as.Date(c("2000-01-11", NA)))
+})
+
+test_that("an admission date before the transplant is not used", {
+  local_mocked_bindings(load_srtr_file = function(...) admission_rejection_txf()[0, ])
+  df <- admission_rejection_cohort()[1:2, ]
+  df$REC_POSTX_LOS <- c(-5, NA)
+  df$REC_DISCHRG_DT <- as.Date(c("2000-01-15", "1999-12-31"))
+
+  out <- suppressWarnings(add_time_to_event_outcomes(df))
+
+  # 900001: negative length of stay, valid discharge date.
+  # 900002: no length of stay, discharge before transplant: undated.
+  expect_equal(out$FIRST_REJ_DATE, as.Date(c("2000-01-15", NA)))
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, c("admission_discharge", "admission_undated"))
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(1L, 1L))
+  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2000-01-15", NA)))
+})
