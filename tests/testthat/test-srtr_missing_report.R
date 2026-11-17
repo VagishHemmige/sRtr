@@ -194,3 +194,49 @@ test_that("no missing meaning doubles as an ordinary code of its format", {
 
   expect_true(all(clash_type %in% clash$missing_type & !is.na(clash_type)))
 })
+
+test_that("labelling keeps the type of codes its format does not list", {
+  # DON_EBV_IGG has format SRLSTT in DONOR_DECEASED, which lists neither a
+  # blank nor "u"; the variables table classifies both.
+  raw <- tibble::tibble(DON_EBV_IGG = c("P", "", "u", "u", "ZQ", NA))
+  labelled <- suppressWarnings(
+    apply_srtr_factors(raw, file_key = "DONOR_DECEASED")
+  )
+
+  expect_true(any(grepl(": not in format", levels(labelled$DON_EBV_IGG))))
+  for (detail in c("type", "code")) {
+    from_raw <- srtr_missing_report(
+      raw,
+      file_key = "DONOR_DECEASED",
+      detail = detail
+    )
+    expect_equal(srtr_missing_report(labelled, detail = detail), from_raw)
+  }
+  by_type <- srtr_missing_report(labelled)
+  expect_equal(count_of(by_type, "DON_EBV_IGG", "unknown"), 2L)
+  expect_equal(count_of(by_type, "DON_EBV_IGG", "sas_missing"), 1L)
+  expect_equal(count_of(by_type, "DON_EBV_IGG", "not_in_format"), 1L)
+})
+
+test_that("a value that is not a classified code never appears in the report", {
+  sentinel <- "FAKE-SENTINEL-TEXT"
+  df <- tibble::tibble(
+    DON_ANTI_CMV = c("P", sentinel, "another stray value", "U"),
+    CAN_MALIG = c("Y", sentinel, "U", "N")
+  )
+  labelled <- suppressWarnings(apply_srtr_factors(df, file_key = "TX_KI"))
+
+  for (input in list(df, labelled)) {
+    report <- srtr_missing_report(input, file_key = "TX_KI", detail = "code")
+    shown <- unlist(lapply(report, as.character))
+
+    expect_false(any(grepl("SENTINEL|stray", shown)))
+    expect_equal(
+      report$n[
+        report$variable == "DON_ANTI_CMV" &
+          report$missing_type == "not_in_format"
+      ],
+      2L
+    )
+  }
+})
