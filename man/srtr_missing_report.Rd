@@ -48,7 +48,8 @@ value that is already \code{NA}.}
 \item{n}{The number of rows.}
 \item{percent}{\code{n} as a percentage of all rows of \code{df}.}
 }
-With \code{detail = "code"}, \code{code} and \code{meaning} columns identify each code.
+With \code{detail = "code"}, \code{code} and \code{meaning} columns identify each code;
+they are \code{NA} in the \code{"not_in_format"} and \code{"na"} rows.
 Partly known codes (type \code{"partial"}) are reported too, although they
 are not wholly missing.
 }
@@ -66,9 +67,11 @@ format and an ordinary value in another. Raw codes and labelled columns
 have no format are recognised from the \code{variables} table of
 \link{missing_codes}, which is not taken from the SRTR dictionary.
 
-The report holds counts only, never values from individual rows. Counts
-from SRTR data can still be small cells; treat them as you would any
-other table made from the data.
+The report holds counts, and the codes and meanings that \link{missing_codes}
+lists. It never holds a value taken from the data: values a format does
+not list are counted together and not shown. Counts from SRTR data can
+still be small cells; treat them as you would any other table made from
+the data.
 }
 \examples{
 # Made-up rows using TX_KI column names
