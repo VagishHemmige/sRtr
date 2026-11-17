@@ -473,7 +473,8 @@ area geography.</p>
 <p>The layer includes the OPOs serving Alaska, Hawaii and Puerto Rico,
 which stretch a national map, so crop it to the contiguous states before
 plotting. There are more than 50 OPOs, too many for a legend, so the
-plot leaves the key out.</p>
+plot leaves the key out. Colors repeat across OPOs; the black borders
+separate them.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">opo_contiguous</span> <span class="op">&lt;-</span> <span class="va">opo_areas</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/valid.html" class="external-link">st_make_valid</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -543,21 +544,24 @@ Puerto Rico are assigned to Regions 6 and 3 rather than to none.</p>
 <span>  <span class="va">regions_all</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># The HRSA layer has one row per center and organ program, so count each</span></span>
+<span><span class="co"># center once</span></span>
 <span><span class="va">centers_with_region</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">OTC_NM</span>, <span class="va">Region</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">Region</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       Region   n</span></span>
-<span><span class="co">#&gt; 1   Region 5 113</span></span>
-<span><span class="co">#&gt; 2   Region 2  98</span></span>
-<span><span class="co">#&gt; 3   Region 3  89</span></span>
-<span><span class="co">#&gt; 4   Region 4  88</span></span>
-<span><span class="co">#&gt; 5  Region 11  80</span></span>
-<span><span class="co">#&gt; 6   Region 7  79</span></span>
-<span><span class="co">#&gt; 7  Region 10  68</span></span>
-<span><span class="co">#&gt; 8   Region 8  60</span></span>
-<span><span class="co">#&gt; 9   Region 9  46</span></span>
-<span><span class="co">#&gt; 10  Region 1  40</span></span>
-<span><span class="co">#&gt; 11  Region 6  30</span></span></code></pre></div>
+<span><span class="co">#&gt;       Region  n</span></span>
+<span><span class="co">#&gt; 1   Region 2 34</span></span>
+<span><span class="co">#&gt; 2   Region 5 33</span></span>
+<span><span class="co">#&gt; 3   Region 3 31</span></span>
+<span><span class="co">#&gt; 4   Region 4 30</span></span>
+<span><span class="co">#&gt; 5  Region 11 26</span></span>
+<span><span class="co">#&gt; 6   Region 7 22</span></span>
+<span><span class="co">#&gt; 7  Region 10 20</span></span>
+<span><span class="co">#&gt; 8   Region 8 19</span></span>
+<span><span class="co">#&gt; 9   Region 9 16</span></span>
+<span><span class="co">#&gt; 10  Region 1 14</span></span>
+<span><span class="co">#&gt; 11  Region 6  9</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="notes">Notes<a class="anchor" aria-label="anchor" href="#notes"></a>

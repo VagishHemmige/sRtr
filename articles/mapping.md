@@ -454,7 +454,8 @@ opo_areas <- get_hrsa_opo_service_areas()
 The layer includes the OPOs serving Alaska, Hawaii and Puerto Rico,
 which stretch a national map, so crop it to the contiguous states before
 plotting. There are more than 50 OPOs, too many for a legend, so the
-plot leaves the key out.
+plot leaves the key out. Colors repeat across OPOs; the black borders
+separate them.
 
 ``` r
 
@@ -540,21 +541,24 @@ centers_with_region <- sf::st_join(
   regions_all |> dplyr::select(Region)
 )
 
+# The HRSA layer has one row per center and organ program, so count each
+# center once
 centers_with_region |>
   sf::st_drop_geometry() |>
+  dplyr::distinct(OTC_NM, Region) |>
   dplyr::count(Region, sort = TRUE)
-#>       Region   n
-#> 1   Region 5 113
-#> 2   Region 2  98
-#> 3   Region 3  89
-#> 4   Region 4  88
-#> 5  Region 11  80
-#> 6   Region 7  79
-#> 7  Region 10  68
-#> 8   Region 8  60
-#> 9   Region 9  46
-#> 10  Region 1  40
-#> 11  Region 6  30
+#>       Region  n
+#> 1   Region 2 34
+#> 2   Region 5 33
+#> 3   Region 3 31
+#> 4   Region 4 30
+#> 5  Region 11 26
+#> 6   Region 7 22
+#> 7  Region 10 20
+#> 8   Region 8 19
+#> 9   Region 9 16
+#> 10  Region 1 14
+#> 11  Region 6  9
 ```
 
 ## Notes
