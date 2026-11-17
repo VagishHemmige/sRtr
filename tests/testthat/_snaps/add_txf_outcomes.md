@@ -25,3 +25,12 @@
       'TXF_KP' follow-up rows with ORG_TY "KP" are not "KI" or "PA".
       i Their rejections are not assigned to an organ.
 
+# an undated admission rejection is reported
+
+    Code
+      out <- add_time_to_event_outcomes(admission_rejection_cohort())
+    Condition
+      Warning:
+      1 recipient had a treated rejection during the transplant admission with no length of stay or discharge date.
+      i It counts as a rejection with an unknown time: FIRST_REJ_DATE_BINARY is 1 and the time is `NA`.
+

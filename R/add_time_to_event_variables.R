@@ -216,7 +216,12 @@ add_txf_outcomes <- function(
     dates <- rows |>
       dplyr::group_by(.data$TRR_ID) |>
       dplyr::summarise(
-        date = min(.data$TFL_PX_STAT_DT, na.rm = TRUE),
+        #All forms undated: NA, not the Inf (with a warning) min() gives.
+        date = if (all(is.na(.data$TFL_PX_STAT_DT))) {
+          as.Date(NA)
+        } else {
+          min(.data$TFL_PX_STAT_DT, na.rm = TRUE)
+        },
         .groups = "drop"
       )
     dates$date[match(df$TRR_ID, dates$TRR_ID)]
@@ -422,38 +427,28 @@ add_time_to_event_outcomes <- function(
   #Add rejection and malignancy from follow up database
   df <- add_txf_outcomes(df)
 
-  #Rejection can be both in acute admission as well as in follow up.  So we create a rejection date variable:
-
+  #Rejection can be found during the transplant admission or on a follow-up
+  #form. An admission rejection is dated at discharge: the transplant date
+  #plus the length of stay, else the discharge date. With neither, it stays a
+  #rejection with an unknown time (#213); a later follow-up rejection is kept
+  #in its own column and never substituted for it.
   if (is_kp) {
-    df <- df |>
-      dplyr::mutate(
-        FIRST_REJ_DATE = dplyr::case_when(
-          .data$REC_ACUTE_REJ_EPISODE ==
-            "1: Yes, at least one episode treated with anti-rejection agent" ~
-            .data$REC_TX_DT + .data$REC_POSTX_LOS,
-          TRUE ~ .data$FIRST_FU_REJ_DATE_KI
-        )
-      ) |>
-      dplyr::mutate(
-        FIRST_REJ_DATE_PA = dplyr::case_when(
-          .data$REC_ACUTE_REJ_EPISODE_PA ==
-            "1: Yes, at least one episode treated with anti-rejection agent" ~
-            .data$REC_TX_DT + .data$REC_POSTX_LOS,
-          TRUE ~ .data$FIRST_FU_REJ_DATE_PA
-        )
-      )
-  }
-
-  if (!is_kp) {
-    df <- df |>
-      dplyr::mutate(
-        FIRST_REJ_DATE = dplyr::case_when(
-          .data$REC_ACUTE_REJ_EPISODE ==
-            "1: Yes, at least one episode treated with anti-rejection agent" ~ .data$REC_TX_DT +
-            .data$REC_POSTX_LOS,
-          TRUE ~ .data$FIRST_FU_REJ_DATE
-        )
-      )
+    rejection <- .srtr_first_rejection(
+      df, "REC_ACUTE_REJ_EPISODE", df$FIRST_FU_REJ_DATE_KI
+    )
+    df$FIRST_REJ_DATE <- rejection$date
+    df$FIRST_REJ_DATE_SOURCE <- rejection$source
+    rejection <- .srtr_first_rejection(
+      df, "REC_ACUTE_REJ_EPISODE_PA", df$FIRST_FU_REJ_DATE_PA
+    )
+    df$FIRST_REJ_DATE_PA <- rejection$date
+    df$FIRST_REJ_DATE_PA_SOURCE <- rejection$source
+  } else {
+    rejection <- .srtr_first_rejection(
+      df, "REC_ACUTE_REJ_EPISODE", df$FIRST_FU_REJ_DATE
+    )
+    df$FIRST_REJ_DATE <- rejection$date
+    df$FIRST_REJ_DATE_SOURCE <- rejection$source
   }
 
   if ("FIRST_FU_MALIG_DATE" %in% names(df)) {
@@ -489,6 +484,12 @@ add_time_to_event_outcomes <- function(
       )
   }
 
+  for (prefix in c("FIRST_REJ_DATE", "FIRST_REJ_DATE_PA")) {
+    if (paste0(prefix, "_SOURCE") %in% names(df)) {
+      df <- .srtr_mark_undated_rejection(df, prefix)
+    }
+  }
+
   df$.patient_lafu <- NULL
   df$.graft_lafu <- NULL
   df$.death_event <- NULL
@@ -516,4 +517,76 @@ add_time_to_event_outcomes <- function(
     event = dplyr::if_else(keep_event, event, as.Date(NA)),
     censor = dplyr::if_else(died_first, death, censor)
   )
+}
+
+#' First rejection date: at the transplant admission, else on follow-up
+#'
+#' @param df The transplant data frame.
+#' @param episode_col The admission rejection column (`REC_ACUTE_REJ_EPISODE`
+#'   or `REC_ACUTE_REJ_EPISODE_PA`), with format labels applied.
+#' @param follow_up_date The first follow-up rejection date for this graft.
+#' @return A list with `date` (a `Date` vector) and `source` (`"admission_los"`,
+#'   `"admission_discharge"`, `"admission_undated"`, `"follow_up"` or `NA`).
+#' @noRd
+.srtr_first_rejection <- function(df, episode_col, follow_up_date) {
+  check_columns(
+    df,
+    c("REC_TX_DT", "REC_POSTX_LOS", episode_col),
+    why = "They date a rejection during the transplant admission."
+  )
+  treated <- "1: Yes, at least one episode treated with anti-rejection agent"
+  at_admission <- as.character(df[[episode_col]]) %in% treated
+  los_date <- df$REC_TX_DT + df$REC_POSTX_LOS
+  discharge_date <- if ("REC_DISCHRG_DT" %in% names(df)) {
+    df$REC_DISCHRG_DT
+  } else {
+    rep(as.Date(NA), nrow(df))
+  }
+  source <- dplyr::case_when(
+    at_admission & !is.na(los_date) ~ "admission_los",
+    at_admission & !is.na(discharge_date) ~ "admission_discharge",
+    at_admission ~ "admission_undated",
+    !is.na(follow_up_date) ~ "follow_up",
+    .default = NA_character_
+  )
+  date <- dplyr::if_else(
+    at_admission,
+    dplyr::coalesce(los_date, discharge_date),
+    follow_up_date
+  )
+  list(date = date, source = source)
+}
+
+#' Keep an undated admission rejection as a rejection
+#'
+#' [srtr_time_to_event()] reads a missing event date as no event. A rejection
+#' found during the transplant admission with no date is still a rejection:
+#' it gets status 1 and a missing time, so it drops out of time-to-event
+#' models instead of counting as rejection-free.
+#' @noRd
+.srtr_mark_undated_rejection <- function(df, prefix) {
+  undated <- df[[paste0(prefix, "_SOURCE")]] %in% "admission_undated"
+  if (!any(undated)) {
+    return(df)
+  }
+  time_col <- grep(
+    paste0("^", prefix, "_(days|months|yrs)$"),
+    names(df),
+    value = TRUE
+  )
+  df[[paste0(prefix, "_BINARY")]][undated] <- 1L
+  df[[paste0(prefix, "_CENSOR")]][undated] <- as.Date(NA)
+  for (col in time_col) {
+    df[[col]][undated] <- NA_real_
+  }
+  n <- sum(undated)
+  srtr_warn(
+    c(
+      "{n} recipient{?s} had a treated rejection during the transplant admission with no length of stay or discharge date.",
+      "i" = "{cli::qty(n)}{?It counts/They count} as {?a rejection/rejections} with an unknown time: {.field {prefix}_BINARY} is 1 and the time is {.code NA}."
+    ),
+    class = "undated_admission_rejection",
+    n = n
+  )
+  df
 }

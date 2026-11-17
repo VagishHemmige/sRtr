@@ -119,6 +119,9 @@
 
 * `add_txf_outcomes()` no longer fails unless dplyr is attached (#17).
 
+* `add_txf_outcomes()` gives a missing date, not an infinite one, when every
+  positive follow-up form for a recipient is undated (#214).
+
 * `apply_srtr_factors()` and `apply_srtr_varlabels()` no longer fail when
   called as `sRtr::fun()` without sRtr attached (#90).
 

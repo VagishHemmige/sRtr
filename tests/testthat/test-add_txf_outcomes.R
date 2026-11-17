@@ -234,3 +234,105 @@ test_that("TX_KP warns when follow-up rows are coded neither KI nor PA", {
   expect_equal(out$FIRST_FU_REJ_DATE_KI, rep(as.Date(NA), 3))
   expect_equal(out$FIRST_FU_REJ_DATE_PA, rep(as.Date(NA), 3))
 })
+
+# ---- #213: admission rejection with no length of stay -----------------------
+
+admission_rejection_cohort <- function() {
+  df <- tibble::tibble(
+    TRR_ID = c(900001, 900002, 900003, 900004),
+    REC_TX_DT = as.Date("2000-01-01"),
+    REC_POSTX_LOS = c(10, NA, NA, NA),
+    REC_DISCHRG_DT = as.Date(c("2000-01-11", "2000-01-20", NA, NA)),
+    REC_ACUTE_REJ_EPISODE = c(
+      rep("1: Yes, at least one episode treated with anti-rejection agent", 3),
+      "3: No"
+    ),
+    PERS_OPTN_DEATH_DT = as.Date(NA),
+    PERS_SSA_DEATH_DT = as.Date(NA),
+    TFL_DEATH_DT = as.Date(NA),
+    TFL_GRAFT_DT = as.Date(NA),
+    TFL_LAFUDATE = as.Date("2005-01-01")
+  )
+  attr(df, "file_key") <- "TX_KI"
+  df
+}
+
+admission_rejection_txf <- function() {
+  # A later follow-up rejection for 900003, whose admission rejection is undated.
+  tibble::tibble(
+    TRR_ID = 900003,
+    ORG_TY = "KI",
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date("2002-01-01")
+  )
+}
+
+test_that("an admission rejection with no length of stay stays a rejection", {
+  local_mocked_bindings(load_srtr_file = function(...) admission_rejection_txf())
+
+  out <- suppressWarnings(add_time_to_event_outcomes(admission_rejection_cohort()))
+
+  # 900001: length of stay; 900002: discharge date; 900003: no date at all.
+  expect_equal(
+    out$FIRST_REJ_DATE,
+    as.Date(c("2000-01-11", "2000-01-20", NA, NA))
+  )
+  expect_equal(
+    out$FIRST_REJ_DATE_SOURCE,
+    c("admission_los", "admission_discharge", "admission_undated", NA)
+  )
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(1L, 1L, 1L, 0L))
+  expect_equal(is.na(out$FIRST_REJ_DATE_days), c(FALSE, FALSE, TRUE, FALSE))
+  expect_equal(out$FIRST_REJ_DATE_CENSOR[3], as.Date(NA))
+  # The later follow-up rejection is kept in its own column, not substituted.
+  expect_equal(out$FIRST_FU_REJ_DATE[3], as.Date("2002-01-01"))
+})
+
+test_that("an undated admission rejection is reported", {
+  local_mocked_bindings(load_srtr_file = function(...) admission_rejection_txf())
+
+  expect_warning(
+    add_time_to_event_outcomes(admission_rejection_cohort()),
+    class = "sRtr_warning_undated_admission_rejection"
+  )
+  expect_snapshot(out <- add_time_to_event_outcomes(admission_rejection_cohort()))
+})
+
+test_that("a follow-up rejection is dated as before when there is none at admission", {
+  local_mocked_bindings(load_srtr_file = function(...) admission_rejection_txf())
+  df <- admission_rejection_cohort()
+  df$REC_ACUTE_REJ_EPISODE <- "3: No"
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$FIRST_REJ_DATE, as.Date(c(NA, NA, "2002-01-01", NA)))
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, c(NA, NA, "follow_up", NA))
+})
+
+test_that("TX_KP applies the same rule to the kidney and the pancreas", {
+  local_mocked_bindings(load_srtr_file = function(...) fake_cohort_txf("PA")[0, ])
+  df <- fake_cohort("TX_KP")
+  df$REC_POSTX_LOS <- NA
+  df$REC_DISCHRG_DT <- as.Date(c("2000-01-20", NA))
+  df$REC_ACUTE_REJ_EPISODE <- "1: Yes, at least one episode treated with anti-rejection agent"
+  df$REC_ACUTE_REJ_EPISODE_PA <- "1: Yes, at least one episode treated with anti-rejection agent"
+
+  out <- suppressWarnings(add_time_to_event_outcomes(df))
+
+  expect_equal(out$FIRST_REJ_DATE, as.Date(c("2000-01-20", NA)))
+  expect_equal(out$FIRST_REJ_DATE_PA, as.Date(c("2000-01-20", NA)))
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(1L, 1L))
+  expect_equal(out$FIRST_REJ_DATE_PA_BINARY, c(1L, 1L))
+  expect_equal(out$FIRST_REJ_DATE_PA_SOURCE, c("admission_discharge", "admission_undated"))
+})
+
+test_that("a recipient whose positive forms are all undated gets NA, not Inf", {
+  txf <- fake_txf("KI")
+  txf$TFL_PX_STAT_DT[txf$TRR_ID == 900003] <- NA
+  local_mocked_bindings(load_srtr_file = function(...) txf)
+
+  expect_no_warning(out <- add_txf_outcomes(fake_tx("TX_KI")))
+
+  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2001-01-01", NA, NA)))
+})
