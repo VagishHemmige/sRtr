@@ -99,15 +99,19 @@
   columns = NULL,
   file_key = NULL,
   gaps = c("warn", "error", "nearest"),
+  view = "corrected",
   call = rlang::caller_env()
 ) {
   gaps <- rlang::arg_match(gaps)
   resolved <- .srtr_resolve_release(release, versions, columns, file_key, call = call)
-  .srtr_enforce_release(resolved, gaps, call = call)
+  .srtr_enforce_release(resolved, gaps, view = view, call = call)
 }
 
-# The checks made on every use of a resolved release.
-.srtr_enforce_release <- function(resolved, gaps, call = rlang::caller_env()) {
+# The checks made on every use of a resolved release, then the dictionary
+# corrections for `view` (see R/dictionary-corrections.R). Corrections are
+# applied after the cache, so the cache holds SRTR's tables as published.
+.srtr_enforce_release <- function(resolved, gaps, view = "corrected",
+                                  call = rlang::caller_env()) {
   if (!is.null(resolved$outside)) {
     srtr_warn(
       c(
@@ -131,7 +135,10 @@
     }
     srtr_warn(text, class = "dictionary_gap", entries = uncertain)
   }
-  resolved[c("dictionary", "formats", "snapshot", "basis")]
+  .srtr_apply_corrections(
+    resolved[c("dictionary", "formats", "snapshot", "basis")],
+    view
+  )
 }
 
 # Work out the tables for a release without warning. Also returns `release`,
@@ -263,13 +270,17 @@
 # The dictionary and formats for a data frame: the tables load_srtr_file() is
 # using, while it labels the file; else the `release` argument, else the
 # release recorded on `df` by load_srtr_file(), else the bundled tables. The
-# resolution is cached for the session; the `gaps` policy is applied on every
-# call.
+# resolution is cached for the session; the `gaps` policy and the dictionary
+# corrections for `view` (else the view recorded on `df`, else "corrected")
+# are applied on every call.
 .srtr_tables_for <- function(df, release, file_key, gaps = "warn",
-                             columns = names(df),
+                             columns = names(df), view = NULL,
                              call = rlang::caller_env()) {
   if (!is.null(.srtr_env$loading_tables)) {
     return(.srtr_env$loading_tables)
+  }
+  if (is.null(view)) {
+    view <- .srtr_view_of(df)
   }
   if (is.null(release)) {
     recorded <- attr(df, "srtr_release")$release
@@ -278,7 +289,7 @@
     }
   }
   if (is.null(release)) {
-    return(.srtr_dictionary_for(NULL))
+    return(.srtr_dictionary_for(NULL, view = view))
   }
   versions <- .srtr_bundled_versions()
   columns <- sort(toupper(columns))
@@ -292,7 +303,7 @@
     cache[[key]] <- .srtr_resolve_release(release, versions, columns, file_key, call = call)
     .srtr_env$dictionary_cache <- cache
   }
-  .srtr_enforce_release(cache[[key]], gaps, call = call)
+  .srtr_enforce_release(cache[[key]], gaps, view = view, call = call)
 }
 
 # Run `code` with the label and factor functions using `tables` (the
@@ -322,11 +333,32 @@
 #'   be known without the file; [load_srtr_file()] decides them from the file's
 #'   columns. Format codes seen in only one are kept.
 #'
+#' @param view `"corrected"` (the default) applies sRtr's corrections to SRTR's
+#'   web dictionary; `"web"` returns the dictionary as SRTR's web page has it.
+#'   The corrections are listed in the Corrections section below. They change
+#'   only the dictionary table, never the format code lists.
+#'
+#' @section Corrections:
+#' sRtr corrects a few entries of SRTR's web dictionary that do not match the
+#' SAFs, each under a stable ID:
+#'
+#' * `SRTR-DC-001`: `REC_COD` in every TX dataset uses the format `COD`, not
+#'   `THCOD`. The thoracic format `THCOD` is a subset of `COD` with the same
+#'   meanings (`COD` prefixes their labels with "TH:"), and liver recipients'
+#'   causes of death are `COD` codes that `THCOD` lacks. This was checked on
+#'   a real TX_LI file only; for other organs it is a generalization.
+#'
+#' A correction is applied only when SRTR's entry still has the value sRtr
+#' expects; if SRTR has changed it, sRtr keeps SRTR's value and warns. Codes
+#' that appear in data but are in no format are not corrected: their meaning
+#' is not documented.
+#'
 #' @return A tibble with the columns of [dictionary] or [formats]. Its
 #'   attributes `snapshot` (the stored version used, or `NA`) and `basis`
 #'   (`"observed"`, `"interpolated"`, `"nearest snapshot"` or `"default"`) say
 #'   where it came from. A release before the first or after the last stored
-#'   version uses that version, with a warning.
+#'   version uses that version, with a warning. Attribute `view` is the view
+#'   used and `corrections` the IDs of the corrections applied.
 #' @seealso [load_srtr_file()] and [set_srtr_wd()], which take a `release`.
 #' @export
 #'
@@ -337,13 +369,17 @@
 srtr_dictionary <- function(
   release = NULL,
   table = c("dictionary", "formats"),
-  gaps = c("warn", "error", "nearest")
+  gaps = c("warn", "error", "nearest"),
+  view = c("corrected", "web")
 ) {
   table <- rlang::arg_match(table)
   gaps <- rlang::arg_match(gaps)
-  out <- .srtr_dictionary_for(release, gaps = gaps)
+  view <- rlang::arg_match(view)
+  out <- .srtr_dictionary_for(release, gaps = gaps, view = view)
   result <- out[[table]]
   attr(result, "snapshot") <- out$snapshot
   attr(result, "basis") <- out$basis
+  attr(result, "view") <- out$view
+  attr(result, "corrections") <- out$corrections
   result
 }

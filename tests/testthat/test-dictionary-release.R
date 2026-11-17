@@ -97,7 +97,7 @@ test_that("a release outside the stored snapshots uses the nearest one, with a w
 })
 
 test_that("no release gives the bundled dictionary and formats", {
-  out <- .srtr_dictionary_for(NULL)
+  out <- .srtr_dictionary_for(NULL, view = "web")
 
   expect_equal(out$basis, "default")
   expect_identical(out$dictionary, sRtr::dictionary)
@@ -162,7 +162,13 @@ test_that("load_srtr_file() records the release and dictionary it used", {
 
   expect_equal(
     attr(out, "srtr_release"),
-    list(release = "9904", dictionary = "9904-1", basis = "folder name")
+    list(
+      release = "9904",
+      dictionary = "9904-1",
+      basis = "folder name",
+      view = "corrected",
+      corrections = character()
+    )
   )
   expect_equal(labelled::var_label(out$REC_FAKE_NEW), "New only")
 

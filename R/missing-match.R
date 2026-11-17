@@ -67,7 +67,7 @@
         release <- NULL
       }
     }
-    tables <- .srtr_dictionary_for(release, call = call)
+    tables <- .srtr_dictionary_for(release, view = .srtr_view_of(df), call = call)
   }
 
   dictionary <- tables$dictionary

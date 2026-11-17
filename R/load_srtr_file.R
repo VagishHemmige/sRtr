@@ -59,13 +59,22 @@
 #'   With `"na"`, [srtr_missing_report()] counts blanks as `NA`, not as
 #'   `sas_missing`; use `"keep"` to count them, or to keep them with
 #'   `srtr_normalize_missing(policy = "tag_only")`.
+#' @param view `"corrected"` (the default) labels and checks the file with
+#'   sRtr's corrections to SRTR's web dictionary; `"web"` uses the dictionary
+#'   as SRTR's web page has it. See the Corrections section of
+#'   [srtr_dictionary()]. The view and the corrections applied are recorded
+#'   in the result's `srtr_release` attribute, and later calls to
+#'   [apply_srtr_factors()], [apply_srtr_varlabels()],
+#'   [srtr_missing_report()] and [srtr_normalize_missing()] on the result use
+#'   the same view.
 #' @param ... Additional arguments passed to the file reader
 #'   ([haven::read_sas()] or [arrow::read_parquet()]), e.g. `encoding` for
 #'   `read_sas()`.
 #'
 #' @return A tibble with the loaded file contents, optionally labeled.
 #'   The tibble includes attributes `source_path`, `file_key` and
-#'   `srtr_release` (a list: `release`, `dictionary`, `basis`).
+#'   `srtr_release` (a list: `release`, `dictionary`, `basis`, `view`,
+#'   `corrections`).
 #' @export
 #'
 #' @examples
@@ -83,11 +92,13 @@ load_srtr_file <- function(
   release = NULL,
   gaps = c("warn", "error", "nearest"),
   blank_text = c("na", "keep"),
+  view = c("corrected", "web"),
   ...
 ) {
   column_check <- match.arg(column_check)
   gaps <- rlang::arg_match(gaps)
   blank_text <- rlang::arg_match(blank_text)
+  view <- rlang::arg_match(view)
   release_info <- if (!is.null(release)) {
     list(release = .srtr_check_release(release), basis = "supplied")
   } else {
@@ -213,7 +224,8 @@ load_srtr_file <- function(
     release_used,
     file_key_input,
     gaps = gaps,
-    columns = all_columns
+    columns = all_columns,
+    view = view
   )
 
   # ---- Compare columns with the data dictionary ----
@@ -295,7 +307,9 @@ load_srtr_file <- function(
     } else {
       "interpolated"
     },
-    basis = release_info$basis
+    basis = release_info$basis,
+    view = tables$view,
+    corrections = tables$corrections
   )
 
   return(df)
