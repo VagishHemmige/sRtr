@@ -270,7 +270,7 @@ The detailed OPO service-area layer can be downloaded with:
 opo_areas <- get_hrsa_opo_service_areas()
 ```
 
-The layer includes the OPOs serving Alaska, Hawaii and Puerto Rico, which stretch a national map, so crop it to the contiguous states before plotting. There are more than 50 OPOs, too many for a legend, so the plot leaves the key out.
+The layer includes the OPOs serving Alaska, Hawaii and Puerto Rico, which stretch a national map, so crop it to the contiguous states before plotting. There are more than 50 OPOs, too many for a legend, so the plot leaves the key out. Colors repeat across OPOs; the black borders separate them.
 
 ```{r plot-opo-service-areas, eval = hrsa_ok}
 opo_contiguous <- opo_areas |>
@@ -336,8 +336,11 @@ centers_with_region <- sf::st_join(
   regions_all |> dplyr::select(Region)
 )
 
+# The HRSA layer has one row per center and organ program, so count each
+# center once
 centers_with_region |>
   sf::st_drop_geometry() |>
+  dplyr::distinct(OTC_NM, Region) |>
   dplyr::count(Region, sort = TRUE)
 ```
 
