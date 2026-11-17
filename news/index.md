@@ -21,6 +21,15 @@
   changed is not applied, with a warning
   ([\#191](https://github.com/VagishHemmige/sRtr/issues/191)).
 
+- [`apply_srtr_varlabels()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.md),
+  and so
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md),
+  now keep the variable labels a SAS file already carries and label only
+  the columns without one, without a warning. Before, any existing label
+  made it warn and label nothing, which happened on every real SAF. The
+  new `overwrite = TRUE` replaces the file’s labels with the
+  dictionary’s.
+
 - [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
   is rebuilt on `missing_codes`. It recognises codes by what they mean
   in each variable’s own format, for raw codes and labelled columns

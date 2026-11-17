@@ -6,7 +6,13 @@ data dictionary.
 ## Usage
 
 ``` r
-apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE, release = NULL)
+apply_srtr_varlabels(
+  df,
+  file_key = NULL,
+  verbose = FALSE,
+  release = NULL,
+  overwrite = FALSE
+)
 ```
 
 ## Arguments
@@ -35,6 +41,12 @@ apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE, release = NULL)
   is used, or the bundled
   [dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
   if there is none.
+
+- overwrite:
+
+  `FALSE` (the default) keeps a label a column already has, such as the
+  variable labels stored in a SAS file, and labels only the columns
+  without one. `TRUE` replaces every label with the dictionary's.
 
 ## Value
 
