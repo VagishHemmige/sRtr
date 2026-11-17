@@ -24,7 +24,10 @@ format of the variable lists. Most are one-character flag columns with no
 format:
 \describe{
 \item{Variable}{The variable name, in whichever file it appears.}
-\item{Code}{The raw value, as text. A blank is the empty string.}
+\item{Code}{The raw value, as text. A blank is the empty string. A
+blank or text value listed for a variable the dictionary types as
+numeric cannot occur as stored; such rows are kept from the hand
+list, and their \code{note} says so.}
 \item{missing_type}{The type, as above. Never \code{"none"} or
 \code{"partial"}.}
 \item{source}{Where the row comes from. \code{"hand list"} rows were carried
