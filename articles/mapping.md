@@ -141,23 +141,33 @@ transplant_centers_sf
 ## Plotting UNOS/OPTN regions
 
 The object `UNOS_regions_sf` contains state-level geometries with a
-`Region` field. These can be plotted directly.
+`Region` field. `Region` is stored as text, so a plot sorts it
+alphabetically (Region 1, Region 10, Region 11, Region 2, …). Convert it
+to a factor first so the legend runs from Region 1 to Region 11.
 
 ``` r
 
-plot(UNOS_regions_sf["Region"])
+region_levels <- paste("Region", 1:11)
+
+unos_regions <- UNOS_regions_sf
+unos_regions$Region <- factor(unos_regions$Region, levels = region_levels)
+
+plot(unos_regions["Region"], key.pos = 4)
 ```
 
 ![](mapping_files/figure-html/plot-unos-regions-1.png)
 
 To plot dissolved region boundaries, use
 [`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md).
+Putting the legend on the right (`key.pos = 4`) leaves room to label all
+11 regions.
 
 ``` r
 
 optn_regions <- get_hrsa_optn_regions()
+optn_regions$Region <- factor(optn_regions$Region, levels = region_levels)
 
-plot(optn_regions["Region"])
+plot(optn_regions["Region"], key.pos = 4)
 ```
 
 ![](mapping_files/figure-html/plot-dissolved-unos-regions-1.png)
@@ -183,13 +193,37 @@ plot(sf::st_geometry(transplant_centers_sf), add = TRUE, pch = 16, cex = 0.5)
 
 ![](mapping_files/figure-html/plot-centers-1.png)
 
+`UNOS_regions_sf` covers the contiguous United States and the District
+of Columbia, and the first layer drawn sets the map’s frame. Centers
+outside that frame, such as those in Hawaii and Puerto Rico, are not
+shown. To list them:
+
+``` r
+
+frame <- sf::st_as_sfc(sf::st_bbox(UNOS_regions_sf))
+outside <- lengths(sf::st_intersects(transplant_centers_sf, frame)) == 0
+
+transplant_centers_sf$OTCName[outside]
+#> [1] "The Queen's Medical Center"                            
+#> [2] "Cardiovascular Center of Puerto Rico and the Caribbean"
+#> [3] "Auxilio Mutuo Hospital"
+```
+
 ## Downloading current HRSA transplant center locations
 
 To retrieve the current HRSA transplant center layer:
 
+Base [`plot()`](https://rdrr.io/r/graphics/plot.default.html) does not
+reproject layers. A layer added with `add = TRUE` must already use the
+coordinate reference system of the first layer drawn, or it is drawn in
+the wrong place or not at all. The same holds for spatial joins, which
+need both layers in one coordinate reference system. So transform the
+downloaded centers to match `optn_regions` before using them together:
+
 ``` r
 
-centers <- get_hrsa_transplant_centers()
+centers <- get_hrsa_transplant_centers() |>
+  sf::st_transform(sf::st_crs(optn_regions))
 
 centers |>
   dplyr::select(OTC_NM, OTC_CITY, STATE_ABBR, OPO_PROVIDER_NM, Service_Lst)
@@ -245,7 +279,10 @@ states <- tigris::states(cb = TRUE, year = 2023) |>
 
 plot(sf::st_geometry(states), border = "grey80")
 plot(sf::st_geometry(optn_regions), add = TRUE, border = "black", lwd = 2)
-plot(sf::st_geometry(transplant_centers_sf), add = TRUE, pch = 16, cex = 0.4)
+plot(
+  sf::st_geometry(sf::st_transform(transplant_centers_sf, sf::st_crs(states))),
+  add = TRUE, pch = 16, cex = 0.4
+)
 ```
 
 ## Filtering by organ or service list
