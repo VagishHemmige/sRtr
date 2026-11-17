@@ -60,9 +60,9 @@
 #'   \item{missing_type}{The type, as above. Never `"none"` or
 #'     `"partial"`.}
 #'   \item{source}{Where the row comes from. `"hand list"` rows were carried
-#'     over from the list `srtr_normalize_missing()` has used so far. The
-#'     SRTR dictionary does not document these values, and they have not yet
-#'     been checked against SAF data.}
+#'     over from the hand-written list that `srtr_normalize_missing()` used
+#'     before this dataset existed. The SRTR dictionary does not document
+#'     these values, and they have not yet been checked against SAF data.}
 #'   \item{note}{Anything else worth knowing about the row.}
 #' }
 #' @source `formats`: meanings from the SRTR SAF data dictionary pages

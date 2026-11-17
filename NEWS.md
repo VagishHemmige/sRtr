@@ -20,6 +20,8 @@
     include (93 code meanings in 64 variables in all).
   * Not done and not tested still become `NA` by default;
     `actions = c(not_done = "keep")` keeps them (#28).
+  * The internal list of default missing codes (`R/sysdata.rda`) is gone;
+    everything it held is in `missing_codes`, where it can be read.
 
 * New `srtr_missing_report()` counts, for each variable, the values that
   stand for missing information and of which kind (unknown, not done, not

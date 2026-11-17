@@ -91,6 +91,24 @@ jobs:
             fi
           done
 
+      - name: Remove retired generated files
+        run: |
+          # data-raw/retired-data.txt names generated files that no script
+          # builds any more. They are removed here, before anything is
+          # built, so that generated data are changed only by this workflow
+          # and a file that a script still builds is caught by the check
+          # after the build steps.
+          while IFS= read -r f; do
+            if ! printf '%s\n' "$f" | grep -qE '^(data/[A-Za-z0-9_.]+\.rda|R/sysdata\.rda)$'; then
+              echo "::error::data-raw/retired-data.txt: '$f' is not data/<name>.rda or R/sysdata.rda."
+              exit 1
+            fi
+            if [ -e "$f" ]; then
+              git rm -q "$f"
+              echo "Retired $f"
+            fi
+          done < <(tr -d '\r' < data-raw/retired-data.txt | grep -vE '^[[:space:]]*(#|$)')
+
       - name: Build dictionary and formats
         run: |
           Rscript data-raw/dictionary_file_creator.R
@@ -102,16 +120,15 @@ jobs:
       - name: Install the branch with the new dictionary
         run: R CMD INSTALL --no-docs --no-multiarch .
 
-      - name: Build default missing codes and maps
-        run: |
-          Rscript data-raw/create_default_missing_values.R
-          Rscript data-raw/DATASET.R
+      - name: Build maps
+        run: Rscript data-raw/DATASET.R
 
       - name: Keep only files whose objects changed
         shell: Rscript {0}
         run: |
           committed <- file.path(Sys.getenv("RUNNER_TEMP"), "committed")
           files <- c(Sys.glob("data/*.rda"), "R/sysdata.rda")
+          files <- files[file.exists(files)]
           for (path in files) {
             old_path <- file.path(committed, basename(path))
             if (!file.exists(old_path)) {
@@ -131,12 +148,24 @@ jobs:
             }
           }
 
+      - name: Check that no retired file was rebuilt
+        run: |
+          rebuilt=0
+          while IFS= read -r f; do
+            if [ -e "$f" ]; then
+              echo "::error::$f is listed in data-raw/retired-data.txt, but a script built it. Remove its line there, or the script."
+              rebuilt=1
+            fi
+          done < <(tr -d '\r' < data-raw/retired-data.txt | grep -vE '^[[:space:]]*(#|$)')
+          exit "$rebuilt"
+
       - name: Commit and push
         id: commit
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data R/sysdata.rda
+          git add data
+          if [ -e R/sysdata.rda ]; then git add R/sysdata.rda; fi
           if git diff --cached --quiet; then
             echo "Generated data already match data-raw/."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
