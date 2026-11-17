@@ -1,3 +1,12 @@
+# verbose = TRUE says how many labels were kept
+
+    Code
+      out <- apply_srtr_varlabels(df, file_key = "TX_KI", verbose = TRUE)
+    Message
+      i Kept the existing label on 1 variable.
+        Use `overwrite = TRUE` to replace it with dictionary labels.
+      v Labeled variable: `CAN_GENDER` (Patient/s Gender).
+
 # an unknown file_key warns and returns the data unchanged
 
     Code

@@ -68,7 +68,7 @@ test_that("live: the TX_LI composite death date is NA only when every source is"
   skip_if_no_srtr_file("TX_LI")
   sources <- c("PERS_OPTN_DEATH_DT", "PERS_SSA_DEATH_DT", "TFL_DEATH_DT")
 
-  tx <- srtr_composite_death(load_live("TX_LI", col_select = c("TRR_ID", sources)))
+  tx <- srtr_composite_death(load_live("TX_LI", col_select = c("TRR_ID", tidyselect::all_of(sources))))
 
   expect_s3_class(tx$REC_DEATH_DT_COMPOSITE, "Date")
   every_source_na <- Reduce(`&`, lapply(tx[sources], is.na))

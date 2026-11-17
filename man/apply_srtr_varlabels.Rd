@@ -4,7 +4,13 @@
 \alias{apply_srtr_varlabels}
 \title{Apply SRTR variable labels to a data frame}
 \usage{
-apply_srtr_varlabels(df, file_key = NULL, verbose = FALSE, release = NULL)
+apply_srtr_varlabels(
+  df,
+  file_key = NULL,
+  verbose = FALSE,
+  release = NULL,
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{df}{A data frame loaded from an SRTR SAF file.}
@@ -19,6 +25,10 @@ should be unnecessary.}
 (\code{"2609"}), to label it with that release's dictionary (see
 \code{\link[=srtr_dictionary]{srtr_dictionary()}}). If \code{NULL} (the default), the release recorded by
 \code{\link[=load_srtr_file]{load_srtr_file()}} is used, or the bundled \link{dictionary} if there is none.}
+
+\item{overwrite}{\code{FALSE} (the default) keeps a label a column already has,
+such as the variable labels stored in a SAS file, and labels only the
+columns without one. \code{TRUE} replaces every label with the dictionary's.}
 }
 \value{
 A data frame with variable labels applied, and a \code{file_key}

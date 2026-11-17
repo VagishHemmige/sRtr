@@ -518,6 +518,22 @@ test_that("a parquet column not in the dictionary gives a message naming it", {
   expect_equal(out$NOT_A_DICTIONARY_COLUMN, c(7, 8))
 })
 
+test_that("a file's own variable labels are kept, and the rest labelled, quietly", {
+  fake <- tibble::tibble(TRR_ID = c(900001, 900002), CAN_ABO = c("A", "B"))
+  attr(fake$CAN_ABO, "label") <- "A made-up label"
+  local_sas_file(fake, "TX_KI")
+
+  expect_no_warning(
+    out <- load_srtr_file("TX_KI", factor_labels = FALSE, column_check = "none")
+  )
+
+  expect_equal(labelled::var_label(out$CAN_ABO), "A made-up label")
+  expect_equal(
+    labelled::var_label(out$TRR_ID),
+    dictionary$Label[dictionary$Dataset == "TX_KI" & dictionary$Variable == "TRR_ID"]
+  )
+})
+
 test_that("loading with factor labels keeps ages numeric", {
   local_sas_file(fake_tx(), "TX_KI")
 

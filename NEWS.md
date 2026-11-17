@@ -14,6 +14,12 @@
   view. A correction whose entry SRTR has since changed is not applied, with
   a warning (#191).
 
+* `apply_srtr_varlabels()`, and so `load_srtr_file()`, now keep the variable
+  labels a SAS file already carries and label only the columns without one,
+  without a warning. Before, any existing label made it warn and label
+  nothing, which happened on every real SAF. The new `overwrite = TRUE`
+  replaces the file's labels with the dictionary's.
+
 * `srtr_normalize_missing()` is rebuilt on `missing_codes`. It recognises
   codes by what they mean in each variable's own format, for raw codes and
   labelled columns alike, and a `policy` chooses which kinds become `NA`:
