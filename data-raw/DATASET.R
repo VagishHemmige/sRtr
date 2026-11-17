@@ -1,10 +1,10 @@
 ## code to prepare national mapping data goes here
 library(tidyverse)
 
-#Import State level mapping data
+#Import State level mapping data: 50 states, DC and Puerto Rico. Alaska and
+#Hawaii are in Region 6 and Puerto Rico in Region 3, so all are kept.
 us_states <- sf::read_sf("data-raw/cb_2018_us_state_20m/cb_2018_us_state_20m.shp") %>%
   dplyr::select(NAME, geometry) %>%
-  dplyr::filter(!(NAME %in% c("Alaska", "Hawaii", "Puerto Rico"))) %>%
   dplyr::rename(State=NAME)
 
 UNOS_regions <-
@@ -23,6 +23,16 @@ UNOS_regions <-
     values_to = "State",
     values_drop_na = TRUE)%>%
   select(-StateNumber)
+
+#Entries that match no state, such as "Northern Virginia" (part of a state),
+#are dropped by the join below; say which, so a renamed state is not lost
+unmatched <- setdiff(UNOS_regions$State, us_states$State)
+if (length(unmatched) > 0) {
+  warning(
+    "UNOS regions.xlsx entries with no state boundary, left out: ",
+    paste(unmatched, collapse = ", ")
+  )
+}
 
 UNOS_regions_sf<-inner_join(UNOS_regions, us_states, by="State") %>%
   sf::st_as_sf()%>%

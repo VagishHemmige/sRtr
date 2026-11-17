@@ -164,6 +164,14 @@
   NAD83 / Conus Albers projection of `UNOS_regions_sf`. Its documentation
   wrongly said it kept that projection.
 
+* `get_hrsa_optn_regions()` gains `noncontiguous`: `"exclude"` (the
+  default) leaves out Alaska, Hawaii and Puerto Rico as before; `"shift"`
+  includes them, moved below the contiguous states for national maps;
+  `"include"` keeps them at their real locations. `UNOS_regions_sf` gains
+  the three rows (52 in all). Its documentation now names the three states
+  OPTN splits between regions (Virginia, Vermont, Ohio), which it assigns
+  whole (#197).
+
 * `load_srtr_file()` finds the folder set with `set_srtr_wd()` when it first
   needs it, and looks again if a file is not found, so files added during a
   session are picked up. Errors now say when `SRTR_WD` is not set and which
@@ -193,6 +201,10 @@
 
 * `rank_individual_coverage_gains()` now defaults to `method = "areal"`,
   like `calculate_geography_coverage_gain()` (#58).
+
+* New `shift_noncontiguous()` moves Alaska, Hawaii and Puerto Rico below the
+  contiguous states for national maps, offline, so points and polygons in
+  those areas land together.
 
 * `srtr_composite_death()` now requires its three death date columns to be
   `Date`, which is how `load_srtr_file()` returns SAS date columns, and errors

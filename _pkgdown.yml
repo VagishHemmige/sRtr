@@ -49,6 +49,7 @@ reference:
       - get_hrsa_transplant_centers
       - get_hrsa_optn_regions
       - get_hrsa_opo_service_areas
+      - shift_noncontiguous
       - calculate_geography_coverage_gain
       - rank_individual_coverage_gains
 
