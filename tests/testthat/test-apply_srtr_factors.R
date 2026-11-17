@@ -39,9 +39,7 @@ test_that("apply_srtr_factors works with explicit file_key", {
 
 # ---- Test 3: Works with other datasets ----
 test_that("apply_srtr_factors works with TX_HR and CAND_KIPA", {
-  skip_if_no_srtr_file(c("TX_HR", "CAND_KIPA"))
-
-  keys <- c("TX_HR", "CAND_KIPA")
+  keys <- srtr_live_keys_present(c("TX_HR", "CAND_KIPA"))
 
   for (key in keys) {
     df <- load_srtr_file(key, factor_labels = FALSE)
