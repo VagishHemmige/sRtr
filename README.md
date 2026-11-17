@@ -90,8 +90,8 @@ tx_ki <- load_srtr_file("TX_KI")
 # Count the unknown, not-done, pending and other codes in each variable
 srtr_missing_report(tx_ki)
 
-# Turn them into NA
-tx_ki <- srtr_normalize_missing(tx_ki)
+# Turn them into NA, in a new data frame
+tx_ki_clean <- srtr_normalize_missing(tx_ki)
 ```
 
 Which kinds of missing value should become `NA` depends on the analysis,
@@ -102,8 +102,9 @@ applicable”, “indeterminate” and partly known answers.
 change the rule for one kind of value or one variable:
 
 ``` r
-# Keep "not done" as a value, and record why each value became NA
-srtr_normalize_missing(
+# From the original data: keep "not done" as a value, and record why
+# each value became NA
+tx_ki_clean <- srtr_normalize_missing(
   tx_ki,
   actions = c(not_done = "keep"),
   reason = "changed"
