@@ -5,8 +5,9 @@
 \alias{missing_codes}
 \title{Missing-value codes in the SRTR formats, by type}
 \format{
-A list holding one tibble, \code{formats}, with one row per classified
-format code:
+A list of two tibbles.
+
+\code{formats} has one row per classified format code:
 \describe{
 \item{Format, Code, Meaning}{The format code, as in
 \link{dictionary_versions}. A classification applies only to this exact
@@ -17,18 +18,36 @@ is known. Empty otherwise.}
 \item{note}{Why the code was classified this way, where that is not
 plain from its meaning.}
 }
+
+\code{variables} has one row per variable and raw value, for values that no
+format of the variable lists. Most are one-character flag columns with no
+format:
+\describe{
+\item{Variable}{The variable name, in whichever file it appears.}
+\item{Code}{The raw value, as text. A blank is the empty string.}
+\item{missing_type}{The type, as above. Never \code{"none"} or
+\code{"partial"}.}
+\item{source}{Where the row comes from. \code{"hand list"} rows were carried
+over from the list \code{srtr_normalize_missing()} has used so far. The
+SRTR dictionary does not document these values, and they have not yet
+been checked against SAF data.}
+\item{note}{Anything else worth knowing about the row.}
+}
 }
 \source{
-Meanings from the SRTR SAF data dictionary pages stored in
-\link{dictionary_versions}; classified by hand in
-\code{data-raw/missing-codes/format_codes.csv}.
+\code{formats}: meanings from the SRTR SAF data dictionary pages
+stored in \link{dictionary_versions}, classified by hand in
+\code{data-raw/missing-codes/format_codes.csv}. \code{variables}:
+\code{data-raw/missing-codes/variable_codes.csv}, which is not taken from
+the dictionary.
 }
 \description{
 SRTR formats record missing information in several ways, and the same code
 number means different things in different formats: code \code{4} is "Unknown"
-in one format, "N/A" in another and "Not tested" in a third. This dataset
-classifies each format code that may stand for missing information, so
-that code can be handled by what it means.
+in one format, "N/A" in another and "Not tested" in a third. Many flag
+columns have no format at all, so the dictionary does not say which of
+their values mean missing. This dataset classifies both kinds of code, so
+that each can be handled by what it means.
 }
 \details{
 The classification describes what a code means. It does not say what an
@@ -53,8 +72,8 @@ SRTR classification:
 \item \code{"indeterminate"}: the test was done and gave no clear result.
 \item \code{"partial"}: part of the answer is known, such as "Yes, duration
 unknown". \code{collapses_to} names the part that is known.
-\item \code{"sas_missing"}: the SAS missing value \code{.}, which the format labels
-"Missing".
+\item \code{"sas_missing"}: the SAS missing value. For numbers that is \code{.}, which
+a format labels "Missing"; for text it is a blank.
 \item \code{"none"}: an ordinary value.
 }
 }
