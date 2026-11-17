@@ -106,6 +106,12 @@ catch-all label are reported too; raw codes get it silently, as in SAS).
 Convert again from the raw codes, or keep working with dplyr. Attributes
 on each column, such as a variable label, are kept.
 
+When codes that are not in the format are kept, the column also carries
+an `srtr_kept_codes` attribute: a named vector giving, for each such
+level, the original code.
+[`srtr_missing_report()`](https://vagishhemmige.github.io/sRtr/reference/srtr_missing_report.md)
+uses it to recognise those codes after labelling.
+
 ## Examples
 
 ``` r
