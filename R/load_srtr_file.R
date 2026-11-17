@@ -49,6 +49,16 @@
 #'   at that release is not known: `"warn"` (the default) uses the earlier
 #'   snapshot's value with a warning, `"nearest"` does so silently, and
 #'   `"error"` stops.
+#' @param blank_text What to do with text values that are empty or only
+#'   spaces. SAS has no missing value for text, so a SAF stores a blank
+#'   wherever a text column has no value. `"na"` (the default) turns them into
+#'   `NA` before labelling, so a blank never becomes a factor level and
+#'   `is.na()` finds it. `"keep"` loads them as they are. A blank can mean
+#'   different things (not answered, not applicable, not collected at the
+#'   time); `"na"` does not tell these apart. Numeric columns are not changed.
+#'   With `"na"`, [srtr_missing_report()] counts blanks as `NA`, not as
+#'   `sas_missing`; use `"keep"` to count them, or to keep them with
+#'   `srtr_normalize_missing(policy = "tag_only")`.
 #' @param ... Additional arguments passed to the file reader
 #'   ([haven::read_sas()] or [arrow::read_parquet()]), e.g. `encoding` for
 #'   `read_sas()`.
@@ -72,10 +82,12 @@ load_srtr_file <- function(
   column_check = c("warn", "error", "none"),
   release = NULL,
   gaps = c("warn", "error", "nearest"),
+  blank_text = c("na", "keep"),
   ...
 ) {
   column_check <- match.arg(column_check)
   gaps <- rlang::arg_match(gaps)
+  blank_text <- rlang::arg_match(blank_text)
   release_info <- if (!is.null(release)) {
     list(release = .srtr_check_release(release), basis = "supplied")
   } else {
@@ -244,6 +256,12 @@ load_srtr_file <- function(
     df <- df[keep]
   }
 
+  # ---- Blank text to NA ----
+  # Before labelling, so a blank never becomes a factor level.
+  if (blank_text == "na") {
+    df <- .srtr_blank_text_to_na(df)
+  }
+
   # ---- Apply factor labels ----
   # Files the bundled dictionary does not list have nothing to label, so they
   # are skipped quietly, as in the column check.
@@ -281,6 +299,19 @@ load_srtr_file <- function(
   )
 
   return(df)
+}
+
+# Sets text values that are empty or only spaces to NA, in every character
+# column. SAS has no missing value for text and stores a blank instead, which
+# haven reads as "". Matched on bytes, so text in an unexpected encoding
+# cannot make grepl() fail; only ASCII spaces count as blank.
+.srtr_blank_text_to_na <- function(df) {
+  is_text <- vapply(df, is.character, logical(1))
+  df[is_text] <- lapply(df[is_text], function(x) {
+    x[!is.na(x) & grepl("^[[:space:]]*$", x, useBytes = TRUE)] <- NA_character_
+    x
+  })
+  df
 }
 
 # A zero-row data frame with the file's columns and types, read without

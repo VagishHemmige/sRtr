@@ -497,3 +497,57 @@ test_that("loading with factor labels keeps ages numeric", {
 
   expect_equal(out$REC_AGE_AT_TX, fake_tx()$REC_AGE_AT_TX)
 })
+
+test_that("blank text in a column without a format loads as NA", {
+  local_sas_file(fake_tx_blank_text(), "TX_LI")
+
+  out <- load_cols("TX_LI")
+
+  expect_equal(out$REC_FAIL_INFECT, c("Y", NA, NA), ignore_attr = TRUE)
+  expect_equal(out$REC_AGE_AT_TX, c(1, 2, NA), ignore_attr = TRUE)
+})
+
+test_that("blank text in a formatted column is NA, not a factor level", {
+  local_sas_file(fake_tx_blank_text(), "TX_LI")
+
+  expect_no_warning(
+    out <- load_srtr_file(
+      "TX_LI",
+      factor_labels = TRUE,
+      var_labels = FALSE,
+      column_check = "none"
+    )
+  )
+
+  expect_s3_class(out$DON_ANTI_HCV, "factor")
+  expect_equal(is.na(out$DON_ANTI_HCV), c(FALSE, TRUE, TRUE))
+  expect_equal(
+    intersect(levels(out$DON_ANTI_HCV), c("", ": not in format")),
+    character()
+  )
+})
+
+test_that("blank_text = \"keep\" loads blank text as it is", {
+  local_sas_file(fake_tx_blank_text(), "TX_LI")
+
+  out <- load_cols("TX_LI", blank_text = "keep")
+
+  expect_equal(out$REC_FAIL_INFECT, c("Y", "", ""), ignore_attr = TRUE)
+})
+
+test_that("blank text in a parquet file loads as NA", {
+  skip_if_not(arrow::arrow_with_parquet(), "arrow was built without Parquet")
+  dir <- local_srtr_folder(character())
+  arrow::write_parquet(fake_tx_blank_text(), file.path(dir, "TX_LI.parquet"))
+
+  out <- load_cols("TX_LI")
+
+  expect_equal(out$REC_FAIL_INFECT, c("Y", NA, NA))
+  expect_equal(out$DON_ANTI_HCV, c("P", NA, NA))
+})
+
+test_that("blank_text must be \"na\" or \"keep\"", {
+  local_sas_file(fake_tx_blank_text(), "TX_LI")
+
+  expect_error(load_cols("TX_LI", blank_text = "drop"), class = "rlang_error")
+})
