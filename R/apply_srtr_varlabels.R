@@ -83,15 +83,16 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE,
     )
   }
 
-  # ---- Uppercase names and match to dictionary ----
-  df_names_upper <- toupper(setdiff(names(df), kept))
+  # ---- Match each eligible column to the dictionary ----
+  # By column position, so two names differing only in case are handled
+  # separately and a kept label is never overwritten through the other one.
+  entries <- dict[dict$Dataset == file_key, c("Variable", "Label")]
+  eligible <- if (overwrite) seq_along(df) else which(!has_label)
+  at <- match(toupper(names(df)[eligible]), toupper(entries$Variable))
+  to_label <- eligible[!is.na(at)]
+  label_texts <- entries$Label[at[!is.na(at)]]
 
-  vars_to_label <- dict |>
-    dplyr::filter(.data$Dataset == file_key) |>
-    dplyr::mutate(variable_upper = toupper(.data$Variable)) |>
-    dplyr::filter(.data$variable_upper %in% df_names_upper)
-
-  if (nrow(vars_to_label) == 0) {
+  if (length(to_label) == 0) {
     if (verbose) {
       srtr_inform(
         "No variable labels applied for {.val {file_key}}.",
@@ -101,12 +102,11 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE,
     return(df)
   }
 
-  for (i in seq_len(nrow(vars_to_label))) {
-    var_upper <- vars_to_label$variable_upper[i]
-    label_text <- vars_to_label$Label[i]
-    var_match <- names(df)[toupper(names(df)) == var_upper][1]
+  for (i in seq_along(to_label)) {
+    var_match <- names(df)[to_label[i]]
+    label_text <- label_texts[i]
 
-    labelled::var_label(df[[var_match]]) <- label_text
+    labelled::var_label(df[[to_label[i]]]) <- label_text
 
     if (verbose) {
       srtr_inform(
