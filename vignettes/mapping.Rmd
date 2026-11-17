@@ -128,7 +128,7 @@ corridor_box <- sf::st_bbox(
   sf::st_transform(5070) |>
   sf::st_bbox()
 
-region_colours <- grDevices::palette.colors(11, "Set 3")
+region_colors <- grDevices::palette.colors(11, "Set 3")
 ```
 
 ### With ggplot2
@@ -139,9 +139,9 @@ ggplot2 has no inset of its own, so the corridor is drawn as a second plot and p
 library(ggplot2)
 
 map_layers <- list(
-  geom_sf(data = regions_shifted, aes(fill = Region), colour = "white", linewidth = 0.2),
+  geom_sf(data = regions_shifted, aes(fill = Region), color = "white", linewidth = 0.2),
   geom_sf(data = centers_shifted, size = 0.5),
-  scale_fill_manual(values = region_colours, drop = FALSE)
+  scale_fill_manual(values = region_colors, drop = FALSE)
 )
 
 corridor_map <- ggplot() +
@@ -154,7 +154,7 @@ corridor_map <- ggplot() +
   theme_void() +
   theme(
     legend.position = "none",
-    panel.border = element_rect(colour = "red", fill = NA, linewidth = 0.8)
+    panel.border = element_rect(color = "red", fill = NA, linewidth = 0.8)
   )
 
 # Place the inset to the right of the national map, keeping its shape
@@ -173,7 +173,7 @@ ggplot() +
     "rect",
     xmin = corridor_box[["xmin"]], xmax = corridor_box[["xmax"]],
     ymin = corridor_box[["ymin"]], ymax = corridor_box[["ymax"]],
-    fill = NA, colour = "red", linewidth = 0.5
+    fill = NA, color = "red", linewidth = 0.5
   ) +
   annotation_custom(
     ggplotGrob(corridor_map),
@@ -192,7 +192,7 @@ ggplot() +
 
 ### With tmap
 
-tmap draws the inset itself with `tm_inset()` and marks the corridor on the national map. This needs tmap 4.2 or later, the first version whose `tm_inset()` takes the frame colours.
+tmap draws the inset itself with `tm_inset()` and marks the corridor on the national map. This needs tmap 4.2 or later, the first version whose `tm_inset()` takes the frame colors.
 
 ```{r tmap-corridor, eval = requireNamespace("tmap", quietly = TRUE) && utils::packageVersion("tmap") >= "4.2", fig.width = 9, fig.height = 5.5}
 library(tmap)
@@ -200,7 +200,7 @@ library(tmap)
 tm_shape(regions_shifted) +
   tm_polygons(
     fill = "Region",
-    fill.scale = tm_scale_categorical(values = region_colours),
+    fill.scale = tm_scale_categorical(values = region_colors),
     fill.legend = tm_legend(
       title = "",
       orientation = "landscape",
