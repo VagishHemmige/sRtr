@@ -2,6 +2,16 @@
 
 ## sRtr (development version)
 
+- New dataset `missing_codes`: each SRTR format code that may stand for
+  missing information, classified by what it means (unknown, not
+  applicable, not done, pending, cannot disclose, indeterminate, partly
+  known, SAS missing, or an ordinary value). The same code number means
+  different things in different formats, so the classification is by
+  format and code. Nothing uses it yet;
+  [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
+  is unchanged
+  ([\#27](https://github.com/VagishHemmige/sRtr/issues/27)).
+
 - New dataset `optn_mapping_tables`: the OPTN KDRI-to-KDPI (2010 onward)
   and EPTS (2014 onward) mapping tables, parsed from OPTN’s PDFs, with
   each source file’s address and sha256, and the date each table took

@@ -80,5 +80,7 @@ Helpers for composing event dates and simple time-to-event calculations
   : Stored versions of the SRTR data dictionary
 - [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)
   : SRTR data dictionary for a SAF release
+- [`missing_codes`](https://vagishhemmige.github.io/sRtr/reference/missing_codes.md)
+  : Missing-value codes in the SRTR formats, by type
 - [`optn_mapping_tables`](https://vagishhemmige.github.io/sRtr/reference/optn_mapping_tables.md)
   : OPTN KDPI and EPTS mapping tables
