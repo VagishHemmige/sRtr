@@ -41,10 +41,11 @@ element per column, each a vector like \code{actions}, such as
 \code{"append"} leaves them as they are and adds the normalized values in
 new columns named with \verb{_NORM} added.}
 
-\item{reason}{Which reason columns to add: \code{"changed"} records the kind
-of each changed value; \code{"all"} records the kind of every recognised
-code, changed or not; \code{"none"} adds no columns. \code{NULL} (the default)
-means \code{"all"} under \code{policy = "tag_only"} and \code{"changed"} otherwise.}
+\item{reason}{Which reason columns to add: \code{"none"} adds no columns;
+\code{"changed"} records the kind of each changed value; \code{"all"} records
+the kind of every recognised code, changed or not. \code{NULL} (the
+default) means \code{"none"}, except under \code{policy = "tag_only"}, where it
+means \code{"all"}. See Reason columns.}
 
 \item{na_level}{A string, such as \code{"Missing"}, to use in place of \code{NA}
 in the normalized factor and character columns, so that missing values
@@ -69,8 +70,8 @@ character vector giving the type of each value, such as
 many variables.}
 }
 \value{
-\code{df} with the chosen codes replaced, and reason columns added at
-the end. For factors, the levels that became \code{NA} are removed; the
+\code{df} with the chosen codes replaced, and any reason columns
+added at the end. For factors, the levels that became \code{NA} are removed; the
 other levels keep their order, so the reference level does not depend
 on the order of the rows. Ordered factors stay ordered, and attributes
 such as variable labels are kept.
@@ -104,7 +105,8 @@ it is a choice. \code{policy} picks a sensible set in one word; \code{actions} a
 keeps what does: "not applicable" and "indeterminate" are findings, and
 a partly known answer still says yes.
 \item \code{"strict"} leaves only substantive values.
-\item \code{"tag_only"} changes no value and only adds the reason columns.
+\item \code{"tag_only"} changes no value and adds a reason column for each
+variable that holds a recognised code.
 }
 
 Whether "not done" is information depends on the question: a test that
@@ -116,12 +118,13 @@ list are left alone.
 }
 
 \section{Reason columns}{
-So that "unknown" and "not done" are not lost when both become \code{NA}, a
-column named after the variable with \verb{_MISS} added records the kind of
-each value that was changed. It is \code{NA} for values that were not
-changed, including values that were \code{NA} already. A variable gets a
-reason column only if one of its values changed (under \code{"tag_only"}, if
-one of its values is a recognised code).
+Once "unknown" and "not done" have both become \code{NA}, they can no longer
+be told apart. \code{reason = "changed"} keeps that information: a column
+named after the variable with \verb{_MISS} added records the kind of each
+value that was changed. It is \code{NA} for values that were not changed,
+including values that were \code{NA} already, and a variable gets the column
+only if one of its values changed. No reason columns are added by
+default, because a wide file can gain hundreds of them.
 }
 
 \examples{
@@ -140,11 +143,11 @@ srtr_normalize_missing(
   file_key = "TX_KI"
 )
 
-# Only substantive values, without reason columns
+# Only substantive values, recording why each value became NA
 srtr_normalize_missing(
   df,
   policy = "strict",
-  reason = "none",
+  reason = "changed",
   file_key = "TX_KI"
 )
 }

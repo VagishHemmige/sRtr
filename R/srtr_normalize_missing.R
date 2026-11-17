@@ -27,7 +27,8 @@
 #'   keeps what does: "not applicable" and "indeterminate" are findings, and
 #'   a partly known answer still says yes.
 #' * `"strict"` leaves only substantive values.
-#' * `"tag_only"` changes no value and only adds the reason columns.
+#' * `"tag_only"` changes no value and adds a reason column for each
+#'   variable that holds a recognised code.
 #'
 #' Whether "not done" is information depends on the question: a test that
 #' was not ordered can itself be informative. Use
@@ -38,12 +39,13 @@
 #'
 #' # Reason columns
 #'
-#' So that "unknown" and "not done" are not lost when both become `NA`, a
-#' column named after the variable with `_MISS` added records the kind of
-#' each value that was changed. It is `NA` for values that were not
-#' changed, including values that were `NA` already. A variable gets a
-#' reason column only if one of its values changed (under `"tag_only"`, if
-#' one of its values is a recognised code).
+#' Once "unknown" and "not done" have both become `NA`, they can no longer
+#' be told apart. `reason = "changed"` keeps that information: a column
+#' named after the variable with `_MISS` added records the kind of each
+#' value that was changed. It is `NA` for values that were not changed,
+#' including values that were `NA` already, and a variable gets the column
+#' only if one of its values changed. No reason columns are added by
+#' default, because a wide file can gain hundreds of them.
 #'
 #' @param df A data frame from an SRTR SAF file. Raw codes and labelled
 #'   columns (from [apply_srtr_factors()]) are handled alike.
@@ -60,10 +62,11 @@
 #' @param output `"replace"` (the default) changes the columns in place.
 #'   `"append"` leaves them as they are and adds the normalized values in
 #'   new columns named with `_NORM` added.
-#' @param reason Which reason columns to add: `"changed"` records the kind
-#'   of each changed value; `"all"` records the kind of every recognised
-#'   code, changed or not; `"none"` adds no columns. `NULL` (the default)
-#'   means `"all"` under `policy = "tag_only"` and `"changed"` otherwise.
+#' @param reason Which reason columns to add: `"none"` adds no columns;
+#'   `"changed"` records the kind of each changed value; `"all"` records
+#'   the kind of every recognised code, changed or not. `NULL` (the
+#'   default) means `"none"`, except under `policy = "tag_only"`, where it
+#'   means `"all"`. See Reason columns.
 #' @param na_level A string, such as `"Missing"`, to use in place of `NA`
 #'   in the normalized factor and character columns, so that missing values
 #'   form their own group in a table. It covers values that were `NA`
@@ -73,8 +76,8 @@
 #' @param verbose If `TRUE`, report how many values were changed in how
 #'   many variables.
 #'
-#' @return `df` with the chosen codes replaced, and reason columns added at
-#'   the end. For factors, the levels that became `NA` are removed; the
+#' @return `df` with the chosen codes replaced, and any reason columns
+#'   added at the end. For factors, the levels that became `NA` are removed; the
 #'   other levels keep their order, so the reference level does not depend
 #'   on the order of the rows. Ordered factors stay ordered, and attributes
 #'   such as variable labels are kept.
@@ -97,11 +100,11 @@
 #'   file_key = "TX_KI"
 #' )
 #'
-#' # Only substantive values, without reason columns
+#' # Only substantive values, recording why each value became NA
 #' srtr_normalize_missing(
 #'   df,
 #'   policy = "strict",
-#'   reason = "none",
+#'   reason = "changed",
 #'   file_key = "TX_KI"
 #' )
 srtr_normalize_missing <- function(
@@ -131,9 +134,9 @@ srtr_normalize_missing <- function(
   policy <- rlang::arg_match(policy)
   output <- rlang::arg_match(output)
   if (is.null(reason)) {
-    reason <- if (policy == "tag_only") "all" else "changed"
+    reason <- if (policy == "tag_only") "all" else "none"
   }
-  reason <- rlang::arg_match(reason, c("changed", "all", "none"))
+  reason <- rlang::arg_match(reason, c("none", "changed", "all"))
   if (!is.null(na_level) && !rlang::is_string(na_level)) {
     srtr_abort(
       "{.arg na_level} must be a single string or {.code NULL}.",
@@ -228,7 +231,7 @@ srtr_normalize_missing <- function(
     srtr_abort(
       c(
         "{.arg df} already has column{?s} {.field {clash}}.",
-        "i" = "Rename or remove {cli::qty(length(clash))}{?it/them}, or use {.code reason = \"none\"}."
+        "i" = "Rename or remove {cli::qty(length(clash))}{?it/them} first."
       ),
       class = "column_exists"
     )

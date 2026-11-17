@@ -4,9 +4,10 @@
   codes by what they mean in each variable's own format, for raw codes and
   labelled columns alike, and a `policy` chooses which kinds become `NA`:
   `"analysis"` (the default), `"strict"` or `"tag_only"`. `actions` changes
-  the policy by kind and `overrides` by variable. A `_MISS` column records
-  why each value became `NA`. Also new: `output = "append"`, `na_level`,
-  `extra_codes`, `cols`, `file_key` and `release`.
+  the policy by kind and `overrides` by variable. `reason = "changed"` adds
+  a `_MISS` column recording why each value became `NA`. Also new:
+  `output = "append"`, `na_level`, `extra_codes`, `cols`, `file_key` and
+  `release`.
 
   Changes from the earlier version:
   * The `missing_vals` list and `replacement` are removed. Use
@@ -17,7 +18,6 @@
   * 59 more variables are normalized by default, because their format has
     an unknown, not-done or pending code that the earlier list did not
     include (93 code meanings in 64 variables in all).
-  * Reason columns are added by default; `reason = "none"` turns them off.
   * Not done and not tested still become `NA` by default;
     `actions = c(not_done = "keep")` keeps them (#28).
 

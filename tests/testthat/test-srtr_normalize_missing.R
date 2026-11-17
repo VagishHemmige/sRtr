@@ -21,8 +21,20 @@ test_that("the default policy turns unknown-type codes into NA", {
   expect_equal(out$FAKE_ID, 1:8)
 })
 
-test_that("the reason column says why a value became NA, and only that", {
-  out <- srtr_normalize_missing(fake_tx_ki_values(), file_key = "TX_KI")
+test_that("no columns are added by default", {
+  df <- fake_tx_ki_values()
+
+  out <- srtr_normalize_missing(df, file_key = "TX_KI")
+
+  expect_named(out, names(df))
+})
+
+test_that("reason = 'changed' says why a value became NA, and only that", {
+  out <- srtr_normalize_missing(
+    fake_tx_ki_values(),
+    reason = "changed",
+    file_key = "TX_KI"
+  )
 
   expect_equal(
     out$DON_ANTI_CMV_MISS,
@@ -37,7 +49,7 @@ test_that("the reason column says why a value became NA, and only that", {
 test_that("a variable with nothing to change gets no reason column", {
   df <- tibble::tibble(DON_ANTI_CMV = c("P", "N", "I", NA))
 
-  out <- srtr_normalize_missing(df, file_key = "TX_KI")
+  out <- srtr_normalize_missing(df, reason = "changed", file_key = "TX_KI")
 
   expect_identical(out, df)
 })
@@ -46,8 +58,8 @@ test_that("raw codes and labelled columns are normalized alike", {
   raw <- fake_tx_ki_values()
   labelled <- suppressWarnings(apply_srtr_factors(raw, file_key = "TX_KI"))
 
-  from_raw <- srtr_normalize_missing(raw, file_key = "TX_KI")
-  from_labelled <- srtr_normalize_missing(labelled)
+  from_raw <- srtr_normalize_missing(raw, reason = "changed", file_key = "TX_KI")
+  from_labelled <- srtr_normalize_missing(labelled, reason = "changed")
 
   expect_equal(is.na(from_labelled$DON_ANTI_CMV), is.na(from_raw$DON_ANTI_CMV))
   expect_equal(is.na(from_labelled$DON_HIST_DIAB), is.na(from_raw$DON_HIST_DIAB))
@@ -79,6 +91,7 @@ test_that("policy 'strict' leaves only substantive values", {
   out <- srtr_normalize_missing(
     fake_tx_ki_values(),
     policy = "strict",
+    reason = "changed",
     file_key = "TX_KI"
   )
 
@@ -126,12 +139,15 @@ test_that("overrides change the rule for one variable only", {
   expect_true(is.na(out$CAN_MALIG[6]))
 })
 
-test_that("reason = 'none' adds no columns", {
-  df <- fake_tx_ki_values()
+test_that("reason = 'all' tags recognised codes that were kept", {
+  out <- srtr_normalize_missing(
+    fake_tx_ki_values(),
+    reason = "all",
+    file_key = "TX_KI"
+  )
 
-  out <- srtr_normalize_missing(df, reason = "none", file_key = "TX_KI")
-
-  expect_named(out, names(df))
+  expect_equal(out$DON_ANTI_CMV[4], "I")
+  expect_equal(out$DON_ANTI_CMV_MISS[4], "indeterminate")
 })
 
 test_that("output = 'append' keeps the original columns", {
@@ -141,7 +157,7 @@ test_that("output = 'append' keeps the original columns", {
 
   expect_identical(out[names(df)], df)
   expect_equal(out$DON_ANTI_CMV_NORM, c("P", "N", NA, "I", NA, NA, NA, NA))
-  expect_true("DON_ANTI_CMV_MISS" %in% names(out))
+  expect_false("DON_ANTI_CMV_MISS" %in% names(out))
 })
 
 test_that("cols limits the variables that are normalized", {
@@ -182,6 +198,7 @@ test_that("extra_codes adds the caller's own codes", {
   out <- srtr_normalize_missing(
     df,
     extra_codes = list(FAKE_SCORE = c(ZZ = "unknown")),
+    reason = "changed",
     file_key = "TX_KI"
   )
 
@@ -190,16 +207,9 @@ test_that("extra_codes adds the caller's own codes", {
 })
 
 test_that("normalizing twice changes nothing more", {
-  once <- srtr_normalize_missing(
-    fake_tx_ki_values(),
-    reason = "none",
-    file_key = "TX_KI"
-  )
+  once <- srtr_normalize_missing(fake_tx_ki_values(), file_key = "TX_KI")
 
-  expect_identical(
-    srtr_normalize_missing(once, reason = "none", file_key = "TX_KI"),
-    once
-  )
+  expect_identical(srtr_normalize_missing(once, file_key = "TX_KI"), once)
 })
 
 test_that("values a format does not list are left alone", {
@@ -227,7 +237,7 @@ test_that("an existing reason or output column is not overwritten", {
   df$DON_ANTI_CMV_MISS <- "mine"
 
   expect_error(
-    srtr_normalize_missing(df, file_key = "TX_KI"),
+    srtr_normalize_missing(df, reason = "changed", file_key = "TX_KI"),
     class = "sRtr_error_column_exists"
   )
 })
