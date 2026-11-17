@@ -1,0 +1,4 @@
+# testthat writes snapshot files with Linux line endings (LF) on every
+# platform. Keep them LF in every checkout too, so that on Windows a test run
+# that changes nothing does not show the snapshots as modified.
+tests/testthat/_snaps/** text eol=lf
