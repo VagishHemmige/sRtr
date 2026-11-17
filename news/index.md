@@ -2,6 +2,25 @@
 
 ## sRtr (development version)
 
+- sRtr now corrects entries of SRTR’s web data dictionary that do not
+  match the SAFs, each under a stable ID. The first, `SRTR-DC-001`,
+  gives `REC_COD` in every TX dataset the format `COD` instead of
+  `THCOD`: liver recipients’ causes of death are `COD` codes, and
+  `THCOD` is a subset of `COD` with the same meanings, so `REC_COD`
+  labels now say “TH:” for thoracic codes. The stored dictionary
+  versions are unchanged; corrections are applied when sRtr reads them.
+  [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md)
+  and
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+  gain `view`: `"corrected"` (the default) or `"web"` for the dictionary
+  as SRTR’s web page has it.
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+  records the view and the corrections applied in its `srtr_release`
+  attribute, and later labelling and missing-value functions on the
+  result use the same view. A correction whose entry SRTR has since
+  changed is not applied, with a warning
+  ([\#191](https://github.com/VagishHemmige/sRtr/issues/191)).
+
 - [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
   is rebuilt on `missing_codes`. It recognises codes by what they mean
   in each variable’s own format, for raw codes and labelled columns

@@ -13,7 +13,8 @@ in both.
 srtr_dictionary(
   release = NULL,
   table = c("dictionary", "formats"),
-  gaps = c("warn", "error", "nearest")
+  gaps = c("warn", "error", "nearest"),
+  view = c("corrected", "web")
 )
 ```
 
@@ -44,6 +45,13 @@ srtr_dictionary(
   decides them from the file's columns. Format codes seen in only one
   are kept.
 
+- view:
+
+  `"corrected"` (the default) applies sRtr's corrections to SRTR's web
+  dictionary; `"web"` returns the dictionary as SRTR's web page has it.
+  The corrections are listed in the Corrections section below. They
+  change only the dictionary table, never the format code lists.
+
 ## Value
 
 A tibble with the columns of
@@ -52,7 +60,25 @@ or [formats](https://vagishhemmige.github.io/sRtr/reference/formats.md).
 Its attributes `snapshot` (the stored version used, or `NA`) and `basis`
 (`"observed"`, `"interpolated"`, `"nearest snapshot"` or `"default"`)
 say where it came from. A release before the first or after the last
-stored version uses that version, with a warning.
+stored version uses that version, with a warning. Attribute `view` is
+the view used and `corrections` the IDs of the corrections applied.
+
+## Corrections
+
+sRtr corrects a few entries of SRTR's web dictionary that do not match
+the SAFs, each under a stable ID:
+
+- `SRTR-DC-001`: `REC_COD` in every TX dataset uses the format `COD`,
+  not `THCOD`. The thoracic format `THCOD` is a subset of `COD` with the
+  same meanings (`COD` prefixes their labels with "TH:"), and liver
+  recipients' causes of death are `COD` codes that `THCOD` lacks. This
+  was checked on a real TX_LI file only; for other organs it is a
+  generalization.
+
+A correction is applied only when SRTR's entry still has the value sRtr
+expects; if SRTR has changed it, sRtr keeps SRTR's value and warns.
+Codes that appear in data but are in no format are not corrected: their
+meaning is not documented.
 
 ## See also
 

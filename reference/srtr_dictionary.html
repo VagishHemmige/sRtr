@@ -59,7 +59,8 @@ versions uses the entries that are the same in both.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">srtr_dictionary</span><span class="op">(</span></span>
 <span>  release <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  table <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dictionary"</span>, <span class="st">"formats"</span><span class="op">)</span>,</span>
-<span>  gaps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"nearest"</span><span class="op">)</span></span>
+<span>  gaps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"nearest"</span><span class="op">)</span>,</span>
+<span>  view <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"corrected"</span>, <span class="st">"web"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,6 +87,13 @@ versions are left out, since whether they existed at that release cannot
 be known without the file; <code><a href="load_srtr_file.html">load_srtr_file()</a></code> decides them from the file's
 columns. Format codes seen in only one are kept.</p></dd>
 
+
+<dt id="arg-view">view<a class="anchor" aria-label="anchor" href="#arg-view"></a></dt>
+<dd><p><code>"corrected"</code> (the default) applies sRtr's corrections to SRTR's
+web dictionary; <code>"web"</code> returns the dictionary as SRTR's web page has it.
+The corrections are listed in the Corrections section below. They change
+only the dictionary table, never the format code lists.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -93,7 +101,23 @@ columns. Format codes seen in only one are kept.</p></dd>
 attributes <code>snapshot</code> (the stored version used, or <code>NA</code>) and <code>basis</code>
 (<code>"observed"</code>, <code>"interpolated"</code>, <code>"nearest snapshot"</code> or <code>"default"</code>) say
 where it came from. A release before the first or after the last stored
-version uses that version, with a warning.</p>
+version uses that version, with a warning. Attribute <code>view</code> is the view
+used and <code>corrections</code> the IDs of the corrections applied.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="corrections">Corrections<a class="anchor" aria-label="anchor" href="#corrections"></a></h2>
+
+
+<p>sRtr corrects a few entries of SRTR's web dictionary that do not match the
+SAFs, each under a stable ID:</p><ul><li><p><code>SRTR-DC-001</code>: <code>REC_COD</code> in every TX dataset uses the format <code>COD</code>, not
+<code>THCOD</code>. The thoracic format <code>THCOD</code> is a subset of <code>COD</code> with the same
+meanings (<code>COD</code> prefixes their labels with "TH:"), and liver recipients'
+causes of death are <code>COD</code> codes that <code>THCOD</code> lacks. This was checked on
+a real TX_LI file only; for other organs it is a generalization.</p></li>
+</ul><p>A correction is applied only when SRTR's entry still has the value sRtr
+expects; if SRTR has changed it, sRtr keeps SRTR's value and warns. Codes
+that appear in data but are in no format are not corrected: their meaning
+is not documented.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

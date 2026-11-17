@@ -19,6 +19,7 @@ load_srtr_file(
   release = NULL,
   gaps = c("warn", "error", "nearest"),
   blank_text = c("na", "keep"),
+  view = c("corrected", "web"),
   ...
 )
 ```
@@ -107,6 +108,21 @@ load_srtr_file(
   them, or to keep them with
   `srtr_normalize_missing(policy = "tag_only")`.
 
+- view:
+
+  `"corrected"` (the default) labels and checks the file with sRtr's
+  corrections to SRTR's web dictionary; `"web"` uses the dictionary as
+  SRTR's web page has it. See the Corrections section of
+  [`srtr_dictionary()`](https://vagishhemmige.github.io/sRtr/reference/srtr_dictionary.md).
+  The view and the corrections applied are recorded in the result's
+  `srtr_release` attribute, and later calls to
+  [`apply_srtr_factors()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.md),
+  [`apply_srtr_varlabels()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.md),
+  [`srtr_missing_report()`](https://vagishhemmige.github.io/sRtr/reference/srtr_missing_report.md)
+  and
+  [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
+  on the result use the same view.
+
 - ...:
 
   Additional arguments passed to the file reader
@@ -119,7 +135,7 @@ load_srtr_file(
 
 A tibble with the loaded file contents, optionally labeled. The tibble
 includes attributes `source_path`, `file_key` and `srtr_release` (a
-list: `release`, `dictionary`, `basis`).
+list: `release`, `dictionary`, `basis`, `view`, `corrections`).
 
 ## Details
 

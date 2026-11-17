@@ -66,6 +66,7 @@ Variable labels using the dictionary dataset
 <span>  release <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gaps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"nearest"</span><span class="op">)</span>,</span>
 <span>  blank_text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"na"</span>, <span class="st">"keep"</span><span class="op">)</span>,</span>
+<span>  view <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"corrected"</span>, <span class="st">"web"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -146,6 +147,17 @@ With <code>"na"</code>, <code><a href="srtr_missing_report.html">srtr_missing_re
 <code>srtr_normalize_missing(policy = "tag_only")</code>.</p></dd>
 
 
+<dt id="arg-view">view<a class="anchor" aria-label="anchor" href="#arg-view"></a></dt>
+<dd><p><code>"corrected"</code> (the default) labels and checks the file with
+sRtr's corrections to SRTR's web dictionary; <code>"web"</code> uses the dictionary
+as SRTR's web page has it. See the Corrections section of
+<code><a href="srtr_dictionary.html">srtr_dictionary()</a></code>. The view and the corrections applied are recorded
+in the result's <code>srtr_release</code> attribute, and later calls to
+<code><a href="apply_srtr_factors.html">apply_srtr_factors()</a></code>, <code><a href="apply_srtr_varlabels.html">apply_srtr_varlabels()</a></code>,
+<code><a href="srtr_missing_report.html">srtr_missing_report()</a></code> and <code><a href="srtr_normalize_missing.html">srtr_normalize_missing()</a></code> on the result use
+the same view.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to the file reader
 (<code><a href="https://haven.tidyverse.org/reference/read_sas.html" class="external-link">haven::read_sas()</a></code> or <code><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">arrow::read_parquet()</a></code>), e.g. <code>encoding</code> for
@@ -156,7 +168,8 @@ With <code>"na"</code>, <code><a href="srtr_missing_report.html">srtr_missing_re
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with the loaded file contents, optionally labeled.
 The tibble includes attributes <code>source_path</code>, <code>file_key</code> and
-<code>srtr_release</code> (a list: <code>release</code>, <code>dictionary</code>, <code>basis</code>).</p>
+<code>srtr_release</code> (a list: <code>release</code>, <code>dictionary</code>, <code>basis</code>, <code>view</code>,
+<code>corrections</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
