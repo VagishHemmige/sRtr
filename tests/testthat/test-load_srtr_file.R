@@ -326,7 +326,10 @@ test_that("TX_KP without col_select still gets TFL_LAFUDATE", {
 })
 
 test_that("the derived TX_KP TFL_LAFUDATE gets a label when labels are applied", {
-  local_sas_file(fake_tx_kp(), "TX_KP")
+  fake <- fake_tx_kp()
+  attr(fake$TFL_LAFUDATEKI, "label") <- "A made-up kidney label"
+  attr(fake$TFL_LAFUDATEPA, "label") <- "A made-up pancreas label"
+  local_sas_file(fake, "TX_KP")
 
   out <- load_srtr_file("TX_KP", factor_labels = FALSE, column_check = "none")
   unlabelled <- load_cols("TX_KP")
