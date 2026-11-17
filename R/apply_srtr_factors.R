@@ -55,6 +55,11 @@
 #' the raw codes, or keep working with dplyr. Attributes on each column, such
 #' as a variable label, are kept.
 #'
+#' When codes that are not in the format are kept, the column also carries
+#' an `srtr_kept_codes` attribute: a named vector giving, for each such
+#' level, the original code. [srtr_missing_report()] uses it to recognise
+#' those codes after labelling.
+#'
 #' @return A data frame with factor levels applied to coded variables, and a
 #'   `file_key` attribute holding the dataset key in upper case, so the key
 #'   carries through a chain of calls. If no usable key is found, `df` is
@@ -224,6 +229,7 @@ apply_srtr_factors <- function(
   values <- as.character(x)
   mapped <- labels[match(values, codes)]
   outside <- !is.na(values) & is.na(mapped)
+  kept_codes <- NULL
 
   if (has_other && !is.factor(x)) {
     # Raw codes: as a SAS format does, values not listed get the catch-all
@@ -249,10 +255,25 @@ apply_srtr_factors <- function(
     }
     if (unknown_codes == "keep") {
       mapped[outside] <- .srtr_unknown_name(values[outside], all_labels)
+      kept <- !duplicated(values[outside])
+      kept_codes <- stats::setNames(
+        values[outside][kept],
+        mapped[outside][kept]
+      )
     }
   }
   extra <- sort(setdiff(unique(mapped[!is.na(mapped)]), all_labels))
-  .srtr_keep_attributes(factor(mapped, levels = c(all_labels, extra)), x, fmt)
+  new <- .srtr_keep_attributes(
+    factor(mapped, levels = c(all_labels, extra)),
+    x,
+    fmt
+  )
+  # Which level stands for which kept code: the name alone cannot say,
+  # since a raw value may itself end in the suffix.
+  if (length(kept_codes) > 0) {
+    attr(new, "srtr_kept_codes") <- kept_codes
+  }
+  new
 }
 
 # Level names for kept codes: each distinct code gets the code plus the

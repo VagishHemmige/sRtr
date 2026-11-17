@@ -1,5 +1,13 @@
 # sRtr (development version)
 
+* New `srtr_missing_report()` counts, for each variable, the values that
+  stand for missing information and of which kind (unknown, not done, not
+  applicable, ...), using `missing_codes`. It changes nothing in the data,
+  gives the same counts for raw codes and labelled columns, and reports
+  values that are already `NA` and values a format does not list separately.
+  `detail = "code"` lists every classified code with its count, to check
+  the classification against the data (#28).
+
 * New dataset `missing_codes`: each SRTR format code that may stand for
   missing information, classified by what it means (unknown, not applicable,
   not done, pending, cannot disclose, indeterminate, partly known, SAS
