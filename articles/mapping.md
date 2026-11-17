@@ -388,6 +388,45 @@ centers <- get_hrsa_transplant_centers() |>
 
 centers |>
   dplyr::select(OTC_NM, OTC_CITY, STATE_ABBR, OPO_PROVIDER_NM, Service_Lst)
+#> Simple feature collection with 791 features and 5 fields
+#> Geometry type: POINT
+#> Dimension:     XY
+#> Bounding box:  xmin: -157.8552 ymin: 18.41789 xmax: -66.0577 ymax: 47.66421
+#> Geodetic CRS:  WGS 84
+#> First 10 features:
+#>                            OTC_NM   OTC_CITY STATE_ABBR      OPO_PROVIDER_NM
+#> 1           Children's of Alabama Birmingham         AL Alabama Organ Center
+#> 2           Children's of Alabama Birmingham         AL Alabama Organ Center
+#> 3           Children's of Alabama Birmingham         AL Alabama Organ Center
+#> 4  University of Alabama Hospital Birmingham         AL Alabama Organ Center
+#> 5  University of Alabama Hospital Birmingham         AL Alabama Organ Center
+#> 6  University of Alabama Hospital Birmingham         AL Alabama Organ Center
+#> 7  University of Alabama Hospital Birmingham         AL Alabama Organ Center
+#> 8  University of Alabama Hospital Birmingham         AL Alabama Organ Center
+#> 9  University of Alabama Hospital Birmingham         AL Alabama Organ Center
+#> 10   Birmingham VA Medical Center Birmingham         AL Alabama Organ Center
+#>                                                         Service_Lst
+#> 1                                              Heart, Kidney, Liver
+#> 2                                              Heart, Kidney, Liver
+#> 3                                              Heart, Kidney, Liver
+#> 4   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 5   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 6   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 7   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 8   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 9   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 10                                                           Kidney
+#>                      geometry
+#> 1  POINT (-86.80482 33.50352)
+#> 2  POINT (-86.80482 33.50352)
+#> 3  POINT (-86.80482 33.50352)
+#> 4  POINT (-86.81464 33.48393)
+#> 5  POINT (-86.81464 33.48393)
+#> 6  POINT (-86.81464 33.48393)
+#> 7  POINT (-86.81464 33.48393)
+#> 8  POINT (-86.81464 33.48393)
+#> 9  POINT (-86.81464 33.48393)
+#> 10 POINT (-86.80125 33.50508)
 ```
 
 A simple map:
@@ -397,6 +436,8 @@ A simple map:
 plot(sf::st_geometry(optn_regions), border = "grey70")
 plot(sf::st_geometry(centers), add = TRUE, pch = 16, cex = 0.5)
 ```
+
+![](mapping_files/figure-html/current-centers-map-1.png)
 
 ## Plotting OPO service areas
 
@@ -410,21 +451,38 @@ The detailed OPO service-area layer can be downloaded with:
 opo_areas <- get_hrsa_opo_service_areas()
 ```
 
-A basic plot:
+The layer includes the OPOs serving Alaska, Hawaii and Puerto Rico,
+which stretch a national map, so crop it to the contiguous states before
+plotting. There are more than 50 OPOs, too many for a legend, so the
+plot leaves the key out.
 
 ``` r
 
-plot(opo_areas["OPO_PROVIDER_NM"])
+opo_contiguous <- opo_areas |>
+  sf::st_make_valid() |>
+  sf::st_transform(sf::st_crs(unos_regions)) |>
+  sf::st_crop(sf::st_bbox(unos_regions))
+#> Warning: attribute variables are assumed to be spatially constant throughout
+#> all geometries
+
+plot(opo_contiguous["OPO_PROVIDER_NM"], key.pos = NULL, main = "OPO service areas")
 ```
+
+![](mapping_files/figure-html/plot-opo-service-areas-1.png)
 
 For a less cluttered map, draw only the boundaries and overlay
 transplant centers.
 
 ``` r
 
-plot(sf::st_geometry(opo_areas), border = "grey70")
-plot(sf::st_geometry(centers), add = TRUE, pch = 16, cex = 0.4)
+plot(sf::st_geometry(opo_contiguous), border = "grey70")
+plot(
+  sf::st_geometry(sf::st_transform(centers, sf::st_crs(opo_contiguous))),
+  add = TRUE, pch = 16, cex = 0.4
+)
 ```
+
+![](mapping_files/figure-html/plot-opo-with-centers-1.png)
 
 ## Adding state outlines with tigris
 
@@ -461,31 +519,50 @@ plot(sf::st_geometry(optn_regions), border = "grey70")
 plot(sf::st_geometry(kidney_centers), add = TRUE, pch = 16, cex = 0.5)
 ```
 
+![](mapping_files/figure-html/filter-service-list-1.png)
+
 ## Working with geometries
 
 Because these are `sf` objects, they can be used with standard spatial
 operations.
 
 For example, you can check which transplant centers fall within a
-UNOS/OPTN region.
+UNOS/OPTN region. For a join, use the regions at their real locations
+with `noncontiguous = "include"`, so centers in Hawaii and Puerto Rico
+are assigned to Regions 6 and 3 rather than to none.
 
 ``` r
 
+regions_all <- get_hrsa_optn_regions(noncontiguous = "include")
+
 centers_with_region <- sf::st_join(
-  centers,
-  optn_regions |> dplyr::select(Region)
+  sf::st_transform(centers, sf::st_crs(regions_all)),
+  regions_all |> dplyr::select(Region)
 )
 
 centers_with_region |>
   sf::st_drop_geometry() |>
   dplyr::count(Region, sort = TRUE)
+#>       Region   n
+#> 1   Region 5 113
+#> 2   Region 2  98
+#> 3   Region 3  89
+#> 4   Region 4  88
+#> 5  Region 11  80
+#> 6   Region 7  79
+#> 7  Region 10  68
+#> 8   Region 8  60
+#> 9   Region 9  46
+#> 10  Region 1  40
+#> 11  Region 6  30
 ```
 
 ## Notes
 
 The HRSA transplant center and OPO functions download public GIS layers
 from HRSA. These layers may change over time as HRSA updates the source
-data.
+data. On the package website, the maps that use them are drawn from
+HRSA’s layers at the time the site was last built.
 
 The built-in `UNOS_regions_sf` object is included with the package and
 is useful for reproducible examples and basic region mapping.

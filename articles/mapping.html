@@ -416,11 +416,51 @@ match <code>optn_regions</code> before using them together:</p>
 <span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">optn_regions</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">centers</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">OTC_NM</span>, <span class="va">OTC_CITY</span>, <span class="va">STATE_ABBR</span>, <span class="va">OPO_PROVIDER_NM</span>, <span class="va">Service_Lst</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">OTC_NM</span>, <span class="va">OTC_CITY</span>, <span class="va">STATE_ABBR</span>, <span class="va">OPO_PROVIDER_NM</span>, <span class="va">Service_Lst</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Simple feature collection with 791 features and 5 fields</span></span>
+<span><span class="co">#&gt; Geometry type: POINT</span></span>
+<span><span class="co">#&gt; Dimension:     XY</span></span>
+<span><span class="co">#&gt; Bounding box:  xmin: -157.8552 ymin: 18.41789 xmax: -66.0577 ymax: 47.66421</span></span>
+<span><span class="co">#&gt; Geodetic CRS:  WGS 84</span></span>
+<span><span class="co">#&gt; First 10 features:</span></span>
+<span><span class="co">#&gt;                            OTC_NM   OTC_CITY STATE_ABBR      OPO_PROVIDER_NM</span></span>
+<span><span class="co">#&gt; 1           Children's of Alabama Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 2           Children's of Alabama Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 3           Children's of Alabama Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 4  University of Alabama Hospital Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 5  University of Alabama Hospital Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 6  University of Alabama Hospital Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 7  University of Alabama Hospital Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 8  University of Alabama Hospital Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 9  University of Alabama Hospital Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt; 10   Birmingham VA Medical Center Birmingham         AL Alabama Organ Center</span></span>
+<span><span class="co">#&gt;                                                         Service_Lst</span></span>
+<span><span class="co">#&gt; 1                                              Heart, Kidney, Liver</span></span>
+<span><span class="co">#&gt; 2                                              Heart, Kidney, Liver</span></span>
+<span><span class="co">#&gt; 3                                              Heart, Kidney, Liver</span></span>
+<span><span class="co">#&gt; 4   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet</span></span>
+<span><span class="co">#&gt; 5   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet</span></span>
+<span><span class="co">#&gt; 6   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet</span></span>
+<span><span class="co">#&gt; 7   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet</span></span>
+<span><span class="co">#&gt; 8   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet</span></span>
+<span><span class="co">#&gt; 9   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet</span></span>
+<span><span class="co">#&gt; 10                                                           Kidney</span></span>
+<span><span class="co">#&gt;                      geometry</span></span>
+<span><span class="co">#&gt; 1  POINT (-86.80482 33.50352)</span></span>
+<span><span class="co">#&gt; 2  POINT (-86.80482 33.50352)</span></span>
+<span><span class="co">#&gt; 3  POINT (-86.80482 33.50352)</span></span>
+<span><span class="co">#&gt; 4  POINT (-86.81464 33.48393)</span></span>
+<span><span class="co">#&gt; 5  POINT (-86.81464 33.48393)</span></span>
+<span><span class="co">#&gt; 6  POINT (-86.81464 33.48393)</span></span>
+<span><span class="co">#&gt; 7  POINT (-86.81464 33.48393)</span></span>
+<span><span class="co">#&gt; 8  POINT (-86.81464 33.48393)</span></span>
+<span><span class="co">#&gt; 9  POINT (-86.81464 33.48393)</span></span>
+<span><span class="co">#&gt; 10 POINT (-86.80125 33.50508)</span></span></code></pre></div>
 <p>A simple map:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">optn_regions</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">centers</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
+<p><img src="mapping_files/figure-html/current-centers-map-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="plotting-opo-service-areas">Plotting OPO service areas<a class="anchor" aria-label="anchor" href="#plotting-opo-service-areas"></a>
@@ -430,14 +470,29 @@ area geography.</p>
 <p>The detailed OPO service-area layer can be downloaded with:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">opo_areas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_hrsa_opo_service_areas.html">get_hrsa_opo_service_areas</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>A basic plot:</p>
+<p>The layer includes the OPOs serving Alaska, Hawaii and Puerto Rico,
+which stretch a national map, so crop it to the contiguous states before
+plotting. There are more than 50 OPOs, too many for a legend, so the
+plot leaves the key out.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">opo_areas</span><span class="op">[</span><span class="st">"OPO_PROVIDER_NM"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">opo_contiguous</span> <span class="op">&lt;-</span> <span class="va">opo_areas</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/valid.html" class="external-link">st_make_valid</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">unos_regions</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crop.html" class="external-link">st_crop</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span><span class="va">unos_regions</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: attribute variables are assumed to be spatially constant throughout</span></span>
+<span><span class="co">#&gt; all geometries</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">opo_contiguous</span><span class="op">[</span><span class="st">"OPO_PROVIDER_NM"</span><span class="op">]</span>, key.pos <span class="op">=</span> <span class="cn">NULL</span>, main <span class="op">=</span> <span class="st">"OPO service areas"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="mapping_files/figure-html/plot-opo-service-areas-1.png" class="r-plt" alt="" width="672"></p>
 <p>For a less cluttered map, draw only the boundaries and overlay
 transplant centers.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">opo_areas</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">centers</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">opo_contiguous</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">centers</span>, <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">opo_contiguous</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.4</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="mapping_files/figure-html/plot-opo-with-centers-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="adding-state-outlines-with-tigris">Adding state outlines with tigris<a class="anchor" aria-label="anchor" href="#adding-state-outlines-with-tigris"></a>
@@ -469,6 +524,7 @@ that list specific transplant services.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">optn_regions</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">kidney_centers</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
+<p><img src="mapping_files/figure-html/filter-service-list-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="working-with-geometries">Working with geometries<a class="anchor" aria-label="anchor" href="#working-with-geometries"></a>
@@ -476,23 +532,40 @@ that list specific transplant services.</p>
 <p>Because these are <code>sf</code> objects, they can be used with
 standard spatial operations.</p>
 <p>For example, you can check which transplant centers fall within a
-UNOS/OPTN region.</p>
+UNOS/OPTN region. For a join, use the regions at their real locations
+with <code>noncontiguous = "include"</code>, so centers in Hawaii and
+Puerto Rico are assigned to Regions 6 and 3 rather than to none.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">centers_with_region</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html" class="external-link">st_join</a></span><span class="op">(</span></span>
-<span>  <span class="va">centers</span>,</span>
-<span>  <span class="va">optn_regions</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">regions_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_hrsa_optn_regions.html">get_hrsa_optn_regions</a></span><span class="op">(</span>noncontiguous <span class="op">=</span> <span class="st">"include"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">centers_with_region</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html" class="external-link">st_join</a></span><span class="op">(</span></span>
+<span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">centers</span>, <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">regions_all</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="va">regions_all</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">centers_with_region</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">Region</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">Region</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt;       Region   n</span></span>
+<span><span class="co">#&gt; 1   Region 5 113</span></span>
+<span><span class="co">#&gt; 2   Region 2  98</span></span>
+<span><span class="co">#&gt; 3   Region 3  89</span></span>
+<span><span class="co">#&gt; 4   Region 4  88</span></span>
+<span><span class="co">#&gt; 5  Region 11  80</span></span>
+<span><span class="co">#&gt; 6   Region 7  79</span></span>
+<span><span class="co">#&gt; 7  Region 10  68</span></span>
+<span><span class="co">#&gt; 8   Region 8  60</span></span>
+<span><span class="co">#&gt; 9   Region 9  46</span></span>
+<span><span class="co">#&gt; 10  Region 1  40</span></span>
+<span><span class="co">#&gt; 11  Region 6  30</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="notes">Notes<a class="anchor" aria-label="anchor" href="#notes"></a>
 </h2>
 <p>The HRSA transplant center and OPO functions download public GIS
 layers from HRSA. These layers may change over time as HRSA updates the
-source data.</p>
+source data. On the package website, the maps that use them are drawn
+from HRSA’s layers at the time the site was last built.</p>
 <p>The built-in <code>UNOS_regions_sf</code> object is included with the
 package and is useful for reproducible examples and basic region
 mapping.</p>
