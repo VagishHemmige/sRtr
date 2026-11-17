@@ -50,10 +50,12 @@ Suggests:
     spelling,
     testthat (>= 3.0.0),
     flowchart,
+    ggplot2,
     withr,
     xml2,
     digest,
-    kidney.epi
+    kidney.epi,
+    tmap (>= 4.1)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true
