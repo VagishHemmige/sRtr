@@ -17,6 +17,9 @@
 #' If the file was loaded via the `load_srtr_file` function, this argument
 #' should be unnecessary.
 #' @param verbose Logical. If TRUE, print each variable being labeled.
+#' @param overwrite `FALSE` (the default) keeps a label a column already has,
+#'   such as the variable labels stored in a SAS file, and labels only the
+#'   columns without one. `TRUE` replaces every label with the dictionary's.
 #' @param release Optional. The SAF release `df` comes from, as year and month
 #'   (`"2609"`), to label it with that release's dictionary (see
 #'   [srtr_dictionary()]). If `NULL` (the default), the release recorded by
@@ -44,7 +47,14 @@
 #' }
 
 apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE,
-                                 release = NULL) {
+                                 release = NULL, overwrite = FALSE) {
+  if (!rlang::is_bool(overwrite)) {
+    srtr_abort(
+      "{.arg overwrite} must be {.code TRUE} or {.code FALSE}.",
+      class = "bad_overwrite"
+    )
+  }
+
   # ---- Work out the dataset ----
   file_key <- .srtr_resolve_file_key(df, file_key, substitute(df), verbose)
   if (is.null(file_key)) {
@@ -55,20 +65,26 @@ apply_srtr_varlabels <- function(df, file_key = NULL, verbose = FALSE,
   # ---- Dictionary for the release ----
   dict <- .srtr_tables_for(df, release, file_key)$dictionary
 
-  # ---- Check if already labeled ----
-  already_labelled <- any(
-    !vapply(df, function(x) is.null(labelled::var_label(x)), logical(1))
+  # ---- Columns that keep their own label ----
+  # SAF files carry SAS variable labels, so labelled columns are normal.
+  has_label <- !vapply(
+    df,
+    function(x) is.null(labelled::var_label(x)),
+    logical(1)
   )
-  if (already_labelled) {
-    srtr_warn(
-      "Some variables already have labels, so none were relabeled.",
-      class = "already_labelled"
+  kept <- if (overwrite) character() else names(df)[has_label]
+  if (verbose && length(kept) > 0) {
+    srtr_inform(
+      c(
+        "i" = "Kept the existing label on {length(kept)} variable{?s}.",
+        " " = "Use {.code overwrite = TRUE} to replace {cli::qty(length(kept))}{?it/them} with dictionary labels."
+      ),
+      class = "labels_kept"
     )
-    return(df)
   }
 
   # ---- Uppercase names and match to dictionary ----
-  df_names_upper <- toupper(names(df))
+  df_names_upper <- toupper(setdiff(names(df), kept))
 
   vars_to_label <- dict |>
     dplyr::filter(.data$Dataset == file_key) |>

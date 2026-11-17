@@ -25,14 +25,56 @@ test_that("verbose = TRUE reports each labeled variable", {
   )
 })
 
-test_that("already-labelled data is left alone, with a warning", {
+test_that("a column's own label is kept and other columns are labelled, quietly", {
+  df <- tibble::tibble(CAN_ABO = "A", CAN_GENDER = "F")
+  labelled::var_label(df$CAN_ABO) <- "A made-up label"
+
+  expect_no_warning(out <- apply_srtr_varlabels(df, file_key = "TX_KI"))
+
+  expect_equal(labelled::var_label(out$CAN_ABO), "A made-up label")
+  expect_equal(
+    labelled::var_label(out$CAN_GENDER),
+    dictionary$Label[dictionary$Dataset == "TX_KI" & dictionary$Variable == "CAN_GENDER"]
+  )
+})
+
+test_that("overwrite = TRUE replaces a column's own label", {
   df <- tibble::tibble(CAN_ABO = "A")
   labelled::var_label(df$CAN_ABO) <- "A made-up label"
-  expect_warning(
-    out <- apply_srtr_varlabels(df, file_key = "TX_KI"),
-    class = "sRtr_warning_already_labelled"
+
+  out <- apply_srtr_varlabels(df, file_key = "TX_KI", overwrite = TRUE)
+
+  expect_equal(labelled::var_label(out$CAN_ABO), "Patient/s Blood Type")
+})
+
+test_that("verbose = TRUE says how many labels were kept", {
+  df <- tibble::tibble(CAN_ABO = "A", CAN_GENDER = "F")
+  labelled::var_label(df$CAN_ABO) <- "A made-up label"
+
+  classes <- character()
+  withCallingHandlers(
+    apply_srtr_varlabels(df, file_key = "TX_KI", verbose = TRUE),
+    message = function(cnd) {
+      classes <<- c(classes, class(cnd)[1])
+      invokeRestart("muffleMessage")
+    }
   )
-  expect_equal(labelled::var_label(out$CAN_ABO), "A made-up label")
+  expect_equal(
+    classes,
+    c("sRtr_message_labels_kept", "sRtr_message_variable_labeled")
+  )
+  expect_snapshot(
+    out <- apply_srtr_varlabels(df, file_key = "TX_KI", verbose = TRUE)
+  )
+})
+
+test_that("overwrite must be TRUE or FALSE", {
+  df <- tibble::tibble(CAN_ABO = "A")
+
+  expect_error(
+    apply_srtr_varlabels(df, file_key = "TX_KI", overwrite = NA),
+    class = "sRtr_error_bad_overwrite"
+  )
 })
 
 test_that("the result carries the upper-case file_key", {
