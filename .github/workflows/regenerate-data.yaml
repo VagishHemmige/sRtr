@@ -24,6 +24,7 @@ on:
     paths:
       - "data-raw/**"
       - "R/dictionary-versions.R"
+      - "R/missing-codes.R"
       - ".github/workflows/regenerate-data.yaml"
   workflow_dispatch:
 
@@ -95,6 +96,7 @@ jobs:
           Rscript data-raw/dictionary_file_creator.R
           Rscript data-raw/formats_file_creator.R
           Rscript data-raw/dictionary_versions_data.R
+          Rscript data-raw/missing_codes_data.R
           Rscript data-raw/optn_tables_data.R
 
       - name: Install the branch with the new dictionary
