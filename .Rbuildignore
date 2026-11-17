@@ -17,3 +17,4 @@
 ^PACKAGE_REVIEW\.md$
 ^tools/audit$
 ^tools/reference-review$
+^\.gitattributes$
