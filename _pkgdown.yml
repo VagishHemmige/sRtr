@@ -33,6 +33,7 @@ reference:
 
   - title: Missing data
     contents:
+      - srtr_missing_report
       - srtr_normalize_missing
 
   - title: Time-to-event & composite dates
