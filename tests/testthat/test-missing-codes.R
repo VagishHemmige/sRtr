@@ -220,10 +220,30 @@ test_that("problems in a variable classification are reported", {
   )
 })
 
+test_that("a text value for a numeric variable must be explained", {
+  codes <- fake_variable_codes(
+    Variable = c("FAKE_NUM", "FAKE_NUM", "FAKE_NUM", "FAKE_FLAG"),
+    Code = c("998", "U", "", "U"),
+    missing_type = c("unknown", "unknown", "sas_missing", "unknown"),
+    note = c("", "", "The dictionary lists this variable as numeric.", "")
+  )
+
+  problems <- .srtr_missing_variable_problems(
+    codes,
+    variables = c("FAKE_NUM", "FAKE_FLAG"),
+    numeric = "FAKE_NUM"
+  )
+
+  expect_equal(problems$problem, "text_code_for_numeric")
+  expect_equal(problems$Code, "U")
+})
+
 test_that("the stored variable classification has no problems", {
+  stored <- sRtr::dictionary_versions$dictionary
   problems <- .srtr_missing_variable_problems(
     sRtr::missing_codes$variables,
-    unique(sRtr::dictionary_versions$dictionary$Variable)
+    variables = unique(stored$Variable),
+    numeric = .srtr_numeric_variables(stored)
   )
 
   expect_equal(nrow(problems), 0L, info = format(problems))

@@ -31,13 +31,14 @@ variable_codes <- .srtr_missing_read(
   "data-raw/missing-codes/variable_codes.csv",
   columns = .srtr_missing_variable_columns
 )
-stored_variables <- unique(
-  .srtr_versions_read("data-raw/dictionary-versions")$dictionary$Variable
-)
+stored_dictionary <- .srtr_versions_read(
+  "data-raw/dictionary-versions"
+)$dictionary
 
 variable_problems <- .srtr_missing_variable_problems(
   variable_codes,
-  stored_variables
+  variables = unique(stored_dictionary$Variable),
+  numeric = .srtr_numeric_variables(stored_dictionary)
 )
 if (nrow(variable_problems) > 0) {
   print(variable_problems, n = Inf)

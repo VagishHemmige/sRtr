@@ -53,7 +53,10 @@
 #' format:
 #' \describe{
 #'   \item{Variable}{The variable name, in whichever file it appears.}
-#'   \item{Code}{The raw value, as text. A blank is the empty string.}
+#'   \item{Code}{The raw value, as text. A blank is the empty string. A
+#'     blank or text value listed for a variable the dictionary types as
+#'     numeric cannot occur as stored; such rows are kept from the hand
+#'     list, and their `note` says so.}
 #'   \item{missing_type}{The type, as above. Never `"none"` or
 #'     `"partial"`.}
 #'   \item{source}{Where the row comes from. `"hand list"` rows were carried
@@ -198,10 +201,20 @@ NULL
 # Everything wrong with the classification of raw values by variable.
 # `variables` is every variable name the stored dictionary versions know.
 # These rows list missing values only, so "none" and "partial" are not
-# allowed, and each row must say where it comes from.
-.srtr_missing_variable_problems <- function(codes, variables) {
+# allowed, and each row must say where it comes from. `numeric` is the
+# variables the dictionary types as numeric everywhere: a blank or text
+# value cannot be stored in one, so such a row must say so in its note.
+.srtr_missing_variable_problems <- function(
+  codes,
+  variables,
+  numeric = character()
+) {
   key <- paste(codes$Variable, codes$Code, sep = "\r")
   allowed <- setdiff(.srtr_missing_types, c("none", "partial"))
+  is_text <- is.na(suppressWarnings(as.numeric(codes$Code)))
+  unexplained <- codes$Variable %in% numeric &
+    is_text &
+    !grepl("numeric", codes$note, fixed = TRUE)
 
   problem <- function(name, rows) {
     tibble::tibble(
@@ -214,6 +227,14 @@ NULL
     problem("not_in_dictionary", codes[!codes$Variable %in% variables, ]),
     problem("duplicate", codes[duplicated(key), ]),
     problem("invalid_type", codes[!codes$missing_type %in% allowed, ]),
-    problem("no_source", codes[!nzchar(codes$source), ])
+    problem("no_source", codes[!nzchar(codes$source), ]),
+    problem("text_code_for_numeric", codes[unexplained, ])
   )
+}
+
+# Variables a dictionary table (columns Variable and Type) types as numeric
+# in every dataset that has them.
+.srtr_numeric_variables <- function(dictionary) {
+  not_numeric <- unique(dictionary$Variable[dictionary$Type != "num"])
+  setdiff(unique(dictionary$Variable), not_numeric)
 }
