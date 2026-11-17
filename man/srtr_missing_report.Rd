@@ -9,7 +9,8 @@ srtr_missing_report(
   cols = NULL,
   file_key = NULL,
   detail = c("type", "code"),
-  release = NULL
+  release = NULL,
+  extra_codes = NULL
 )
 }
 \arguments{
@@ -30,6 +31,13 @@ whether the codes in \link{missing_codes} match the data.}
 
 \item{release}{The SAF release, as in \code{\link[=load_srtr_file]{load_srtr_file()}}. \code{NULL} uses
 the release recorded on \code{df}, or else the bundled dictionary.}
+
+\item{extra_codes}{Your own codes, for values that \link{missing_codes} does
+not cover: a named list with one element per column, each a named
+character vector giving the type of each value, such as
+\code{list(MY_VAR = c("9" = "unknown"))}. These win over \link{missing_codes},
+and apply alike to raw codes and to labelled columns. If two codes of
+a format share one label, both must be given the same type.}
 }
 \value{
 A tibble with one row per variable and kind of missing value:
