@@ -1,13 +1,17 @@
 ## code to prepare `missing_codes` dataset goes here
 
-# The hand-reviewed classification of format codes that may stand for
-# missing information (data-raw/missing-codes/format_codes.csv), checked
-# against the stored dictionary versions. Built on GitHub by the
-# regenerate-data workflow.
+# The hand-reviewed classifications of codes that may stand for missing
+# information, checked against the stored dictionary versions. Built on
+# GitHub by the regenerate-data workflow.
+#
+#   * data-raw/missing-codes/format_codes.csv: format codes.
+#   * data-raw/missing-codes/variable_codes.csv: raw values of variables
+#     that no format lists.
 #
 # The build stops if any stored format code that the screen picks up has no
-# classification, or if a classified code no longer exists with that
-# meaning. Fix format_codes.csv by hand; this script never edits it.
+# classification, if a classified code no longer exists with that meaning,
+# or if a variable row is invalid. Fix the CSV files by hand; this script
+# never edits them.
 
 pkgload::load_all(".", quiet = TRUE, export_all = TRUE)
 
@@ -23,6 +27,27 @@ if (nrow(problems) > 0) {
   )
 }
 
-missing_codes <- list(formats = format_codes)
+variable_codes <- .srtr_missing_read(
+  "data-raw/missing-codes/variable_codes.csv",
+  columns = .srtr_missing_variable_columns
+)
+stored_dictionary <- .srtr_versions_read(
+  "data-raw/dictionary-versions"
+)$dictionary
+
+variable_problems <- .srtr_missing_variable_problems(
+  variable_codes,
+  variables = unique(stored_dictionary$Variable),
+  numeric = .srtr_numeric_variables(stored_dictionary)
+)
+if (nrow(variable_problems) > 0) {
+  print(variable_problems, n = Inf)
+  stop(
+    nrow(variable_problems),
+    " problem(s) in data-raw/missing-codes/variable_codes.csv; see above."
+  )
+}
+
+missing_codes <- list(formats = format_codes, variables = variable_codes)
 
 usethis::use_data(missing_codes, overwrite = TRUE)
