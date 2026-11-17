@@ -130,6 +130,17 @@ jobs:
             }
           }
 
+      - name: Retire internal data that no script builds
+        run: |
+          # R/sysdata.rda is written only by a data-raw/ script that calls
+          # usethis::use_data(internal = TRUE). When no script does, the
+          # file is left over from a removed one, so it is removed here:
+          # generated data are changed only by this workflow.
+          if [ -e R/sysdata.rda ] && ! grep -rqE "internal *= *TRUE" --include='*.R' data-raw; then
+            git rm -q R/sysdata.rda
+            echo "Retired R/sysdata.rda: no data-raw/ script builds it."
+          fi
+
       - name: Commit and push
         id: commit
         run: |
