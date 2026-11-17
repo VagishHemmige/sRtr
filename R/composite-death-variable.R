@@ -22,8 +22,7 @@
 #'   as many from 2015 on), consistent with the 2011 change to the SSA Death
 #'   Master File. So for recent deaths a missing SSA date is weak evidence
 #'   against a death reported to OPTN.
-#' * Conflicts between sources were more frequent among earlier transplants,
-#'   and most were differences of a few days.
+#' * Conflicts between sources were more frequent among earlier transplants.
 #' * `prefer_earliest = TRUE` changed the date for under 5% of recipients with
 #'   a death date, mostly by a week or less.
 #'
