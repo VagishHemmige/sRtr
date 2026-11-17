@@ -97,12 +97,12 @@ transplant center point locations.
 ``` r
 
 UNOS_regions_sf
-#> Simple feature collection with 49 features and 2 fields
+#> Simple feature collection with 52 features and 2 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
-#> Bounding box:  xmin: -2356114 ymin: 268660.9 xmax: 2258154 ymax: 3165722
+#> Bounding box:  xmin: -6293423 ymin: -79515.28 xmax: 3320182 ymax: 6198355
 #> Projected CRS: NAD83 / Conus Albers
-#> # A tibble: 49 × 3
+#> # A tibble: 52 × 3
 #>    Region   State                                                       geometry
 #>  * <chr>    <chr>                                             <MULTIPOLYGON [m]>
 #>  1 Region 1 Connecticut          (((1841099 2228944, 1855809 2243706, 1848123 2…
@@ -115,7 +115,7 @@ UNOS_regions_sf
 #>  8 Region 2 Maryland             (((1722285 1847165, 1725330 1849095, 1728392 1…
 #>  9 Region 2 New Jersey           (((1725281 2031759, 1726883 2034105, 1728061 2…
 #> 10 Region 2 Pennsylvania         (((1287712 2093650, 1286266 2102574, 1283800 2…
-#> # ℹ 39 more rows
+#> # ℹ 42 more rows
 transplant_centers_sf
 #> Simple feature collection with 254 features and 2 fields
 #> Geometry type: POINT

@@ -63,6 +63,5 @@ if (requireNamespace("sf", quietly = TRUE)) {
     add = TRUE, pch = 16, cex = 0.4
   )
 }
-#> Error in .srtr_shift_layout(): `UNOS_regions_sf` has no boundary for "Alaska", "Hawaii", and "Puerto
-#> Rico".
+
 ```
