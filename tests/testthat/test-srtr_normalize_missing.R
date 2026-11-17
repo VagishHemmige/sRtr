@@ -306,4 +306,8 @@ test_that("labelling does not change what becomes NA for unlisted codes", {
     levels(from_labelled$DON_EBV_IGG),
     c("I: Indeterminate", "N: Negative", "P: Positive", "ZQ: not in format")
   )
+  expect_equal(
+    attr(from_labelled$DON_EBV_IGG, "srtr_kept_codes"),
+    c("ZQ: not in format" = "ZQ")
+  )
 })

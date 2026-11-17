@@ -218,6 +218,37 @@ test_that("labelling keeps the type of codes its format does not list", {
   expect_equal(count_of(by_type, "DON_EBV_IGG", "not_in_format"), 1L)
 })
 
+test_that("a raw value that looks like a kept code is not taken for one", {
+  # Made-up values: the second already ends in the text that labelling adds.
+  raw <- tibble::tibble(DON_EBV_IGG = c("u", "u: not in format", "P"))
+  labelled <- suppressWarnings(
+    apply_srtr_factors(raw, file_key = "DONOR_DECEASED")
+  )
+
+  for (detail in c("type", "code")) {
+    expect_equal(
+      srtr_missing_report(labelled, detail = detail),
+      srtr_missing_report(raw, file_key = "DONOR_DECEASED", detail = detail)
+    )
+  }
+  by_type <- srtr_missing_report(labelled)
+  expect_equal(count_of(by_type, "DON_EBV_IGG", "unknown"), 1L)
+  expect_equal(count_of(by_type, "DON_EBV_IGG", "not_in_format"), 1L)
+})
+
+test_that("a labelled column without its record of kept codes is not guessed at", {
+  raw <- tibble::tibble(DON_EBV_IGG = c("u", "P"))
+  labelled <- suppressWarnings(
+    apply_srtr_factors(raw, file_key = "DONOR_DECEASED")
+  )
+  attr(labelled$DON_EBV_IGG, "srtr_kept_codes") <- NULL
+
+  report <- srtr_missing_report(labelled, file_key = "DONOR_DECEASED")
+
+  expect_equal(count_of(report, "DON_EBV_IGG", "not_in_format"), 1L)
+  expect_equal(count_of(report, "DON_EBV_IGG", "unknown"), 0L)
+})
+
 test_that("a value that is not a classified code never appears in the report", {
   sentinel <- "FAKE-SENTINEL-TEXT"
   df <- tibble::tibble(
