@@ -117,6 +117,29 @@
 <span></span>
 <span><span class="va">TX_KI_labelled</span> <span class="op">&lt;-</span> <span class="va">TX_KI</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/apply_srtr_factors.html">apply_srtr_factors</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="missing-values">Missing values<a class="anchor" aria-label="anchor" href="#missing-values"></a>
+</h2>
+<p>SRTR variables record missing information in many ways, and the codes differ from variable to variable: code <code>4</code> is “Unknown” in one format, “N/A” in another and “Not tested” in a third. sRtr recognises each code by what it means in its own variable, for raw codes and labelled columns alike.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tx_ki</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_KI"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Count the unknown, not-done, pending and other codes in each variable</span></span>
+<span><span class="fu"><a href="reference/srtr_missing_report.html">srtr_missing_report</a></span><span class="op">(</span><span class="va">tx_ki</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Turn them into NA, in a new data frame</span></span>
+<span><span class="va">tx_ki_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_ki</span><span class="op">)</span></span></code></pre></div>
+<p>Which kinds of missing value should become <code>NA</code> depends on the analysis, so it is a choice. The default policy, <code>"analysis"</code>, removes unknown, not done, pending, withheld and blank values, and keeps “not applicable”, “indeterminate” and partly known answers. <code>policy = "strict"</code> removes those too, and <code>actions</code> or <code>overrides</code> change the rule for one kind of value or one variable:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># From the original data: keep "not done" as a value, and record why</span></span>
+<span><span class="co"># each value became NA</span></span>
+<span><span class="va">tx_ki_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span></span>
+<span>  <span class="va">tx_ki</span>,</span>
+<span>  actions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>not_done <span class="op">=</span> <span class="st">"keep"</span><span class="op">)</span>,</span>
+<span>  reason <span class="op">=</span> <span class="st">"changed"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The <code>missing_codes</code> dataset lists every code and its type. See the <a href="https://vagishhemmige.github.io/sRtr/articles/missing-data.html">Missing data article</a> for the full walk-through.</p>
 <p>See <a href="https://vagishhemmige.github.io/sRtr/reference/index.html">Function Reference</a> for full documentation.</p>
 <p>Much more, including help files, vignettes, etc. will be coming soon!</p>
 </div>

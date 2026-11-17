@@ -72,6 +72,48 @@ TX_KI_labelled <- TX_KI |>
   apply_srtr_factors()
 ```
 
+## Missing values
+
+SRTR variables record missing information in many ways, and the codes
+differ from variable to variable: code `4` is “Unknown” in one format,
+“N/A” in another and “Not tested” in a third. sRtr recognises each code
+by what it means in its own variable, for raw codes and labelled columns
+alike.
+
+``` r
+
+tx_ki <- load_srtr_file("TX_KI")
+
+# Count the unknown, not-done, pending and other codes in each variable
+srtr_missing_report(tx_ki)
+
+# Turn them into NA, in a new data frame
+tx_ki_clean <- srtr_normalize_missing(tx_ki)
+```
+
+Which kinds of missing value should become `NA` depends on the analysis,
+so it is a choice. The default policy, `"analysis"`, removes unknown,
+not done, pending, withheld and blank values, and keeps “not
+applicable”, “indeterminate” and partly known answers.
+`policy = "strict"` removes those too, and `actions` or `overrides`
+change the rule for one kind of value or one variable:
+
+``` r
+
+# From the original data: keep "not done" as a value, and record why
+# each value became NA
+tx_ki_clean <- srtr_normalize_missing(
+  tx_ki,
+  actions = c(not_done = "keep"),
+  reason = "changed"
+)
+```
+
+The `missing_codes` dataset lists every code and its type. See the
+[Missing data
+article](https://vagishhemmige.github.io/sRtr/articles/missing-data.html)
+for the full walk-through.
+
 See [Function
 Reference](https://vagishhemmige.github.io/sRtr/reference/index.html)
 for full documentation.

@@ -18,6 +18,7 @@ load_srtr_file(
   column_check = c("warn", "error", "none"),
   release = NULL,
   gaps = c("warn", "error", "nearest"),
+  blank_text = c("na", "keep"),
   ...
 )
 ```
@@ -90,6 +91,21 @@ load_srtr_file(
   that release is not known: `"warn"` (the default) uses the earlier
   snapshot's value with a warning, `"nearest"` does so silently, and
   `"error"` stops.
+
+- blank_text:
+
+  What to do with text values that are empty or only spaces. SAS has no
+  missing value for text, so a SAF stores a blank wherever a text column
+  has no value. `"na"` (the default) turns them into `NA` before
+  labelling, so a blank never becomes a factor level and
+  [`is.na()`](https://rdrr.io/r/base/NA.html) finds it. `"keep"` loads
+  them as they are. A blank can mean different things (not answered, not
+  applicable, not collected at the time); `"na"` does not tell these
+  apart. Numeric columns are not changed. With `"na"`,
+  [`srtr_missing_report()`](https://vagishhemmige.github.io/sRtr/reference/srtr_missing_report.md)
+  counts blanks as `NA`, not as `sas_missing`; use `"keep"` to count
+  them, or to keep them with
+  `srtr_normalize_missing(policy = "tag_only")`.
 
 - ...:
 

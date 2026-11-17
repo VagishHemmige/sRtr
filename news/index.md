@@ -232,6 +232,12 @@
   error (`"error"`) or skips the comparison (`"none"`)
   ([\#4](https://github.com/VagishHemmige/sRtr/issues/4)).
 
+- [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+  now loads blank text (empty or only spaces) as `NA`. Before, a blank
+  in a formatted column became a factor level such as
+  `": not in format"`, and a blank in any other text column stayed as
+  `""`. The new `blank_text` argument keeps blanks with `"keep"`.
+
 - [`rank_individual_coverage_gains()`](https://vagishhemmige.github.io/sRtr/reference/rank_individual_coverage_gains.md)
   now defaults to `method = "areal"`, like
   [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)

@@ -65,6 +65,7 @@ Variable labels using the dictionary dataset
 <span>  column_check <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  release <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gaps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"nearest"</span><span class="op">)</span>,</span>
+<span>  blank_text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"na"</span>, <span class="st">"keep"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -130,6 +131,19 @@ do about an entry whose definition changed between them, so its value
 at that release is not known: <code>"warn"</code> (the default) uses the earlier
 snapshot's value with a warning, <code>"nearest"</code> does so silently, and
 <code>"error"</code> stops.</p></dd>
+
+
+<dt id="arg-blank-text">blank_text<a class="anchor" aria-label="anchor" href="#arg-blank-text"></a></dt>
+<dd><p>What to do with text values that are empty or only
+spaces. SAS has no missing value for text, so a SAF stores a blank
+wherever a text column has no value. <code>"na"</code> (the default) turns them into
+<code>NA</code> before labelling, so a blank never becomes a factor level and
+<code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code> finds it. <code>"keep"</code> loads them as they are. A blank can mean
+different things (not answered, not applicable, not collected at the
+time); <code>"na"</code> does not tell these apart. Numeric columns are not changed.
+With <code>"na"</code>, <code><a href="srtr_missing_report.html">srtr_missing_report()</a></code> counts blanks as <code>NA</code>, not as
+<code>sas_missing</code>; use <code>"keep"</code> to count them, or to keep them with
+<code>srtr_normalize_missing(policy = "tag_only")</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
