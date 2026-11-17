@@ -14,6 +14,7 @@ load_srtr_file(
   release = NULL,
   gaps = c("warn", "error", "nearest"),
   blank_text = c("na", "keep"),
+  view = c("corrected", "web"),
   ...
 )
 }
@@ -72,6 +73,15 @@ With \code{"na"}, \code{\link[=srtr_missing_report]{srtr_missing_report()}} coun
 \code{sas_missing}; use \code{"keep"} to count them, or to keep them with
 \code{srtr_normalize_missing(policy = "tag_only")}.}
 
+\item{view}{\code{"corrected"} (the default) labels and checks the file with
+sRtr's corrections to SRTR's web dictionary; \code{"web"} uses the dictionary
+as SRTR's web page has it. See the Corrections section of
+\code{\link[=srtr_dictionary]{srtr_dictionary()}}. The view and the corrections applied are recorded
+in the result's \code{srtr_release} attribute, and later calls to
+\code{\link[=apply_srtr_factors]{apply_srtr_factors()}}, \code{\link[=apply_srtr_varlabels]{apply_srtr_varlabels()}},
+\code{\link[=srtr_missing_report]{srtr_missing_report()}} and \code{\link[=srtr_normalize_missing]{srtr_normalize_missing()}} on the result use
+the same view.}
+
 \item{...}{Additional arguments passed to the file reader
 (\code{\link[haven:read_sas]{haven::read_sas()}} or \code{\link[arrow:read_parquet]{arrow::read_parquet()}}), e.g. \code{encoding} for
 \code{read_sas()}.}
@@ -79,7 +89,8 @@ With \code{"na"}, \code{\link[=srtr_missing_report]{srtr_missing_report()}} coun
 \value{
 A tibble with the loaded file contents, optionally labeled.
 The tibble includes attributes \code{source_path}, \code{file_key} and
-\code{srtr_release} (a list: \code{release}, \code{dictionary}, \code{basis}).
+\code{srtr_release} (a list: \code{release}, \code{dictionary}, \code{basis}, \code{view},
+\code{corrections}).
 }
 \description{
 Loads a file from the SRTR dataset registry and optionally applies:
