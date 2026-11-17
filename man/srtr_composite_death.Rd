@@ -43,6 +43,28 @@ The three columns must be stored as \code{Date}, which is how \code{\link[=load_
 returns SAS date columns. You can also keep a "which source won" indicator
 and a conflict flag when multiple sources disagree.
 }
+\section{How the sources compare in real data}{
+
+In the 2303 liver transplant file (TX_LI):
+\itemize{
+\item Among recipients with both dates, \code{TFL_DEATH_DT} matched the OPTN date on
+the same day in over 99\%. Deaths recorded only in \code{TFL_DEATH_DT} were
+very rare (19 of about 87,000 recipients with any death date).
+\item Among recipients with both dates, the SSA date matched OPTN on the same
+day in about 82\% and within a week in about 94\%; differences ran in both
+directions.
+\item SSA recorded far fewer deaths than OPTN in recent years (under a quarter
+as many from 2015 on), consistent with the 2011 change to the SSA Death
+Master File. So for recent deaths a missing SSA date is weak evidence
+against a death reported to OPTN.
+\item Conflicts between sources were more frequent among earlier transplants.
+\item \code{prefer_earliest = TRUE} changed the date for under 5\% of recipients with
+a death date, mostly by a week or less.
+}
+
+Other releases and organs may differ.
+}
+
 \examples{
 \dontrun{
 df <- srtr_composite_death(df)
