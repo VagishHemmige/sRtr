@@ -34,7 +34,7 @@
 - [`srtr_missing_report()`](https://vagishhemmige.github.io/sRtr/reference/srtr_missing_report.md)
   : Count the missing-value codes in SRTR data
 - [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
-  : Normalize Missing Value Representations in SRTR Data
+  : Normalize missing-value codes in SRTR data
 
 ## Time-to-event & composite dates
 

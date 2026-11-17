@@ -75,47 +75,253 @@
 
     
     
-<div class="section level2">
-<h2 id="harmonizing-missing-data">Harmonizing missing data<a class="anchor" aria-label="anchor" href="#harmonizing-missing-data"></a>
-</h2>
-<p>SRTR data often uses non-standard codes to represent missingness —
-such as <code>""</code>,<code>"U"</code>, <code>"ND"</code>, or
-<code>"C: Cannot Disclose"</code> — which can vary by variable. The
-<code><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing()</a></code> function helps harmonize these
-values by converting them to <code>NA</code> or a user-specified label
-like <code>"Missing"</code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_LI"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Replace common SRTR missing codes (e.g., "U", "", "ND") with NA</span></span>
-<span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Replace missing codes and NAs with an explicit label</span></span>
-<span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span>, replacement <span class="op">=</span> <span class="st">"Missing"</span><span class="op">)</span></span></code></pre></div>
-<p>Internally, this uses a built-in dictionary of variable-specific
-missing codes drawn from the SRTR documentation and known conventions.
-You can also pass a custom list of codes using the
-<code>missing_vals</code> argument.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span></code></pre></div>
+<p>SRTR variables record missing information in many ways, and the codes
+differ from variable to variable. Code <code>4</code> is “Unknown” in
+one format, “N/A” in another and “Not tested” in a third. sRtr handles
+this in three steps that can be used separately:</p>
+<ol style="list-style-type: decimal">
+<li>
+<code>missing_codes</code> says what each code means.</li>
+<li>
+<code><a href="../reference/srtr_missing_report.html">srtr_missing_report()</a></code> counts what is in your data.</li>
+<li>
+<code><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing()</a></code> turns the kinds you choose
+into <code>NA</code>.</li>
+</ol>
+<p>The rows below are made up. They use column names from
+<code>TX_KI</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Load the data</span></span>
-<span><span class="va">tx_li</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_LI"</span>, var_labels <span class="op">=</span> <span class="cn">TRUE</span>, factor_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Define custom missing codes for specific variables</span></span>
-<span><span class="va">custom_missing_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  REC_HIV_STAT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"U"</span>, <span class="st">""</span><span class="op">)</span>,              <span class="co"># "Unknown" or blank</span></span>
-<span>  REC_HCV_STAT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ND: Not Done"</span>, <span class="st">"U"</span><span class="op">)</span>,  <span class="co"># Custom-labeled values</span></span>
-<span>  REC_CMVD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">999</span><span class="op">)</span>,                  <span class="co"># Numeric codes</span></span>
-<span>  DON_RACE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"99"</span>, <span class="st">"Unknown"</span><span class="op">)</span>           <span class="co"># Other arbitrary codes</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Apply normalization, replacing with NA</span></span>
-<span><span class="va">tx_li_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span>, missing_vals <span class="op">=</span> <span class="va">custom_missing_vals</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Or, replace all with an explicit label</span></span>
-<span><span class="va">tx_li_labeled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_li</span>, missing_vals <span class="op">=</span> <span class="va">custom_missing_vals</span>, replacement <span class="op">=</span> <span class="st">"Missing"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">tx_ki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  DON_ANTI_HCV <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P"</span>, <span class="st">"N"</span>, <span class="st">"U"</span>, <span class="st">"ND"</span>, <span class="st">"I"</span>, <span class="st">"PD"</span><span class="op">)</span>,</span>
+<span>  DON_HIST_DIAB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">998</span>, <span class="fl">998</span>, <span class="fl">2</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  CAN_MALIG <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Y"</span>, <span class="st">"N"</span>, <span class="st">"U"</span>, <span class="st">""</span>, <span class="st">"ND"</span>, <span class="st">"N"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>With real data, <code>load_srtr_file("TX_KI")</code> records the
+dataset on the data frame, so <code>file_key</code> does not need to be
+given.</p>
+<div class="section level2">
+<h2 id="what-the-codes-mean">What the codes mean<a class="anchor" aria-label="anchor" href="#what-the-codes-mean"></a>
+</h2>
+<p><code>missing_codes$formats</code> classifies the format codes that
+may stand for missing information. Each code has one type.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">codes</span> <span class="op">&lt;-</span> <span class="va">missing_codes</span><span class="op">$</span><span class="va">formats</span></span>
+<span><span class="va">codes</span><span class="op">[</span><span class="va">codes</span><span class="op">$</span><span class="va">Format</span> <span class="op">==</span> <span class="st">"SRLSTT"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Code"</span>, <span class="st">"Meaning"</span>, <span class="st">"missing_type"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;     Code            Meaning    missing_type</span></span>
+<span><span class="co">#&gt; 234    C C: Cannot Disclose cannot_disclose</span></span>
+<span><span class="co">#&gt; 235    I   I: Indeterminate   indeterminate</span></span>
+<span><span class="co">#&gt; 236   ND       ND: Not Done        not_done</span></span>
+<span><span class="co">#&gt; 237   PD        PD: Pending         pending</span></span>
+<span><span class="co">#&gt; 238    U         U: Unknown         unknown</span></span></code></pre></div>
+<p>The types are <code>unknown</code>, <code>not_applicable</code>,
+<code>not_done</code>, <code>pending</code>,
+<code>cannot_disclose</code>, <code>indeterminate</code>,
+<code>partial</code> (part of the answer is known, such as “Yes,
+duration unknown”), <code>sas_missing</code> and <code>none</code> (an
+ordinary value). They are sRtr’s grouping of the meanings in the SRTR
+data dictionary, not an SRTR classification.</p>
+<p><code>missing_codes$variables</code> covers flag columns that have no
+format, with values such as a blank, <code>U</code> or <code>ND</code>.
+The SRTR dictionary does not document these values; they are listed from
+experience with the files.</p>
 </div>
-  </main>
+<div class="section level2">
+<h2 id="what-is-in-the-data">What is in the data<a class="anchor" aria-label="anchor" href="#what-is-in-the-data"></a>
+</h2>
+<p><code><a href="../reference/srtr_missing_report.html">srtr_missing_report()</a></code> counts the codes by type and
+changes nothing.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/srtr_missing_report.html">srtr_missing_report</a></span><span class="op">(</span><span class="va">tx_ki</span>, file_key <span class="op">=</span> <span class="st">"TX_KI"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 5</span></span></span>
+<span><span class="co">#&gt;    variable      format  missing_type      n percent</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> DON_ANTI_HCV  SRLSTT  unknown           1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> DON_ANTI_HCV  SRLSTT  not_done          1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> DON_ANTI_HCV  SRLSTT  pending           1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> DON_ANTI_HCV  SRLSTT  indeterminate     1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> DON_HIST_DIAB HSTDBDR unknown           2    33.3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> DON_HIST_DIAB HSTDBDR partial           1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> DON_HIST_DIAB HSTDBDR na                1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CAN_MALIG     <span style="color: #BB0000;">NA</span>      unknown           1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CAN_MALIG     <span style="color: #BB0000;">NA</span>      not_done          1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CAN_MALIG     <span style="color: #BB0000;">NA</span>      sas_missing       1    16.7</span></span></code></pre></div>
+<p><code>detail = "code"</code> lists every classified code with its
+count, including codes that do not occur.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/srtr_missing_report.html">srtr_missing_report</a></span><span class="op">(</span></span>
+<span>  <span class="va">tx_ki</span>,</span>
+<span>  cols <span class="op">=</span> <span class="st">"DON_ANTI_HCV"</span>,</span>
+<span>  file_key <span class="op">=</span> <span class="st">"TX_KI"</span>,</span>
+<span>  detail <span class="op">=</span> <span class="st">"code"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 7</span></span></span>
+<span><span class="co">#&gt;   variable     format code  meaning            missing_type        n percent</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> DON_ANTI_HCV SRLSTT U     U: Unknown         unknown             1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> DON_ANTI_HCV SRLSTT ND    ND: Not Done       not_done            1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> DON_ANTI_HCV SRLSTT PD    PD: Pending        pending             1    16.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> DON_ANTI_HCV SRLSTT C     C: Cannot Disclose cannot_disclose     0     0  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> DON_ANTI_HCV SRLSTT I     I: Indeterminate   indeterminate       1    16.7</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="choosing-what-becomes-na">Choosing what becomes NA<a class="anchor" aria-label="anchor" href="#choosing-what-becomes-na"></a>
+</h2>
+<p>By default, <code><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing()</a></code> uses the
+<code>"analysis"</code> policy.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_ki</span>, file_key <span class="op">=</span> <span class="st">"TX_KI"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   DON_ANTI_HCV DON_HIST_DIAB CAN_MALIG</span></span>
+<span><span class="co">#&gt; 1            P             1         Y</span></span>
+<span><span class="co">#&gt; 2            N             5         N</span></span>
+<span><span class="co">#&gt; 3         &lt;NA&gt;            NA      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4         &lt;NA&gt;            NA      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5            I             2      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6         &lt;NA&gt;            NA         N</span></span></code></pre></div>
+<p>Unknown, not done, pending, withheld and blank values became
+<code>NA</code>. “Indeterminate” and the partly known diabetes code were
+kept, because they say something about the patient.</p>
+<p>Once they are <code>NA</code>, “unknown” and “not done” look the
+same. To keep the difference, ask for reason columns:
+<code>reason = "changed"</code> adds a <code>_MISS</code> column for
+each variable that changed, recording why each value became
+<code>NA</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span><span class="va">tx_ki</span>, reason <span class="op">=</span> <span class="st">"changed"</span>, file_key <span class="op">=</span> <span class="st">"TX_KI"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   DON_ANTI_HCV DON_HIST_DIAB CAN_MALIG DON_ANTI_HCV_MISS DON_HIST_DIAB_MISS</span></span>
+<span><span class="co">#&gt; 1            P             1         Y              &lt;NA&gt;               &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2            N             5         N              &lt;NA&gt;               &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3         &lt;NA&gt;            NA      &lt;NA&gt;           unknown            unknown</span></span>
+<span><span class="co">#&gt; 4         &lt;NA&gt;            NA      &lt;NA&gt;          not_done            unknown</span></span>
+<span><span class="co">#&gt; 5            I             2      &lt;NA&gt;              &lt;NA&gt;               &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6         &lt;NA&gt;            NA         N           pending               &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;   CAN_MALIG_MISS</span></span>
+<span><span class="co">#&gt; 1           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3        unknown</span></span>
+<span><span class="co">#&gt; 4    sas_missing</span></span>
+<span><span class="co">#&gt; 5       not_done</span></span>
+<span><span class="co">#&gt; 6           &lt;NA&gt;</span></span></code></pre></div>
+<p>Which kinds of missing value to drop depends on the analysis. Three
+policies cover common choices:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Kind</th>
+<th><code>"analysis"</code></th>
+<th><code>"strict"</code></th>
+<th><code>"tag_only"</code></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>unknown, pending, cannot disclose, blank</td>
+<td><code>NA</code></td>
+<td><code>NA</code></td>
+<td>kept</td>
+</tr>
+<tr class="even">
+<td>not done, not tested</td>
+<td><code>NA</code></td>
+<td><code>NA</code></td>
+<td>kept</td>
+</tr>
+<tr class="odd">
+<td>not applicable</td>
+<td>kept</td>
+<td><code>NA</code></td>
+<td>kept</td>
+</tr>
+<tr class="even">
+<td>indeterminate</td>
+<td>kept</td>
+<td><code>NA</code></td>
+<td>kept</td>
+</tr>
+<tr class="odd">
+<td>partly known</td>
+<td>kept</td>
+<td><code>NA</code></td>
+<td>kept</td>
+</tr>
+</tbody>
+</table>
+<p><code>"strict"</code> leaves only substantive values.
+<code>"tag_only"</code> changes no value and adds a reason column for
+each variable that holds a recognised code.</p>
+<div class="section level3">
+<h3 id="adjusting-a-policy">Adjusting a policy<a class="anchor" aria-label="anchor" href="#adjusting-a-policy"></a>
+</h3>
+<p>A test that was not done can be informative in itself. To keep “not
+done” as a value everywhere:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span></span>
+<span>  <span class="va">tx_ki</span>,</span>
+<span>  actions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>not_done <span class="op">=</span> <span class="st">"keep"</span><span class="op">)</span>,</span>
+<span>  file_key <span class="op">=</span> <span class="st">"TX_KI"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;   DON_ANTI_HCV DON_HIST_DIAB CAN_MALIG</span></span>
+<span><span class="co">#&gt; 1            P             1         Y</span></span>
+<span><span class="co">#&gt; 2            N             5         N</span></span>
+<span><span class="co">#&gt; 3         &lt;NA&gt;            NA      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4           ND            NA      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5            I             2        ND</span></span>
+<span><span class="co">#&gt; 6         &lt;NA&gt;            NA         N</span></span></code></pre></div>
+<p>To change the rule for one variable only:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span></span>
+<span>  <span class="va">tx_ki</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>DON_ANTI_HCV <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>indeterminate <span class="op">=</span> <span class="st">"na"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  file_key <span class="op">=</span> <span class="st">"TX_KI"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;   DON_ANTI_HCV DON_HIST_DIAB CAN_MALIG</span></span>
+<span><span class="co">#&gt; 1            P             1         Y</span></span>
+<span><span class="co">#&gt; 2            N             5         N</span></span>
+<span><span class="co">#&gt; 3         &lt;NA&gt;            NA      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4         &lt;NA&gt;            NA      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5         &lt;NA&gt;             2      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6         &lt;NA&gt;            NA         N</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="other-choices">Other choices<a class="anchor" aria-label="anchor" href="#other-choices"></a>
+</h3>
+<ul>
+<li>
+<code>output = "append"</code> leaves the original columns as they
+are and adds the normalized values in <code>_NORM</code> columns.</li>
+<li>
+<code>na_level = "Missing"</code> makes missing its own group in
+factor and character columns, which is useful for descriptive
+tables.</li>
+<li>
+<code>extra_codes</code> adds your own codes, for example
+<code>extra_codes = list(MY_VAR = c("9" = "unknown"))</code>.</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing</a></span><span class="op">(</span></span>
+<span>  <span class="va">tx_ki</span>,</span>
+<span>  cols <span class="op">=</span> <span class="st">"CAN_MALIG"</span>,</span>
+<span>  na_level <span class="op">=</span> <span class="st">"Missing"</span>,</span>
+<span>  file_key <span class="op">=</span> <span class="st">"TX_KI"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;   DON_ANTI_HCV DON_HIST_DIAB CAN_MALIG</span></span>
+<span><span class="co">#&gt; 1            P             1         Y</span></span>
+<span><span class="co">#&gt; 2            N             5         N</span></span>
+<span><span class="co">#&gt; 3            U           998   Missing</span></span>
+<span><span class="co">#&gt; 4           ND           998   Missing</span></span>
+<span><span class="co">#&gt; 5            I             2   Missing</span></span>
+<span><span class="co">#&gt; 6           PD            NA         N</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="what-this-does-not-cover">What this does not cover<a class="anchor" aria-label="anchor" href="#what-this-does-not-cover"></a>
+</h2>
+<p>A blank can mean that a field was not collected in that era, and a
+continuous variable can hold an implausible value or a placeholder such
+as 999. Neither is a coded missing value, and
+<code><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing()</a></code> does not look for them.</p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

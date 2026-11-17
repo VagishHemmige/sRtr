@@ -13,7 +13,8 @@ srtr_missing_report(
   cols = NULL,
   file_key = NULL,
   detail = c("type", "code"),
-  release = NULL
+  release = NULL,
+  extra_codes = NULL
 )
 ```
 
@@ -53,6 +54,17 @@ srtr_missing_report(
   [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md).
   `NULL` uses the release recorded on `df`, or else the bundled
   dictionary.
+
+- extra_codes:
+
+  Your own codes, for values that
+  [missing_codes](https://vagishhemmige.github.io/sRtr/reference/missing_codes.md)
+  does not cover: a named list with one element per column, each a named
+  character vector giving the type of each value, such as
+  `list(MY_VAR = c("9" = "unknown"))`. These win over
+  [missing_codes](https://vagishhemmige.github.io/sRtr/reference/missing_codes.md),
+  and apply alike to raw codes and to labelled columns. If two codes of
+  a format share one label, both must be given the same type.
 
 ## Value
 
