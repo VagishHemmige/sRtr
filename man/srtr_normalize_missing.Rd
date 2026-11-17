@@ -64,7 +64,9 @@ the release recorded on \code{df}, or else the bundled dictionary.}
 \item{extra_codes}{Your own codes, for values that \link{missing_codes} does
 not cover: a named list with one element per column, each a named
 character vector giving the type of each value, such as
-\code{list(MY_VAR = c("9" = "unknown"))}. These win over \link{missing_codes}.}
+\code{list(MY_VAR = c("9" = "unknown"))}. These win over \link{missing_codes},
+and apply alike to raw codes and to labelled columns. If two codes of
+a format share one label, both must be given the same type.}
 
 \item{verbose}{If \code{TRUE}, report how many values were changed in how
 many variables.}

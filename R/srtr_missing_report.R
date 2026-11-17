@@ -34,7 +34,9 @@
 #' @param extra_codes Your own codes, for values that [missing_codes] does
 #'   not cover: a named list with one element per column, each a named
 #'   character vector giving the type of each value, such as
-#'   `list(MY_VAR = c("9" = "unknown"))`. These win over [missing_codes].
+#'   `list(MY_VAR = c("9" = "unknown"))`. These win over [missing_codes],
+#'   and apply alike to raw codes and to labelled columns. If two codes of
+#'   a format share one label, both must be given the same type.
 #'
 #' @return A tibble with one row per variable and kind of missing value:
 #' \describe{

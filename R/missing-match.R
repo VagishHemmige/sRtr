@@ -123,6 +123,11 @@
       c("Code", "missing_type")
     ]
     extra_rows <- extra_codes[[name]]
+    if (!format %in% .srtr_range_formats) {
+      # Age-band formats are not applied to raw numbers, and their rows
+      # repeat each band's label on purpose.
+      .srtr_missing_check_extra(extra_rows, format_rows, name, call)
+    }
     if (
       all(is.na(format_rows$missing_type)) &&
         nrow(variable_rows) == 0 &&
@@ -190,6 +195,9 @@
   type <- rep(NA_character_, length(values))
   code <- rep(NA_character_, length(values))
   outside <- rep(FALSE, length(values))
+  # The format code each value stands for, whether the value is that code
+  # or its label; NA when the format does not list it.
+  format_code <- rep(NA_character_, length(values))
 
   banded <- format %in% .srtr_range_formats && !labelled
   if (!is.null(format_rows) && nrow(format_rows) > 0 && !banded) {
@@ -204,6 +212,8 @@
     }
     type <- listed$missing_type[row]
     code <- ifelse(is.na(type), NA_character_, listed$Code[row])
+    in_format <- !is.na(row)
+    format_code[in_format] <- listed$Code[row[in_format]]
     outside <- !is_na & is.na(row)
     if (nrow(other) > 0) {
       # An unlisted value belongs to the catch-all, as does its label.
@@ -228,7 +238,13 @@
   }
 
   if (!is.null(extra_rows) && nrow(extra_rows) > 0) {
-    row <- match(plain, extra_rows$Code)
+    # The caller's codes are matched against the value as it is, against
+    # the code a kept level stands for, and against the format code a label
+    # stands for, so they apply alike to raw and labelled columns.
+    row <- dplyr::coalesce(
+      match(format_code, extra_rows$Code),
+      match(plain, extra_rows$Code)
+    )
     use <- !is.na(row)
     type[use] <- extra_rows$missing_type[row[use]]
     code[use] <- extra_rows$Code[row[use]]
@@ -240,6 +256,38 @@
   type[is_na] <- "na"
   code[is_na] <- NA_character_
   list(type = type, code = code)
+}
+
+# A labelled column shows a label, not a code, so two codes with the same
+# label cannot be told apart there. The caller's codes must therefore treat
+# every code that shares a label alike; otherwise raw and labelled columns
+# would be handled differently.
+.srtr_missing_check_extra <- function(
+  extra_rows,
+  format_rows,
+  name,
+  call = rlang::caller_env()
+) {
+  if (is.null(extra_rows) || is.null(format_rows)) {
+    return(invisible())
+  }
+  named <- format_rows[format_rows$Code %in% extra_rows$Code, ]
+  for (label in unique(named$Meaning)) {
+    peers <- format_rows$Code[format_rows$Meaning == label]
+    types <- extra_rows$missing_type[match(peers, extra_rows$Code)]
+    if (anyNA(types) || length(unique(types)) > 1) {
+      srtr_abort(
+        c(
+          "{.arg extra_codes} for {.field {name}} must give one type to every code labelled {.val {label}}.",
+          "i" = "Codes sharing that label: {.val {peers}}.",
+          "i" = "A labelled column cannot tell them apart."
+        ),
+        class = "ambiguous_extra_codes",
+        call = call
+      )
+    }
+  }
+  invisible()
 }
 
 # Check the caller's own codes: a named list, one element per column of the

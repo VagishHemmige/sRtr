@@ -311,3 +311,85 @@ test_that("labelling does not change what becomes NA for unlisted codes", {
     c("ZQ: not in format" = "ZQ")
   )
 })
+
+test_that("extra_codes override a format's own code, raw or labelled", {
+  # SRLSTT lists I as "I: Indeterminate"; here the caller calls it unknown.
+  raw <- tibble::tibble(DON_ANTI_CMV = c("I", "P", "U"))
+  labelled <- apply_srtr_factors(raw, file_key = "TX_KI")
+  extra <- list(DON_ANTI_CMV = c(I = "unknown"))
+
+  from_raw <- srtr_normalize_missing(
+    raw,
+    extra_codes = extra,
+    reason = "changed",
+    file_key = "TX_KI"
+  )
+  from_labelled <- srtr_normalize_missing(
+    labelled,
+    extra_codes = extra,
+    reason = "changed"
+  )
+
+  expect_equal(is.na(from_raw$DON_ANTI_CMV), c(TRUE, FALSE, TRUE))
+  expect_equal(is.na(from_labelled$DON_ANTI_CMV), c(TRUE, FALSE, TRUE))
+  expect_equal(from_raw$DON_ANTI_CMV_MISS, c("unknown", NA, "unknown"))
+  expect_equal(from_labelled$DON_ANTI_CMV_MISS, from_raw$DON_ANTI_CMV_MISS)
+  expect_false("I: Indeterminate" %in% levels(from_labelled$DON_ANTI_CMV))
+  for (detail in c("type", "code")) {
+    expect_equal(
+      srtr_missing_report(labelled, extra_codes = extra, detail = detail),
+      srtr_missing_report(
+        raw,
+        extra_codes = extra,
+        file_key = "TX_KI",
+        detail = detail
+      )
+    )
+  }
+})
+
+test_that("extra_codes can also name a label as it appears in a labelled column", {
+  labelled <- apply_srtr_factors(
+    tibble::tibble(DON_ANTI_CMV = c("I", "P")),
+    file_key = "TX_KI"
+  )
+
+  out <- srtr_normalize_missing(
+    labelled,
+    extra_codes = list(DON_ANTI_CMV = c("I: Indeterminate" = "unknown"))
+  )
+
+  expect_equal(is.na(out$DON_ANTI_CMV), c(TRUE, FALSE))
+})
+
+test_that("an extra code whose label another code shares must cover both", {
+  format_rows <- tibble::tibble(
+    Code = c("1", "2", "3"),
+    Meaning = c("Group A", "Group A", "Group B"),
+    missing_type = NA_character_
+  )
+  one <- data.frame(Code = "1", missing_type = "unknown")
+  both <- data.frame(Code = c("1", "2"), missing_type = "unknown")
+  mixed <- data.frame(Code = c("1", "2"), missing_type = c("unknown", "pending"))
+  alone <- data.frame(Code = "3", missing_type = "unknown")
+
+  expect_error(
+    .srtr_missing_check_extra(one, format_rows, "FAKE_VAR"),
+    class = "sRtr_error_ambiguous_extra_codes"
+  )
+  expect_error(
+    .srtr_missing_check_extra(mixed, format_rows, "FAKE_VAR"),
+    class = "sRtr_error_ambiguous_extra_codes"
+  )
+  expect_no_error(.srtr_missing_check_extra(both, format_rows, "FAKE_VAR"))
+  expect_no_error(.srtr_missing_check_extra(alone, format_rows, "FAKE_VAR"))
+  found <- .srtr_missing_match(
+    c("Group A", "Group B"),
+    format_rows,
+    NULL,
+    "FAKEFMT",
+    extra_rows = both,
+    labelled = TRUE
+  )
+  expect_equal(found$type, c("unknown", NA))
+})
