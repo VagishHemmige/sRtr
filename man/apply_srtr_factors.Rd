@@ -82,6 +82,11 @@ format has a catch-all: for a factor input, values given the catch-all label
 are reported too; raw codes get it silently, as in SAS). Convert again from
 the raw codes, or keep working with dplyr. Attributes on each column, such
 as a variable label, are kept.
+
+When codes that are not in the format are kept, the column also carries
+an \code{srtr_kept_codes} attribute: a named vector giving, for each such
+level, the original code. \code{\link[=srtr_missing_report]{srtr_missing_report()}} uses it to recognise
+those codes after labelling.
 }
 \examples{
 \dontrun{

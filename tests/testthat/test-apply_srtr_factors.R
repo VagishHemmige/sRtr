@@ -434,3 +434,27 @@ test_that("raw codes sent to the catch-all are not reported", {
   expect_no_warning(out <- apply_srtr_factors(df, file_key = "TX_KI"))
   expect_equal(as.character(out$CAN_RACE), c("8: White", "Multi-Racial"))
 })
+
+test_that("kept codes are recorded with the names they were given", {
+  # Made-up values; DON_EBV_IGG has format SRLSTT in DONOR_DECEASED.
+  df <- tibble::tibble(DON_EBV_IGG = c("P", "u", "u: not in format", "u"))
+
+  out <- suppressWarnings(apply_srtr_factors(df, file_key = "DONOR_DECEASED"))
+
+  kept <- attr(out$DON_EBV_IGG, "srtr_kept_codes")
+  expect_setequal(unname(kept), c("u", "u: not in format"))
+  expect_equal(unname(kept[as.character(out$DON_EBV_IGG)[2]]), "u")
+  expect_equal(
+    unname(kept[as.character(out$DON_EBV_IGG)[3]]),
+    "u: not in format"
+  )
+  expect_true(all(names(kept) %in% levels(out$DON_EBV_IGG)))
+})
+
+test_that("a column with no kept codes has no record of them", {
+  df <- tibble::tibble(DON_EBV_IGG = c("P", "N"))
+
+  out <- apply_srtr_factors(df, file_key = "DONOR_DECEASED")
+
+  expect_null(attr(out$DON_EBV_IGG, "srtr_kept_codes"))
+})

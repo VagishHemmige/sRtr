@@ -338,7 +338,8 @@ srtr_normalize_missing <- function(
     column$variable_rows,
     column$format,
     column$extra_rows,
-    labelled = .srtr_already_factored(x)
+    labelled = .srtr_already_factored(x),
+    kept = attr(x, "srtr_kept_codes")
   )
   levels(x)[found$type %in% to_na]
 }
@@ -355,6 +356,11 @@ srtr_normalize_missing <- function(
   attrs <- attributes(x)
   attrs$contrasts <- NULL
   attrs$levels <- keep
+  kept_codes <- attrs$srtr_kept_codes
+  if (!is.null(kept_codes)) {
+    kept_codes <- kept_codes[names(kept_codes) %in% keep]
+    attrs$srtr_kept_codes <- if (length(kept_codes) > 0) kept_codes
+  }
   codes <- match(levels(x)[x], keep)
   attributes(codes) <- attrs
   codes
