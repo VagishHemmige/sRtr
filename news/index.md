@@ -220,6 +220,12 @@
   - It no longer fails unless dplyr and sf are attached
     ([\#55](https://github.com/VagishHemmige/sRtr/issues/55)).
 
+- [`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md)
+  gains `crs`. The default, `4326`, keeps the longitude/latitude result
+  it already returned; `crs = 5070` keeps the NAD83 / Conus Albers
+  projection of `UNOS_regions_sf`. Its documentation wrongly said it
+  kept that projection.
+
 - [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
   finds the folder set with
   [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md)
