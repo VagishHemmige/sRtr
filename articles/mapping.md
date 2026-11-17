@@ -263,8 +263,9 @@ region_colors <- grDevices::palette.colors(11, "Set 3")
 
 ggplot2 has no inset of its own, so the corridor is drawn as a second
 plot and placed beside the national map with
-[`annotation_custom()`](https://ggplot2.tidyverse.org/reference/annotation_custom.html).
-A red box marks the corridor on the national map.
+[`annotation_custom()`](https://ggplot2.tidyverse.org/reference/annotation_custom.html),
+at about two and a half times the national scale. A red box marks the
+corridor on the national map.
 
 ``` r
 
@@ -314,8 +315,9 @@ ggplot() +
   ) +
   coord_sf(
     crs = 5070, datum = NA, expand = FALSE,
-    xlim = c(national[["xmin"]], inset_x + inset_width),
-    ylim = national[c("ymin", "ymax")]
+    # A little room past the inset so its frame is not clipped
+    xlim = c(national[["xmin"]], inset_x + 1.01 * inset_width),
+    ylim = c(national[["ymin"]], national[["ymax"]] + 0.01 * inset_height)
   ) +
   labs(fill = NULL) +
   theme_void() +
@@ -353,7 +355,10 @@ tm_shape(regions_shifted) +
   tm_dots(size = 0.1) +
   tm_inset(
     corridor_box,
-    position = c("right", "bottom"),
+    # Outside the map, to the right, and large enough to separate the centers
+    position = tm_pos_out("right", "center"),
+    width = 16,
+    height = 16,
     box_frame.color = "red",
     main_frame.color = "red"
   ) +
