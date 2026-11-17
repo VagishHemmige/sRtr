@@ -170,3 +170,15 @@ test_that("the same code number is classified by its format, not its number", {
   expect_equal(type_of("PEPULCER", "4"), "partial")
   expect_equal(type_of("STATE", "NA"), "none")
 })
+
+test_that("no code typed 'none' is noted as left unclassified", {
+  codes <- sRtr::missing_codes$formats
+  unresolved <- codes$missing_type == "none" &
+    grepl("unclassified|unclear", codes$note, ignore.case = TRUE)
+
+  expect_equal(codes$Format[unresolved], character())
+  expect_equal(
+    codes$missing_type[codes$Format == "AGE8C" & codes$Code == "**OTHER**"],
+    "unknown"
+  )
+})

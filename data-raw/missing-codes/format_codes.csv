@@ -11,7 +11,7 @@
 "ACREJEPF","998","998: Unknown","unknown","",""
 "ACTVLVL","6","6: Unknown","unknown","",""
 "AGE8A","**OTHER**","Unknown","unknown","","Catch-all for values the format does not list."
-"AGE8C","**OTHER**","Au","none","","Judgement call: the label ""Au"" is unclear; left unclassified. No variable uses this format."
+"AGE8C","**OTHER**","Au","unknown","","Judgement call: read as age unknown. AGE8C has the same age bands as AGE8A, whose catch-all is labelled Unknown. No variable uses this format."
 "AGE9A","**OTHER**","Unknown","unknown","","Catch-all for values the format does not list."
 "AGE9A","Unknown","Unknown","unknown","",""
 "ALOCUS","97","97: Unknown","unknown","",""
