@@ -159,10 +159,19 @@
 # that is classified, and is "not_in_format" when there is no catch-all.
 #
 # apply_srtr_factors() keeps a code its format does not list under a name
-# made of the code and a suffix. In a column it converted (the `srtr_format`
-# marker is the proof), that name is turned back into the code before the
-# variables table is consulted, so labelling does not change the answer.
-.srtr_missing_match <- function(x, format_rows, variable_rows, format) {
+# made of the code and a suffix, and records which level stands for which
+# code in the `srtr_kept_codes` attribute. `kept` is that record: through it
+# a level is turned back into its code before the variables table is
+# consulted, so labelling does not change the answer. The name is never
+# parsed, because a raw value may itself end in the suffix; a column
+# without the record is not guessed at.
+.srtr_missing_match <- function(
+  x,
+  format_rows,
+  variable_rows,
+  format,
+  kept = attr(x, "srtr_kept_codes")
+) {
   is_na <- is.na(x)
   values <- as.character(x)
   type <- rep(NA_character_, length(values))
@@ -193,12 +202,9 @@
   }
 
   plain <- values
-  if (labelled) {
-    plain <- sub(
-      paste0("(", .srtr_unknown_suffix, ")+$"),
-      "",
-      values
-    )
+  if (labelled && !is.null(kept)) {
+    is_kept <- values %in% names(kept)
+    plain[is_kept] <- unname(kept[values[is_kept]])
   }
 
   if (!is.null(variable_rows) && nrow(variable_rows) > 0) {
