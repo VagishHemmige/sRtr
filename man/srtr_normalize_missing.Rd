@@ -2,59 +2,152 @@
 % Please edit documentation in R/srtr_normalize_missing.R
 \name{srtr_normalize_missing}
 \alias{srtr_normalize_missing}
-\title{Normalize Missing Value Representations in SRTR Data}
+\title{Normalize missing-value codes in SRTR data}
 \usage{
 srtr_normalize_missing(
   df,
-  missing_vals = NULL,
-  replacement = NA,
+  cols = NULL,
+  policy = c("analysis", "strict", "tag_only"),
+  actions = NULL,
+  overrides = NULL,
+  output = c("replace", "append"),
+  reason = NULL,
+  na_level = NULL,
+  file_key = NULL,
+  release = NULL,
+  extra_codes = NULL,
   verbose = FALSE
 )
 }
 \arguments{
-\item{df}{A data frame from an SRTR SAF file.}
+\item{df}{A data frame from an SRTR SAF file. Raw codes and labelled
+columns (from \code{\link[=apply_srtr_factors]{apply_srtr_factors()}}) are handled alike.}
 
-\item{missing_vals}{An optional named list. The \code{srtr_normalize_missing()} function defaults to an internal list of
-variables to normalize and values to convert to the specified replacement value.
-Each name corresponds to a column in \code{df}, and each element is a vector of values to treat as missing in that column.
-Any values matched will be replaced by \code{replacement}. Columns not present in \code{df} are silently skipped.}
+\item{cols}{Names of the columns to normalize. \code{NULL} (the default)
+takes every column that \link{missing_codes} covers.}
 
-\item{replacement}{The value to use in place of the missing representations. Defaults to \code{NA}.
-If a string is provided (e.g., \code{"Missing"}), both missing codes and \code{NA} values will be replaced.
-If the column is a factor and \code{replacement} is not \code{NA}, the replacement will be added as a new factor level.
-For factors, the replaced codes are removed from the levels; the other
-levels keep their order, so the reference level does not depend on the
-order of the rows. Ordered factors stay ordered, and attributes such as
-variable labels are kept. A new \code{replacement} level goes last.}
+\item{policy}{The set of rules to start from: \code{"analysis"} (the
+default), \code{"strict"} or \code{"tag_only"}. See Policies.}
 
-\item{verbose}{Logical. If \code{TRUE}, the function prints a message for each column it modifies,
-including skipped columns that are not found in \code{df}.}
+\item{actions}{Changes to the policy by kind of missing value: a named
+character vector such as \code{c(not_done = "keep", indeterminate = "na")}.
+Names are types from \link{missing_codes}; values are \code{"na"} or \code{"keep"}.}
+
+\item{overrides}{Changes for single variables: a named list with one
+element per column, each a vector like \code{actions}, such as
+\code{list(REC_HIV_STAT = c(not_done = "keep"))}. These win over \code{actions}.}
+
+\item{output}{\code{"replace"} (the default) changes the columns in place.
+\code{"append"} leaves them as they are and adds the normalized values in
+new columns named with \verb{_NORM} added.}
+
+\item{reason}{Which reason columns to add: \code{"changed"} records the kind
+of each changed value; \code{"all"} records the kind of every recognised
+code, changed or not; \code{"none"} adds no columns. \code{NULL} (the default)
+means \code{"all"} under \code{policy = "tag_only"} and \code{"changed"} otherwise.}
+
+\item{na_level}{A string, such as \code{"Missing"}, to use in place of \code{NA}
+in the normalized factor and character columns, so that missing values
+form their own group in a table. It covers values that were \code{NA}
+already. For a factor it becomes the last level. Numeric columns keep
+\code{NA}. \code{NULL} (the default) leaves \code{NA}.}
+
+\item{file_key}{The dataset \code{df} comes from, such as \code{"TX_KI"}. \code{NULL}
+uses the \code{file_key} attribute that \code{\link[=load_srtr_file]{load_srtr_file()}} sets. If there
+is none, variables are looked up by name alone, and a variable whose
+format differs between datasets is skipped, with a message.}
+
+\item{release}{The SAF release, as in \code{\link[=load_srtr_file]{load_srtr_file()}}. \code{NULL} uses
+the release recorded on \code{df}, or else the bundled dictionary.}
+
+\item{extra_codes}{Your own codes, for values that \link{missing_codes} does
+not cover: a named list with one element per column, each a named
+character vector giving the type of each value, such as
+\code{list(MY_VAR = c("9" = "unknown"))}. These win over \link{missing_codes}.}
+
+\item{verbose}{If \code{TRUE}, report how many values were changed in how
+many variables.}
 }
 \value{
-A modified version of \code{df}, with all specified missing values (and possibly \code{NA}s) replaced by \code{replacement}.
+\code{df} with the chosen codes replaced, and reason columns added at
+the end. For factors, the levels that became \code{NA} are removed; the
+other levels keep their order, so the reference level does not depend
+on the order of the rows. Ordered factors stay ordered, and attributes
+such as variable labels are kept.
 }
 \description{
-Replaces common non-standard representations of missing values (e.g., -1, 999, "Unknown")
-with either \code{NA} or a user-specified string (e.g., \code{"Missing"}). This includes both
-explicit missing codes (provided via \code{missing_vals}) and, if \code{replacement} is not \code{NA},
-any existing \code{NA} values in the specified columns.
+SRTR variables record missing information in many ways: "Unknown", "Not
+done", "N/A", "Pending", blanks, and codes whose number differs from
+variable to variable. \code{srtr_normalize_missing()} recognises these codes
+from \link{missing_codes}, by what they mean in each variable's own format,
+and turns the ones you choose into \code{NA}.
 }
 \details{
-This function is helpful for harmonizing SRTR datasets, which may use multiple codes
-to represent missingness (e.g., -1 for numeric fields, "U" or "Unknown" for character or factor fields).
+Which kinds become \code{NA} is a judgement that depends on the analysis, so
+it is a choice. \code{policy} picks a sensible set in one word; \code{actions} and
+\code{overrides} adjust it by kind of missing value and by variable. Run
+\code{\link[=srtr_missing_report]{srtr_missing_report()}} first to see what the data hold.
 }
+\section{Policies}{
+\tabular{llll}{
+   Kind (type) \tab \code{"analysis"} \tab \code{"strict"} \tab \code{"tag_only"} \cr
+   \code{unknown}, \code{pending}, \code{cannot_disclose} \tab \code{NA} \tab \code{NA} \tab kept \cr
+   \code{sas_missing} (blank) \tab \code{NA} \tab \code{NA} \tab kept \cr
+   \code{not_done} (not done, not tested) \tab \code{NA} \tab \code{NA} \tab kept \cr
+   \code{not_applicable} \tab kept \tab \code{NA} \tab kept \cr
+   \code{indeterminate} \tab kept \tab \code{NA} \tab kept \cr
+   \code{partial} (such as "Yes, duration unknown") \tab kept \tab \code{NA} \tab kept \cr
+}
+
+\itemize{
+\item \code{"analysis"} removes what carries no information about the patient and
+keeps what does: "not applicable" and "indeterminate" are findings, and
+a partly known answer still says yes.
+\item \code{"strict"} leaves only substantive values.
+\item \code{"tag_only"} changes no value and only adds the reason columns.
+}
+
+Whether "not done" is information depends on the question: a test that
+was not ordered can itself be informative. Use
+\code{actions = c(not_done = "keep")} to keep it.
+
+Values that are already \code{NA} stay \code{NA}. Values that a format does not
+list are left alone.
+}
+
+\section{Reason columns}{
+So that "unknown" and "not done" are not lost when both become \code{NA}, a
+column named after the variable with \verb{_MISS} added records the kind of
+each value that was changed. It is \code{NA} for values that were not
+changed, including values that were \code{NA} already. A variable gets a
+reason column only if one of its values changed (under \code{"tag_only"}, if
+one of its values is a recognised code).
+}
+
 \examples{
-\dontrun{
-df <- load_srtr_file("TX_LI")
-
-# Use default SRTR-wide missing definitions
-srtr_normalize_missing(df)
-
-# Explicitly define missing values and convert all missing to "Missing"
-missing_vals <- list(
-  REC_HIV_STAT = c("U", ""),
-  REC_HCV_STAT = c("U", ""),
+# Made-up rows using TX_KI column names
+df <- data.frame(
+  DON_ANTI_CMV = c("P", "N", "U", "ND", "I"),
+  DON_HIST_DIAB = c(1, 5, 998, 998, 2)
 )
-srtr_normalize_missing(df, missing_vals, replacement = "Missing")
+
+srtr_normalize_missing(df, file_key = "TX_KI")
+
+# Keep "not done" as a value
+srtr_normalize_missing(
+  df,
+  actions = c(not_done = "keep"),
+  file_key = "TX_KI"
+)
+
+# Only substantive values, without reason columns
+srtr_normalize_missing(
+  df,
+  policy = "strict",
+  reason = "none",
+  file_key = "TX_KI"
+)
 }
+\seealso{
+\code{\link[=srtr_missing_report]{srtr_missing_report()}}, \link{missing_codes}
 }
