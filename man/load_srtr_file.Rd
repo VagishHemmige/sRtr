@@ -13,6 +13,7 @@ load_srtr_file(
   column_check = c("warn", "error", "none"),
   release = NULL,
   gaps = c("warn", "error", "nearest"),
+  blank_text = c("na", "keep"),
   ...
 )
 }
@@ -59,6 +60,17 @@ do about an entry whose definition changed between them, so its value
 at that release is not known: \code{"warn"} (the default) uses the earlier
 snapshot's value with a warning, \code{"nearest"} does so silently, and
 \code{"error"} stops.}
+
+\item{blank_text}{What to do with text values that are empty or only
+spaces. SAS has no missing value for text, so a SAF stores a blank
+wherever a text column has no value. \code{"na"} (the default) turns them into
+\code{NA} before labelling, so a blank never becomes a factor level and
+\code{is.na()} finds it. \code{"keep"} loads them as they are. A blank can mean
+different things (not answered, not applicable, not collected at the
+time); \code{"na"} does not tell these apart. Numeric columns are not changed.
+With \code{"na"}, \code{\link[=srtr_missing_report]{srtr_missing_report()}} counts blanks as \code{NA}, not as
+\code{sas_missing}; use \code{"keep"} to count them, or to keep them with
+\code{srtr_normalize_missing(policy = "tag_only")}.}
 
 \item{...}{Additional arguments passed to the file reader
 (\code{\link[haven:read_sas]{haven::read_sas()}} or \code{\link[arrow:read_parquet]{arrow::read_parquet()}}), e.g. \code{encoding} for
