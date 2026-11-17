@@ -2,9 +2,10 @@
 #'
 #' SRTR formats record missing information in several ways, and the same code
 #' number means different things in different formats: code `4` is "Unknown"
-#' in one format, "N/A" in another and "Not tested" in a third. This dataset
-#' classifies each format code that may stand for missing information, so
-#' that code can be handled by what it means.
+#' in one format, "N/A" in another and "Not tested" in a third. Many flag
+#' columns have no format at all, so the dictionary does not say which of
+#' their values mean missing. This dataset classifies both kinds of code, so
+#' that each can be handled by what it means.
 #'
 #' The classification describes what a code means. It does not say what an
 #' analysis should do with it.
@@ -29,12 +30,13 @@
 #' * `"indeterminate"`: the test was done and gave no clear result.
 #' * `"partial"`: part of the answer is known, such as "Yes, duration
 #'   unknown". `collapses_to` names the part that is known.
-#' * `"sas_missing"`: the SAS missing value `.`, which the format labels
-#'   "Missing".
+#' * `"sas_missing"`: the SAS missing value. For numbers that is `.`, which
+#'   a format labels "Missing"; for text it is a blank.
 #' * `"none"`: an ordinary value.
 #'
-#' @format A list holding one tibble, `formats`, with one row per classified
-#'   format code:
+#' @format A list of two tibbles.
+#'
+#' `formats` has one row per classified format code:
 #' \describe{
 #'   \item{Format, Code, Meaning}{The format code, as in
 #'     [dictionary_versions]. A classification applies only to this exact
@@ -45,9 +47,26 @@
 #'   \item{note}{Why the code was classified this way, where that is not
 #'     plain from its meaning.}
 #' }
-#' @source Meanings from the SRTR SAF data dictionary pages stored in
-#'   [dictionary_versions]; classified by hand in
-#'   `data-raw/missing-codes/format_codes.csv`.
+#'
+#' `variables` has one row per variable and raw value, for values that no
+#' format of the variable lists. Most are one-character flag columns with no
+#' format:
+#' \describe{
+#'   \item{Variable}{The variable name, in whichever file it appears.}
+#'   \item{Code}{The raw value, as text. A blank is the empty string.}
+#'   \item{missing_type}{The type, as above. Never `"none"` or
+#'     `"partial"`.}
+#'   \item{source}{Where the row comes from. `"hand list"` rows were carried
+#'     over from the list `srtr_normalize_missing()` has used so far. The
+#'     SRTR dictionary does not document these values, and they have not yet
+#'     been checked against SAF data.}
+#'   \item{note}{Anything else worth knowing about the row.}
+#' }
+#' @source `formats`: meanings from the SRTR SAF data dictionary pages
+#'   stored in [dictionary_versions], classified by hand in
+#'   `data-raw/missing-codes/format_codes.csv`. `variables`:
+#'   `data-raw/missing-codes/variable_codes.csv`, which is not taken from
+#'   the dictionary.
 #' @docType data
 #' @keywords datasets
 #' @name missing_codes
@@ -71,6 +90,14 @@ NULL
   "Meaning",
   "missing_type",
   "collapses_to",
+  "note"
+)
+
+.srtr_missing_variable_columns <- c(
+  "Variable",
+  "Code",
+  "missing_type",
+  "source",
   "note"
 )
 
@@ -121,7 +148,7 @@ NULL
 
 # Read a classification file. Every column is text; a blank stays "" and the
 # text "NA" stays "NA", because both are real format codes.
-.srtr_missing_read <- function(path) {
+.srtr_missing_read <- function(path, columns = .srtr_missing_columns) {
   codes <- tibble::as_tibble(utils::read.csv(
     path,
     colClasses = "character",
@@ -129,7 +156,7 @@ NULL
     check.names = FALSE,
     encoding = "UTF-8"
   ))
-  codes[.srtr_missing_columns]
+  codes[columns]
 }
 
 # Everything wrong with a classification, measured against a formats table
@@ -165,5 +192,28 @@ NULL
     ),
     problem("partial_without_target", codes[is_partial & !has_target, ]),
     problem("target_without_partial", codes[!is_partial & has_target, ])
+  )
+}
+
+# Everything wrong with the classification of raw values by variable.
+# `variables` is every variable name the stored dictionary versions know.
+# These rows list missing values only, so "none" and "partial" are not
+# allowed, and each row must say where it comes from.
+.srtr_missing_variable_problems <- function(codes, variables) {
+  key <- paste(codes$Variable, codes$Code, sep = "\r")
+  allowed <- setdiff(.srtr_missing_types, c("none", "partial"))
+
+  problem <- function(name, rows) {
+    tibble::tibble(
+      problem = rep(name, nrow(rows)),
+      Variable = rows$Variable,
+      Code = rows$Code
+    )
+  }
+  dplyr::bind_rows(
+    problem("not_in_dictionary", codes[!codes$Variable %in% variables, ]),
+    problem("duplicate", codes[duplicated(key), ]),
+    problem("invalid_type", codes[!codes$missing_type %in% allowed, ]),
+    problem("no_source", codes[!nzchar(codes$source), ])
   )
 }

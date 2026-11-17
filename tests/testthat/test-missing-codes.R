@@ -182,3 +182,84 @@ test_that("no code typed 'none' is noted as left unclassified", {
     "unknown"
   )
 })
+
+test_that("a sound variable classification has no problems", {
+  codes <- fake_variable_codes(
+    Variable = c("FAKE_FLAG", "FAKE_FLAG", "FAKE_FLAG"),
+    Code = c("", "ND", "U"),
+    missing_type = c("sas_missing", "not_done", "unknown")
+  )
+
+  expect_equal(nrow(.srtr_missing_variable_problems(codes, "FAKE_FLAG")), 0L)
+})
+
+test_that("problems in a variable classification are reported", {
+  codes <- fake_variable_codes(
+    Variable = c(
+      "FAKE_FLAG",
+      "FAKE_FLAG",
+      "FAKE_FLAG",
+      "FAKE_GONE",
+      "FAKE_FLAG"
+    ),
+    Code = c("U", "U", "Y", "U", "X"),
+    missing_type = c("unknown", "unknown", "none", "unknown", "unknown"),
+    source = c("hand list", "hand list", "hand list", "hand list", "")
+  )
+
+  problems <- .srtr_missing_variable_problems(codes, "FAKE_FLAG")
+
+  expect_setequal(
+    problems$problem,
+    c("duplicate", "invalid_type", "not_in_dictionary", "no_source")
+  )
+  expect_equal(problems$Code[problems$problem == "invalid_type"], "Y")
+  expect_equal(
+    problems$Variable[problems$problem == "not_in_dictionary"],
+    "FAKE_GONE"
+  )
+})
+
+test_that("the stored variable classification has no problems", {
+  problems <- .srtr_missing_variable_problems(
+    sRtr::missing_codes$variables,
+    unique(sRtr::dictionary_versions$dictionary$Variable)
+  )
+
+  expect_equal(nrow(problems), 0L, info = format(problems))
+})
+
+# Temporary: holds until `default_missing_vars` is removed (#28). It shows
+# that the two tables together carry exactly what the hand list carries.
+test_that("the two classifications together reproduce the hand list", {
+  by_format <- sRtr::missing_codes$formats
+  by_format <- by_format[by_format$missing_type != "none", ]
+  by_variable <- sRtr::missing_codes$variables
+  variable_formats <- unique(sRtr::dictionary[c("Variable", "FormatID")])
+
+  covered_by_format <- function(variable, values) {
+    formats <- variable_formats$FormatID[variable_formats$Variable == variable]
+    rows <- by_format[by_format$Format %in% formats, ]
+    values %in% c(rows$Meaning, rows$Code)
+  }
+
+  unclassified <- character()
+  extra <- character()
+  for (variable in names(default_missing_vars)) {
+    hand <- as.character(default_missing_vars[[variable]])
+    listed <- by_variable$Code[by_variable$Variable == variable]
+    if (!all(hand %in% listed | covered_by_format(variable, hand))) {
+      unclassified <- c(unclassified, variable)
+    }
+    if (!all(listed %in% hand)) {
+      extra <- c(extra, variable)
+    }
+  }
+
+  expect_equal(unclassified, character())
+  expect_equal(extra, character())
+  expect_equal(
+    setdiff(by_variable$Variable, names(default_missing_vars)),
+    character()
+  )
+})

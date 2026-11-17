@@ -21,3 +21,19 @@ fake_missing_codes <- function(
     note = note
   )
 }
+
+fake_variable_codes <- function(
+  Variable,
+  Code,
+  missing_type,
+  source = "hand list",
+  note = ""
+) {
+  tibble::tibble(
+    Variable = Variable,
+    Code = Code,
+    missing_type = missing_type,
+    source = source,
+    note = note
+  )
+}

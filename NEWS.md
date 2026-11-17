@@ -5,7 +5,11 @@
   not done, pending, cannot disclose, indeterminate, partly known, SAS
   missing, or an ordinary value). The same code number means different
   things in different formats, so the classification is by format and code.
-  Nothing uses it yet; `srtr_normalize_missing()` is unchanged (#27).
+  A second table, `variables`, lists the raw values (blank, `ND`, `U` and
+  similar) of flag columns that have no format; these come from the list
+  `srtr_normalize_missing()` has used so far and are not documented in the
+  SRTR dictionary. Nothing uses the dataset yet; `srtr_normalize_missing()`
+  is unchanged (#27).
 
 * New dataset `optn_mapping_tables`: the OPTN KDRI-to-KDPI (2010 onward) and
   EPTS (2014 onward) mapping tables, parsed from OPTN's PDFs, with each
