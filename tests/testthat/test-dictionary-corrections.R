@@ -39,16 +39,24 @@ test_that("only the corrected entries differ from the web dictionary", {
 })
 
 test_that("every correction still matches the latest stored dictionary", {
-  # Fails when SRTR changes an entry a correction expects, so the correction
-  # can be reviewed or retired.
-  latest <- srtr_dictionary("2609", view = "web")
-  corrections <- .srtr_dictionary_corrections
+  # Fails when a stored dictionary update changes an entry a correction
+  # expects, so the correction can be reviewed or retired.
+  versions <- .srtr_bundled_versions()
+  latest <- utils::tail(.srtr_sort_snapshots(versions$releases$snapshot), 1)
+  web <- .srtr_versions_view(versions, latest, "dictionary")
 
-  for (i in seq_len(nrow(corrections))) {
-    row <- corrections[i, ]
-    entry <- latest[latest$Dataset == row$Dataset & latest$Variable == row$Variable, ]
-    expect_equal(entry[[row$field]], row$from, info = row$id)
-  }
+  expect_equal(nrow(.srtr_correction_mismatches(web)), 0, info = latest)
+})
+
+test_that("a dictionary that changed a corrected entry is caught", {
+  web <- srtr_dictionary("2609", view = "web")
+  changed <- web
+  changed$FormatID[changed$Dataset == "TX_LI" & changed$Variable == "REC_COD"] <- "COD"
+  dropped <- web[!(web$Dataset == "TX_KI" & web$Variable == "REC_COD"), ]
+
+  expect_equal(nrow(.srtr_correction_mismatches(web)), 0)
+  expect_equal(.srtr_correction_mismatches(changed)$Dataset, "TX_LI")
+  expect_equal(.srtr_correction_mismatches(dropped)$Dataset, "TX_KI")
 })
 
 test_that("a correction whose target format is missing is not applied", {
@@ -191,4 +199,39 @@ test_that("a column labelled under the web view keeps its own format", {
   report <- srtr_missing_report(web, cols = "REC_COD")
 
   expect_equal(unique(report$format), "THCOD")
+})
+
+test_that("normalizing REC_COD agrees on raw and labelled data, in both views", {
+  local_sas_file(fake_tx_cause_of_death(), "TX_LI")
+
+  for (view in c("corrected", "web")) {
+    raw <- suppressWarnings(load_srtr_file(
+      "TX_LI", factor_labels = FALSE, var_labels = FALSE,
+      column_check = "none", release = "2609", view = view
+    ))
+    labelled <- suppressWarnings(apply_srtr_factors(raw))
+
+    out_raw <- srtr_normalize_missing(raw, cols = "REC_COD", reason = "changed")
+    out_labelled <- srtr_normalize_missing(labelled, cols = "REC_COD", reason = "changed")
+
+    expect_equal(is.na(out_raw$REC_COD), c(FALSE, FALSE, TRUE), info = view)
+    expect_equal(is.na(out_labelled$REC_COD), c(FALSE, FALSE, TRUE), info = view)
+    expect_equal(
+      as.character(out_raw$REC_COD_MISS),
+      as.character(out_labelled$REC_COD_MISS),
+      info = view
+    )
+  }
+})
+
+test_that("under the web view an undocumented REC_COD code is kept, not normalized", {
+  local_sas_file(fake_tx_cause_of_death(), "TX_LI")
+  web <- suppressWarnings(load_srtr_file(
+    "TX_LI", var_labels = FALSE, column_check = "none",
+    release = "2609", view = "web"
+  ))
+
+  out <- srtr_normalize_missing(web, cols = "REC_COD")
+
+  expect_equal(as.character(out$REC_COD[1]), "4600: not in format")
 })

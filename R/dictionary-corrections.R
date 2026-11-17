@@ -117,6 +117,27 @@
   )
 }
 
+# The corrections that no longer fit `dictionary` (SRTR's web dictionary, as
+# stored): the entry is gone or no longer has the expected value. A test runs
+# this on the latest stored snapshot, so a dictionary update that changes a
+# corrected entry fails and the correction is reviewed.
+.srtr_correction_mismatches <- function(
+  dictionary,
+  corrections = .srtr_dictionary_corrections
+) {
+  fits <- vapply(
+    seq_len(nrow(corrections)),
+    function(i) {
+      row <- corrections[i, ]
+      at <- dictionary$Dataset == row$Dataset &
+        dictionary$Variable == row$Variable
+      any(at) && identical(unique(dictionary[[row$field]][at]), row$from)
+    },
+    logical(1)
+  )
+  corrections[!fits, c("id", "Dataset", "Variable"), drop = FALSE]
+}
+
 # The view recorded on `df` by load_srtr_file(), or "corrected".
 .srtr_view_of <- function(df) {
   view <- attr(df, "srtr_release")$view
