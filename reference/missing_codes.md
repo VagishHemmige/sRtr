@@ -3,13 +3,15 @@
 SRTR formats record missing information in several ways, and the same
 code number means different things in different formats: code `4` is
 "Unknown" in one format, "N/A" in another and "Not tested" in a third.
-This dataset classifies each format code that may stand for missing
-information, so that code can be handled by what it means.
+Many flag columns have no format at all, so the dictionary does not say
+which of their values mean missing. This dataset classifies both kinds
+of code, so that each can be handled by what it means.
 
 ## Format
 
-A list holding one tibble, `formats`, with one row per classified format
-code:
+A list of two tibbles.
+
+`formats` has one row per classified format code:
 
 - Format, Code, Meaning:
 
@@ -31,11 +33,44 @@ code:
   Why the code was classified this way, where that is not plain from its
   meaning.
 
+`variables` has one row per variable and raw value, for values that no
+format of the variable lists. Most are one-character flag columns with
+no format:
+
+- Variable:
+
+  The variable name, in whichever file it appears.
+
+- Code:
+
+  The raw value, as text. A blank is the empty string. A blank or text
+  value listed for a variable the dictionary types as numeric cannot
+  occur as stored; such rows are kept from the hand list, and their
+  `note` says so.
+
+- missing_type:
+
+  The type, as above. Never `"none"` or `"partial"`.
+
+- source:
+
+  Where the row comes from. `"hand list"` rows were carried over from
+  the list
+  [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
+  has used so far. The SRTR dictionary does not document these values,
+  and they have not yet been checked against SAF data.
+
+- note:
+
+  Anything else worth knowing about the row.
+
 ## Source
 
-Meanings from the SRTR SAF data dictionary pages stored in
-[dictionary_versions](https://vagishhemmige.github.io/sRtr/reference/dictionary_versions.md);
+`formats`: meanings from the SRTR SAF data dictionary pages stored in
+[dictionary_versions](https://vagishhemmige.github.io/sRtr/reference/dictionary_versions.md),
 classified by hand in `data-raw/missing-codes/format_codes.csv`.
+`variables`: `data-raw/missing-codes/variable_codes.csv`, which is not
+taken from the dictionary.
 
 ## Details
 
@@ -68,7 +103,7 @@ SRTR classification:
 - `"partial"`: part of the answer is known, such as "Yes, duration
   unknown". `collapses_to` names the part that is known.
 
-- `"sas_missing"`: the SAS missing value `.`, which the format labels
-  "Missing".
+- `"sas_missing"`: the SAS missing value. For numbers that is `.`, which
+  a format labels "Missing"; for text it is a blank.
 
 - `"none"`: an ordinary value.

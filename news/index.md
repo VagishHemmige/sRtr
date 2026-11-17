@@ -7,7 +7,12 @@
   applicable, not done, pending, cannot disclose, indeterminate, partly
   known, SAS missing, or an ordinary value). The same code number means
   different things in different formats, so the classification is by
-  format and code. Nothing uses it yet;
+  format and code. A second table, `variables`, lists the raw values
+  (blank, `ND`, `U` and similar) of flag columns that have no format;
+  these come from the list
+  [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
+  has used so far and are not documented in the SRTR dictionary. Nothing
+  uses the dataset yet;
   [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
   is unchanged
   ([\#27](https://github.com/VagishHemmige/sRtr/issues/27)).
