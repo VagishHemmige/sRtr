@@ -42,17 +42,20 @@ test_that("add_txf_outcomes() runs for a single-organ file without dplyr attache
 })
 
 test_that("add_txf_outcomes() reads only the follow-up columns it uses", {
-  asked <- NULL
+  selected <- NULL
   local_mocked_bindings(load_srtr_file = function(file_key, ..., col_select) {
-    asked <<- rlang::as_label(rlang::enquo(col_select))
+    schema <- fake_txf("KI")
+    schema$TFL_SPARE_COLUMN <- 1
+    selected <<- names(tidyselect::eval_select(rlang::enquo(col_select), schema))
     fake_txf("KI")
   })
 
   add_txf_outcomes(fake_tx("TX_KI"))
 
-  for (col in c("TRR_ID", "ORG_TY", "TFL_MALIG", "TFL_ACUTE_REJ_EPISODE", "TFL_PX_STAT_DT")) {
-    expect_match(asked, col, fixed = TRUE)
-  }
+  expect_setequal(
+    selected,
+    c("TRR_ID", "ORG_TY", "TFL_MALIG", "TFL_ACUTE_REJ_EPISODE", "TFL_PX_STAT_DT")
+  )
 })
 
 test_that("add_txf_outcomes() gives the same result from a real TXF file", {
