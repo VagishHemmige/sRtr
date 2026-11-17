@@ -248,38 +248,3 @@ test_that("the stored variable classification has no problems", {
 
   expect_equal(nrow(problems), 0L, info = format(problems))
 })
-
-# Temporary: holds until `default_missing_vars` is removed (#28). It shows
-# that the two tables together carry exactly what the hand list carries.
-test_that("the two classifications together reproduce the hand list", {
-  by_format <- sRtr::missing_codes$formats
-  by_format <- by_format[by_format$missing_type != "none", ]
-  by_variable <- sRtr::missing_codes$variables
-  variable_formats <- unique(sRtr::dictionary[c("Variable", "FormatID")])
-
-  covered_by_format <- function(variable, values) {
-    formats <- variable_formats$FormatID[variable_formats$Variable == variable]
-    rows <- by_format[by_format$Format %in% formats, ]
-    values %in% c(rows$Meaning, rows$Code)
-  }
-
-  unclassified <- character()
-  extra <- character()
-  for (variable in names(default_missing_vars)) {
-    hand <- as.character(default_missing_vars[[variable]])
-    listed <- by_variable$Code[by_variable$Variable == variable]
-    if (!all(hand %in% listed | covered_by_format(variable, hand))) {
-      unclassified <- c(unclassified, variable)
-    }
-    if (!all(listed %in% hand)) {
-      extra <- c(extra, variable)
-    }
-  }
-
-  expect_equal(unclassified, character())
-  expect_equal(extra, character())
-  expect_equal(
-    setdiff(by_variable$Variable, names(default_missing_vars)),
-    character()
-  )
-})

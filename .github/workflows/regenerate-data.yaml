@@ -102,16 +102,15 @@ jobs:
       - name: Install the branch with the new dictionary
         run: R CMD INSTALL --no-docs --no-multiarch .
 
-      - name: Build default missing codes and maps
-        run: |
-          Rscript data-raw/create_default_missing_values.R
-          Rscript data-raw/DATASET.R
+      - name: Build maps
+        run: Rscript data-raw/DATASET.R
 
       - name: Keep only files whose objects changed
         shell: Rscript {0}
         run: |
           committed <- file.path(Sys.getenv("RUNNER_TEMP"), "committed")
           files <- c(Sys.glob("data/*.rda"), "R/sysdata.rda")
+          files <- files[file.exists(files)]
           for (path in files) {
             old_path <- file.path(committed, basename(path))
             if (!file.exists(old_path)) {
@@ -136,7 +135,8 @@ jobs:
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data R/sysdata.rda
+          git add data
+          if [ -e R/sysdata.rda ]; then git add R/sysdata.rda; fi
           if git diff --cached --quiet; then
             echo "Generated data already match data-raw/."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
