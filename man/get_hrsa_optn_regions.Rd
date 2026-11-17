@@ -4,10 +4,18 @@
 \alias{get_hrsa_optn_regions}
 \title{Get OPTN/UNOS Region Boundaries}
 \usage{
-get_hrsa_optn_regions()
+get_hrsa_optn_regions(crs = 4326)
+}
+\arguments{
+\item{crs}{Coordinate reference system of the result: anything
+\code{\link[sf:st_crs]{sf::st_crs()}} accepts, such as an EPSG code. The default, \code{4326}
+(longitude/latitude), matches the layers that
+\code{\link[=get_hrsa_transplant_centers]{get_hrsa_transplant_centers()}} and \code{\link[=get_hrsa_opo_service_areas]{get_hrsa_opo_service_areas()}}
+download. Use \code{5070} to keep the projection of \code{UNOS_regions_sf}, which
+suits area and distance calculations.}
 }
 \value{
-An \code{sf} object with one feature per OPTN/UNOS region.
+An \code{sf} object with one feature per OPTN/UNOS region, in \code{crs}.
 }
 \description{
 Returns OPTN/UNOS region boundaries from the package's internal
@@ -22,8 +30,8 @@ Unlike the HRSA ArcGIS \code{REGION_CD} and \code{REGION_NM} fields, which appea
 represent 10 HRSA/HHS administrative regions, this function returns the
 11 OPTN/UNOS regions.
 
-The returned object preserves the coordinate reference system of
-\code{UNOS_regions_sf}, currently NAD83 / Conus Albers.
+The regions are dissolved in the projection of \code{UNOS_regions_sf}
+(NAD83 / Conus Albers, EPSG:5070) and then transformed to \code{crs}.
 }
 \examples{
 \dontrun{
@@ -32,6 +40,9 @@ regions <- get_hrsa_optn_regions()
 regions
 sf::st_crs(regions)
 plot(regions["Region"])
+
+# Keep the projection of UNOS_regions_sf, for areas and distances
+regions_albers <- get_hrsa_optn_regions(crs = 5070)
 }
 
 }
