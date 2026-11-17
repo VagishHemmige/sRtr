@@ -551,3 +551,20 @@ test_that("blank_text must be \"na\" or \"keep\"", {
 
   expect_error(load_cols("TX_LI", blank_text = "drop"), class = "rlang_error")
 })
+
+test_that("only text that is empty or all whitespace counts as blank", {
+  x <- c(
+    "Y", "", "  ", "\t", "\v", "\f", "\r\n", " \t", NA,
+    " a ", "a ", "caf\xe9", "é"
+  )
+  df <- tibble::tibble(x = x, n = seq_along(x))
+
+  out <- .srtr_blank_text_to_na(df)
+
+  expect_equal(
+    is.na(out$x),
+    c(FALSE, rep(TRUE, 8), FALSE, FALSE, FALSE, FALSE)
+  )
+  expect_equal(out$x[c(1, 10:13)], x[c(1, 10:13)])
+  expect_equal(out$n, df$n)
+})
