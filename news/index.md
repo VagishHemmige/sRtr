@@ -29,6 +29,9 @@
   made it warn and label nothing, which happened on every real SAF. The
   new `overwrite = TRUE` replaces the file’s labels with the
   dictionary’s.
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+  also labels the `TFL_LAFUDATE` it derives for TX_KP, which the
+  dictionary does not list.
 
 - [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
   is rebuilt on `missing_codes`. It recognises codes by what they mean
