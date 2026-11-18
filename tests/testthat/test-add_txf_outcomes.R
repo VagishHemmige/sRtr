@@ -850,3 +850,37 @@ test_that("an event reported only on undated forms is reported", {
   )
   expect_snapshot(out <- add_time_to_event_outcomes(df))
 })
+
+test_that("a registration's transplant date is used whichever row has it", {
+  # 900001 twice: one row has no transplant date. Reports before and after
+  # the transplant; the later one counts, whichever row comes first.
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(c("1999-12-31", "2002-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+  df <- window_cohort()[c(1, 1), ]
+  df$REC_TX_DT[1] <- NA
+
+  for (rows in list(1:2, 2:1)) {
+    out <- add_time_to_event_outcomes(df[rows, ])
+    known <- which(!is.na(out$REC_TX_DT))
+    expect_equal(out$FIRST_FU_MALIG_DATE_BINARY[known], 1L)
+    expect_equal(out$FIRST_FU_MALIG_DATE_CENSOR[known], as.Date("2002-01-01"))
+    expect_equal(out$FIRST_REJ_DATE[known], as.Date("2002-01-01"))
+  }
+})
+
+test_that("a caller's own columns that look like helpers are kept", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+  df <- window_cohort()
+  df$.FIRST_FU_note <- "kept"
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$.FIRST_FU_note, rep("kept", 6))
+  expect_equal(grep("ELIGIBLE", names(out), value = TRUE), character())
+})
