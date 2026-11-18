@@ -323,3 +323,17 @@ testthat::test_that("continuous inputs must be numeric", {
   )
   testthat::expect_snapshot(error = TRUE, add_pdri(df, variant = "KP"))
 })
+
+testthat::test_that("an sf data frame is scored and keeps its geometry", {
+  testthat::skip_if_not_installed("sf")
+  df <- fake_donors()[rep(1, 2), ]
+  geo <- sf::st_as_sf(
+    cbind(df, x = c(0, 1), y = c(0, 1)),
+    coords = c("x", "y")
+  )
+
+  out <- add_pdri(geo, variant = "KP")
+
+  testthat::expect_s3_class(out, "sf")
+  testthat::expect_equal(out$PDRI, add_pdri(df, variant = "KP")$PDRI)
+})

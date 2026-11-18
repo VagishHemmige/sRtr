@@ -236,7 +236,9 @@ add_pdri <- function(
     ),
     names(df)
   )
-  not_numeric <- continuous[!vapply(df[continuous], is.numeric, logical(1))]
+  not_numeric <- continuous[
+    !vapply(continuous, \(nm) is.numeric(df[[nm]]), logical(1))
+  ]
   if (length(not_numeric) > 0) {
     srtr_abort(
       c(
