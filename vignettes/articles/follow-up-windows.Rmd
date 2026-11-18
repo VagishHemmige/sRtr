@@ -265,17 +265,17 @@ your choice of what counts as recording noise. Even a one-day difference
 can matter when the question is about order: whether a graft failed before
 the recipient died, or a report fell before death.
 
-The order of sources is itself a choice. sRtr's order matches the current
-SRTR program-specific reports: "the OPTN death date takes precedence", and
-among the other sources "the SSDMF date takes precedence"
-([SRTR Technical Methods](#ref-psr)). Older SRTR guidance started from the
+The order of sources is itself a choice. sRtr and the current SRTR
+program-specific reports both put OPTN first: "the OPTN death date takes
+precedence" ([SRTR Technical Methods](#ref-psr)). After that they differ.
+The reports choose between the Social Security Death Master File and CMS
+("the SSDMF date takes precedence"); sRtr uses Social Security and then the
+follow-up form, and has no CMS date. Older SRTR guidance started from the
 form date for the transplant (`TFL_DEATH_DT`), then OPTN, Social Security
 and CMS ([Kim and Snyder 2012](#ref-kim2012), slide 26). In the liver
 release documented in `?srtr_composite_death`, the form and OPTN dates
 agreed on the same day for over 99% of recipients who had both, so the two
-orders rarely give different dates. Even with all sources combined, SRTR
-cautions that the deaths found "may represent an under-count"
-([SRTR Technical Methods](#ref-psr)).
+orders rarely give different dates.
 
 # Deaths found after follow-up ends
 
@@ -327,10 +327,14 @@ failure for every organ except heart-lung and lung
 ([SRTR Technical Methods](#ref-psr);
 [Kim and Snyder 2012](#ref-kim2012), slide 27). sRtr dates graft failure
 from `TFL_GRAFT_DT` alone, and does not yet use the retransplant date
-(`PERS_RETX`). If you want all-cause graft failure, take the earlier of
-graft failure and death. Combining them is a modeling choice: a composite
-end point disregards the possibility that the exposure affects its parts
-differently
+(`PERS_RETX`). The earlier of `TFL_GRAFT_DT` and death is therefore a
+narrower end point than SRTR's graft failure: it misses a retransplant
+that came first, or dates it too late. To follow SRTR's definition, take
+the earliest of the recorded failure, the retransplant date and death,
+inside the observation window. Lung and heart-lung leave out retransplant,
+and heart uses only death and retransplant. Combining events this way is a
+modeling choice: a composite end point disregards the possibility that the
+exposure affects its parts differently
 ([Sapir-Pichhadze et al. 2016](#ref-sapir)).
 
 sRtr treats graft failure as death-censored: a failure dated after death

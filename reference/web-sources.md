@@ -168,7 +168,9 @@
   - "For all organs, deaths are considered to be graft failures".
   - The lung and heart-lung graft bullet: "do not include deaths that occur
     after loss to follow-up in the OPTN database".
-  - Deaths found "may represent an under-count" (Table B7 caveats).
+  - "may represent an under-count" (Table B7 caveats). This concerns
+    deaths captured through waitlist removals and follow-up forms; it is
+    not a statement about the completeness of linked sources.
 - **SRTR, The SRTR Database:**
   https://srtr.hrsa.gov/transplant-professionals/reports/the-srtr-database/.
   Quoted:
@@ -184,6 +186,8 @@
     failure".
   - For forms due 2020-03-13 to 2021-03-31, non-submission of the full TRF
     was acceptable, but notice of death or graft failure was still required.
+    Forms in amnesty status had to be completed by 2021-07-01. Actual
+    completeness in a given SAF release is an empirical question.
 - **CMS Cell Size Suppression Policy** (2020):
   https://www.hhs.gov/guidance/document/cms-cell-suppression-policy.
   - No cell from 1 to 10, or any cell from which such a value can be derived.
