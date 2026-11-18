@@ -31,6 +31,6 @@
       out <- add_time_to_event_outcomes(admission_rejection_cohort())
     Condition
       Warning:
-      1 recipient had a treated rejection during the transplant admission with no length of stay or discharge date.
+      1 recipient had a treated rejection during the transplant admission with no usable length of stay or discharge date.
       i It counts as a rejection with an unknown time: FIRST_REJ_DATE_BINARY is 1 and the time is `NA`.
 

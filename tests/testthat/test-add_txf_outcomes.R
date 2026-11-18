@@ -378,3 +378,18 @@ test_that("an admission date before the transplant is not used", {
   expect_equal(out$FIRST_REJ_DATE_BINARY, c(1L, 1L))
   expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date(c("2000-01-15", NA)))
 })
+
+test_that("a discharge date is kept when the transplant date is missing", {
+  local_mocked_bindings(load_srtr_file = function(...) admission_rejection_txf()[0, ])
+  df <- admission_rejection_cohort()[2, ]
+  df$REC_TX_DT <- as.Date(NA)
+
+  out <- suppressWarnings(add_time_to_event_outcomes(df))
+
+  # The date cannot be checked against the transplant, but it is the best
+  # date there is; the elapsed time is unknown without a start.
+  expect_equal(out$FIRST_REJ_DATE, as.Date("2000-01-20"))
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, "admission_discharge")
+  expect_equal(out$FIRST_REJ_DATE_BINARY, 1L)
+  expect_equal(out$FIRST_REJ_DATE_days, NA_real_)
+})

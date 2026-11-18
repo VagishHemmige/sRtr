@@ -334,7 +334,11 @@ add_txf_outcomes <- function(
 #' admission rejection with no usable date keeps `_BINARY = 1` with a missing
 #' censoring date and time, with a warning, so it drops out of time-to-event
 #' models instead of counting as rejection-free. A later follow-up rejection
-#' stays in `FIRST_FU_REJ_DATE` and is never used in its place.
+#' stays in `FIRST_FU_REJ_DATE` (`FIRST_FU_REJ_DATE_KI` and
+#' `FIRST_FU_REJ_DATE_PA` for `TX_KP`, with `FIRST_REJ_DATE_PA_SOURCE` for the
+#' pancreas) and is never used in its place. A date is unusable when it falls
+#' before the transplant; with no transplant date, the discharge date is kept,
+#' and the elapsed time is missing.
 #'
 add_time_to_event_outcomes <- function(
   df,
@@ -551,9 +555,12 @@ add_time_to_event_outcomes <- function(
   #Code 1 of format ACREJEP: at least one episode treated with an
   #anti-rejection agent. Raw codes and labelled columns alike.
   at_admission <- .srtr_has_code(df[[episode_col]], "1", "ACREJEP")
-  #A date before the transplant cannot date an admission event.
+  #A date before the transplant cannot date an admission event. With no
+  #transplant date it cannot be checked, and is kept: the elapsed time is
+  #unknown anyway.
   usable <- function(date) {
-    dplyr::if_else(!is.na(date) & date >= df$REC_TX_DT, date, as.Date(NA))
+    before <- !is.na(df$REC_TX_DT) & date < df$REC_TX_DT
+    dplyr::if_else(!is.na(date) & !before, date, as.Date(NA))
   }
   los_date <- usable(df$REC_TX_DT + df$REC_POSTX_LOS)
   discharge_date <- if ("REC_DISCHRG_DT" %in% names(df)) {
@@ -614,7 +621,7 @@ add_time_to_event_outcomes <- function(
   n <- sum(undated)
   srtr_warn(
     c(
-      "{n} recipient{?s} had a treated rejection during the transplant admission with no length of stay or discharge date.",
+      "{n} recipient{?s} had a treated rejection during the transplant admission with no usable length of stay or discharge date.",
       "i" = "{cli::qty(n)}{?It counts/They count} as {?a rejection/rejections} with an unknown time: {.field {prefix}_BINARY} is 1 and the time is {.code NA}."
     ),
     class = "undated_admission_rejection",
