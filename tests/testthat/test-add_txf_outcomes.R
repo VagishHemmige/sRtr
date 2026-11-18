@@ -104,7 +104,7 @@ test_that("add_time_to_event_outcomes() builds rejection dates without dplyr att
     srtr_time_to_event = function(df, ...) df,
     .srtr_add_txf_outcomes = function(df, ...) {
       df$FIRST_FU_REJ_DATE <- as.Date(c(NA, "2005-01-01"))
-      df$.FIRST_FU_REJ_ELIGIBLE <- df$FIRST_FU_REJ_DATE
+      attr(df, ".srtr_eligible") <- list(FIRST_FU_REJ_DATE = df$FIRST_FU_REJ_DATE)
       df
     }
   )
@@ -878,9 +878,26 @@ test_that("a caller's own columns that look like helpers are kept", {
   local_mocked_bindings(load_srtr_file = function(...) window_forms())
   df <- window_cohort()
   df$.FIRST_FU_note <- "kept"
+  df$.FIRST_FU_MALIG_ELIGIBLE <- "also kept"
 
   out <- add_time_to_event_outcomes(df)
 
   expect_equal(out$.FIRST_FU_note, rep("kept", 6))
-  expect_equal(grep("ELIGIBLE", names(out), value = TRUE), character())
+  expect_equal(out$.FIRST_FU_MALIG_ELIGIBLE, rep("also kept", 6))
+  expect_equal(out$FIRST_FU_MALIG_DATE_BINARY, c(1L, 0L, 0L, 1L, 0L, 0L))
+})
+
+test_that("a plain data frame keeps its attributes", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+  df <- as.data.frame(window_cohort())
+  attr(df, "file_key") <- "TX_KI"
+  attr(df, "srtr_note") <- "kept"
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(attr(out, "file_key"), "TX_KI")
+  expect_equal(attr(out, "srtr_note"), "kept")
+  expect_null(attr(out, ".srtr_eligible"))
+  expect_null(attr(add_txf_outcomes(df), ".srtr_eligible"))
+  expect_equal(attr(out, "txf_report")$registrations_with_forms, 5)
 })
