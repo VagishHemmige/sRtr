@@ -17,7 +17,8 @@ add_time_to_event_outcomes(
   df,
   death_window = c("follow_up", "ascertainment"),
   ascertainment_date = NULL,
-  graft_death_same_day = c("censor", "event")
+  graft_death_same_day = c("censor", "event"),
+  rejection_after_graft_failure = c("exclude", "keep")
 )
 ```
 
@@ -62,6 +63,37 @@ add_time_to_event_outcomes(
   with the death date when a recipient dies with a functioning graft. A
   real failure and death can also fall on the same day. Run both
   settings to see how much your results depend on it.
+
+- rejection_after_graft_failure:
+
+  Whether a rejection reported after the graft failed counts:
+
+  - `"exclude"` (default): a graft is at risk of rejection only until it
+    fails. Forms filed in the years after graft failure are not used,
+    and the rejection window ends at the graft failure date
+    (`TFL_GRAFT_DT`, or that graft's own date, `TFL_GRAFT_DT_KI` or
+    `TFL_GRAFT_DT_PA`, for `TX_KP`); grafts without a rejection are
+    censored there. These columns are then required.
+
+  - `"keep"`: every form counts, as before.
+
+  The follow-up code `TFL_FOL_CD` uses format `FOLCD` of the SRTR data
+  dictionary (SAF releases 2203 and 2609): code 800 is the form filed at
+  graft failure and codes 801 to 850 are "N year after graft failure".
+  Under `"exclude"`, sRtr leaves out codes 801 to 850. These are package
+  conventions, not SRTR rules: the form filed at failure (code 800) is
+  kept, since it may report the rejection that led to the failure; a
+  rejection reported on the day of failure counts; and a rejection
+  during the transplant admission counts if it falls inside the ordinary
+  window, even when the graft failed in the same admission (its date is
+  only a discharge-date proxy). Censoring still ends at the failure
+  date.
+
+  Malignancy is patient-level and always uses every form. The columns
+  from
+  [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
+  (`FIRST_FU_REJ_DATE`, `FIRST_FU_REJ_STATUS`) describe every form
+  either way.
 
 ## Details
 

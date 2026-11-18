@@ -66,7 +66,8 @@
 <span>  <span class="va">df</span>,</span>
 <span>  death_window <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"follow_up"</span>, <span class="st">"ascertainment"</span><span class="op">)</span>,</span>
 <span>  ascertainment_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  graft_death_same_day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"censor"</span>, <span class="st">"event"</span><span class="op">)</span></span>
+<span>  graft_death_same_day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"censor"</span>, <span class="st">"event"</span><span class="op">)</span>,</span>
+<span>  rejection_after_graft_failure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exclude"</span>, <span class="st">"keep"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,6 +106,30 @@ dictionary does not say whether the graft failure date is filled in with
 the death date when a recipient dies with a functioning graft. A real
 failure and death can also fall on the same day. Run both settings to see
 how much your results depend on it.</p></dd>
+
+
+<dt id="arg-rejection-after-graft-failure">rejection_after_graft_failure<a class="anchor" aria-label="anchor" href="#arg-rejection-after-graft-failure"></a></dt>
+<dd><p>Whether a rejection reported after
+the graft failed counts:</p><ul><li><p><code>"exclude"</code> (default): a graft is at risk of rejection only until it
+fails. Forms filed in the years after graft failure are not used, and
+the rejection window ends at the graft failure date (<code>TFL_GRAFT_DT</code>,
+or that graft's own date, <code>TFL_GRAFT_DT_KI</code> or <code>TFL_GRAFT_DT_PA</code>, for
+<code>TX_KP</code>); grafts without a rejection are censored there. These columns
+are then required.</p></li>
+<li><p><code>"keep"</code>: every form counts, as before.</p></li>
+</ul><p>The follow-up code <code>TFL_FOL_CD</code> uses format <code>FOLCD</code> of the SRTR data
+dictionary (SAF releases 2203 and 2609): code 800 is the form filed at
+graft failure and codes 801 to 850 are "N year after graft failure".
+Under <code>"exclude"</code>, sRtr leaves out codes 801 to 850. These are package
+conventions, not SRTR rules: the form filed at failure (code 800) is
+kept, since it may report the rejection that led to the failure; a
+rejection reported on the day of failure counts; and a rejection during
+the transplant admission counts if it falls inside the ordinary window,
+even when the graft failed in the same admission (its date is only a
+discharge-date proxy). Censoring still ends at the failure date.</p>
+<p>Malignancy is patient-level and always uses every form. The columns from
+<code><a href="add_txf_outcomes.html">add_txf_outcomes()</a></code> (<code>FIRST_FU_REJ_DATE</code>, <code>FIRST_FU_REJ_STATUS</code>) describe
+every form either way.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -68,6 +68,11 @@ srtr_time_to_event(
 
 ## Details
 
+Infinite dates (from [`min()`](https://rdrr.io/r/base/Extremes.html) or
+[`max()`](https://rdrr.io/r/base/Extremes.html) of no dates, for
+example) are an error (`sRtr_error_nonfinite_dates`): they would
+otherwise count as an event with an infinite time.
+
 Units suffix mapping: `years -> "_yrs"`, `months -> "_months"`,
 `days -> "_days"`. Negative times (e.g., when
 `start_date > censor/event`) trigger a warning, and the numeric time is

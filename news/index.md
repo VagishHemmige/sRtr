@@ -190,6 +190,19 @@
   catheterization values recorded at listing or at transplant
   ([\#179](https://github.com/VagishHemmige/sRtr/issues/179)).
 
+- [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
+  gains `rejection_after_graft_failure`. By default (`"exclude"`), a
+  rejection reported after the graft failed no longer counts: forms
+  filed in the years after graft failure (follow-up codes 801-850) are
+  not used, and the rejection window ends at the graft failure date.
+  `"keep"` gives the previous behaviour
+  ([\#21](https://github.com/VagishHemmige/sRtr/issues/21)).
+
+- [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
+  now errors when one transplant registration has two different
+  transplant dates (`sRtr_error_conflicting_transplant_dates`), instead
+  of using the earliest.
+
 - [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
   no longer fails unless dplyr is attached
   ([\#17](https://github.com/VagishHemmige/sRtr/issues/17)).
@@ -272,6 +285,11 @@
   returns the dictionary or format code lists for a SAF release, from
   the new `dictionary_versions` dataset of stored SRTR dictionary
   versions ([\#26](https://github.com/VagishHemmige/sRtr/issues/26)).
+
+- [`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)
+  now errors on infinite dates (`sRtr_error_nonfinite_dates`) instead of
+  counting them as events with an infinite time
+  ([\#97](https://github.com/VagishHemmige/sRtr/issues/97)).
 
 - [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
   now does what its arguments say

@@ -119,7 +119,10 @@ Default 1. Set to 0 to disable. Logical TRUE/FALSE also accepted
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Units suffix mapping: <code>years -&gt; "_yrs"</code>, <code>months -&gt; "_months"</code>, <code>days -&gt; "_days"</code>.
+    <p>Infinite dates (from <code><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min()</a></code> or <code><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max()</a></code> of no dates, for example) are an
+error (<code>sRtr_error_nonfinite_dates</code>): they would otherwise count as an
+event with an infinite time.</p>
+<p>Units suffix mapping: <code>years -&gt; "_yrs"</code>, <code>months -&gt; "_months"</code>, <code>days -&gt; "_days"</code>.
 Negative times (e.g., when <code>start_date &gt; censor/event</code>) trigger a warning,
 and the numeric time is set to <code>NA</code>.#'</p>
     </div>

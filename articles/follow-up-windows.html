@@ -319,6 +319,26 @@ assumption, not an SRTR rule, so run both:</p>
 <code class="sourceCode R"><span><span class="va">as_event</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, graft_death_same_day <span class="op">=</span> <span class="st">"event"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="rejection-after-the-graft-has-failed">Rejection after the graft has failed<a class="anchor" aria-label="anchor" href="#rejection-after-the-graft-has-failed"></a>
+</h2>
+<p>Follow-up forms keep coming after a graft fails: SRTR files forms for
+the years after graft failure (<code>TFL_FOL_CD</code> codes 801 to
+850). A rejection reported on one of them is about a graft that has
+already failed, so it is not an event for a graft-rejection outcome.
+Neither is a rejection on an ordinary form dated after the failure.</p>
+<p><strong>The naive approach</strong> takes the first rejection on any
+form, and censors rejection-free grafts at last follow-up, past the
+failure.</p>
+<p><strong>With sRtr</strong>, <code><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes()</a></code>
+leaves out the post-failure forms and ends the rejection window at the
+graft failure date, by default. The form filed at failure (code 800)
+still counts, since it may report the rejection that caused the failure.
+Compare with every form counted:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, rejection_after_graft_failure <span class="op">=</span> <span class="st">"keep"</span><span class="op">)</span></span>
+<span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">keep</span><span class="op">$</span><span class="va">FIRST_REJ_DATE_BINARY</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1L</span> <span class="op">&amp;</span> <span class="op">!</span><span class="va">out</span><span class="op">$</span><span class="va">FIRST_REJ_DATE_BINARY</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="whose-follow-up">Whose follow-up?<a class="anchor" aria-label="anchor" href="#whose-follow-up"></a>
 </h2>
 <p>Some outcomes belong to the patient and some to the graft. Malignancy
@@ -350,6 +370,7 @@ far apart the sources are.</li>
 <li>Count deaths and censor survivors over the same period:
 <code>death_window</code>.</li>
 <li>Run graft failure both ways for failures on the day of death.</li>
+<li>Stop counting rejection when the graft fails.</li>
 <li>For kidney-pancreas, use each graft’s own follow-up.</li>
 </ul>
 </div>
