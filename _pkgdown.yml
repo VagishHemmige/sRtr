@@ -97,3 +97,13 @@ articles:
     navbar: ~
     contents:
       - articles/geographic-coverage-gain
+
+  - title: Pitfalls in SRTR data
+    navbar: ~
+    desc: >
+      Subtleties in SRTR files that change results, each with a naive
+      approach that trips on it and the sRtr function that handles it.
+      The code needs your own SAFs and is not run on this site.
+    contents:
+      - articles/follow-up-forms
+      - articles/follow-up-windows

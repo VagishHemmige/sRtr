@@ -1,0 +1,288 @@
+---
+title: "Follow-up forms are reports, not events"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+SRTR follow-up files (`TXF_KI`, `TXF_LI`, and so on) hold one row per
+follow-up form. It is tempting to read them as a clinical record: find the
+first form that says "yes", take its date, and call that the event. That
+reading is wrong in several ways, and each one quietly changes an
+analysis. This article walks through them with code you can run on your own
+standard analysis files (SAFs). The companion article,
+[Follow-up windows and death](follow-up-windows.html), covers what happens
+around the end of follow-up and death.
+
+The code here is not run on this website, because it needs real SAFs. You
+can run it yourself: each section shows a naive version first, then the
+sRtr function that handles the problem. When you share what you find,
+share counts only, and mask any count under 11, as the SRTR data use
+agreement requires. The `mask()` helper below does that for a table.
+
+```{r setup}
+library(sRtr)
+library(dplyr)
+
+set_srtr_wd("path/to/your/SAFs")
+
+tx <- load_srtr_file("TX_LI")
+txf <- load_srtr_file(
+  "TXF_LI",
+  col_select = c(
+    "TRR_ID", "ORG_TY", "TFL_PX_STAT_DT", "TFL_FOL_CD",
+    "TFL_MALIG", "TFL_ACUTE_REJ_EPISODE"
+  )
+)
+
+mask <- function(x) {
+  t <- table(x, useNA = "ifany")
+  noquote(ifelse(t > 0 & t < 11, "<11", format(t, big.mark = ",")))
+}
+```
+
+The examples use liver files and malignancy and acute rejection, the two
+outcomes `add_txf_outcomes()` derives. The same issues apply to the other
+organs.
+
+# A form date is not an onset date
+
+Each follow-up form covers a period, often a year, and its date
+(`TFL_PX_STAT_DT`, the patient status date) is when the status was
+recorded. A form that first says "yes, malignancy" tells you the malignancy
+began at some point after the last form that said "no", and on or before
+this one. The figure below shows three made-up recipients.
+
+```{r timeline, eval = TRUE, echo = FALSE, fig.width = 7.5, fig.height = 2.8, fig.alt = "Timeline of follow-up forms for three made-up recipients, in years since transplant. Recipient A has forms saying no at years 1 and 2 and yes at year 3; the onset lies somewhere in the shaded interval between years 2 and 3. Recipient B has a form saying no at year 1, an unknown answer at year 2 and yes at year 3; the onset interval runs from year 1 to year 3. Recipient C has forms saying unknown at years 1 and 2, so nothing is known about malignancy."}
+forms <- data.frame(
+  who = rep(c("A", "B", "C"), c(3, 3, 2)),
+  year = c(1, 2, 3, 1, 2, 3, 1, 2),
+  answer = c("No", "No", "Yes", "No", "Unknown", "Yes", "Unknown", "Unknown")
+)
+forms$answer <- factor(forms$answer, c("No", "Yes", "Unknown"))
+intervals <- data.frame(who = c("A", "B"), from = c(2, 1), to = c(3, 3))
+ink <- "#52514e"
+
+ggplot2::ggplot(forms, ggplot2::aes(x = year, y = who)) +
+  ggplot2::geom_segment(
+    data = intervals,
+    ggplot2::aes(x = from, xend = to, y = who, yend = who),
+    linewidth = 6, colour = "#cde2fb", lineend = "round"
+  ) +
+  ggplot2::geom_vline(xintercept = 0, colour = ink, linewidth = 0.4) +
+  ggplot2::geom_point(
+    ggplot2::aes(colour = answer, shape = answer),
+    size = 3.5, stroke = 1.2
+  ) +
+  ggplot2::annotate(
+    "text", x = 0.05, y = 3.45, label = "Transplant",
+    hjust = 0, size = 3.2, colour = ink
+  ) +
+  ggplot2::annotate(
+    "text", x = 2.5, y = 3.32, label = "Onset is somewhere in here",
+    size = 3.2, colour = ink
+  ) +
+  ggplot2::scale_colour_manual(
+    values = c(No = "#2a78d6", Yes = "#eb6834", Unknown = "#8a8984"),
+    name = "Form says"
+  ) +
+  ggplot2::scale_shape_manual(
+    values = c(No = 16, Yes = 17, Unknown = 1),
+    name = "Form says"
+  ) +
+  ggplot2::scale_y_discrete(limits = c("C", "B", "A")) +
+  ggplot2::scale_x_continuous(
+    "Years since transplant", breaks = 0:3, limits = c(0, 3.2)
+  ) +
+  ggplot2::labs(y = "Recipient") +
+  ggplot2::theme_minimal(base_size = 11) +
+  ggplot2::theme(
+    panel.grid.major.y = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    legend.position = "top",
+    legend.justification = "left"
+  )
+```
+
+**The naive approach** takes the first "yes":
+
+```{r}
+naive <- txf |>
+  filter(TFL_MALIG == "Y") |>
+  summarise(malig_date = min(TFL_PX_STAT_DT), .by = TRR_ID)
+```
+
+This gives the date of the first *report*, which lags onset by up to the
+gap between forms. It also has a technical trap: `min()` returns `NA` for a
+recipient whose positive forms include an undated one, and with
+`na.rm = TRUE` it returns `Inf`, with a warning, when all of them are
+undated.
+
+**With sRtr**, `add_txf_outcomes()` gives the first report date and the
+other end of the interval: the last form that explicitly said "no" before
+it.
+
+```{r}
+tx <- add_txf_outcomes(tx)
+
+gap <- as.numeric(tx$FIRST_FU_MALIG_DATE - tx$FIRST_FU_MALIG_LAST_NEG_DATE)
+summary(gap)
+```
+
+On real files the median gap is close to a year, because forms are mostly
+annual. An analysis that treats the report date as the event date is
+right-censored data with a built-in delay; the two dates together support
+interval-censored or discrete-time models instead. Even then, the interval
+bounds the onset only as well as the form's question does: the forms ask
+about the period since the last form, and are filled in from the
+transplant center's records.
+
+# A missing date does not mean "no event"
+
+**The naive approach** joins the first dates back to the cohort and calls
+everyone without one event-free:
+
+```{r}
+naive_cohort <- tx |>
+  left_join(naive, by = "TRR_ID") |>
+  mutate(malignancy = !is.na(malig_date))
+```
+
+That merges four quite different groups into "no malignancy":
+
+- recipients whose forms said "no";
+- recipients whose forms said only "unknown" or were left blank;
+- recipients with no follow-up form at all;
+- recipients with a "yes" form that has no date.
+
+**With sRtr**, the status column keeps them apart:
+
+```{r}
+mask(tx$FIRST_FU_MALIG_STATUS)
+```
+
+`"event"` means at least one form reports a malignancy, dated or not;
+`"no event"` means none does and at least one says "no"; `"unknown"` means
+there are forms but none says "yes" or "no"; `"no follow-up"` means there is
+no form. On real liver files, "unknown" and "no follow-up" are each large
+groups, not rounding errors. Whether to exclude them, treat them as
+censored at transplant, or model them is an analysis decision, and it
+should be made on purpose.
+
+# "Rejection" has more than one meaning
+
+The rejection question (`TFL_ACUTE_REJ_EPISODE`, format `ACREJEPF`) has
+four answers: 1, at least one episode treated with an anti-rejection
+agent; 2, rejection, none treated; 3, no; 998, unknown.
+
+**The naive approach** matches the label text:
+
+```{r}
+txf |>
+  filter(
+    TFL_ACUTE_REJ_EPISODE ==
+      "1: Yes, at least one episode treated with anti-rejection agent"
+  )
+```
+
+This finds nothing if the file was loaded with raw codes
+(`factor_labels = FALSE`), and nothing if SRTR rewords the label in a later
+release. And it treats an untreated rejection (code 2) the same as "no".
+
+**With sRtr**, rejection is matched by code, so raw and labelled files give
+the same answer, and an untreated rejection gets its own status:
+
+```{r}
+mask(tx$FIRST_FU_REJ_STATUS)
+```
+
+The derived endpoint is *treated* acute rejection. An untreated rejection
+is evidence that rejection happened, so it is never used as a negative form
+when bounding the interval in `FIRST_FU_REJ_LAST_NEG_DATE`.
+
+# Rejection during the transplant admission is not on the follow-up forms
+
+Rejection before discharge is recorded on the transplant record
+(`REC_ACUTE_REJ_EPISODE` in `TX_LI`), not on a follow-up form, and it has
+no date of its own.
+
+**The naive approach** uses only the follow-up file, and so misses early
+rejection, or counts it late, at the first follow-up form.
+
+**With sRtr**, `add_time_to_event_outcomes()` (see the note in
+[Follow-up windows and death](follow-up-windows.html)) uses the admission
+rejection first. It
+dates it at discharge, a proxy: the transplant date plus the length of stay
+(`REC_POSTX_LOS`), else the discharge date (`REC_DISCHRG_DT`).
+`FIRST_REJ_DATE_SOURCE` records which rule applied:
+
+```{r}
+out <- sRtr:::add_time_to_event_outcomes(tx)
+mask(out$FIRST_REJ_DATE_SOURCE)
+```
+
+When neither date is usable, the rejection still counts: its status is 1
+and its time is missing, so it drops out of a survival model rather than
+adding rejection-free time. The same rule covers a rejection or malignancy
+reported only on undated follow-up forms. Each case gives a warning with
+the count.
+
+# Forms can be dated before the transplant
+
+A follow-up form describes the period after transplant, so a form dated
+before it is a data error. Check how many you have:
+
+```{r}
+tx_date <- tx$REC_TX_DT[match(txf$TRR_ID, tx$TRR_ID)]
+sum(txf$TFL_PX_STAT_DT < tx_date, na.rm = TRUE)
+```
+
+In liver files they are rare, but a single one can matter: with the naive
+approach, a pre-transplant "yes" becomes an event at time zero, or a
+negative time. sRtr times events from the first report on or after the
+transplant date; the date columns from `add_txf_outcomes()` keep the first
+report of all, so you can find these cases.
+
+# Count registrations, and say so
+
+Each row of a transplant file is a transplant registration (`TRR_ID`), not
+a person. A person transplanted twice has two rows, and two sets of
+follow-up forms.
+
+```{r}
+c(registrations = n_distinct(tx$TRR_ID), people = n_distinct(tx$PERS_ID))
+```
+
+`add_txf_outcomes()` attaches a report of the merge, in registrations,
+ready for a methods section: how many registrations have any follow-up
+form, how many forms were read and how many were undated, and for each
+outcome the positive forms, the registrations with a report, and the
+registrations whose report is dated.
+
+```{r}
+report <- attr(tx, "txf_report")
+str(report[setdiff(names(report), "outcomes")])
+report$outcomes
+```
+
+The report describes the cohort at the time of the merge; filter first,
+then call `add_txf_outcomes()`, if you want it to describe your analysis
+cohort.
+
+# Checklist
+
+- Treat follow-up dates as report dates. Use the last negative form as the
+  other end of the interval.
+- Read the status column before treating a missing date as no event.
+- Decide what "unknown" and "no follow-up" mean for your question.
+- Match codes, not label text, and decide whether untreated rejection
+  counts.
+- Include rejection during the transplant admission.
+- Look for forms dated before the transplant.
+- Report counts in registrations, and mask counts under 11 when you share
+  them.
