@@ -79,5 +79,9 @@ rule applied. Here a missing date does not always mean no event: an
 admission rejection with no usable date keeps \verb{_BINARY = 1} with a missing
 censoring date and time, with a warning, so it drops out of time-to-event
 models instead of counting as rejection-free. A later follow-up rejection
-stays in \code{FIRST_FU_REJ_DATE} and is never used in its place.
+stays in \code{FIRST_FU_REJ_DATE} (\code{FIRST_FU_REJ_DATE_KI} and
+\code{FIRST_FU_REJ_DATE_PA} for \code{TX_KP}, with \code{FIRST_REJ_DATE_PA_SOURCE} for the
+pancreas) and is never used in its place. A date is unusable when it falls
+before the transplant; with no transplant date, the discharge date is kept,
+and the elapsed time is missing.
 }
