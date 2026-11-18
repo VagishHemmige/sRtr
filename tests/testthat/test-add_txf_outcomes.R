@@ -755,6 +755,7 @@ test_that("the merge report survives add_time_to_event_outcomes()", {
   out <- add_time_to_event_outcomes(window_cohort())
 
   expect_equal(attr(out, "txf_report")$registrations_with_forms, 5)
+})
 
 # ---- review of cae0f22 -------------------------------------------------------
 
