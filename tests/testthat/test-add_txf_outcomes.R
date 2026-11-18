@@ -884,11 +884,14 @@ test_that("a caller's own columns that look like helpers are kept", {
   df <- window_cohort()
   df$.FIRST_FU_note <- "kept"
   df$.FIRST_FU_MALIG_ELIGIBLE <- "also kept"
+  # The admission exception reads a source column only for rejection.
+  df$FIRST_FU_MALIG_DATE_SOURCE <- 1:6
 
   out <- add_time_to_event_outcomes(df)
 
   expect_equal(out$.FIRST_FU_note, rep("kept", 6))
   expect_equal(out$.FIRST_FU_MALIG_ELIGIBLE, rep("also kept", 6))
+  expect_equal(out$FIRST_FU_MALIG_DATE_SOURCE, 1:6)
   expect_equal(out$FIRST_FU_MALIG_DATE_BINARY, c(1L, 0L, 0L, 1L, 0L, 0L))
 })
 

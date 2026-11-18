@@ -737,7 +737,11 @@ add_time_to_event_outcomes <- function(
       report_lafu[[prefix]],
       death
     )
-    source <- df[[paste0(prefix, "_SOURCE")]]
+    #The admission exception applies only to rejection; for other outcomes a
+    #caller's column of the same name is not read.
+    source <- if (prefix %in% names(accept_lafu)) {
+      df[[paste0(prefix, "_SOURCE")]]
+    }
     if (!is.null(source) && rejection_after_graft_failure == "exclude") {
       admission <- startsWith(dplyr::coalesce(source, ""), "admission")
       free <- .srtr_report_window(
