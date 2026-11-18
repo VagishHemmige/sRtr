@@ -106,7 +106,42 @@ report, the last such form at all. An untreated rejection is
 evidence of rejection, so it is not a negative form.</p></dd>
 
 
-</dl></div>
+</dl><p>The result also carries a <code>txf_report</code> attribute, a list of counts from
+the merge for a methods section. Counts are of transplant registrations
+(distinct <code>TRR_ID</code>s), not people, and of form rows:</p><dl><dt><code>follow_up_file</code></dt>
+<dd><p>The follow-up file read, such as <code>"TXF_KI"</code>.</p></dd>
+
+<dt><code>cohort_rows</code></dt>
+<dd><p>Rows of <code>df</code>.</p></dd>
+
+<dt><code>registrations</code></dt>
+<dd><p>Distinct non-missing <code>TRR_ID</code>s in <code>df</code>.</p></dd>
+
+<dt><code>registrations_with_forms</code></dt>
+<dd><p>Of those, how many have at least
+one follow-up form.</p></dd>
+
+<dt><code>forms</code></dt>
+<dd><p>Follow-up form rows for those registrations.</p></dd>
+
+<dt><code>forms_undated</code></dt>
+<dd><p>Of those, how many have no <code>TFL_PX_STAT_DT</code>.</p></dd>
+
+<dt><code>outcomes</code></dt>
+<dd><p>A tibble with one row per outcome (<code>"malignancy"</code>,
+<code>"rejection"</code>, or for <code>TX_KP</code> <code>"rejection, kidney"</code> and
+<code>"rejection, pancreas"</code>): <code>column</code>, the date column;
+<code>positive_forms</code>, forms reporting it; <code>registrations_with_report</code>,
+registrations with a positive form (status <code>"event"</code>); and
+<code>registrations_with_dated_report</code>, those with at least one dated
+positive form, the earliest of which gives the date column. An
+undated positive form cannot be ordered against the dated ones.</p></dd>
+
+
+</dl><p>Forms with a missing <code>TRR_ID</code> match no registration and count nowhere.
+The report describes the cohort at the time of the merge: filtering the
+result afterwards does not update it.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>The dates are report dates.</strong> A follow-up form covers a period, and its

@@ -18,7 +18,9 @@ srtr_composite_death(
   out = "REC_DEATH_DT_COMPOSITE",
   keep_source = TRUE,
   add_conflict_flag = TRUE,
-  prefer_earliest = FALSE
+  prefer_earliest = FALSE,
+  conflict_days = 0,
+  add_spread_days = FALSE
 )
 ```
 
@@ -43,15 +45,35 @@ srtr_composite_death(
 
 - add_conflict_flag:
 
-  If TRUE, add `{out}_conflict` when sources disagree.
+  If TRUE, add `{out}_conflict`: `TRUE` when the earliest and latest
+  non-missing source dates are more than `conflict_days` apart, `FALSE`
+  otherwise, including when fewer than two sources have a date.
 
 - prefer_earliest:
 
   If TRUE, ignore precedence and choose the earliest date.
 
+- conflict_days:
+
+  How many calendar days apart the earliest and latest source dates may
+  be before `{out}_conflict` is `TRUE`; only a spread strictly greater
+  than it is flagged. The default, 0, flags any difference. A larger
+  value is your choice of what counts as recording noise: a difference
+  of a day can still change the order of death and another event. It
+  changes only the flag, never the composite date or its source.
+
+- add_spread_days:
+
+  If TRUE, add `{out}_spread_days`: the calendar days between the
+  earliest and latest non-missing source dates, 0 when two or more
+  sources agree, and `NA` when fewer than two have a date. A column
+  given for two sources counts once. Use it to compare thresholds
+  without running this function again.
+
 ## Value
 
-`df` with added composite column (and optional source/conflict columns).
+`df` with added composite column (and optional source, conflict and
+spread columns).
 
 ## Details
 

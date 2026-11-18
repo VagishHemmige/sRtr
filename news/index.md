@@ -179,6 +179,13 @@
   found in raw codes, not only in labelled columns
   ([\#214](https://github.com/VagishHemmige/sRtr/issues/214)).
 
+- [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
+  attaches a `txf_report` attribute counting the merge: registrations in
+  the cohort and with follow-up forms, forms read and undated, and for
+  each outcome the positive forms and the registrations with a report
+  and with a dated report
+  ([\#216](https://github.com/VagishHemmige/sRtr/issues/216)).
+
 - [`apply_srtr_factors()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.md)
   and
   [`apply_srtr_varlabels()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.md)
@@ -311,6 +318,15 @@
   moves Alaska, Hawaii and Puerto Rico below the contiguous states for
   national maps, offline, so points and polygons in those areas land
   together.
+
+- [`srtr_composite_death()`](https://vagishhemmige.github.io/sRtr/reference/srtr_composite_death.md)
+  gains `conflict_days`, a tolerance for the conflict flag:
+  `{out}_conflict` is `TRUE` only when the earliest and latest source
+  dates are more than `conflict_days` apart. The default, 0, keeps the
+  old flag. The new `add_spread_days = TRUE` adds `{out}_spread_days`,
+  the days between them (`NA` with fewer than two sources), so you can
+  compare thresholds
+  ([\#210](https://github.com/VagishHemmige/sRtr/issues/210)).
 
 - [`srtr_composite_death()`](https://vagishhemmige.github.io/sRtr/reference/srtr_composite_death.md)
   now requires its three death date columns to be `Date`, which is how

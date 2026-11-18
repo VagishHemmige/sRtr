@@ -63,6 +63,49 @@ forms for both grafts.
   untreated rejection is evidence of rejection, so it is not a negative
   form.
 
+The result also carries a `txf_report` attribute, a list of counts from
+the merge for a methods section. Counts are of transplant registrations
+(distinct `TRR_ID`s), not people, and of form rows:
+
+- `follow_up_file`:
+
+  The follow-up file read, such as `"TXF_KI"`.
+
+- `cohort_rows`:
+
+  Rows of `df`.
+
+- `registrations`:
+
+  Distinct non-missing `TRR_ID`s in `df`.
+
+- `registrations_with_forms`:
+
+  Of those, how many have at least one follow-up form.
+
+- `forms`:
+
+  Follow-up form rows for those registrations.
+
+- `forms_undated`:
+
+  Of those, how many have no `TFL_PX_STAT_DT`.
+
+- `outcomes`:
+
+  A tibble with one row per outcome (`"malignancy"`, `"rejection"`, or
+  for `TX_KP` `"rejection, kidney"` and `"rejection, pancreas"`):
+  `column`, the date column; `positive_forms`, forms reporting it;
+  `registrations_with_report`, registrations with a positive form
+  (status `"event"`); and `registrations_with_dated_report`, those with
+  at least one dated positive form, the earliest of which gives the date
+  column. An undated positive form cannot be ordered against the dated
+  ones.
+
+Forms with a missing `TRR_ID` match no registration and count nowhere.
+The report describes the cohort at the time of the merge: filtering the
+result afterwards does not update it.
+
 ## Details
 
 **The dates are report dates.** A follow-up form covers a period, and
