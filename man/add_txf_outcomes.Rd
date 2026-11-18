@@ -54,9 +54,11 @@ one follow-up form.}
 \code{"rejection, pancreas"}): \code{column}, the date column;
 \code{positive_forms}, forms reporting it; \code{registrations_with_report},
 registrations with a positive form (status \code{"event"}); and
-\code{registrations_with_dated_report}, those whose first report is
-dated.}
+\code{registrations_with_dated_report}, those with at least one dated
+positive form, the earliest of which gives the date column. An
+undated positive form cannot be ordered against the dated ones.}
 }
+Forms with a missing \code{TRR_ID} match no registration and count nowhere.
 The report describes the cohort at the time of the merge: filtering the
 result afterwards does not update it.
 }

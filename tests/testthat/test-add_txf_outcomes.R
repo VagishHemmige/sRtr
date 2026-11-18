@@ -704,15 +704,16 @@ test_that("live: follow-up status, bounds and window hold on real liver files", 
 
 test_that("add_txf_outcomes() reports the merge in transplant registrations", {
   # Cohort rows: 900001 twice, 900002 (no forms), and a missing TRR_ID.
-  # Forms: three for 900001 (one undated), one for 900003 (not in the cohort).
+  # Forms: three for 900001 (one undated), one for 900003 (not in the
+  # cohort), and a positive one with a missing TRR_ID.
   df <- tibble::tibble(TRR_ID = c(900001, 900001, 900002, NA))
   attr(df, "file_key") <- "TX_KI"
   forms <- tibble::tibble(
-    TRR_ID = c(900001, 900001, 900001, 900003),
+    TRR_ID = c(900001, 900001, 900001, 900003, NA),
     ORG_TY = "KI",
-    TFL_MALIG = c("Y", "Y", "N", "Y"),
-    TFL_ACUTE_REJ_EPISODE = labelled_rejection(c(1, 3, 3, 1)),
-    TFL_PX_STAT_DT = as.Date(c(NA, "2002-01-01", "2001-01-01", "2001-01-01"))
+    TFL_MALIG = c("Y", "Y", "N", "Y", "Y"),
+    TFL_ACUTE_REJ_EPISODE = labelled_rejection(c(1, 3, 3, 1, 1)),
+    TFL_PX_STAT_DT = as.Date(c(NA, "2002-01-01", "2001-01-01", "2001-01-01", "2001-01-01"))
   )
   local_mocked_bindings(load_srtr_file = function(...) forms)
 
@@ -730,6 +731,9 @@ test_that("add_txf_outcomes() reports the merge in transplant registrations", {
   expect_equal(report$outcomes$registrations_with_report, c(1, 1))
   # The only treated rejection form is undated.
   expect_equal(report$outcomes$registrations_with_dated_report, c(1, 0))
+  # The form with a missing TRR_ID is evidence for no row.
+  out <- add_txf_outcomes(df)
+  expect_equal(out$FIRST_FU_MALIG_STATUS, c("event", "event", "no follow-up", "no follow-up"))
 })
 
 test_that("the TX_KP merge report counts rejection per graft", {

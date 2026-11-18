@@ -149,9 +149,11 @@ srtr_time_to_event <- function(
 #'       `"rejection, pancreas"`): `column`, the date column;
 #'       `positive_forms`, forms reporting it; `registrations_with_report`,
 #'       registrations with a positive form (status `"event"`); and
-#'       `registrations_with_dated_report`, those whose first report is
-#'       dated.}
+#'       `registrations_with_dated_report`, those with at least one dated
+#'       positive form, the earliest of which gives the date column. An
+#'       undated positive form cannot be ordered against the dated ones.}
 #'   }
+#'   Forms with a missing `TRR_ID` match no registration and count nowhere.
 #'   The report describes the cohort at the time of the merge: filtering the
 #'   result afterwards does not update it.
 #'
