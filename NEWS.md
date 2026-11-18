@@ -217,6 +217,13 @@
   contiguous states for national maps, offline, so points and polygons in
   those areas land together.
 
+* `srtr_composite_death()` gains `conflict_days`, a tolerance for the
+  conflict flag: `{out}_conflict` is `TRUE` only when the earliest and latest
+  source dates are more than `conflict_days` apart. The default, 0, keeps
+  the old flag. The new `add_spread_days = TRUE` adds `{out}_spread_days`,
+  the days between them (`NA` with fewer than two sources), so you can
+  compare thresholds (#210).
+
 * `srtr_composite_death()` now requires its three death date columns to be
   `Date`, which is how `load_srtr_file()` returns SAS date columns, and errors
   with the names of any that are not. It no longer converts numbers or text to

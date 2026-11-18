@@ -64,6 +64,68 @@ test_that("srtr_composite_death() errors on death dates that are not Date", {
   expect_snapshot(error = TRUE, srtr_composite_death(df))
 })
 
+# ---- #210: tolerance for the conflict flag ---------------------------------
+
+spread_deaths <- function() {
+  # 900001: three sources 5 days apart each, 10 days in all. 900002: exactly
+  # 7 days apart. 900003: 8 days apart. 900004: one source. 900005: none.
+  # 900006: two sources on the same day.
+  data.frame(
+    TRR_ID = 900001:900006,
+    PERS_OPTN_DEATH_DT = as.Date(c("2010-01-01", "2010-01-01", "2010-01-01", NA, NA, "2010-01-01")),
+    PERS_SSA_DEATH_DT = as.Date(c("2010-01-06", "2010-01-08", "2010-01-09", "2010-01-01", NA, NA)),
+    TFL_DEATH_DT = as.Date(c("2010-01-11", NA, NA, NA, NA, "2010-01-01"))
+  )
+}
+
+test_that("conflict_days flags only spreads strictly greater than it", {
+  out <- srtr_composite_death(spread_deaths(), conflict_days = 7)
+
+  expect_equal(
+    out$REC_DEATH_DT_COMPOSITE_conflict,
+    c(TRUE, FALSE, TRUE, FALSE, FALSE, FALSE)
+  )
+})
+
+test_that("conflict_days = 0 keeps the old flag: any difference", {
+  out <- srtr_composite_death(spread_deaths())
+  zero <- srtr_composite_death(spread_deaths(), conflict_days = 0)
+
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_conflict, c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
+  expect_equal(zero, out)
+})
+
+test_that("add_spread_days adds the spread, NA with fewer than two sources", {
+  out <- srtr_composite_death(spread_deaths(), add_spread_days = TRUE)
+
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_spread_days, c(10, 7, 8, NA, NA, 0))
+  expect_named(
+    srtr_composite_death(spread_deaths()),
+    c(names(spread_deaths()), "REC_DEATH_DT_COMPOSITE", "REC_DEATH_DT_COMPOSITE_source",
+      "REC_DEATH_DT_COMPOSITE_conflict")
+  )
+})
+
+test_that("conflict_days changes only the flag, not the date or its source", {
+  for (earliest in c(FALSE, TRUE)) {
+    strict <- srtr_composite_death(spread_deaths(), prefer_earliest = earliest)
+    loose <- srtr_composite_death(spread_deaths(), prefer_earliest = earliest, conflict_days = 30)
+    expect_equal(loose$REC_DEATH_DT_COMPOSITE, strict$REC_DEATH_DT_COMPOSITE)
+    expect_equal(loose$REC_DEATH_DT_COMPOSITE_source, strict$REC_DEATH_DT_COMPOSITE_source)
+    expect_equal(loose$REC_DEATH_DT_COMPOSITE_conflict, rep(FALSE, 6))
+  }
+})
+
+test_that("conflict_days must be one non-negative number", {
+  expect_error(
+    srtr_composite_death(spread_deaths(), conflict_days = -1),
+    class = "sRtr_error_invalid_conflict_days"
+  )
+  expect_snapshot(error = TRUE, srtr_composite_death(spread_deaths(), conflict_days = -1))
+  expect_snapshot(error = TRUE, srtr_composite_death(spread_deaths(), conflict_days = c(1, 2)))
+  expect_snapshot(error = TRUE, srtr_composite_death(spread_deaths(), conflict_days = "7"))
+})
+
 test_that("live: the TX_LI composite death date is NA only when every source is", {
   skip_if_no_srtr_file("TX_LI")
   sources <- c("PERS_OPTN_DEATH_DT", "PERS_SSA_DEATH_DT", "TFL_DEATH_DT")

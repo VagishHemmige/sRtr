@@ -33,9 +33,23 @@
 #'   dates. Each must be a `Date` column.
 #' @param out Name of the output composite column to create.
 #' @param keep_source If TRUE, add `{out}_source` with the chosen source label.
-#' @param add_conflict_flag If TRUE, add `{out}_conflict` when sources disagree.
+#' @param add_conflict_flag If TRUE, add `{out}_conflict`: `TRUE` when the
+#'   earliest and latest non-missing source dates are more than
+#'   `conflict_days` apart, `FALSE` otherwise, including when fewer than two
+#'   sources have a date.
 #' @param prefer_earliest If TRUE, ignore precedence and choose the earliest date.
-#' @return `df` with added composite column (and optional source/conflict columns).
+#' @param conflict_days How many days apart the earliest and latest source
+#'   dates may be before `{out}_conflict` is `TRUE`; only a spread strictly
+#'   greater than it is flagged. The default, 0, flags any difference. A
+#'   larger value is your choice of what counts as recording noise: a
+#'   difference of a day can still change the order of death and another
+#'   event. It changes only the flag, never the composite date or its source.
+#' @param add_spread_days If TRUE, add `{out}_spread_days`: the days between
+#'   the earliest and latest non-missing source dates, 0 when two or more
+#'   sources agree, and `NA` when fewer than two have a date. Use it to
+#'   compare thresholds without running this function again.
+#' @return `df` with added composite column (and optional source, conflict and
+#'   spread columns).
 #' @export
 #' @examples
 #' \dontrun{
@@ -49,11 +63,24 @@ srtr_composite_death <- function(
   out = "REC_DEATH_DT_COMPOSITE",
   keep_source = TRUE,
   add_conflict_flag = TRUE,
-  prefer_earliest = FALSE
+  prefer_earliest = FALSE,
+  conflict_days = 0,
+  add_spread_days = FALSE
 ) {
   cols <- c(optn, ssa, tfl)
   check_columns(df, cols)
   check_date_columns(df, cols)
+  if (
+    !is.numeric(conflict_days) ||
+      length(conflict_days) != 1 ||
+      !is.finite(conflict_days) ||
+      conflict_days < 0
+  ) {
+    srtr_abort(
+      "{.arg conflict_days} must be one non-negative number of days.",
+      class = "invalid_conflict_days"
+    )
+  }
 
   vals <- lapply(cols, function(nm) df[[nm]])
 
@@ -94,14 +121,19 @@ srtr_composite_death <- function(
     df[[paste0(out, "_source")]] <- src
   }
 
+  # Spread between the earliest and latest non-missing source dates; NA when
+  # fewer than two sources have a date. Any number of sources (#5).
+  n_dates <- Reduce(`+`, lapply(vals, function(v) !is.na(v)))
+  latest <- do.call(pmax, c(vals, list(na.rm = TRUE)))
+  earliest <- do.call(pmin, c(vals, list(na.rm = TRUE)))
+  spread <- as.numeric(latest - earliest)
+  spread[n_dates < 2] <- NA_real_
+
   if (add_conflict_flag) {
-    # flag when more than one *distinct* non-missing date appears across sources
-    num_mat <- do.call(cbind, lapply(vals, function(v) as.integer(v)))
-    conflict <- apply(num_mat, 1, function(r) {
-      u <- unique(r[!is.na(r)])
-      length(u) > 1
-    })
-    df[[paste0(out, "_conflict")]] <- as.logical(conflict)
+    df[[paste0(out, "_conflict")]] <- !is.na(spread) & spread > conflict_days
+  }
+  if (add_spread_days) {
+    df[[paste0(out, "_spread_days")]] <- spread
   }
 
   df
