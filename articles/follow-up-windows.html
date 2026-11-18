@@ -114,7 +114,16 @@ may change before it is. The other functions used here are exported.</p>
 (<code>TFL_LAFUDATE</code>), and some are dated after death. A report
 outside the period the recipient was followed for cannot be paired with
 the right censoring: everyone else’s follow-up ends at their last
-follow-up date.</p>
+follow-up date. SRTR’s own graft survival estimates follow this rule for
+most organs. Their follow-up is censored at the last OPTN follow-up
+date, and for lung and heart-lung they “do not include deaths that occur
+after loss to follow-up in the OPTN database” (<a href="#ref-psr">SRTR
+Technical Methods</a>).</p>
+<p>SAFs also hold <code>TFL_ENDTXFU</code> (labeled “Cohort date” in the
+data dictionary), which SRTR staff describe as “the variable to use to
+identify the last possible follow-up date” for each recipient, with a
+three-month lag to allow forms to be completed (<a href="#ref-kim2012">Kim and Snyder 2012</a>, slide 25). sRtr does not
+use it yet. Compare it with <code>TFL_LAFUDATE</code> in your files.</p>
 <p><img src="follow-up-windows_files/figure-html/window-1.png" class="r-plt" alt="Timeline for three made-up recipients, in years since transplant, each with a shaded window from transplant to the earlier of last follow-up and death. Recipient A has a malignancy report at year 2, inside the window, which counts. Recipient B's window ends at last follow-up at year 3, and a report at year 3.5 falls outside it and does not count. Recipient C died at year 2.5; a report dated on the day of death is flagged, and one dated after death does not count." width="720"></p>
 <p><strong>The naive approach</strong> feeds the first report and the
 last follow-up date straight into <code><a href="../reference/srtr_time_to_event.html">srtr_time_to_event()</a></code>:</p>
@@ -190,7 +199,10 @@ changes:</p>
 event for malignancy: say which estimand you want. A cause-specific
 hazard treats death as censoring, as here; a cumulative incidence needs
 death coded as a competing event, for example with an Aalen-Johansen
-estimator.</p>
+estimator. The complement of a Kaplan-Meier curve overstates the
+cumulative incidence when there are competing events (<a href="#ref-austin">Austin et al. 2016</a>; <a href="#ref-noordzij">Noordzij et al. 2013</a>). <a href="#ref-sapir">Sapir-Pichhadze et al. 2016</a> work through both
+approaches, cause-specific and subdistribution hazards, with SRTR
+data.</p>
 </div>
 <div class="section level2">
 <h2 id="which-death-date">Which death date?<a class="anchor" aria-label="anchor" href="#which-death-date"></a>
@@ -199,6 +211,12 @@ estimator.</p>
 (<code>PERS_OPTN_DEATH_DT</code>), the Social Security death data
 (<code>PERS_SSA_DEATH_DT</code>) and the follow-up forms
 (<code>TFL_DEATH_DT</code>). They do not always agree.</p>
+<p>The Social Security date is “determined from SSA database” (data
+dictionary). SRTR and OPTN “receive monthly updates from the NTIS Death
+Master File” (<a href="#ref-srtrdb">The SRTR Database</a>). Since 2011
+the Death Master File has excluded many state-reported deaths. It misses
+a varying share of deaths across states and over time, so it should not
+be used on its own (<a href="#ref-dagraca">da Graca et al. 2013</a>; <a href="#ref-navar">Navar et al. 2019</a>).</p>
 <p><strong>The naive approach</strong> picks one source, often the OPTN
 date, and misses deaths recorded only elsewhere. Picking the earliest of
 the three is not safe either: one wrong early date then moves that
@@ -222,14 +240,29 @@ larger tolerance is your choice of what counts as recording noise. Even
 a one-day difference can matter when the question is about order:
 whether a graft failed before the recipient died, or a report fell
 before death.</p>
+<p>The order of sources is itself a choice. sRtr and the current SRTR
+program-specific reports both put OPTN first: “the OPTN death date takes
+precedence” (<a href="#ref-psr">SRTR Technical Methods</a>). After that
+they differ. The reports choose between the Social Security Death Master
+File and CMS (“the SSDMF date takes precedence”); sRtr uses Social
+Security and then the follow-up form, and has no CMS date. Older SRTR
+guidance started from the form date for the transplant
+(<code>TFL_DEATH_DT</code>), then OPTN, Social Security and CMS (<a href="#ref-kim2012">Kim and Snyder 2012</a>, slide 26). In the liver
+release documented in <code><a href="../reference/srtr_composite_death.html">?srtr_composite_death</a></code>, the form and
+OPTN dates agreed on the same day for over 99% of recipients who had
+both, so the two orders rarely give different dates.</p>
 </div>
 <div class="section level2">
 <h2 id="deaths-found-after-follow-up-ends">Deaths found after follow-up ends<a class="anchor" aria-label="anchor" href="#deaths-found-after-follow-up-ends"></a>
 </h2>
-<p>The Social Security data find deaths long after a recipient stops
-being followed. If those deaths count as events but survivors are
-censored at their last follow-up date, the dead are followed for longer
-than the living, and mortality is overstated.</p>
+<p>Transplant programs need not report deaths after the required
+follow-up intervals: they “may voluntarily submit death dates after
+these defined follow-up intervals, but they are not required to do so”
+(<a href="#ref-srtrdb">The SRTR Database</a>). The Social Security data,
+by contrast, find deaths long after a recipient stops being followed. If
+those deaths count as events but survivors are censored at their last
+follow-up date, the dead are followed for longer than the living, and
+mortality is overstated.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">REC_DEATH_DT_COMPOSITE</span> <span class="op">&gt;</span> <span class="va">d</span><span class="op">$</span><span class="va">TFL_LAFUDATE</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes()</a></code> offers two consistent
@@ -238,7 +271,8 @@ choices through <code>death_window</code>. The default,
 date and censors everyone else there. <code>"ascertainment"</code>
 shares the principle of the SRTR program-specific reports: deaths from
 any source count up to an ascertainment date, and everyone else is
-assumed alive and censored at that date. Take the date from your SAF
+assumed alive and censored at that date. In SRTR’s words, patients “not
+reported to have died in any source are assumed to be alive” (<a href="#ref-psr">SRTR Technical Methods</a>). Take the date from your SAF
 release notes.</p>
 <p>It does not reproduce the published patient survival estimates. Those
 draw on death sources that <code><a href="../reference/srtr_composite_death.html">srtr_composite_death()</a></code> does not
@@ -258,6 +292,23 @@ Technical Methods for the Program-Specific Reports, Section C</a>.</p>
 of death. The data dictionary does not say whether that date is filled
 in with the death date when a recipient dies with a working graft, or
 marks a real failure.</p>
+<p>SRTR’s reports count death as graft failure (“for all organs, deaths
+are considered to be graft failures”). They also count retransplant as
+graft failure for every organ except heart-lung and lung (<a href="#ref-psr">SRTR Technical Methods</a>; <a href="#ref-kim2012">Kim
+and Snyder 2012</a>, slide 27). sRtr dates graft failure from
+<code>TFL_GRAFT_DT</code> alone, and does not yet use the retransplant
+date (<code>PERS_RETX</code>). The earlier of <code>TFL_GRAFT_DT</code>
+and death is therefore a narrower end point than SRTR’s graft failure:
+it misses a retransplant that came first, or dates it too late. To
+follow SRTR’s definition, take the earliest of the recorded failure, the
+retransplant date and death, inside the observation window. Lung and
+heart-lung leave out retransplant, and heart uses only death and
+retransplant. For heart, SRTR also does not stop at the last OPTN
+follow-up date: deaths and retransplants after it still count, up to the
+reporting time point (<a href="#ref-psr">SRTR Technical Methods</a>).
+Combining events this way is a modeling choice: a composite end point
+disregards the possibility that the exposure affects its parts
+differently (<a href="#ref-sapir">Sapir-Pichhadze et al. 2016</a>).</p>
 <p>sRtr treats graft failure as death-censored: a failure dated after
 death does not count, and a graft without a failure is censored at the
 earlier of its last follow-up date and death. By default, a failure on
@@ -301,6 +352,37 @@ far apart the sources are.</li>
 <li>Run graft failure both ways for failures on the day of death.</li>
 <li>For kidney-pancreas, use each graft’s own follow-up.</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p><a id="ref-austin"></a>Austin PC, Lee DS, Fine JP. Introduction to
+the analysis of survival data in the presence of competing risks.
+<em>Circulation</em>. 2016;133(6):601-609. <a href="https://doi.org/10.1161/CIRCULATIONAHA.115.017719" class="external-link">doi:10.1161/CIRCULATIONAHA.115.017719</a></p>
+<p><a id="ref-dagraca"></a>da Graca B, Filardo G, Nicewander D.
+Consequences for healthcare quality and research of the exclusion of
+records from the Death Master File. <em>Circ Cardiovasc Qual
+Outcomes</em>. 2013;6(1):124-128. <a href="https://doi.org/10.1161/CIRCOUTCOMES.112.968826" class="external-link">doi:10.1161/CIRCOUTCOMES.112.968826</a></p>
+<p><a id="ref-kim2012"></a>Kim SJ, Snyder JJ. OPTN/SRTR registry
+analysis: the devil is in the details. Slides, American Transplant
+Congress; 2012. <a href="https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf" class="external-link uri">https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf</a></p>
+<p><a id="ref-navar"></a>Navar AM, Peterson ED, Steen DL, et
+al. Evaluation of mortality data from the Social Security Administration
+Death Master File for clinical research. <em>JAMA Cardiol</em>.
+2019;4(4):375-379. <a href="https://doi.org/10.1001/jamacardio.2019.0198" class="external-link">doi:10.1001/jamacardio.2019.0198</a></p>
+<p><a id="ref-noordzij"></a>Noordzij M, Leffondré K, van Stralen KJ, et
+al. When do we need competing risks methods for survival analysis in
+nephrology? <em>Nephrol Dial Transplant</em>. 2013;28(11):2670-2677. <a href="https://doi.org/10.1093/ndt/gft355" class="external-link">doi:10.1093/ndt/gft355</a></p>
+<p><a id="ref-sapir"></a>Sapir-Pichhadze R, Pintilie M, Tinckam KJ, et
+al. Survival analysis in the presence of competing risks: the example of
+waitlisted kidney transplant candidates. <em>Am J Transplant</em>.
+2016;16(7):1958-1966. <a href="https://doi.org/10.1111/ajt.13717" class="external-link">doi:10.1111/ajt.13717</a></p>
+<p><a id="ref-psr"></a>Scientific Registry of Transplant Recipients.
+Technical methods for the program-specific reports. <a href="https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/" class="external-link uri">https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/</a>
+(accessed 18 November 2026).</p>
+<p><a id="ref-srtrdb"></a>Scientific Registry of Transplant Recipients.
+The SRTR database. <a href="https://srtr.hrsa.gov/transplant-professionals/reports/the-srtr-database/" class="external-link uri">https://srtr.hrsa.gov/transplant-professionals/reports/the-srtr-database/</a>
+(accessed 18 November 2026).</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

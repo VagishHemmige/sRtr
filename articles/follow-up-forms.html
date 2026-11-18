@@ -92,10 +92,13 @@ the sRtr function that handles the problem. When you share what you
 find, share counts only, and mask any count under 11, as the SRTR data
 use agreement requires. The helpers below do that: <code>mask()</code>
 for a table of a column, <code>mask_n()</code> for counts you have
-already computed. Every chunk here prints counts only, never rows; keep
-it that way when you adapt the code. Masking each number is not enough
-on its own: if you share a total next to masked parts, or two counts
-that differ by a few, a reader can subtract to recover a count under 11.
+already computed. The threshold is the same as in the CMS cell size
+suppression policy, which also rules out any count from 1 to 10 that can
+be worked out from other reported numbers (<a href="#ref-cms">CMS
+2020</a>). Every chunk here prints counts only, never rows; keep it that
+way when you adapt the code. Masking each number is not enough on its
+own: if you share a total next to masked parts, or two counts that
+differ by a few, a reader can subtract to recover a count under 11.
 Summaries such as quartiles can also describe a handful of people; look
 at them yourself, and share them only when the group behind them is
 large.</p>
@@ -122,7 +125,9 @@ large.</p>
 <span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">x</span>, useNA <span class="op">=</span> <span class="st">"ifany"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The examples use liver files and malignancy and acute rejection, the
 two outcomes <code><a href="../reference/add_txf_outcomes.html">add_txf_outcomes()</a></code> derives. The same issues
-apply to the other organs.</p>
+apply to the other organs. For background on where SRTR data come from
+and how they are collected, see <a href="#ref-leppke">Leppke et
+al. 2013</a> and <a href="#ref-massie">Massie et al. 2014</a>.</p>
 <div class="section level2">
 <h2 id="a-form-date-is-not-an-onset-date">A form date is not an onset date<a class="anchor" aria-label="anchor" href="#a-form-date-is-not-an-onset-date"></a>
 </h2>
@@ -130,7 +135,12 @@ apply to the other organs.</p>
 (<code>TFL_PX_STAT_DT</code>, the patient status date) is when the
 status was recorded. A form that first says “yes, malignancy” after one
 that said “no” tells you the <em>recorded</em> status changed between
-those two dates.</p>
+those two dates. Transplant programs file these forms at 6 months and
+then every year after transplant, until the recipient dies or the graft
+fails (<a href="#ref-optn2021">OPTN 2021</a>). The forms do not ask when
+a rejection happened, so SRTR staff describe the incidence of rejection
+as a “step” function (<a href="#ref-kim2012">Kim and Snyder 2012</a>,
+slide 33).</p>
 <p>That interval bounds when the malignancy began only if the forms are
 complete and timely: if each form records what was known at the time,
 and a malignancy is recorded on the first form after it is found. A
@@ -166,7 +176,14 @@ explicitly said “no” before it.</p>
 mostly annual. An analysis that treats the report date as the event date
 is right-censored data with a built-in delay; the two dates together
 support interval-censored or discrete-time models instead, under the
-assumption above.</p>
+assumption above. Assigning each event to the end (or start, or middle)
+of its interval and then using standard survival methods “can lead to
+invalid inferences” and tends to understate standard errors (<a href="#ref-lindsey">Lindsey and Ryan 1998</a>). An SRTR example is <a href="#ref-levitsky">Levitsky et al. 2017</a>. Their SRTR data recorded
+only whether biopsy-proven rejection had occurred since the last
+assessment. They therefore modeled time to first rejection with
+discrete-time survival analysis. When rejection was a time-dependent
+covariate, they imputed its date from a uniform distribution within the
+reporting interval, using five imputations.</p>
 </div>
 <div class="section level2">
 <h2 id="a-missing-date-does-not-mean-no-event">A missing date does not mean “no event”<a class="anchor" aria-label="anchor" href="#a-missing-date-does-not-mean-no-event"></a>
@@ -194,7 +211,23 @@ says “no”; <code>"unknown"</code> means there are forms but none says
 real liver files, “unknown” and “no follow-up” are each large groups,
 not rounding errors. Whether to exclude them, treat them as censored at
 transplant, or model them is an analysis decision, and it should be made
-on purpose.</p>
+on purpose. Loss to follow-up is common in the long term: in a study of
+children who received a liver transplant, 1 in 6 of those who had not
+died or been retransplanted were reported as lost to follow-up (<a href="#ref-cheng">Cheng et al. 2022</a>).</p>
+<p>The forms also miss events, so “no event” means “none reported”.
+Compared with linked cancer registries, SRTR identified about half of
+the cancers studied (<a href="#ref-yanik">Yanik et al. 2016</a>);
+studies of cancer after transplant often link SRTR to cancer registries
+instead (<a href="#ref-engels">Engels et al. 2011</a>). For liver
+rejection, <a href="#ref-levitsky">Levitsky et al. 2017</a> found more
+rejections missing from SRTR than missing from their research cohort.
+Forms due during the COVID-19 emergency are another gap. For forms due
+from 13 March 2020 to 31 March 2021, OPTN accepted non-submission of the
+full follow-up form, but still required notice of death or graft
+failure. The notice ending this relaxation required forms left
+unsubmitted to be completed by 1 July 2021 (<a href="#ref-optn2021">OPTN
+2021</a>). So a form from that period may have been filed late, or not
+at all. Check how complete those forms are in your release.</p>
 </div>
 <div class="section level2">
 <h2 id="rejection-has-more-than-one-meaning">“Rejection” has more than one meaning<a class="anchor" aria-label="anchor" href="#rejection-has-more-than-one-meaning"></a>
@@ -305,6 +338,44 @@ counts.</li>
 <li>Report counts in registrations, and mask counts under 11 when you
 share them.</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p><a id="ref-cheng"></a>Cheng EY, Feng S, Bucuvalas J, et al. Not
+everything that counts can be counted: tracking long-term outcomes in
+pediatric liver transplant recipients. <em>Am J Transplant</em>.
+2022;22(4):1182-1190. <a href="https://doi.org/10.1111/ajt.16932" class="external-link">doi:10.1111/ajt.16932</a></p>
+<p><a id="ref-cms"></a>Centers for Medicare &amp; Medicaid Services. CMS
+cell size suppression policy. 2020. <a href="https://www.hhs.gov/guidance/document/cms-cell-suppression-policy" class="external-link uri">https://www.hhs.gov/guidance/document/cms-cell-suppression-policy</a></p>
+<p><a id="ref-engels"></a>Engels EA, Pfeiffer RM, Fraumeni JF Jr, et al.
+Spectrum of cancer risk among US solid organ transplant recipients.
+<em>JAMA</em>. 2011;306(17):1891-1901. <a href="https://doi.org/10.1001/jama.2011.1592" class="external-link">doi:10.1001/jama.2011.1592</a></p>
+<p><a id="ref-kim2012"></a>Kim SJ, Snyder JJ. OPTN/SRTR registry
+analysis: the devil is in the details. Slides, American Transplant
+Congress; 2012. <a href="https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf" class="external-link uri">https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf</a></p>
+<p><a id="ref-leppke"></a>Leppke S, Leighton T, Zaun D, et
+al. Scientific Registry of Transplant Recipients: collecting, analyzing,
+and reporting data on transplantation in the United States.
+<em>Transplant Rev (Orlando)</em>. 2013;27(2):50-56. <a href="https://doi.org/10.1016/j.trre.2013.01.002" class="external-link">doi:10.1016/j.trre.2013.01.002</a></p>
+<p><a id="ref-levitsky"></a>Levitsky J, Goldberg D, Smith AR, et
+al. Acute rejection increases risk of graft failure and death in recent
+liver transplant recipients. <em>Clin Gastroenterol Hepatol</em>.
+2017;15(4):584-593.e2. <a href="https://doi.org/10.1016/j.cgh.2016.07.035" class="external-link">doi:10.1016/j.cgh.2016.07.035</a></p>
+<p><a id="ref-lindsey"></a>Lindsey JC, Ryan LM. Tutorial in
+biostatistics: methods for interval-censored data. <em>Stat Med</em>.
+1998;17(2):219-238. <a href="https://doi.org/10.1002/(SICI)1097-0258(19980130)17:2%3C219::AID-SIM735%3E3.0.CO;2-O" class="external-link">doi:10.1002/(SICI)1097-0258(19980130)17:2&lt;219::AID-SIM735&gt;3.0.CO;2-O</a></p>
+<p><a id="ref-massie"></a>Massie AB, Kucirka LM, Segev DL. Big data in
+organ transplantation: registries and administrative claims. <em>Am J
+Transplant</em>. 2014;14(8):1723-1730. <a href="https://doi.org/10.1111/ajt.12777" class="external-link">doi:10.1111/ajt.12777</a></p>
+<p><a id="ref-optn2021"></a>Organ Procurement and Transplantation
+Network. Notice of OPTN policy changes: conclude relaxation of data
+submission requirements for follow-up forms. Approved 1 March 2021,
+effective 1 April 2021 (Policy 18, Table 18-1). <a href="https://hrsa.unos.org/media/4453/conclude-relaxation-of-data-submission-requirements-policy-notice-final.pdf" class="external-link uri">https://hrsa.unos.org/media/4453/conclude-relaxation-of-data-submission-requirements-policy-notice-final.pdf</a></p>
+<p><a id="ref-yanik"></a>Yanik EL, Nogueira LM, Koch L, et
+al. Comparison of cancer diagnoses between the US solid organ transplant
+registry and linked central cancer registries. <em>Am J Transplant</em>.
+2016;16(10):2986-2993. <a href="https://doi.org/10.1111/ajt.13818" class="external-link">doi:10.1111/ajt.13818</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
