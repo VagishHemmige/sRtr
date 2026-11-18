@@ -114,6 +114,17 @@
 
 * `add_pdri()` is now exported (#50).
 
+* `add_pdri()` now gives a missing PDRI for a missing donor race in labelled
+  and character columns, as it already did for numeric ones; before, a
+  missing label counted as neither Black nor Asian. Character race codes
+  (`"16"`, `"64"`) are now recognized (#96).
+
+* `add_pdri()` no longer deletes the caller's columns whose names start with
+  a dot, or overwrites them with its own intermediate values, and keeps an
+  output column named with a leading dot (#99).
+
+* `add_pdri()` now warns, instead of failing, when PDRI is infinite.
+
 * `add_pvr()` is a new function that adds pulmonary vascular resistance from
   the catheterization values recorded at listing or at transplant (#179).
 

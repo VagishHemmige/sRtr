@@ -45,6 +45,11 @@ DON_COD_DON_STROKE, REC_PA_PRESERV_TM, DON_NON_HR_BEAT
 If \code{DON_BMI} is missing, it is computed from \code{DON_WGT_KG} and \code{DON_HGT_CM}.
 PA additionally uses \code{REC_PREV_KI} for an interaction term; if absent, the
 interaction is skipped (equivalent to KP behavior).
+
+\code{DON_RACE} (format \code{RACE}) may be raw codes, numeric or character, or
+labels: code 16 (Black or African American) and code 64 (Asian) are read
+the same way in each. A missing race gives a missing PDRI unless
+\code{mean_impute = TRUE}, whatever the encoding.
 }
 \examples{
 \dontshow{if (requireNamespace("dplyr", quietly = TRUE)) withAutoprint(\{ # examplesIf}
