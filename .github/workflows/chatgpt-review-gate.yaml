@@ -1,0 +1,70 @@
+# Sets a commit status, "ChatGPT review", on the head commit of every pull
+# request: pending until the automated ChatGPT review of that exact commit
+# has been posted, then success. Make the status required for master in a
+# branch ruleset, and GitHub will not merge a pull request whose latest push
+# has not been reviewed.
+#
+# The review is recognized by the marker it ends with:
+#   <!-- srtr-automated-review:<head sha>:<base sha> -->
+# A review of an earlier commit does not count: every push needs its own.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created, edited]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "Pull request number to recheck"
+        required: true
+
+name: chatgpt-review-gate.yaml
+
+permissions:
+  statuses: write
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: chatgpt-review-gate-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    # Comments on issues, as opposed to pull requests, are ignored.
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const number = Number(
+              context.payload.pull_request?.number ??
+              context.payload.issue?.number ??
+              context.payload.inputs?.pr
+            );
+            const { owner, repo } = context.repo;
+
+            // Always read the current head: a comment event carries no sha,
+            // and a later push may have moved the head since this run began.
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: number
+            });
+            const sha = pr.head.sha;
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: number, per_page: 100 }
+            );
+            const marker = `srtr-automated-review:${sha}`;
+            const reviewed = comments.some(c => (c.body || "").includes(marker));
+
+            await github.rest.repos.createCommitStatus({
+              owner, repo, sha,
+              context: "ChatGPT review",
+              state: reviewed ? "success" : "pending",
+              description: reviewed
+                ? `Reviewed ${sha.slice(0, 7)}`
+                : `Waiting for the review of ${sha.slice(0, 7)}`
+            });
+            core.info(`PR #${number} at ${sha}: ${reviewed ? "reviewed" : "waiting"}`);
