@@ -70,9 +70,6 @@ be assigned to one graft, and give a warning.
 tx <- load_srtr_file("TX_KI")
 tx <- add_txf_outcomes(tx)
 table(tx$FIRST_FU_REJ_STATUS)
-
-# Event, censoring and time columns inside the follow-up window:
-tx <- add_time_to_event_outcomes(load_srtr_file("TX_KI"))
 }
 
 }

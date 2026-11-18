@@ -673,7 +673,8 @@ test_that("live: follow-up status, bounds and window hold on real liver files", 
   out <- withCallingHandlers(
     add_time_to_event_outcomes(load_live("TX_LI")),
     sRtr_warning_unknown_codes = function(cnd) rlang::cnd_muffle(cnd),
-    sRtr_warning_undated_admission_rejection = function(cnd) rlang::cnd_muffle(cnd)
+    sRtr_warning_undated_admission_rejection = function(cnd) rlang::cnd_muffle(cnd),
+    sRtr_warning_undated_follow_up_report = function(cnd) rlang::cnd_muffle(cnd)
   )
 
   expect_in(
@@ -697,4 +698,88 @@ test_that("live: follow-up status, bounds and window hold on real liver files", 
     end <- pmin(out$TFL_LAFUDATE, out$REC_DEATH_DT_COMPOSITE, na.rm = TRUE)
     expect_equal(sum(out[[prefix]][counted] > end[counted], na.rm = TRUE), 0)
   }
+})
+
+# ---- review of cae0f22 -------------------------------------------------------
+
+test_that("a registration listed twice gets the same outcomes on both rows", {
+  df <- tibble::tibble(TRR_ID = c(900001, 900002, 900001))
+  attr(df, "file_key") <- "TX_KI"
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = c("N", "Y"),
+    TFL_ACUTE_REJ_EPISODE = labelled_rejection(c(3, 1)),
+    TFL_PX_STAT_DT = as.Date(c("2001-01-01", "2002-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- add_txf_outcomes(df)
+
+  expect_equal(out$FIRST_FU_MALIG_STATUS, c("event", "no follow-up", "event"))
+  expect_equal(out$FIRST_FU_MALIG_DATE, as.Date(c("2002-01-01", NA, "2002-01-01")))
+  expect_equal(out$FIRST_FU_MALIG_LAST_NEG_DATE, as.Date(c("2001-01-01", NA, "2001-01-01")))
+  expect_equal(out$FIRST_FU_REJ_STATUS, c("event", "no follow-up", "event"))
+  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2002-01-01", NA, "2002-01-01")))
+})
+
+test_that("a report dated before the transplant is not counted", {
+  # 900001: report the day before transplant only. 900002: one the day before
+  # and a later one; only the first report is kept, so neither counts.
+  df <- window_cohort()[1:2, ]
+  forms <- tibble::tibble(
+    TRR_ID = c(900001, 900002, 900002),
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(c("1999-12-31", "1999-12-31", "2002-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- add_time_to_event_outcomes(df)
+
+  for (prefix in c("FIRST_FU_MALIG_DATE", "FIRST_REJ_DATE")) {
+    expect_equal(out[[paste0(prefix, "_BINARY")]], c(0L, 0L))
+    expect_equal(out[[paste0(prefix, "_CENSOR")]], as.Date(rep("2005-01-01", 2)))
+    expect_equal(out[[prefix]], as.Date(rep("1999-12-31", 2)))
+  }
+})
+
+test_that("an event reported only on undated forms has status 1 and no time", {
+  df <- window_cohort()[1:2, ]
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(NA)
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- suppressWarnings(add_time_to_event_outcomes(df))
+
+  for (prefix in c("FIRST_FU_MALIG_DATE", "FIRST_REJ_DATE")) {
+    expect_equal(out[[paste0(prefix, "_BINARY")]], c(1L, 0L))
+    expect_equal(out[[paste0(prefix, "_CENSOR")]], as.Date(c(NA, "2005-01-01")))
+    expect_equal(out[[paste0(prefix, "_days")]], c(NA, 1828))
+  }
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, c("follow_up_undated", NA))
+})
+
+test_that("an event reported only on undated forms is reported", {
+  df <- window_cohort()[1:2, ]
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(NA)
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  expect_warning(
+    add_time_to_event_outcomes(df),
+    class = "sRtr_warning_undated_follow_up_report"
+  )
+  expect_snapshot(out <- add_time_to_event_outcomes(df))
 })
