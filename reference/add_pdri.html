@@ -107,6 +107,12 @@ DON_COD_DON_STROKE, REC_PA_PRESERV_TM, DON_NON_HR_BEAT
 If <code>DON_BMI</code> is missing, it is computed from <code>DON_WGT_KG</code> and <code>DON_HGT_CM</code>.
 PA additionally uses <code>REC_PREV_KI</code> for an interaction term; if absent, the
 interaction is skipped (equivalent to KP behavior).</p>
+<p><code>DON_RACE</code> (format <code>RACE</code>) may be raw codes, numeric or character, or
+labels: code 16 (Black or African American) and code 64 (Asian) are read
+the same way in each. A missing race (<code>NA</code>, or the format's missing code
+<code>"."</code>, labelled <code>"Missing"</code>) gives a missing PDRI unless
+<code>mean_impute = TRUE</code>, whatever the encoding. Continuous inputs (age,
+creatinine, height, weight, BMI and cold ischemia time) must be numeric.</p>
     </div>
 
     <div class="section level2">

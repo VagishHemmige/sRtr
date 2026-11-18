@@ -153,6 +153,27 @@
   is now exported
   ([\#50](https://github.com/VagishHemmige/sRtr/issues/50)).
 
+- [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
+  now gives a missing PDRI for a missing donor race in labelled and
+  character columns, as it already did for numeric ones; before, a
+  missing label counted as neither Black nor Asian. The format’s missing
+  code `"."` (`"Missing"`) counts as missing too, and character race
+  codes (`"16"`, `"64"`) are now recognized
+  ([\#96](https://github.com/VagishHemmige/sRtr/issues/96)).
+
+- [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
+  now errors when a continuous input such as `DON_BMI` is not numeric,
+  instead of scoring a factor by its level positions.
+
+- [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
+  no longer deletes the caller’s columns whose names start with a dot,
+  or overwrites them with its own intermediate values, and keeps an
+  output column named with a leading dot
+  ([\#99](https://github.com/VagishHemmige/sRtr/issues/99)).
+
+- [`add_pdri()`](https://vagishhemmige.github.io/sRtr/reference/add_pdri.md)
+  now warns, instead of failing, when PDRI is infinite.
+
 - [`add_pvr()`](https://vagishhemmige.github.io/sRtr/reference/add_pvr.md)
   is a new function that adds pulmonary vascular resistance from the
   catheterization values recorded at listing or at transplant

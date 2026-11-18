@@ -61,6 +61,13 @@ DON_NON_HR_BEAT If `DON_BMI` is missing, it is computed from
 interaction term; if absent, the interaction is skipped (equivalent to
 KP behavior).
 
+`DON_RACE` (format `RACE`) may be raw codes, numeric or character, or
+labels: code 16 (Black or African American) and code 64 (Asian) are read
+the same way in each. A missing race (`NA`, or the format's missing code
+`"."`, labelled `"Missing"`) gives a missing PDRI unless
+`mean_impute = TRUE`, whatever the encoding. Continuous inputs (age,
+creatinine, height, weight, BMI and cold ischemia time) must be numeric.
+
 ## Examples
 
 ``` r
