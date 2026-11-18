@@ -48,8 +48,10 @@ interaction is skipped (equivalent to KP behavior).
 
 \code{DON_RACE} (format \code{RACE}) may be raw codes, numeric or character, or
 labels: code 16 (Black or African American) and code 64 (Asian) are read
-the same way in each. A missing race gives a missing PDRI unless
-\code{mean_impute = TRUE}, whatever the encoding.
+the same way in each. A missing race (\code{NA}, or the format's missing code
+\code{"."}, labelled \code{"Missing"}) gives a missing PDRI unless
+\code{mean_impute = TRUE}, whatever the encoding. Continuous inputs (age,
+creatinine, height, weight, BMI and cold ischemia time) must be numeric.
 }
 \examples{
 \dontshow{if (requireNamespace("dplyr", quietly = TRUE)) withAutoprint(\{ # examplesIf}

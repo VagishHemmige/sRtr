@@ -116,8 +116,12 @@
 
 * `add_pdri()` now gives a missing PDRI for a missing donor race in labelled
   and character columns, as it already did for numeric ones; before, a
-  missing label counted as neither Black nor Asian. Character race codes
+  missing label counted as neither Black nor Asian. The format's missing
+  code `"."` (`"Missing"`) counts as missing too, and character race codes
   (`"16"`, `"64"`) are now recognized (#96).
+
+* `add_pdri()` now errors when a continuous input such as `DON_BMI` is not
+  numeric, instead of scoring a factor by its level positions.
 
 * `add_pdri()` no longer deletes the caller's columns whose names start with
   a dot, or overwrites them with its own intermediate values, and keeps an

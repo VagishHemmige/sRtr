@@ -291,3 +291,35 @@ testthat::test_that("an infinite PDRI is reported", {
   testthat::expect_warning(add_pdri(df, variant = "KP"), class = "sRtr_warning_pdri_infinite")
   testthat::expect_snapshot(out <- add_pdri(df, variant = "KP"))
 })
+
+# ---- review of eb368ae ---------------------------------------------------------
+
+testthat::test_that("the RACE format's missing code counts as missing", {
+  for (missing in c(".", "Missing")) {
+    for (race in list(c("8", missing), factor(c("8: White", missing)))) {
+      out <- add_pdri(race_donors(rep(race, 2)), variant = "KP")$PDRI
+      testthat::expect_equal(is.na(out), c(FALSE, TRUE, FALSE, TRUE))
+      imputed <- add_pdri(race_donors(rep(race, 2)), variant = "KP", mean_impute = TRUE)$PDRI
+      testthat::expect_equal(imputed[2], imputed[1])
+    }
+  }
+})
+
+testthat::test_that("rowwise input imputes nothing from other rows", {
+  df <- fake_donors()[rep(1, 2), ]
+  df$DON_CREAT <- c(3, NA)
+  out <- add_pdri(dplyr::rowwise(df), variant = "KP", mean_impute = TRUE)
+  testthat::expect_equal(is.na(out$PDRI), c(FALSE, TRUE))
+  testthat::expect_s3_class(out, "rowwise_df")
+})
+
+testthat::test_that("continuous inputs must be numeric", {
+  df <- fake_donors()
+  df$DON_WGT_KG <- 70
+  df$DON_BMI <- factor("25")
+  testthat::expect_error(
+    add_pdri(df, variant = "KP"),
+    class = "sRtr_error_non_numeric_columns"
+  )
+  testthat::expect_snapshot(error = TRUE, add_pdri(df, variant = "KP"))
+})

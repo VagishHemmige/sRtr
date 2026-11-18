@@ -13,8 +13,10 @@
 #'
 #' `DON_RACE` (format `RACE`) may be raw codes, numeric or character, or
 #' labels: code 16 (Black or African American) and code 64 (Asian) are read
-#' the same way in each. A missing race gives a missing PDRI unless
-#' `mean_impute = TRUE`, whatever the encoding.
+#' the same way in each. A missing race (`NA`, or the format's missing code
+#' `"."`, labelled `"Missing"`) gives a missing PDRI unless
+#' `mean_impute = TRUE`, whatever the encoding. Continuous inputs (age,
+#' creatinine, height, weight, BMI and cold ischemia time) must be numeric.
 #'
 #' @param df A data frame (may be a dplyr grouped data frame).
 #' @param variant NULL (default; auto-detect), or "PA" (pancreas-alone), or "KP" (kidney-pancreas).
@@ -160,7 +162,8 @@ add_pdri <- function(
     }
     z <- tolower(trimws(as.character(x)))
     flag <- .srtr_has_code(x, code, "RACE") | grepl(pattern, z)
-    flag[is.na(x)] <- NA
+    # The format's own missing code (".", labelled "Missing") is missing too.
+    flag[is.na(x) | .srtr_has_code(x, ".", "RACE")] <- NA
     flag
   }
   race_black_flag <- function(x) race_flag(x, "16", "black|african")
@@ -175,7 +178,7 @@ add_pdri <- function(
     )
   }
   # Numeric mean imputation within dplyr groups (or overall if ungrouped).
-  group_id <- if (dplyr::is_grouped_df(df)) {
+  group_id <- if (inherits(df, c("grouped_df", "rowwise_df"))) {
     dplyr::group_indices(df)
   } else {
     rep(1L, nrow(df))
@@ -222,6 +225,28 @@ add_pdri <- function(
   }
 
   check_columns(df, required_base)
+  continuous <- intersect(
+    c(
+      "DON_AGE_IN_MONTHS",
+      "DON_CREAT",
+      "DON_HGT_CM",
+      "REC_PA_PRESERV_TM",
+      "DON_BMI",
+      "DON_WGT_KG"
+    ),
+    names(df)
+  )
+  not_numeric <- continuous[!vapply(df[continuous], is.numeric, logical(1))]
+  if (length(not_numeric) > 0) {
+    srtr_abort(
+      c(
+        "{.arg df} has {length(not_numeric)} continuous input{?s} that {?is/are} not numeric: {.field {not_numeric}}.",
+        "i" = "Convert {cli::qty(length(not_numeric))}{?it/them} to numbers first; a factor's level positions are not its values."
+      ),
+      class = "non_numeric_columns",
+      columns = not_numeric
+    )
+  }
 
   if (verbose) {
     if (!has_bmi) {
