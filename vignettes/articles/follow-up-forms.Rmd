@@ -26,6 +26,11 @@ share counts only, and mask any count under 11, as the SRTR data use
 agreement requires. The helpers below do that: `mask()` for a table of a
 column, `mask_n()` for counts you have already computed. Every chunk here
 prints counts only, never rows; keep it that way when you adapt the code.
+Masking each number is not enough on its own: if you share a total next to
+masked parts, or two counts that differ by a few, a reader can subtract to
+recover a count under 11. Summaries such as quartiles can also describe a
+handful of people; look at them yourself, and share them only when the
+group behind them is large.
 
 ```{r setup}
 library(sRtr)
@@ -142,8 +147,10 @@ it.
 tx <- add_txf_outcomes(tx)
 
 gap <- as.numeric(tx$FIRST_FU_MALIG_DATE - tx$FIRST_FU_MALIG_LAST_NEG_DATE)
-quantile(gap, c(0.25, 0.5, 0.75), na.rm = TRUE)
 mask_n(sum(!is.na(gap)))
+
+# For your own inspection; share only if the count above is large.
+gap_quartiles <- quantile(gap, c(0.25, 0.5, 0.75), na.rm = TRUE)
 ```
 
 On real files the median gap is close to a year, because forms are mostly
