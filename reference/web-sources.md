@@ -142,6 +142,80 @@
   supported. OPO areas are not OPTN regions. Feature completeness and historical
   snapshot availability were not established by reading metadata.
 
+### Follow-up, death and graft-failure guidance (retrieved 2026-11-18)
+
+- **Kim SJ, Snyder JJ, "OPTN/SRTR Registry Analysis: The Devil is in the
+  Details"** (slides, file `atc2012_snyder_kim.pdf`):
+  https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf. Quoted:
+  - Slide 14: forms at 6 months and annually.
+  - Slide 25: `TFL_ENDTXFU` is "the variable to use to identify the last
+    possible follow-up date", with a "Built in lag of 3 months to allow for
+    form completion".
+  - Slide 26: death sources in order, form (`TFL_DEATH_DT`), then OPTN, SSA
+    and CMS.
+  - Slide 27: graft failure by organ. Kidney is
+    `min(TFL_GRAFT_DT, death_date, PERS_RETX, REC_ESRD_FAIL_DT)`; heart and
+    liver are `min(death_date, PERS_RETX)`; lung does not include `PERS_RETX`.
+  - Slide 33: rejection "Dates are not requested, which yields this 'step'
+    function".
+
+  These slides are from 2012. The live PSR Technical Methods now give the
+  OPTN death date precedence.
+- **SRTR PSR Technical Methods** (live page, rechecked 2026-11-18):
+  - "the OPTN death date takes precedence"; then "the SSDMF date takes
+    precedence" over CMS. Both appear in the graft and patient survival
+    sections.
+  - "For all organs, deaths are considered to be graft failures".
+  - The lung and heart-lung graft bullet: "do not include deaths that occur
+    after loss to follow-up in the OPTN database".
+  - "may represent an under-count" (Table B7 caveats). This concerns
+    deaths captured through waitlist removals and follow-up forms; it is
+    not a statement about the completeness of linked sources.
+- **SRTR, The SRTR Database:**
+  https://srtr.hrsa.gov/transplant-professionals/reports/the-srtr-database/.
+  Quoted:
+  - SRTR and OPTN "receive monthly updates from the NTIS Death Master File".
+  - Programs "may voluntarily submit death dates after these defined
+    follow-up intervals, but they are not required to do so."
+- **OPTN, Notice of OPTN Policy Changes: Conclude Relaxation of Data
+  Submission Requirements for Follow-Up Forms** (approved 2021-03-01,
+  effective 2021-04-01):
+  https://hrsa.unos.org/media/4453/conclude-relaxation-of-data-submission-requirements-policy-notice-final.pdf.
+  - Table 18-1: the TRF is due "90 days after the six-month and annual
+    anniversary of the transplant date until the recipient's death or graft
+    failure".
+  - For forms due 2020-03-13 to 2021-03-31, non-submission of the full TRF
+    was acceptable, but notice of death or graft failure was still required.
+    Forms in amnesty status had to be completed by 2021-07-01. Actual
+    completeness in a given SAF release is an empirical question.
+- **CMS Cell Size Suppression Policy** (2020):
+  https://www.hhs.gov/guidance/document/cms-cell-suppression-policy.
+  - No cell from 1 to 10, or any cell from which such a value can be derived.
+- **Papers** (metadata verified in PubMed; Levitsky full text read):
+  - Leppke 2013 (doi:10.1016/j.trre.2013.01.002).
+  - Massie 2014 (doi:10.1111/ajt.12777).
+  - Lindsey & Ryan 1998 (doi:10.1002/(SICI)1097-0258(19980130)17:2<219::AID-SIM735>3.0.CO;2-O).
+    Assigning interval end points "can lead to invalid inferences".
+  - Levitsky 2017, PMC5326609 (doi:10.1016/j.cgh.2016.07.035).
+    - SRTR rejection date not available, so discrete-time survival.
+    - Uniform imputation within the reporting interval, 5 imputations.
+    - 15.2% of patients had rejection in A2ALL but not in SRTR, against 4.1%
+      the other way.
+  - Yanik 2016, PMC5055411 (doi:10.1111/ajt.13818): SRTR sensitivity for
+    cancer 52.5%, against 84.3% for cancer registries.
+  - Engels 2011 (doi:10.1001/jama.2011.1592): linkage of SRTR with cancer
+    registries.
+  - Cheng 2022 (doi:10.1111/ajt.16932): 1 in 6 pediatric liver recipients
+    lost to follow-up.
+  - Austin 2016 (doi:10.1161/CIRCULATIONAHA.115.017719) and Noordzij 2013
+    (doi:10.1093/ndt/gft355): competing risks.
+  - Sapir-Pichhadze 2016 (doi:10.1111/ajt.13717): competing risks with SRTR
+    data; composite end points.
+  - Navar 2019 (doi:10.1001/jamacardio.2019.0198): the SSDMF undercaptures
+    deaths, varying by state and over time.
+  - da Graca 2013 (doi:10.1161/CIRCOUTCOMES.112.968826): exclusion of records
+    from the DMF. Abstract not available; title only.
+
 ## Partially retrieved organ-specific literature
 
 These were examined on 2026-11-14 through search-retrieved article sections.
