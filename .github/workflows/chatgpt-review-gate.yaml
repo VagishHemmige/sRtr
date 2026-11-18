@@ -4,14 +4,21 @@
 # branch ruleset, and GitHub will not merge a pull request whose latest push
 # has not been reviewed.
 #
-# The review is recognized by the marker it ends with:
-#   <!-- srtr-automated-review:<head sha>:<base sha> -->
-# A review of an earlier commit does not count: every push needs its own.
+# A comment counts as the review of the head commit only if it starts with
+# the review's heading, "**Automated ChatGPT review**", and ends with its
+# marker, <!-- srtr-automated-review:<head sha>:<base sha> -->, naming the
+# current head. A review of an earlier commit, or a comment that quotes a
+# review, does not count: every push needs its own review.
+#
+# The marker's second sha (the revision the review was read against) is not
+# required to be master's current head, so merging another PR does not force
+# a new review. The gate cannot prove who wrote a comment: the review
+# automation and Claude post as the same account.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   issue_comment:
-    types: [created, edited]
+    types: [created, edited, deleted]
   workflow_dispatch:
     inputs:
       pr:
@@ -27,7 +34,9 @@ permissions:
 
 concurrency:
   group: chatgpt-review-gate-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr }}
-  cancel-in-progress: true
+  # Queue rather than cancel, so no run shows as cancelled; each run reads
+  # the current state, so the last one to finish is right.
+  cancel-in-progress: false
 
 jobs:
   gate:
@@ -56,8 +65,12 @@ jobs:
               github.rest.issues.listComments,
               { owner, repo, issue_number: number, per_page: 100 }
             );
-            const marker = `srtr-automated-review:${sha}`;
-            const reviewed = comments.some(c => (c.body || "").includes(marker));
+            const isReview = body =>
+              body.trimStart().startsWith("**Automated ChatGPT review**") &&
+              new RegExp(
+                `<!-- srtr-automated-review:${sha}:[0-9a-f]{40} -->\\s*$`
+              ).test(body);
+            const reviewed = comments.some(c => isReview(c.body || ""));
 
             await github.rest.repos.createCommitStatus({
               owner, repo, sha,
