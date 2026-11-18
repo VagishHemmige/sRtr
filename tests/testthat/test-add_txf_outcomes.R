@@ -702,7 +702,7 @@ test_that("live: follow-up status, bounds and window hold on real liver files", 
   }
 })
 
-test_that("live: excluding rejection after graft failure only removes events", {
+test_that("live: excluding rejection after graft failure removes only dated events", {
   skip_if_no_srtr_file(c("TX_LI", "TXF_LI"))
   quiet <- function(expr) {
     withCallingHandlers(
@@ -718,7 +718,13 @@ test_that("live: excluding rejection after graft failure only removes events", {
 
   ex_event <- ex$FIRST_REJ_DATE_BINARY %in% 1L
   kp_event <- kp$FIRST_REJ_DATE_BINARY %in% 1L
-  expect_equal(sum(ex_event & !kp_event), 0)
+  # Excluding forms can only remove dated events. It can add an undated one:
+  # see "dropping a post-failure form can leave an undated rejection".
+  # A counted event's date is its _CENSOR column; undated events have none.
+  ex_dated <- ex_event & !is.na(ex$FIRST_REJ_DATE_CENSOR)
+  kp_dated <- kp_event & !is.na(kp$FIRST_REJ_DATE_CENSOR)
+  expect_equal(sum(ex_dated & !kp_dated), 0)
+  undated <- c("follow_up_undated", "admission_undated")
 
   # A counted follow-up rejection is timed on or before graft failure;
   # admission rejections may fall after a failure during the admission.
@@ -728,7 +734,10 @@ test_that("live: excluding rejection after graft failure only removes events", {
 
   live_counts(
     "Rejection after graft failure (#21)",
-    c(left_out_by_default = sum(kp_event & !ex_event))
+    c(
+      left_out_by_default = sum(kp_event & !ex_event),
+      undated_only_by_default = sum(ex_event & ex$FIRST_REJ_DATE_SOURCE %in% undated & !kp_event)
+    )
   )
 })
 
@@ -1107,4 +1116,32 @@ test_that("a factor TRR_ID with unused levels does not upset the transplant-date
   df2 <- df[c(1, 1), ]
   df2$REC_TX_DT[2] <- as.Date("2000-06-01")
   expect_error(add_time_to_event_outcomes(df2), class = "sRtr_error_conflicting_transplant_dates")
+})
+
+test_that("dropping a post-failure form can leave an undated rejection", {
+  # An ordinary form reports treated rejection with no date; a "1 year after
+  # graft failure" form reports it again, dated after last follow-up.
+  tx <- gf_cohort()[5, ]
+  tx$TFL_GRAFT_DT <- as.Date("2003-01-01")
+  forms <- tibble::tibble(
+    TRR_ID = tx$TRR_ID,
+    ORG_TY = "KI",
+    TFL_FOL_CD = c(10, 801),
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(c(NA, "2007-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  kp <- suppressWarnings(
+    add_time_to_event_outcomes(tx, rejection_after_graft_failure = "keep")
+  )
+  ex <- suppressWarnings(add_time_to_event_outcomes(tx))
+
+  # With every form, the dated report is first and falls outside the window.
+  expect_equal(kp$FIRST_REJ_DATE_BINARY, 0L)
+  # Without the post-failure form, only the undated report is left.
+  expect_equal(ex$FIRST_REJ_DATE_BINARY, 1L)
+  expect_equal(ex$FIRST_REJ_DATE_days, NA_real_)
+  expect_equal(ex$FIRST_REJ_DATE_SOURCE, "follow_up_undated")
 })
