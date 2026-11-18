@@ -189,9 +189,19 @@ srtr_time_to_event <- function(
 #' }
 #'
 #' @export
-add_txf_outcomes <- function(
-  df
-) {
+add_txf_outcomes <- function(df) {
+  .srtr_add_txf_outcomes(df)
+}
+
+#' add_txf_outcomes(), plus the first report on or after a start date
+#'
+#' With `start` (one date per row of `df`, normally `REC_TX_DT`), also adds
+#' internal columns `.FIRST_FU_MALIG_ELIGIBLE` and `.FIRST_FU_REJ_ELIGIBLE`
+#' (with `_KI` and `_PA` for TX_KP): the first dated positive form on or after
+#' `start`. [add_time_to_event_outcomes()] times events from these and drops
+#' them; the public date columns keep the first report of all.
+#' @noRd
+.srtr_add_txf_outcomes <- function(df, start = NULL) {
   #Save the key of the file passed to the function as well as the key of the appropriate follow-up file
   file_key <- attr(df, "file_key")
   follow_up_key <- paste0(substr(file_key, 1, 2), "F", substring(file_key, 3L))
@@ -233,11 +243,15 @@ add_txf_outcomes <- function(
     follow_up_df,
     ids = df$TRR_ID,
     positive = follow_up_df$TFL_MALIG %in% "Y",
-    negative = follow_up_df$TFL_MALIG %in% "N"
+    negative = follow_up_df$TFL_MALIG %in% "N",
+    start = start
   )
   out$FIRST_FU_MALIG_DATE <- malig$date
   out$FIRST_FU_MALIG_STATUS <- malig$status
   out$FIRST_FU_MALIG_LAST_NEG_DATE <- malig$last_neg
+  if (!is.null(start)) {
+    out$.FIRST_FU_MALIG_ELIGIBLE <- malig$eligible
+  }
   endpoints <- list(malig)
   endpoint_names <- c(FIRST_FU_MALIG_DATE = "malignancy")
 
@@ -252,13 +266,17 @@ add_txf_outcomes <- function(
       ids = df$TRR_ID,
       positive = .srtr_has_code(ep, "1", "ACREJEPF"),
       negative = .srtr_has_code(ep, "3", "ACREJEPF"),
-      untreated = .srtr_has_code(ep, "2", "ACREJEPF")
+      untreated = .srtr_has_code(ep, "2", "ACREJEPF"),
+      start = start
     )
   }
   set_rejection <- function(out, result, suffix) {
     out[[paste0("FIRST_FU_REJ_DATE", suffix)]] <- result$date
     out[[paste0("FIRST_FU_REJ_STATUS", suffix)]] <- result$status
     out[[paste0("FIRST_FU_REJ_LAST_NEG_DATE", suffix)]] <- result$last_neg
+    if (!is.null(start)) {
+      out[[paste0(".FIRST_FU_REJ_ELIGIBLE", suffix)]] <- result$eligible
+    }
     out
   }
 
@@ -385,8 +403,10 @@ add_txf_outcomes <- function(
 #' an event, the recipient is censored at the end of the window. A report
 #' dated after it is not an event, but its date stays in the date column, so
 #' `!is.na(FIRST_FU_MALIG_DATE) & FIRST_FU_MALIG_DATE_BINARY == 0` finds the
-#' reports left out. Only the first report is kept, so when it falls before
-#' the transplant date, a later report is not used in its place. With no last
+#' reports left out. A report dated before the transplant is not used:
+#' events are timed from the first report on or after the transplant date,
+#' while `FIRST_FU_MALIG_DATE` and `FIRST_FU_REJ_DATE` keep the first report
+#' of all, for auditing (`FIRST_REJ_DATE` is the date used). With no last
 #' follow-up date the window's end is unknown: death is not used in its place,
 #' and the time is missing.
 #'
@@ -510,7 +530,9 @@ add_time_to_event_outcomes <- function(
   df$.graft_censor <- NULL
 
   #Add rejection and malignancy from follow up database
-  df <- add_txf_outcomes(df)
+  #Events are timed from the first report on or after the transplant date;
+  #the public date columns keep the first report of all, for auditing.
+  df <- .srtr_add_txf_outcomes(df, start = df$REC_TX_DT)
 
   #Rejection can be found during the transplant admission or on a follow-up
   #form. An admission rejection is dated at discharge: the transplant date
@@ -519,21 +541,21 @@ add_time_to_event_outcomes <- function(
   #in its own column and never substituted for it.
   if (is_kp) {
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE", df$FIRST_FU_REJ_DATE_KI,
-      df$FIRST_FU_REJ_STATUS_KI
+      df, "REC_ACUTE_REJ_EPISODE", df$.FIRST_FU_REJ_ELIGIBLE_KI,
+      .srtr_undated_event(df, "FIRST_FU_REJ", "_KI")
     )
     df$FIRST_REJ_DATE <- rejection$date
     df$FIRST_REJ_DATE_SOURCE <- rejection$source
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE_PA", df$FIRST_FU_REJ_DATE_PA,
-      df$FIRST_FU_REJ_STATUS_PA
+      df, "REC_ACUTE_REJ_EPISODE_PA", df$.FIRST_FU_REJ_ELIGIBLE_PA,
+      .srtr_undated_event(df, "FIRST_FU_REJ", "_PA")
     )
     df$FIRST_REJ_DATE_PA <- rejection$date
     df$FIRST_REJ_DATE_PA_SOURCE <- rejection$source
   } else {
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE", df$FIRST_FU_REJ_DATE,
-      df$FIRST_FU_REJ_STATUS
+      df, "REC_ACUTE_REJ_EPISODE", df$.FIRST_FU_REJ_ELIGIBLE,
+      .srtr_undated_event(df, "FIRST_FU_REJ", "")
     )
     df$FIRST_REJ_DATE <- rejection$date
     df$FIRST_REJ_DATE_SOURCE <- rejection$source
@@ -545,17 +567,26 @@ add_time_to_event_outcomes <- function(
   #inclusive, and from the transplant date. Malignancy uses the patient's
   #follow-up, rejection the graft's. A report outside the window stays in its
   #date column, for auditing.
+  #Malignancy is timed from its first report on or after transplant (the
+  #date column keeps the first report of all); rejection from FIRST_REJ_DATE,
+  #already built that way.
   report_lafu <- list(
     FIRST_FU_MALIG_DATE = df$.patient_lafu,
     FIRST_REJ_DATE = df$.graft_lafu,
     FIRST_REJ_DATE_PA = if (is_kp) df$TFL_LAFUDATEPA
   )
+  report_date <- list(
+    FIRST_FU_MALIG_DATE = df$.FIRST_FU_MALIG_ELIGIBLE,
+    FIRST_REJ_DATE = df$FIRST_REJ_DATE,
+    FIRST_REJ_DATE_PA = df[["FIRST_REJ_DATE_PA"]]
+  )
   for (prefix in names(report_lafu)) {
     if (!prefix %in% names(df)) {
       next
     }
+    report <- report_date[[prefix]]
     windowed <- .srtr_report_window(
-      df[[prefix]],
+      report,
       df$REC_TX_DT,
       report_lafu[[prefix]],
       death
@@ -572,7 +603,6 @@ add_time_to_event_outcomes <- function(
       )
     #Whether the report is dated on the day of death: such a report may come
     #from the form filed at death, so the event may be earlier.
-    report <- df[[prefix]]
     df[[paste0(prefix, "_DEATH_DAY")]] <- dplyr::if_else(
       is.na(report),
       NA,
@@ -619,6 +649,7 @@ add_time_to_event_outcomes <- function(
     )
   }
 
+  df <- df[!startsWith(names(df), ".FIRST_FU_")]
   df$.patient_lafu <- NULL
   df$.graft_lafu <- NULL
   df$.death_event <- NULL
@@ -677,16 +708,16 @@ add_time_to_event_outcomes <- function(
 #' @param episode_col The admission rejection column (`REC_ACUTE_REJ_EPISODE`
 #'   or `REC_ACUTE_REJ_EPISODE_PA`), with format labels applied.
 #' @param follow_up_date The first follow-up rejection date for this graft.
-#' @param follow_up_status The follow-up rejection status for this graft,
-#'   from [add_txf_outcomes()].
+#' @param follow_up_undated Logical, one per row: a follow-up rejection is
+#'   reported for this graft, but on no dated form.
 #' @return A list with `date` (a `Date` vector) and `source` (`"admission_los"`,
 #'   `"admission_discharge"`, `"admission_undated"`, `"follow_up"`,
 #'   `"follow_up_undated"` or `NA`).
 #' @noRd
 .srtr_first_rejection <- function(df, episode_col, follow_up_date,
-                                  follow_up_status = NULL) {
-  if (is.null(follow_up_status)) {
-    follow_up_status <- rep(NA_character_, nrow(df))
+                                  follow_up_undated = NULL) {
+  if (is.null(follow_up_undated)) {
+    follow_up_undated <- rep(FALSE, nrow(df))
   }
   check_columns(
     df,
@@ -714,7 +745,7 @@ add_time_to_event_outcomes <- function(
     at_admission & !is.na(discharge_date) ~ "admission_discharge",
     at_admission ~ "admission_undated",
     !is.na(follow_up_date) ~ "follow_up",
-    follow_up_status %in% "event" ~ "follow_up_undated",
+    follow_up_undated ~ "follow_up_undated",
     .default = NA_character_
   )
   date <- dplyr::if_else(
@@ -736,6 +767,17 @@ add_time_to_event_outcomes <- function(
     sRtr::formats$Format == format & sRtr::formats$Code == code
   ]
   as.character(x) %in% c(code, meaning)
+}
+
+#' Which rows have a follow-up event reported only on undated forms
+#' @noRd
+.srtr_undated_event <- function(df, stem, suffix) {
+  status <- df[[paste0(stem, "_STATUS", suffix)]]
+  date <- df[[paste0(stem, "_DATE", suffix)]]
+  if (is.null(status) || is.null(date)) {
+    return(rep(FALSE, nrow(df)))
+  }
+  status %in% "event" & is.na(date)
 }
 
 #' Keep a known event with no usable date as an event
@@ -828,15 +870,19 @@ add_time_to_event_outcomes <- function(
 #'   `"unknown"` or `"no follow-up"`; and `last_neg`, the last explicitly
 #'   negative form strictly before `date`, or the last one at all when there
 #'   is no positive form. `last_neg` is missing when every positive form is
-#'   undated, since the bound is then unknown. Also `positive_forms`, the
-#'   number of positive forms for the cohort, for the merge report.
+#'   undated, since the bound is then unknown. With `start` (one date per
+#'   `ids`), `eligible` is the first dated positive form on or after it.
+#'   Also `positive_forms`, the number of positive forms for the cohort, for
+#'   the merge report.
 #' @noRd
-.srtr_txf_endpoint <- function(forms, ids, positive, negative, untreated = NULL) {
+.srtr_txf_endpoint <- function(forms, ids, positive, negative,
+                               untreated = NULL, start = NULL) {
   n <- length(ids)
   result <- list(
     date = rep(as.Date(NA), n),
     status = rep("no follow-up", n),
-    last_neg = rep(as.Date(NA), n)
+    last_neg = rep(as.Date(NA), n),
+    eligible = rep(as.Date(NA), n)
   )
   result$positive_forms <- 0
   if (nrow(forms) == 0) {
@@ -854,6 +900,12 @@ add_time_to_event_outcomes <- function(
   key <- forms$TRR_ID
   in_cohort <- !is.na(key) & key %in% ids
   result$positive_forms <- sum(positive & in_cohort)
+  #Each form's start date (the transplant date of its registration).
+  form_start <- if (is.null(start)) {
+    rep(as.Date(NA), nrow(forms))
+  } else {
+    start[match(key, ids)]
+  }
 
   #Per registration: any positive, untreated or negative form, and the first
   #dated positive form.
@@ -862,7 +914,12 @@ add_time_to_event_outcomes <- function(
     positive = positive,
     untreated = untreated,
     negative = negative,
-    positive_date = dplyr::if_else(positive, form_date, as.Date(NA))
+    positive_date = dplyr::if_else(positive, form_date, as.Date(NA)),
+    eligible_date = dplyr::if_else(
+      is.na(form_start) | positive_date >= form_start,
+      positive_date,
+      as.Date(NA)
+    )
   )[in_cohort, ] |>
     dplyr::summarise(
       any_positive = any(.data$positive),
@@ -874,12 +931,18 @@ add_time_to_event_outcomes <- function(
       } else {
         min(.data$positive_date, na.rm = TRUE)
       },
+      eligible = if (all(is.na(.data$eligible_date))) {
+        as.Date(NA)
+      } else {
+        min(.data$eligible_date, na.rm = TRUE)
+      },
       .by = "key"
     )
 
   row <- match(ids, by_id$key)
   seen <- !is.na(row)
   result$date <- by_id$first[row]
+  result$eligible <- by_id$eligible[row]
   result$status[seen] <- dplyr::case_when(
     by_id$any_positive[row[seen]] ~ "event",
     by_id$any_untreated[row[seen]] ~ "untreated",
