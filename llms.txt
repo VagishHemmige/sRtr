@@ -242,3 +242,14 @@ Helpers for composing event dates and simple time-to-event calculations
 
 - [Calculating geographic coverage
   gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.md):
+
+### Pitfalls in SRTR data
+
+Subtleties in SRTR files that change results, each with a naive approach
+that trips on it and the sRtr function that handles it. The code needs
+your own SAFs and is not run on this site.
+
+- [Follow-up forms are reports, not
+  events](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.md):
+- [Follow-up windows and
+  death](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.md):

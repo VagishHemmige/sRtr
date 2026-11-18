@@ -2,6 +2,12 @@
 
 ## sRtr (development version)
 
+- Two new articles under “Pitfalls in SRTR data” on the package website,
+  *Follow-up forms are reports, not events* and *Follow-up windows and
+  death*, show subtleties in SRTR follow-up and death data that change
+  results. Each shows a naive approach that trips on one, and the sRtr
+  function that handles it, with code to run on your own SAFs.
+
 - sRtr now corrects entries of SRTR’s web data dictionary that do not
   match the SAFs, each under a stable ID. The first, `SRTR-DC-001`,
   gives `REC_COD` in every TX dataset the format `COD` instead of
