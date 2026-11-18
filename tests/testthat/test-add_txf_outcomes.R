@@ -844,8 +844,12 @@ test_that("an event reported only on undated forms is reported", {
   )
   local_mocked_bindings(load_srtr_file = function(...) forms)
 
+  # One warning for the rejection and one for the malignancy.
   expect_warning(
-    add_time_to_event_outcomes(df),
+    expect_warning(
+      add_time_to_event_outcomes(df),
+      class = "sRtr_warning_undated_follow_up_report"
+    ),
     class = "sRtr_warning_undated_follow_up_report"
   )
   expect_snapshot(out <- add_time_to_event_outcomes(df))
