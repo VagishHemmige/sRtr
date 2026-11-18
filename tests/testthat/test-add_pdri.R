@@ -195,3 +195,145 @@ testthat::test_that("add_pdri(verbose = TRUE) reports the variant and BMI", {
   df$DON_WGT_KG <- 70
   testthat::expect_snapshot(out <- add_pdri(df, verbose = TRUE))
 })
+
+# ---- #96: missing race stays missing whatever the encoding ------------------
+
+race_donors <- function(race) {
+  df <- fake_donors()[rep(1, 4), ]
+  df$DON_RACE <- race
+  df
+}
+
+testthat::test_that("missing race gives a missing PDRI for every encoding", {
+  meaning <- c(
+    "16" = "16: Black or African American",
+    "64" = "64: Asian",
+    "8" = "8: White"
+  )
+  codes <- c(16L, 64L, 8L, NA)
+  encodings <- list(
+    numeric = codes,
+    character = as.character(codes),
+    label = unname(meaning[as.character(codes)]),
+    factor = factor(unname(meaning[as.character(codes)]))
+  )
+  results <- lapply(encodings, \(race) add_pdri(race_donors(race), variant = "KP")$PDRI)
+
+  for (enc in names(results)) {
+    testthat::expect_equal(results[[enc]], results$numeric, ignore_attr = TRUE)
+  }
+  testthat::expect_equal(is.na(results$numeric), c(FALSE, FALSE, FALSE, TRUE))
+  # Black and Asian are recognized in every encoding, not read as White.
+  testthat::expect_equal(
+    log(results$label[1:2] / results$label[3]),
+    c(0.23951, 0.15711),
+    tolerance = 1e-9
+  )
+})
+
+testthat::test_that("with mean_impute, missing race counts as neither group for every encoding", {
+  codes <- c(8L, NA)
+  label <- c("8: White", NA)
+  numeric <- add_pdri(race_donors(rep(codes, 2)), variant = "KP", mean_impute = TRUE)$PDRI
+  labelled <- add_pdri(race_donors(rep(label, 2)), variant = "KP", mean_impute = TRUE)$PDRI
+  testthat::expect_equal(labelled, numeric)
+  testthat::expect_equal(numeric[2], numeric[1])
+})
+
+# ---- #99: the caller's columns are kept --------------------------------------
+
+testthat::test_that("add_pdri() keeps the caller's dot-prefixed columns", {
+  df <- fake_donors()[rep(1, 2), ]
+  df$.row_id <- c(11L, 12L)
+  attr(df$.row_id, "label") <- "Row ID"
+  # Names add_pdri() once used for its own intermediate values.
+  df$.DON_CREAT <- c("kept", "kept")
+  df$.linpred <- c(-1, -2)
+
+  out <- add_pdri(df, variant = "KP")
+
+  testthat::expect_equal(out$.row_id, df$.row_id)
+  testthat::expect_equal(attr(out$.row_id, "label"), "Row ID")
+  testthat::expect_equal(out$.DON_CREAT, df$.DON_CREAT)
+  testthat::expect_equal(out$.linpred, df$.linpred)
+  testthat::expect_equal(names(out), c(names(df), "PDRI"))
+  testthat::expect_equal(
+    out$PDRI,
+    add_pdri(fake_donors()[rep(1, 2), ], variant = "KP")$PDRI
+  )
+})
+
+testthat::test_that("an output name starting with a dot is kept", {
+  out <- add_pdri(fake_donors(), variant = "KP", pdri_col = ".pdri")
+  testthat::expect_named(out, c(names(fake_donors()), ".pdri"))
+  testthat::expect_equal(attr(out$.pdri, "label"), "Pancreas Donor Risk Index")
+})
+
+testthat::test_that("a grouped data frame keeps its groups and attributes", {
+  df <- fake_donors()[rep(1, 4), ]
+  df$grp <- c(1, 1, 2, 2)
+  df$DON_CREAT <- c(1, NA, 3, NA)
+  df <- dplyr::group_by(df, .data$grp)
+  attr(df, "file_key") <- "TX_KP"
+
+  out <- add_pdri(df, mean_impute = TRUE)
+
+  testthat::expect_equal(dplyr::group_vars(out), "grp")
+  testthat::expect_equal(attr(out, "file_key"), "TX_KP")
+  # Row 2 is imputed from group 1 (creatinine 1), row 4 from group 2 (3).
+  testthat::expect_equal(out$PDRI[2], out$PDRI[1])
+  testthat::expect_equal(out$PDRI[4], out$PDRI[3])
+})
+
+testthat::test_that("an infinite PDRI is reported", {
+  df <- fake_donors()
+  df$DON_AGE_IN_MONTHS <- 1e6
+  testthat::expect_warning(add_pdri(df, variant = "KP"), class = "sRtr_warning_pdri_infinite")
+  testthat::expect_snapshot(out <- add_pdri(df, variant = "KP"))
+})
+
+# ---- review of eb368ae ---------------------------------------------------------
+
+testthat::test_that("the RACE format's missing code counts as missing", {
+  for (missing in c(".", "Missing")) {
+    for (race in list(c("8", missing), factor(c("8: White", missing)))) {
+      out <- add_pdri(race_donors(rep(race, 2)), variant = "KP")$PDRI
+      testthat::expect_equal(is.na(out), c(FALSE, TRUE, FALSE, TRUE))
+      imputed <- add_pdri(race_donors(rep(race, 2)), variant = "KP", mean_impute = TRUE)$PDRI
+      testthat::expect_equal(imputed[2], imputed[1])
+    }
+  }
+})
+
+testthat::test_that("rowwise input imputes nothing from other rows", {
+  df <- fake_donors()[rep(1, 2), ]
+  df$DON_CREAT <- c(3, NA)
+  out <- add_pdri(dplyr::rowwise(df), variant = "KP", mean_impute = TRUE)
+  testthat::expect_equal(is.na(out$PDRI), c(FALSE, TRUE))
+  testthat::expect_s3_class(out, "rowwise_df")
+})
+
+testthat::test_that("continuous inputs must be numeric", {
+  df <- fake_donors()
+  df$DON_WGT_KG <- 70
+  df$DON_BMI <- factor("25")
+  testthat::expect_error(
+    add_pdri(df, variant = "KP"),
+    class = "sRtr_error_non_numeric_columns"
+  )
+  testthat::expect_snapshot(error = TRUE, add_pdri(df, variant = "KP"))
+})
+
+testthat::test_that("an sf data frame is scored and keeps its geometry", {
+  testthat::skip_if_not_installed("sf")
+  df <- fake_donors()[rep(1, 2), ]
+  geo <- sf::st_as_sf(
+    cbind(df, x = c(0, 1), y = c(0, 1)),
+    coords = c("x", "y")
+  )
+
+  out <- add_pdri(geo, variant = "KP")
+
+  testthat::expect_s3_class(out, "sf")
+  testthat::expect_equal(out$PDRI, add_pdri(df, variant = "KP")$PDRI)
+})

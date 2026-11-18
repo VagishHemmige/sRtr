@@ -11,6 +11,13 @@
 #' PA additionally uses `REC_PREV_KI` for an interaction term; if absent, the
 #' interaction is skipped (equivalent to KP behavior).
 #'
+#' `DON_RACE` (format `RACE`) may be raw codes, numeric or character, or
+#' labels: code 16 (Black or African American) and code 64 (Asian) are read
+#' the same way in each. A missing race (`NA`, or the format's missing code
+#' `"."`, labelled `"Missing"`) gives a missing PDRI unless
+#' `mean_impute = TRUE`, whatever the encoding. Continuous inputs (age,
+#' creatinine, height, weight, BMI and cold ischemia time) must be numeric.
+#'
 #' @param df A data frame (may be a dplyr grouped data frame).
 #' @param variant NULL (default; auto-detect), or "PA" (pancreas-alone), or "KP" (kidney-pancreas).
 #' @param mean_impute Logical. If TRUE, mean-impute missing numeric inputs within the
@@ -145,25 +152,22 @@ add_pdri <- function(
     )
     out
   }
-  # Internal handling for race (no user input needed):
-  # - numeric codes: treat 16 as Black, 64 as Asian (common SRTR encodings)
-  # - labeled/factor/character: regex on strings
-  race_black_flag <- function(x) {
+  # Race (format RACE): code 16 is Black or African American, code 64 is
+  # Asian. Raw codes (numeric or character) and labels are read alike; a
+  # label is matched by its code or, for other wordings, by text. A missing
+  # race stays missing, so PDRI is missing unless `mean_impute = TRUE`.
+  race_flag <- function(x, code, pattern) {
     if (is.numeric(x)) {
-      x == 16
-    } else {
-      z <- tolower(trimws(as.character(x)))
-      grepl("black|african", z)
+      return(x == as.numeric(code))
     }
+    z <- tolower(trimws(as.character(x)))
+    flag <- .srtr_has_code(x, code, "RACE") | grepl(pattern, z)
+    # The format's own missing code (".", labelled "Missing") is missing too.
+    flag[is.na(x) | .srtr_has_code(x, ".", "RACE")] <- NA
+    flag
   }
-  race_asian_flag <- function(x) {
-    if (is.numeric(x)) {
-      x == 64
-    } else {
-      z <- tolower(trimws(as.character(x)))
-      grepl("\\basian\\b", z)
-    }
-  }
+  race_black_flag <- function(x) race_flag(x, "16", "black|african")
+  race_asian_flag <- function(x) race_flag(x, "64", "\\basian\\b")
 
   compute_bmi <- function(weight_kg, height_cm) {
     h_m <- height_cm / 100
@@ -173,14 +177,21 @@ add_pdri <- function(
       weight_kg / (h_m^2)
     )
   }
-  # Group-aware numeric imputation (respects dplyr grouping)
+  # Numeric mean imputation within dplyr groups (or overall if ungrouped).
+  group_id <- if (inherits(df, c("grouped_df", "rowwise_df"))) {
+    dplyr::group_indices(df)
+  } else {
+    rep(1L, nrow(df))
+  }
   impute_num <- function(x) {
     if (!mean_impute) {
       return(x)
     }
-    m <- mean(x, na.rm = TRUE)
-    x[is.na(x)] <- m
-    x
+    x <- as.numeric(x)
+    stats::ave(x, group_id, FUN = function(v) {
+      v[is.na(v)] <- mean(v, na.rm = TRUE)
+      v
+    })
   }
   # Indicator helper (NA -> 0 only if mean_impute=TRUE)
   ind_01 <- function(cond) {
@@ -214,6 +225,30 @@ add_pdri <- function(
   }
 
   check_columns(df, required_base)
+  continuous <- intersect(
+    c(
+      "DON_AGE_IN_MONTHS",
+      "DON_CREAT",
+      "DON_HGT_CM",
+      "REC_PA_PRESERV_TM",
+      "DON_BMI",
+      "DON_WGT_KG"
+    ),
+    names(df)
+  )
+  not_numeric <- continuous[
+    !vapply(continuous, \(nm) is.numeric(df[[nm]]), logical(1))
+  ]
+  if (length(not_numeric) > 0) {
+    srtr_abort(
+      c(
+        "{.arg df} has {length(not_numeric)} continuous input{?s} that {?is/are} not numeric: {.field {not_numeric}}.",
+        "i" = "Convert {cli::qty(length(not_numeric))}{?it/them} to numbers first; a factor's level positions are not its values."
+      ),
+      class = "non_numeric_columns",
+      columns = not_numeric
+    )
+  }
 
   if (verbose) {
     if (!has_bmi) {
@@ -250,139 +285,107 @@ add_pdri <- function(
   has_prev_ki <- "REC_PREV_KI" %in% names(df)
 
   # ---- compute predictors & PDRI -------------------------------------------
-  df2 <- df |>
-    dplyr::mutate(
-      # numeric (optionally imputed)
-      .DON_AGE_IN_MONTHS = impute_num(.data$DON_AGE_IN_MONTHS),
-      .DON_CREAT = impute_num(.data$DON_CREAT),
-      .DON_HGT_CM = impute_num(.data$DON_HGT_CM),
-      .REC_PA_PRESERV_TM = impute_num(.data$REC_PA_PRESERV_TM),
-
-      # BMI: use existing, fill missing, or compute fully
-      .DON_BMI = impute_num(
-        if (has_bmi) {
-          if (all(c("DON_WGT_KG", "DON_HGT_CM") %in% names(df))) {
-            dplyr::coalesce(
-              .data$DON_BMI,
-              compute_bmi(.data$DON_WGT_KG, .data$DON_HGT_CM)
-            )
-          } else {
-            .data$DON_BMI
-          }
-        } else {
-          compute_bmi(.data$DON_WGT_KG, .data$DON_HGT_CM)
-        }
-      ),
-
-      # indicators via normalization layer
-      .GENDER_F = ind_01(norm_flag(norm_gender_f(.data$DON_GENDER) == 1)),
-      .RACE_BLACK = ind_01(race_black_flag(.data$DON_RACE)),
-      .RACE_ASIAN = ind_01(race_asian_flag(.data$DON_RACE)),
-      .STROKE = {
-        x <- .data$DON_COD_DON_STROKE
-        if (is.numeric(x)) ind_01(x == 1) else ind_01(norm_flag(x))
-      },
-      .DCD = ind_01(norm_flag(.data$DON_NON_HR_BEAT)),
-      .PREV_KI = if (has_prev_ki) ind_01(norm_flag(.data$REC_PREV_KI)) else 0,
-
-      .AGE_LT_240 = as.numeric(.data$.DON_AGE_IN_MONTHS < 240),
-
-      .interaction_term = if (v == "PA" && has_prev_ki) {
-        -0.28137 * (.data$.STROKE * .data$.PREV_KI)
-      } else {
-        0
-      },
-
-      # linear predictor (coefficients as provided)
-      .linpred = -0.13792 *
-        .data$.GENDER_F +
-        -0.034455 *
-          .data$.AGE_LT_240 *
-          ((.data$.DON_AGE_IN_MONTHS - 240) / 12) +
-        0.026149 * ((.data$.DON_AGE_IN_MONTHS - 336) / 12) +
-        0.19490 * (.data$.DON_CREAT > 2.5) +
-        0.23951 * .data$.RACE_BLACK +
-        0.15711 * .data$.RACE_ASIAN -
-        0.000986347 * (.data$.DON_BMI - 24) +
-        0.033274 * (.data$.DON_BMI > 25) * (.data$.DON_BMI - 25) -
-        0.006073879 * (.data$.DON_HGT_CM - 173) +
-        0.21018 * .data$.STROKE +
-        0.014678 * (.data$.REC_PA_PRESERV_TM - 12) +
-        0.33172 * .data$.DCD +
-        .data$.interaction_term,
-
-      !!out_name := exp(.data$.linpred)
-    )
+  # Intermediate values are kept apart from the caller's data, so no column of
+  # `df` is overwritten or dropped, whatever its name (#99).
+  col <- function(nm) df[[nm]]
+  bmi <- if (has_bmi) {
+    if (all(c("DON_WGT_KG", "DON_HGT_CM") %in% names(df))) {
+      dplyr::coalesce(
+        as.numeric(col("DON_BMI")),
+        compute_bmi(col("DON_WGT_KG"), col("DON_HGT_CM"))
+      )
+    } else {
+      col("DON_BMI")
+    }
+  } else {
+    compute_bmi(col("DON_WGT_KG"), col("DON_HGT_CM"))
+  }
+  stroke <- col("DON_COD_DON_STROKE")
+  p <- list(
+    # numeric (optionally imputed)
+    age = impute_num(col("DON_AGE_IN_MONTHS")),
+    creat = impute_num(col("DON_CREAT")),
+    hgt = impute_num(col("DON_HGT_CM")),
+    cit = impute_num(col("REC_PA_PRESERV_TM")),
+    bmi = impute_num(bmi),
+    # indicators via normalization layer
+    gender_f = ind_01(norm_flag(norm_gender_f(col("DON_GENDER")) == 1)),
+    race_black = ind_01(race_black_flag(col("DON_RACE"))),
+    race_asian = ind_01(race_asian_flag(col("DON_RACE"))),
+    stroke = if (is.numeric(stroke)) ind_01(stroke == 1) else ind_01(norm_flag(stroke)),
+    dcd = ind_01(norm_flag(col("DON_NON_HR_BEAT"))),
+    prev_ki = if (has_prev_ki) ind_01(norm_flag(col("REC_PREV_KI"))) else 0
+  )
+  p$age_lt_240 <- as.numeric(p$age < 240)
+  p$interaction <- if (v == "PA" && has_prev_ki) {
+    -0.28137 * (p$stroke * p$prev_ki)
+  } else {
+    rep(0, nrow(df))
+  }
+  # linear predictor (coefficients as provided)
+  linpred <- with(
+    p,
+    -0.13792 *
+      gender_f +
+      -0.034455 * age_lt_240 * ((age - 240) / 12) +
+      0.026149 * ((age - 336) / 12) +
+      0.19490 * (creat > 2.5) +
+      0.23951 * race_black +
+      0.15711 * race_asian -
+      0.000986347 * (bmi - 24) +
+      0.033274 * (bmi > 25) * (bmi - 25) -
+      0.006073879 * (hgt - 173) +
+      0.21018 * stroke +
+      0.014678 * (cit - 12) +
+      0.33172 * dcd +
+      interaction
+  )
+  pdri_nm <- rlang::as_string(out_name)
+  pdri <- exp(linpred)
 
   # --- warn if PDRI is Inf (likely due to extreme/miscoded inputs) ------------
-  pdri_nm <- rlang::as_string(out_name)
-  inf_idx <- which(is.infinite(df2[[pdri_nm]]))
+  inf_idx <- which(is.infinite(pdri))
   if (length(inf_idx)) {
     # Show up to 5 example row numbers and their linear predictors
     ex_rows <- paste(utils::head(inf_idx, 5), collapse = ", ")
     ex_lp <- paste(
-      round(utils::head(df2$.linpred[inf_idx], 5), 3),
+      round(utils::head(linpred[inf_idx], 5), 3),
       collapse = ", "
     )
     n_inf <- length(inf_idx)
     srtr_warn(
       c(
         "{n_inf} row{?s} gave {.val {Inf}} in {.field {pdri_nm}} (the linear predictor overflowed).",
-        "i" = "Check inputs in {qty(n_inf)}{?that row/those rows} for unit or coding errors or extreme values.",
+        "i" = "Check inputs in {cli::qty(n_inf)}{?that row/those rows} for unit or coding errors or extreme values.",
         "i" = "First rows: {ex_rows}; linear predictors: {ex_lp}."
       ),
       class = "pdri_infinite"
     )
   }
 
-  if (return_terms) {
-    terms_list <- lapply(seq_len(nrow(df2)), function(i) {
-      G <- df2$.GENDER_F[i]
-      AGE <- df2$.DON_AGE_IN_MONTHS[i]
-      AGE_LT <- df2$.AGE_LT_240[i]
-      CREAT <- df2$.DON_CREAT[i]
-      RB <- df2$.RACE_BLACK[i]
-      RA <- df2$.RACE_ASIAN[i]
-      BMI <- df2$.DON_BMI[i]
-      HGT <- df2$.DON_HGT_CM[i]
-      STR <- df2$.STROKE[i]
-      CIT <- df2$.REC_PA_PRESERV_TM[i]
-      DCD <- df2$.DCD[i]
-      INT <- df2$.interaction_term[i]
-      list(
-        gender = -0.13792 * G,
-        age_lt240 = -0.034455 * AGE_LT * ((AGE - 240) / 12),
-        age_slope = 0.026149 * ((AGE - 336) / 12),
-        creat = 0.19490 * (CREAT > 2.5),
-        race_blk = 0.23951 * RB,
-        race_asn = 0.15711 * RA,
-        bmi_lin = -0.000986347 * (BMI - 24),
-        bmi_gt25 = 0.033274 * (BMI > 25) * (BMI - 25),
-        height = -0.006073879 * (HGT - 173),
-        stroke = 0.21018 * STR,
-        cit = 0.014678 * (CIT - 12),
-        dcd = 0.33172 * DCD,
-        inter = INT
-      )
-    })
-    df2[["PDRI_terms"]] <- terms_list
-  }
-
-  # Drop scratch columns (names starting with "."), preserving grouping.
-  # PDRI_terms does not start with "." and is always kept.
-  out <- df2
-  scratch <- grep("^\\.", names(out), value = TRUE)
-  if (length(scratch)) {
-    out <- dplyr::select(out, -dplyr::all_of(scratch))
-  }
-
-  # (Optional) move PDRI_terms to the end for readability
-  if ("PDRI_terms" %in% names(out)) {
-    out <- dplyr::relocate(out, "PDRI_terms", .after = dplyr::last_col())
-  }
-
-  pdri_nm <- rlang::as_string(out_name)
+  out <- df
+  out[[pdri_nm]] <- pdri
   attr(out[[pdri_nm]], "label") <- "Pancreas Donor Risk Index"
+
+  if (return_terms) {
+    out[["PDRI_terms"]] <- lapply(seq_len(nrow(df)), function(i) {
+      with(lapply(p, `[`, i), list(
+        gender = -0.13792 * gender_f,
+        age_lt240 = -0.034455 * age_lt_240 * ((age - 240) / 12),
+        age_slope = 0.026149 * ((age - 336) / 12),
+        creat = 0.19490 * (creat > 2.5),
+        race_blk = 0.23951 * race_black,
+        race_asn = 0.15711 * race_asian,
+        bmi_lin = -0.000986347 * (bmi - 24),
+        bmi_gt25 = 0.033274 * (bmi > 25) * (bmi - 25),
+        height = -0.006073879 * (hgt - 173),
+        stroke = 0.21018 * stroke,
+        cit = 0.014678 * (cit - 12),
+        dcd = 0.33172 * dcd,
+        inter = interaction
+      ))
+    })
+  }
 
   out
 }
