@@ -175,7 +175,8 @@ add_txf_outcomes <- function(df) {
 #' internal columns `.FIRST_FU_MALIG_ELIGIBLE` and `.FIRST_FU_REJ_ELIGIBLE`
 #' (with `_KI` and `_PA` for TX_KP): the first dated positive form on or after
 #' `start`. [add_time_to_event_outcomes()] times events from these and drops
-#' them; the public date columns keep the first report of all.
+#' them; the public date columns keep the first report of all. A registration
+#' listed more than once uses its earliest known `start` on every row.
 #' @noRd
 .srtr_add_txf_outcomes <- function(df, start = NULL) {
   #Save the key of the file passed to the function as well as the key of the appropriate follow-up file
@@ -489,7 +490,12 @@ add_time_to_event_outcomes <- function(
   #Add rejection and malignancy from follow up database
   #Events are timed from the first report on or after the transplant date;
   #the public date columns keep the first report of all, for auditing.
+  before <- names(df)
   df <- .srtr_add_txf_outcomes(df, start = df$REC_TX_DT)
+  helpers <- setdiff(
+    grep("^\\.FIRST_FU_.*_ELIGIBLE", names(df), value = TRUE),
+    before
+  )
 
   #Rejection can be found during the transplant admission or on a follow-up
   #form. An admission rejection is dated at discharge: the transplant date
@@ -606,7 +612,7 @@ add_time_to_event_outcomes <- function(
     )
   }
 
-  df <- df[!startsWith(names(df), ".FIRST_FU_")]
+  df <- df[setdiff(names(df), helpers)]
   df$.patient_lafu <- NULL
   df$.graft_lafu <- NULL
   df$.death_event <- NULL
@@ -816,11 +822,16 @@ add_time_to_event_outcomes <- function(
   #than once in the cohort gets the same values on every row.
   key <- forms$TRR_ID
   in_cohort <- !is.na(key) & key %in% ids
-  #Each form's start date (the transplant date of its registration).
-  form_start <- if (is.null(start)) {
-    rep(as.Date(NA), nrow(forms))
-  } else {
-    start[match(key, ids)]
+  #Each form's start date: its registration's earliest known start (the
+  #transplant date), whichever cohort row carries it.
+  form_start <- rep(as.Date(NA), nrow(forms))
+  if (!is.null(start)) {
+    known <- !is.na(ids) & !is.na(start)
+    if (any(known)) {
+      reg_start <- tibble::tibble(key = ids[known], start = start[known]) |>
+        dplyr::summarise(start = min(.data$start), .by = "key")
+      form_start <- reg_start$start[match(key, reg_start$key)]
+    }
   }
 
   #Per registration: any positive, untreated or negative form, and the first
