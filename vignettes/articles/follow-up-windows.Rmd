@@ -65,8 +65,17 @@ registrations, and the last follow-up date was later than it for about a
 fifth of them. Compare the two in your files:
 
 ```{r}
-mask_n(sum(tx$TFL_LAFUDATE > tx$TFL_ENDTXFU, na.rm = TRUE))
+stopifnot(all(c("TFL_LAFUDATE", "TFL_ENDTXFU") %in% names(tx)))
+comparable <- !is.na(tx$TFL_LAFUDATE) & !is.na(tx$TFL_ENDTXFU)
+if (any(comparable)) {
+  mask_n(sum(tx$TFL_LAFUDATE[comparable] > tx$TFL_ENDTXFU[comparable]))
+} else {
+  "no registration has both dates"
+}
 ```
+
+The count covers only registrations with both dates; a 0 means none of
+them has a later last follow-up.
 
 ```{r window, eval = TRUE, echo = FALSE, fig.width = 7.5, fig.height = 2.6, fig.alt = "Timeline for three made-up recipients, in years since transplant, each with a shaded window from transplant to the earlier of last follow-up and death. Recipient A has a malignancy report at year 2, inside the window, which counts. Recipient B's window ends at last follow-up at year 3, and a report at year 3.5 falls outside it and does not count. Recipient C died at year 2.5; a report dated on the day of death is flagged, and one dated after death does not count."}
 windows <- data.frame(who = c("A", "B", "C"), end = c(4, 3, 2.5))
