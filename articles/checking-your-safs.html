@@ -83,7 +83,10 @@ go, codes appear that no format lists, and identifiers that should match
 sometimes do not. Before you rely on sRtr for an analysis, run the
 checks below on your own standard analysis files (SAFs). They take a few
 minutes and tell you whether sRtr behaves on your release as it does on
-the releases it has been checked against.</p>
+the releases it has been checked against. The checks cover the three
+kinds of data quality in a common framework: whether values conform to
+the documented formats, whether they are complete, and whether they are
+plausible (<a href="#ref-kahn">Kahn et al. 2016</a>).</p>
 <p>The code is not run on this website, because it needs real SAFs. It
 uses liver files; change the file keys for other organs.</p>
 <div class="section level2">
@@ -94,7 +97,10 @@ change the code, so you can share the results, for example in a GitHub
 issue, without breaking the SRTR data use agreement. Mask any count from
 1 to 10. Masking each number is not enough on its own. If you share a
 total next to masked parts, or two counts that differ by a few, a reader
-can subtract to recover a small count.</p>
+can subtract to recover a small count. The CMS cell size suppression
+policy sets the same rule: no count from 1 to 10, and none that can be
+worked out from other reported numbers (<a href="#ref-cms">CMS
+2020</a>).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -338,6 +344,16 @@ version;</li>
 <code>sRtr_warning_unknown_codes</code> for <code>REC_COD</code>: &lt;11
 rows with codes not in the format.” Never attach SAF files, rows from
 them, or unmasked counts.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p><a id="ref-cms"></a>Centers for Medicare &amp; Medicaid Services. CMS
+cell size suppression policy. 2020. <a href="https://www.hhs.gov/guidance/document/cms-cell-suppression-policy" class="external-link uri">https://www.hhs.gov/guidance/document/cms-cell-suppression-policy</a></p>
+<p><a id="ref-kahn"></a>Kahn MG, Callahan TJ, Barnard J, et al. A
+harmonized data quality assessment terminology and framework for the
+secondary use of electronic health record data. <em>EGEMS (Wash
+DC)</em>. 2016;4(1):1244. <a href="https://doi.org/10.13063/2327-9214.1244" class="external-link">doi:10.13063/2327-9214.1244</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

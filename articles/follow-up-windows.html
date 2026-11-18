@@ -325,11 +325,16 @@ assumption, not an SRTR rule, so run both:</p>
 <div class="section level2">
 <h2 id="rejection-after-the-graft-has-failed">Rejection after the graft has failed<a class="anchor" aria-label="anchor" href="#rejection-after-the-graft-has-failed"></a>
 </h2>
-<p>Follow-up forms keep coming after a graft fails: SRTR files forms for
-the years after graft failure (<code>TFL_FOL_CD</code> codes 801 to
-850). A rejection reported on one of them is about a graft that has
-already failed, so it is not an event for a graft-rejection outcome.
-Neither is a rejection on an ordinary form dated after the failure.</p>
+<p>Follow-up forms keep coming after a graft fails: SAFs hold forms for
+the years after graft failure (<code>TFL_FOL_CD</code> codes 801 to 850,
+“1 year after graft failure” to “50 year after graft failure” in the
+data dictionary’s format <code>FOLCD</code>). Current OPTN policy asks
+for the follow-up form only “until the recipient’s death or graft
+failure” (<a href="#ref-optn2021">OPTN 2021</a>), so how many such forms
+there are depends on the era and the organ. A rejection reported on one
+of them is about a graft that has already failed, so it is not an event
+for a graft-rejection outcome. Neither is a rejection on an ordinary
+form dated after the failure.</p>
 <p><strong>The naive approach</strong> takes the first rejection on any
 form, and censors rejection-free grafts at last follow-up, past the
 failure.</p>
@@ -398,6 +403,10 @@ Death Master File for clinical research. <em>JAMA Cardiol</em>.
 <p><a id="ref-noordzij"></a>Noordzij M, Leffondré K, van Stralen KJ, et
 al. When do we need competing risks methods for survival analysis in
 nephrology? <em>Nephrol Dial Transplant</em>. 2013;28(11):2670-2677. <a href="https://doi.org/10.1093/ndt/gft355" class="external-link">doi:10.1093/ndt/gft355</a></p>
+<p><a id="ref-optn2021"></a>Organ Procurement and Transplantation
+Network. Notice of OPTN policy changes: conclude relaxation of data
+submission requirements for follow-up forms. Approved 1 March 2021,
+effective 1 April 2021 (Policy 18, Table 18-1). <a href="https://hrsa.unos.org/media/4453/conclude-relaxation-of-data-submission-requirements-policy-notice-final.pdf" class="external-link uri">https://hrsa.unos.org/media/4453/conclude-relaxation-of-data-submission-requirements-policy-notice-final.pdf</a></p>
 <p><a id="ref-sapir"></a>Sapir-Pichhadze R, Pintilie M, Tinckam KJ, et
 al. Survival analysis in the presence of competing risks: the example of
 waitlisted kidney transplant candidates. <em>Am J Transplant</em>.

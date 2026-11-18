@@ -6,7 +6,10 @@ codes appear that no format lists, and identifiers that should match
 sometimes do not. Before you rely on sRtr for an analysis, run the
 checks below on your own standard analysis files (SAFs). They take a few
 minutes and tell you whether sRtr behaves on your release as it does on
-the releases it has been checked against.
+the releases it has been checked against. The checks cover the three
+kinds of data quality in a common framework: whether values conform to
+the documented formats, whether they are complete, and whether they are
+plausible ([Kahn et al. 2016](#ref-kahn)).
 
 The code is not run on this website, because it needs real SAFs. It uses
 liver files; change the file keys for other organs.
@@ -18,7 +21,9 @@ change the code, so you can share the results, for example in a GitHub
 issue, without breaking the SRTR data use agreement. Mask any count from
 1 to 10. Masking each number is not enough on its own. If you share a
 total next to masked parts, or two counts that differ by a few, a reader
-can subtract to recover a small count.
+can subtract to recover a small count. The CMS cell size suppression
+policy sets the same rule: no count from 1 to 10, and none that can be
+worked out from other reported numbers ([CMS 2020](#ref-cms)).
 
 ``` r
 
@@ -285,3 +290,14 @@ include exact counts and values from your files.
 For example: “Release 2303, `TX_LI`. `sRtr_warning_unknown_codes` for
 `REC_COD`: \<11 rows with codes not in the format.” Never attach SAF
 files, rows from them, or unmasked counts.
+
+## References
+
+Centers for Medicare & Medicaid Services. CMS cell size suppression
+policy. 2020.
+<https://www.hhs.gov/guidance/document/cms-cell-suppression-policy>
+
+Kahn MG, Callahan TJ, Barnard J, et al. A harmonized data quality
+assessment terminology and framework for the secondary use of electronic
+health record data. *EGEMS (Wash DC)*. 2016;4(1):1244.
+[doi:10.13063/2327-9214.1244](https://doi.org/10.13063/2327-9214.1244)

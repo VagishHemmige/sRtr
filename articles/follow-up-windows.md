@@ -307,11 +307,16 @@ as_event <- sRtr:::add_time_to_event_outcomes(tx, graft_death_same_day = "event"
 
 ## Rejection after the graft has failed
 
-Follow-up forms keep coming after a graft fails: SRTR files forms for
-the years after graft failure (`TFL_FOL_CD` codes 801 to 850). A
-rejection reported on one of them is about a graft that has already
-failed, so it is not an event for a graft-rejection outcome. Neither is
-a rejection on an ordinary form dated after the failure.
+Follow-up forms keep coming after a graft fails: SAFs hold forms for the
+years after graft failure (`TFL_FOL_CD` codes 801 to 850, “1 year after
+graft failure” to “50 year after graft failure” in the data dictionary’s
+format `FOLCD`). Current OPTN policy asks for the follow-up form only
+“until the recipient’s death or graft failure” ([OPTN
+2021](#ref-optn2021)), so how many such forms there are depends on the
+era and the organ. A rejection reported on one of them is about a graft
+that has already failed, so it is not an event for a graft-rejection
+outcome. Neither is a rejection on an ordinary form dated after the
+failure.
 
 **The naive approach** takes the first rejection on any form, and
 censors rejection-free grafts at last follow-up, past the failure.
@@ -385,6 +390,12 @@ Noordzij M, Leffondré K, van Stralen KJ, et al. When do we need
 competing risks methods for survival analysis in nephrology? *Nephrol
 Dial Transplant*. 2013;28(11):2670-2677.
 [doi:10.1093/ndt/gft355](https://doi.org/10.1093/ndt/gft355)
+
+Organ Procurement and Transplantation Network. Notice of OPTN policy
+changes: conclude relaxation of data submission requirements for
+follow-up forms. Approved 1 March 2021, effective 1 April 2021 (Policy
+18, Table 18-1).
+<https://hrsa.unos.org/media/4453/conclude-relaxation-of-data-submission-requirements-policy-notice-final.pdf>
 
 Sapir-Pichhadze R, Pintilie M, Tinckam KJ, et al. Survival analysis in
 the presence of competing risks: the example of waitlisted kidney
