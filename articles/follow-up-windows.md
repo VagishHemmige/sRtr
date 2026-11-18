@@ -60,8 +60,17 @@ fifth of them. Compare the two in your files:
 
 ``` r
 
-mask_n(sum(tx$TFL_LAFUDATE > tx$TFL_ENDTXFU, na.rm = TRUE))
+stopifnot(all(c("TFL_LAFUDATE", "TFL_ENDTXFU") %in% names(tx)))
+comparable <- !is.na(tx$TFL_LAFUDATE) & !is.na(tx$TFL_ENDTXFU)
+if (any(comparable)) {
+  mask_n(sum(tx$TFL_LAFUDATE[comparable] > tx$TFL_ENDTXFU[comparable]))
+} else {
+  "no registration has both dates"
+}
 ```
+
+The count covers only registrations with both dates; a 0 means none of
+them has a later last follow-up.
 
 ![Timeline for three made-up recipients, in years since transplant, each
 with a shaded window from transplant to the earlier of last follow-up
