@@ -95,8 +95,10 @@ the graft's own (\code{TFL_LAFUDATEKI} or \code{TFL_LAFUDATEPA} for \code{TX_KP}
 an event, the recipient is censored at the end of the window. A report
 dated after it is not an event, but its date stays in the date column, so
 \code{!is.na(FIRST_FU_MALIG_DATE) & FIRST_FU_MALIG_DATE_BINARY == 0} finds the
-reports left out. Only the first report is kept, so when it falls before
-the transplant date, a later report is not used in its place. With no last
+reports left out. A report dated before the transplant is not used:
+events are timed from the first report on or after the transplant date,
+while \code{FIRST_FU_MALIG_DATE} and \code{FIRST_FU_REJ_DATE} keep the first report
+of all, for auditing (\code{FIRST_REJ_DATE} is the date used). With no last
 follow-up date the window's end is unknown: death is not used in its place,
 and the time is missing.
 

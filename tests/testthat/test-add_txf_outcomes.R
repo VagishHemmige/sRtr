@@ -102,8 +102,9 @@ test_that("add_time_to_event_outcomes() builds rejection dates without dplyr att
       df
     },
     srtr_time_to_event = function(df, ...) df,
-    add_txf_outcomes = function(df) {
+    .srtr_add_txf_outcomes = function(df, ...) {
       df$FIRST_FU_REJ_DATE <- as.Date(c(NA, "2005-01-01"))
+      df$.FIRST_FU_REJ_ELIGIBLE <- df$FIRST_FU_REJ_DATE
       df
     }
   )
@@ -723,9 +724,9 @@ test_that("a registration listed twice gets the same outcomes on both rows", {
   expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2002-01-01", NA, "2002-01-01")))
 })
 
-test_that("a report dated before the transplant is not counted", {
+test_that("a report dated before the transplant is not counted, but a later one is", {
   # 900001: report the day before transplant only. 900002: one the day before
-  # and a later one; only the first report is kept, so neither counts.
+  # and a later one in the window.
   df <- window_cohort()[1:2, ]
   forms <- tibble::tibble(
     TRR_ID = c(900001, 900002, 900002),
@@ -739,10 +740,15 @@ test_that("a report dated before the transplant is not counted", {
   out <- add_time_to_event_outcomes(df)
 
   for (prefix in c("FIRST_FU_MALIG_DATE", "FIRST_REJ_DATE")) {
-    expect_equal(out[[paste0(prefix, "_BINARY")]], c(0L, 0L))
-    expect_equal(out[[paste0(prefix, "_CENSOR")]], as.Date(rep("2005-01-01", 2)))
-    expect_equal(out[[prefix]], as.Date(rep("1999-12-31", 2)))
+    expect_equal(out[[paste0(prefix, "_BINARY")]], c(0L, 1L))
+    expect_equal(out[[paste0(prefix, "_CENSOR")]], as.Date(c("2005-01-01", "2002-01-01")))
   }
+  # The follow-up date columns keep the first report, for auditing.
+  expect_equal(out$FIRST_FU_MALIG_DATE, as.Date(rep("1999-12-31", 2)))
+  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(rep("1999-12-31", 2)))
+  expect_equal(out$FIRST_REJ_DATE, as.Date(c(NA, "2002-01-01")))
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, c(NA, "follow_up"))
+  expect_equal(grep("^\\.", names(out), value = TRUE), character())
 })
 
 test_that("an event reported only on undated forms has status 1 and no time", {
