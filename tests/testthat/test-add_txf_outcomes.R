@@ -720,8 +720,11 @@ test_that("live: excluding rejection after graft failure removes only dated even
   kp_event <- kp$FIRST_REJ_DATE_BINARY %in% 1L
   # Excluding forms can only remove dated events. It can add an undated one:
   # see "dropping a post-failure form can leave an undated rejection".
-  ex_dated <- ex_event & !is.na(ex$FIRST_REJ_DATE_days)
-  expect_equal(sum(ex_dated & !kp_event), 0)
+  # A counted event's date is its _CENSOR column; undated events have none.
+  ex_dated <- ex_event & !is.na(ex$FIRST_REJ_DATE_CENSOR)
+  kp_dated <- kp_event & !is.na(kp$FIRST_REJ_DATE_CENSOR)
+  expect_equal(sum(ex_dated & !kp_dated), 0)
+  undated <- c("follow_up_undated", "admission_undated")
 
   # A counted follow-up rejection is timed on or before graft failure;
   # admission rejections may fall after a failure during the admission.
@@ -733,7 +736,7 @@ test_that("live: excluding rejection after graft failure removes only dated even
     "Rejection after graft failure (#21)",
     c(
       left_out_by_default = sum(kp_event & !ex_event),
-      undated_only_by_default = sum(ex_event & !ex_dated & !kp_event)
+      undated_only_by_default = sum(ex_event & ex$FIRST_REJ_DATE_SOURCE %in% undated & !kp_event)
     )
   )
 })
