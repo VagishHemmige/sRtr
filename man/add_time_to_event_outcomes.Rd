@@ -9,7 +9,8 @@ add_time_to_event_outcomes(
   df,
   death_window = c("follow_up", "ascertainment"),
   ascertainment_date = NULL,
-  graft_death_same_day = c("censor", "event")
+  graft_death_same_day = c("censor", "event"),
+  rejection_after_graft_failure = c("exclude", "keep")
 )
 }
 \arguments{
@@ -43,6 +44,24 @@ dictionary does not say whether the graft failure date is filled in with
 the death date when a recipient dies with a functioning graft. A real
 failure and death can also fall on the same day. Run both settings to see
 how much your results depend on it.}
+
+\item{rejection_after_graft_failure}{Whether a rejection reported after
+the graft failed counts:
+\itemize{
+\item \code{"exclude"} (default): a graft is at risk of rejection only until it
+fails. Forms filed in the years after graft failure (\code{TFL_FOL_CD} codes
+801 to 850, "N year after graft failure") are not used, and the
+rejection window ends at the graft failure date (\code{TFL_GRAFT_DT}, or
+that graft's own date for \code{TX_KP}), inclusive. The form filed at
+failure (code 800) is used: it may report the rejection that led to
+the failure. A rejection during the transplant admission counts even
+if the graft failed in the same admission.
+\item \code{"keep"}: every form counts, as before.
+}
+
+Malignancy is patient-level and always uses every form. The columns from
+\code{\link[=add_txf_outcomes]{add_txf_outcomes()}} (\code{FIRST_FU_REJ_DATE}, \code{FIRST_FU_REJ_STATUS}) describe
+every form either way.}
 }
 \description{
 Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:

@@ -26,3 +26,12 @@
       Warning:
       1 row had a negative FAKE time; set to NA.
 
+# srtr_time_to_event() stops on infinite dates
+
+    Code
+      srtr_time_to_event(df, event, start, censor, prefix = "X")
+    Condition
+      Error in `srtr_time_to_event()`:
+      ! `event_date` has infinite dates in 1 row.
+      i An infinite date comes from an error upstream, such as `min()` of no dates. Set it to `NA` or fix the source.
+

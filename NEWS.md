@@ -1,5 +1,19 @@
 # sRtr (development version)
 
+* `add_time_to_event_outcomes()` gains `rejection_after_graft_failure`. By
+  default (`"exclude"`), a rejection reported after the graft failed no
+  longer counts: forms filed in the years after graft failure (follow-up
+  codes 801-850) are not used, and the rejection window ends at the graft
+  failure date. `"keep"` gives the previous behaviour (#21).
+
+* `add_time_to_event_outcomes()` now errors when one transplant
+  registration has two different transplant dates
+  (`sRtr_error_conflicting_transplant_dates`), instead of using the earliest.
+
+* `srtr_time_to_event()` now errors on infinite dates
+  (`sRtr_error_nonfinite_dates`) instead of counting them as events with an
+  infinite time (#97).
+
 * Two new articles under "Pitfalls in SRTR data" on the package website,
   *Follow-up forms are reports, not events* and *Follow-up windows and
   death*, show subtleties in SRTR follow-up and death data that change

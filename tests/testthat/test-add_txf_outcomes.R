@@ -905,3 +905,121 @@ test_that("a plain data frame keeps its attributes", {
   expect_null(attr(add_txf_outcomes(df), ".srtr_eligible"))
   expect_equal(attr(out, "txf_report")$registrations_with_forms, 5)
 })
+
+# ---- #21: rejection after graft failure ---------------------------------------
+
+gf_cohort <- function() {
+  # Transplant 2000-01-01, last follow-up 2006-01-01, graft failed 2003-01-01
+  # (900001-900004); 900005 has no graft failure.
+  df <- window_cohort()[1:5, ]
+  df$PERS_OPTN_DEATH_DT <- as.Date(NA)
+  df$TFL_LAFUDATE <- as.Date("2006-01-01")
+  df$TFL_GRAFT_DT <- as.Date(c(rep("2003-01-01", 4), NA))
+  df
+}
+
+gf_forms <- function(fol = c(801, 10, 800, 801, 801)) {
+  # 900001: rejection on a "1 year after graft failure" form, 2004.
+  # 900002: rejection on an ordinary form dated after the failure, 2004.
+  # 900003: rejection on the form filed at graft failure, 2003-01-01.
+  # 900004: rejection on a post-failure form, and an earlier one in 2002.
+  # 900005: no graft failure; a 801 form cannot happen, but it is not used.
+  tibble::tibble(
+    TRR_ID = c(900001, 900002, 900003, 900004, 900004, 900005),
+    ORG_TY = "KI",
+    TFL_FOL_CD = c(fol[1:4], 20, fol[5]),
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(c(
+      "2004-01-01", "2004-01-01", "2003-01-01", "2004-01-01", "2002-01-01", "2004-01-01"
+    ))
+  )
+}
+
+test_that("by default, rejection after graft failure does not count", {
+  local_mocked_bindings(load_srtr_file = function(...) gf_forms())
+
+  out <- add_time_to_event_outcomes(gf_cohort())
+
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(0L, 0L, 1L, 1L, 0L))
+  expect_equal(
+    out$FIRST_REJ_DATE_CENSOR,
+    as.Date(c("2003-01-01", "2003-01-01", "2003-01-01", "2002-01-01", "2006-01-01"))
+  )
+  # The follow-up date column still reports the first report of all.
+  expect_equal(out$FIRST_FU_REJ_DATE[1], as.Date("2004-01-01"))
+  # Malignancy is patient-level: post-failure forms still count.
+  expect_equal(out$FIRST_FU_MALIG_DATE_BINARY, c(1L, 1L, 1L, 1L, 1L))
+})
+
+test_that("rejection_after_graft_failure = 'keep' counts them", {
+  local_mocked_bindings(load_srtr_file = function(...) gf_forms())
+
+  out <- add_time_to_event_outcomes(gf_cohort(), rejection_after_graft_failure = "keep")
+
+  expect_equal(out$FIRST_REJ_DATE_BINARY, rep(1L, 5))
+  expect_equal(out$FIRST_REJ_DATE[1:2], as.Date(c("2004-01-01", "2004-01-01")))
+})
+
+test_that("the follow-up code is read raw or labelled", {
+  meaning <- sRtr::formats$Meaning[sRtr::formats$Format == "FOLCD"]
+  names(meaning) <- sRtr::formats$Code[sRtr::formats$Format == "FOLCD"]
+  codes <- c(801, 10, 800, 801, 801)
+  labelled <- gf_forms(unname(meaning[as.character(codes)]))
+  labelled$TFL_FOL_CD[5] <- meaning[["20"]]
+  local_mocked_bindings(load_srtr_file = function(...) labelled)
+  out <- add_time_to_event_outcomes(gf_cohort())
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(0L, 0L, 1L, 1L, 0L))
+})
+
+test_that("an admission rejection counts even when the graft failed during the admission", {
+  df <- gf_cohort()[1, ]
+  df$REC_ACUTE_REJ_EPISODE <- "1: Yes, at least one episode treated with anti-rejection agent"
+  df$REC_POSTX_LOS <- 20
+  df$TFL_GRAFT_DT <- as.Date("2000-01-10")
+  local_mocked_bindings(load_srtr_file = function(...) gf_forms()[1, ])
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, "admission_los")
+  expect_equal(out$FIRST_REJ_DATE_BINARY, 1L)
+})
+
+test_that("an unknown rejection_after_graft_failure is an error", {
+  expect_error(
+    add_time_to_event_outcomes(gf_cohort(), rejection_after_graft_failure = "drop"),
+    class = "rlang_error"
+  )
+})
+
+test_that("TX_KP rejection is bounded by its own graft's failure", {
+  # Kidney failed 2002; both grafts report a rejection in 2003.
+  df <- fake_cohort("TX_KP")[1, ]
+  df$TFL_GRAFT_DT_KI <- as.Date("2002-01-01")
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = c("KI", "PA"),
+    TFL_FOL_CD = c(10, 30),
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date("2003-01-01")
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$FIRST_REJ_DATE_BINARY, 0L)
+  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date("2002-01-01"))
+  expect_equal(out$FIRST_REJ_DATE_PA_BINARY, 1L)
+})
+
+# ---- #218 review: one registration, two transplant dates ---------------------
+
+test_that("a registration with two different transplant dates is an error", {
+  df <- window_cohort()[c(1, 1), ]
+  df$REC_TX_DT[2] <- as.Date("2000-06-01")
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+
+  expect_error(add_time_to_event_outcomes(df), class = "sRtr_error_conflicting_transplant_dates")
+  expect_snapshot(error = TRUE, add_time_to_event_outcomes(df))
+})

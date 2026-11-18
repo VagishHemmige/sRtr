@@ -281,3 +281,25 @@ test_that("srtr_time_to_event() warns about negative times and sets them to NA",
   )
   expect_equal(out$FAKE_days, c(NA, 365))
 })
+
+# ---- #97: infinite dates -------------------------------------------------------
+
+test_that("srtr_time_to_event() stops on infinite dates", {
+  df <- data.frame(
+    start = as.Date(c("2000-01-01", "2000-01-01")),
+    event = as.Date(c(Inf, NA)),
+    censor = as.Date(c("2005-01-01", "2005-01-01"))
+  )
+  expect_error(
+    srtr_time_to_event(df, event, start, censor, prefix = "X"),
+    class = "sRtr_error_nonfinite_dates"
+  )
+  expect_snapshot(error = TRUE, srtr_time_to_event(df, event, start, censor, prefix = "X"))
+
+  df$event <- as.Date(NA)
+  df$censor[2] <- as.Date(-Inf)
+  expect_error(
+    srtr_time_to_event(df, event, start, censor, prefix = "X"),
+    class = "sRtr_error_nonfinite_dates"
+  )
+})

@@ -46,3 +46,12 @@
       1 recipient had a malignancy reported only on follow-up forms with no date.
       i It counts as a malignancy with an unknown time: FIRST_FU_MALIG_DATE_BINARY is 1 and the time is `NA`.
 
+# a registration with two different transplant dates is an error
+
+    Code
+      add_time_to_event_outcomes(df)
+    Condition
+      Error in `add_time_to_event_outcomes()`:
+      ! 1 registration has more than one transplant date (REC_TX_DT).
+      i Each TRR_ID is one transplant registration. Check how the cohort was built.
+

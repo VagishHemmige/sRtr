@@ -14,6 +14,11 @@
 #' @param add_epsilon Numeric days to add to time (to avoid zero-time issues).
 #'   Default 1. Set to 0 to disable. Logical TRUE/FALSE also accepted
 #'   (treated as 1/0) for backward compatibility.
+#' @details
+#' Infinite dates (from `min()` or `max()` of no dates, for example) are an
+#' error (`sRtr_error_nonfinite_dates`): they would otherwise count as an
+#' event with an infinite time.
+#'
 #' @param warn_negative Warn and set to NA if computed time is negative. Default TRUE.
 #'
 #' @return `df` with added columns:
@@ -38,6 +43,30 @@ srtr_time_to_event <- function(
   event_q <- rlang::enquo(event_date)
   start_q <- rlang::enquo(start_date)
   censor_q <- rlang::enquo(censor_date)
+
+  # An infinite date can only come from an error upstream (such as min() of
+  # no dates); it would otherwise count as an event with an infinite time.
+  dates <- list(
+    event_date = rlang::eval_tidy(event_q, df),
+    start_date = rlang::eval_tidy(start_q, df),
+    censor_date = rlang::eval_tidy(censor_q, df)
+  )
+  n_inf <- vapply(
+    dates,
+    \(x) sum(is.infinite(suppressWarnings(as.numeric(x)))),
+    integer(1)
+  )
+  if (any(n_inf > 0)) {
+    bad <- names(n_inf)[n_inf > 0]
+    srtr_abort(
+      c(
+        "{.arg {bad}} {cli::qty(length(bad))}{?has/have} infinite dates in {sum(n_inf)} row{?s}.",
+        "i" = "An infinite date comes from an error upstream, such as {.code min()} of no dates. Set {cli::qty(sum(n_inf))}{?it/them} to {.code NA} or fix the source."
+      ),
+      class = "nonfinite_dates",
+      arguments = bad
+    )
+  }
 
   # Output names
   censor_col <- paste0(prefix, "_CENSOR")
@@ -204,7 +233,8 @@ add_txf_outcomes <- function(df) {
 #' out of the columns so no caller column can be overwritten. A registration
 #' listed more than once uses its earliest known `start` on every row.
 #' @noRd
-.srtr_add_txf_outcomes <- function(df, start = NULL) {
+.srtr_add_txf_outcomes <- function(df, start = NULL,
+                                   rejection_after_graft_failure = "keep") {
   #Save the key of the file passed to the function as well as the key of the appropriate follow-up file
   file_key <- attr(df, "file_key")
   follow_up_key <- paste0(substr(file_key, 1, 2), "F", substring(file_key, 3L))
@@ -223,7 +253,8 @@ add_txf_outcomes <- function(df) {
       "ORG_TY",
       "TFL_MALIG",
       "TFL_ACUTE_REJ_EPISODE",
-      "TFL_PX_STAT_DT"
+      "TFL_PX_STAT_DT",
+      if (rejection_after_graft_failure == "exclude") "TFL_FOL_CD"
     ),
     trr_id_filter = filter_vector
   ) |>
@@ -234,7 +265,8 @@ add_txf_outcomes <- function(df) {
       "TFL_MALIG",
       "TFL_ACUTE_REJ_EPISODE",
       "TFL_PX_STAT_DT",
-      "ORG_TYPE"
+      "ORG_TYPE",
+      tidyselect::any_of("TFL_FOL_CD")
     ) |>
     dplyr::arrange(.data$TRR_ID, .data$TFL_PX_STAT_DT)
 
@@ -253,6 +285,9 @@ add_txf_outcomes <- function(df) {
   out$FIRST_FU_MALIG_STATUS <- malig$status
   out$FIRST_FU_MALIG_LAST_NEG_DATE <- malig$last_neg
   attr(out, ".srtr_eligible") <- list(FIRST_FU_MALIG_DATE = malig$eligible)
+  attr(out, ".srtr_undated") <- list(
+    FIRST_FU_MALIG_DATE = malig$status == "event" & is.na(malig$date)
+  )
   endpoints <- list(malig)
   endpoint_names <- c(FIRST_FU_MALIG_DATE = "malignancy")
 
@@ -260,6 +295,16 @@ add_txf_outcomes <- function(df) {
   #untreated, 3 no, 998 unknown. Only code 3 is a negative form: an untreated
   #rejection is evidence of rejection, so it cannot bound the interval.
   episode <- follow_up_df$TFL_ACUTE_REJ_EPISODE
+  #Forms filed in the years after graft failure (follow-up codes 801-850, "N
+  #year after graft failure") describe a graft that has already failed. The
+  #form filed at failure (800) is kept: it may report the rejection that led
+  #to the failure.
+  fol <- follow_up_df[["TFL_FOL_CD"]]
+  after_failure <- if (rejection_after_graft_failure == "exclude" && !is.null(fol)) {
+    .srtr_after_graft_failure(fol)
+  } else {
+    rep(FALSE, nrow(follow_up_df))
+  }
   rejection_endpoint <- function(rows) {
     ep <- episode[rows]
     .srtr_txf_endpoint(
@@ -271,13 +316,24 @@ add_txf_outcomes <- function(df) {
       start = start
     )
   }
-  set_rejection <- function(out, result, suffix) {
+  #The public columns describe every form; the dates used for time to event
+  #(internal attributes) leave out post-failure forms when asked to.
+  set_rejection <- function(out, result, timed, suffix) {
     out[[paste0("FIRST_FU_REJ_DATE", suffix)]] <- result$date
     out[[paste0("FIRST_FU_REJ_STATUS", suffix)]] <- result$status
     out[[paste0("FIRST_FU_REJ_LAST_NEG_DATE", suffix)]] <- result$last_neg
-    attr(out, ".srtr_eligible")[[paste0("FIRST_FU_REJ_DATE", suffix)]] <-
-      result$eligible
+    name <- paste0("FIRST_FU_REJ_DATE", suffix)
+    attr(out, ".srtr_eligible")[[name]] <- timed$eligible
+    attr(out, ".srtr_undated")[[name]] <-
+      timed$status == "event" & is.na(timed$date)
     out
+  }
+  timed_endpoint <- function(rows, result) {
+    if (any(after_failure & rows)) {
+      rejection_endpoint(rows & !after_failure)
+    } else {
+      result
+    }
   }
 
   #The output columns depend on the file, not on which organs happen to have
@@ -300,21 +356,25 @@ add_txf_outcomes <- function(df) {
     }
     graft <- c(KI = "kidney", PA = "pancreas")
     for (organ in names(graft)) {
-      result <- rejection_endpoint(follow_up_df$ORG_TYPE %in% organ)
-      out <- set_rejection(out, result, paste0("_", organ))
+      rows <- follow_up_df$ORG_TYPE %in% organ
+      result <- rejection_endpoint(rows)
+      timed <- timed_endpoint(rows, result)
+      out <- set_rejection(out, result, timed, paste0("_", organ))
       endpoints <- c(endpoints, list(result))
       endpoint_names[[paste0("FIRST_FU_REJ_DATE_", organ)]] <-
         paste0("rejection, ", graft[[organ]])
     }
   } else {
-    result <- rejection_endpoint(rep(TRUE, nrow(follow_up_df)))
-    out <- set_rejection(out, result, "")
+    rows <- rep(TRUE, nrow(follow_up_df))
+    result <- rejection_endpoint(rows)
+    out <- set_rejection(out, result, timed_endpoint(rows, result), "")
     endpoints <- c(endpoints, list(result))
     endpoint_names[["FIRST_FU_REJ_DATE"]] <- "rejection"
   }
 
   if (is.null(start)) {
     attr(out, ".srtr_eligible") <- NULL
+    attr(out, ".srtr_undated") <- NULL
   }
   attr(out, "txf_report") <- .srtr_txf_report(
     df,
@@ -362,6 +422,21 @@ add_txf_outcomes <- function(df) {
 #'   the death date when a recipient dies with a functioning graft. A real
 #'   failure and death can also fall on the same day. Run both settings to see
 #'   how much your results depend on it.
+#' @param rejection_after_graft_failure Whether a rejection reported after
+#'   the graft failed counts:
+#'   * `"exclude"` (default): a graft is at risk of rejection only until it
+#'     fails. Forms filed in the years after graft failure (`TFL_FOL_CD` codes
+#'     801 to 850, "N year after graft failure") are not used, and the
+#'     rejection window ends at the graft failure date (`TFL_GRAFT_DT`, or
+#'     that graft's own date for `TX_KP`), inclusive. The form filed at
+#'     failure (code 800) is used: it may report the rejection that led to
+#'     the failure. A rejection during the transplant admission counts even
+#'     if the graft failed in the same admission.
+#'   * `"keep"`: every form counts, as before.
+#'
+#'   Malignancy is patient-level and always uses every form. The columns from
+#'   [add_txf_outcomes()] (`FIRST_FU_REJ_DATE`, `FIRST_FU_REJ_STATUS`) describe
+#'   every form either way.
 #'
 #' @details
 #' `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only the
@@ -434,10 +509,12 @@ add_time_to_event_outcomes <- function(
   df,
   death_window = c("follow_up", "ascertainment"),
   ascertainment_date = NULL,
-  graft_death_same_day = c("censor", "event")
+  graft_death_same_day = c("censor", "event"),
+  rejection_after_graft_failure = c("exclude", "keep")
 ) {
   death_window <- match.arg(death_window)
   graft_death_same_day <- match.arg(graft_death_same_day)
+  rejection_after_graft_failure <- rlang::arg_match(rejection_after_graft_failure)
   if (death_window == "ascertainment") {
     if (
       is.null(ascertainment_date) ||
@@ -532,12 +609,39 @@ add_time_to_event_outcomes <- function(
   df$.graft_event <- NULL
   df$.graft_censor <- NULL
 
+  #One registration has one transplant date. Two different known dates for
+  #the same TRR_ID can only come from the caller's own data handling, and
+  #would make which report counts depend on row order.
+  known <- !is.na(df$TRR_ID) & !is.na(df$REC_TX_DT)
+  n_dates <- tapply(
+    df$REC_TX_DT[known],
+    df$TRR_ID[known],
+    \(x) length(unique(x))
+  )
+  n_bad <- sum(n_dates > 1)
+  if (n_bad > 0) {
+    srtr_abort(
+      c(
+        "{n_bad} registration{?s} {?has/have} more than one transplant date ({.field REC_TX_DT}).",
+        "i" = "Each {.field TRR_ID} is one transplant registration. Check how the cohort was built."
+      ),
+      class = "conflicting_transplant_dates",
+      n = n_bad
+    )
+  }
+
   #Add rejection and malignancy from follow up database
   #Events are timed from the first report on or after the transplant date;
   #the public date columns keep the first report of all, for auditing.
-  df <- .srtr_add_txf_outcomes(df, start = df$REC_TX_DT)
+  df <- .srtr_add_txf_outcomes(
+    df,
+    start = df$REC_TX_DT,
+    rejection_after_graft_failure = rejection_after_graft_failure
+  )
   eligible <- attr(df, ".srtr_eligible")
+  undated <- attr(df, ".srtr_undated")
   attr(df, ".srtr_eligible") <- NULL
+  attr(df, ".srtr_undated") <- NULL
 
   #Rejection can be found during the transplant admission or on a follow-up
   #form. An admission rejection is dated at discharge: the transplant date
@@ -547,20 +651,20 @@ add_time_to_event_outcomes <- function(
   if (is_kp) {
     rejection <- .srtr_first_rejection(
       df, "REC_ACUTE_REJ_EPISODE", eligible$FIRST_FU_REJ_DATE_KI,
-      .srtr_undated_event(df, "FIRST_FU_REJ", "_KI")
+      undated$FIRST_FU_REJ_DATE_KI
     )
     df$FIRST_REJ_DATE <- rejection$date
     df$FIRST_REJ_DATE_SOURCE <- rejection$source
     rejection <- .srtr_first_rejection(
       df, "REC_ACUTE_REJ_EPISODE_PA", eligible$FIRST_FU_REJ_DATE_PA,
-      .srtr_undated_event(df, "FIRST_FU_REJ", "_PA")
+      undated$FIRST_FU_REJ_DATE_PA
     )
     df$FIRST_REJ_DATE_PA <- rejection$date
     df$FIRST_REJ_DATE_PA_SOURCE <- rejection$source
   } else {
     rejection <- .srtr_first_rejection(
       df, "REC_ACUTE_REJ_EPISODE", eligible$FIRST_FU_REJ_DATE,
-      .srtr_undated_event(df, "FIRST_FU_REJ", "")
+      undated$FIRST_FU_REJ_DATE
     )
     df$FIRST_REJ_DATE <- rejection$date
     df$FIRST_REJ_DATE_SOURCE <- rejection$source
@@ -575,10 +679,31 @@ add_time_to_event_outcomes <- function(
   #Malignancy is timed from its first report on or after transplant (the
   #date column keeps the first report of all); rejection from FIRST_REJ_DATE,
   #already built that way.
+  #With rejection_after_graft_failure = "exclude", a graft is at risk of
+  #rejection only until it fails: the rejection window also ends at that
+  #graft's failure date, except for a rejection found during the transplant
+  #admission, which came before any failure in the same admission.
+  rejection_end <- function(lafu, graft_col, source_col) {
+    failure <- df[[graft_col]]
+    if (rejection_after_graft_failure == "keep" || is.null(failure)) {
+      return(lafu)
+    }
+    use <- !is.na(failure) &
+      !is.na(lafu) &
+      failure < lafu &
+      !startsWith(dplyr::coalesce(df[[source_col]], ""), "admission")
+    dplyr::if_else(use, failure, lafu)
+  }
   report_lafu <- list(
     FIRST_FU_MALIG_DATE = df$.patient_lafu,
-    FIRST_REJ_DATE = df$.graft_lafu,
-    FIRST_REJ_DATE_PA = if (is_kp) df$TFL_LAFUDATEPA
+    FIRST_REJ_DATE = rejection_end(
+      df$.graft_lafu,
+      if (is_kp) "TFL_GRAFT_DT_KI" else "TFL_GRAFT_DT",
+      "FIRST_REJ_DATE_SOURCE"
+    ),
+    FIRST_REJ_DATE_PA = if (is_kp) {
+      rejection_end(df$TFL_LAFUDATEPA, "TFL_GRAFT_DT_PA", "FIRST_REJ_DATE_PA_SOURCE")
+    }
   )
   report_date <- list(
     FIRST_FU_MALIG_DATE = eligible$FIRST_FU_MALIG_DATE,
@@ -647,7 +772,7 @@ add_time_to_event_outcomes <- function(
     df <- .srtr_mark_undated(
       df,
       "FIRST_FU_MALIG_DATE",
-      df$FIRST_FU_MALIG_STATUS %in% "event" & is.na(df$FIRST_FU_MALIG_DATE),
+      undated$FIRST_FU_MALIG_DATE %in% TRUE,
       what = "had a malignancy reported only on follow-up forms with no date",
       noun = "malignancy",
       class = "undated_follow_up_report"
@@ -773,15 +898,16 @@ add_time_to_event_outcomes <- function(
   as.character(x) %in% c(code, meaning)
 }
 
-#' Which rows have a follow-up event reported only on undated forms
+#' Which follow-up forms were filed in the years after graft failure
+#'
+#' `TFL_FOL_CD` (format `FOLCD`) codes 801 to 850 are "N year after graft
+#' failure". Raw codes or labels; a missing value counts as no.
 #' @noRd
-.srtr_undated_event <- function(df, stem, suffix) {
-  status <- df[[paste0(stem, "_STATUS", suffix)]]
-  date <- df[[paste0(stem, "_DATE", suffix)]]
-  if (is.null(status) || is.null(date)) {
-    return(rep(FALSE, nrow(df)))
-  }
-  status %in% "event" & is.na(date)
+.srtr_after_graft_failure <- function(fol) {
+  Reduce(
+    `|`,
+    lapply(as.character(801:850), \(code) .srtr_has_code(fol, code, "FOLCD"))
+  )
 }
 
 #' Keep a known event with no usable date as an event

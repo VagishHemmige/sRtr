@@ -290,6 +290,27 @@ death counts as death with a working graft (`graft_death_same_day =
 as_event <- sRtr:::add_time_to_event_outcomes(tx, graft_death_same_day = "event")
 ```
 
+# Rejection after the graft has failed
+
+Follow-up forms keep coming after a graft fails: SRTR files forms for the
+years after graft failure (`TFL_FOL_CD` codes 801 to 850). A rejection
+reported on one of them is about a graft that has already failed, so it is
+not an event for a graft-rejection outcome. Neither is a rejection on an
+ordinary form dated after the failure.
+
+**The naive approach** takes the first rejection on any form, and censors
+rejection-free grafts at last follow-up, past the failure.
+
+**With sRtr**, `add_time_to_event_outcomes()` leaves out the post-failure
+forms and ends the rejection window at the graft failure date, by default.
+The form filed at failure (code 800) still counts, since it may report the
+rejection that caused the failure. Compare with every form counted:
+
+```{r}
+keep <- sRtr:::add_time_to_event_outcomes(tx, rejection_after_graft_failure = "keep")
+mask_n(sum(keep$FIRST_REJ_DATE_BINARY %in% 1L & !out$FIRST_REJ_DATE_BINARY %in% 1L))
+```
+
 # Whose follow-up?
 
 Some outcomes belong to the patient and some to the graft. Malignancy and
@@ -315,4 +336,5 @@ bound a pancreas rejection.
   apart the sources are.
 - Count deaths and censor survivors over the same period: `death_window`.
 - Run graft failure both ways for failures on the day of death.
+- Stop counting rejection when the graft fails.
 - For kidney-pancreas, use each graft's own follow-up.
