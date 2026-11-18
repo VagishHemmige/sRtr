@@ -137,22 +137,32 @@ Joins between SAF files rely on identifiers. These should hold, and
 anything else is worth knowing before you join:
 
 ```{r}
-ids <- tx |> filter(!is.na(TRR_ID), !is.na(PERS_ID))
 mask_n(c(
   registrations = n_distinct(tx$TRR_ID, na.rm = TRUE),
   rows_beyond_one_per_registration =
     sum(!is.na(tx$TRR_ID)) - n_distinct(tx$TRR_ID, na.rm = TRUE),
   missing_trr_id = sum(is.na(tx$TRR_ID)),
-  repeat_registrations =
-    n_distinct(ids$TRR_ID) - n_distinct(ids$PERS_ID),
   follow_up_registrations_not_in_tx =
     n_distinct(txf$TRR_ID[!is.na(txf$TRR_ID) & !txf$TRR_ID %in% tx$TRR_ID])
 ))
+
+# Each registration belongs to one person. Check that first; only then is
+# "registrations minus people" a count of repeat registrations.
+ids <- tx |>
+  filter(!is.na(TRR_ID), !is.na(PERS_ID)) |>
+  distinct(TRR_ID, PERS_ID)
+one_person_per_registration <- !anyDuplicated(ids$TRR_ID)
+one_person_per_registration
+if (one_person_per_registration) {
+  mask_n(c(repeat_registrations = nrow(ids) - n_distinct(ids$PERS_ID)))
+}
 ```
 
 - `rows_beyond_one_per_registration` should be 0: each row of a transplant
   file is one registration.
 - `missing_trr_id` should be 0.
+- `one_person_per_registration` should be `TRUE`. If it is not, that is
+  worth reporting, and the next count is skipped.
 - `repeat_registrations` counts registrations after a person's first one:
   people transplanted more than once have several registrations. It is not
   the number of people with a repeat transplant, nor all their
