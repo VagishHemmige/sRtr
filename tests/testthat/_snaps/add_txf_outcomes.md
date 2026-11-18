@@ -34,3 +34,15 @@
       1 recipient had a treated rejection during the transplant admission with no usable length of stay or discharge date.
       i It counts as a rejection with an unknown time: FIRST_REJ_DATE_BINARY is 1 and the time is `NA`.
 
+# an event reported only on undated forms is reported
+
+    Code
+      out <- add_time_to_event_outcomes(df)
+    Condition
+      Warning:
+      1 recipient had a rejection reported only on follow-up forms with no date.
+      i It counts as a rejection with an unknown time: FIRST_REJ_DATE_BINARY is 1 and the time is `NA`.
+      Warning:
+      1 recipient had a malignancy reported only on follow-up forms with no date.
+      i It counts as a malignancy with an unknown time: FIRST_FU_MALIG_DATE_BINARY is 1 and the time is `NA`.
+
