@@ -60,3 +60,19 @@ load_live <- function(file_key, ...) {
     }
   )
 }
+
+# Prints sizing counts from a live test, masked so they can be shared: any
+# count from 1 to 10 shows as "<11". Use it only for counts that cannot be
+# subtracted from one another, or from a printed total, to recover a masked
+# count.
+live_counts <- function(title, counts) {
+  shown <- ifelse(
+    counts > 0 & counts < 11,
+    "<11",
+    format(counts, big.mark = ",", trim = TRUE)
+  )
+  message(
+    "\n[live] ", title, "\n",
+    paste0("  ", names(counts), ": ", shown, collapse = "\n")
+  )
+}
