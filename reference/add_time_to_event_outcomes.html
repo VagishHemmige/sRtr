@@ -118,6 +118,23 @@ is not counted, and a graft without a failure is censored at the earlier of
 its last follow-up date and death. Death with a functioning graft is a
 censoring time, not a graft failure. A graft failure dated after the last
 follow-up date but before death is still counted, at its own date.</p>
+<p>First rejection (<code>FIRST_REJ_DATE</code>, and <code>FIRST_REJ_DATE_PA</code> for <code>TX_KP</code>)
+counts a treated rejection (code 1 of format <code>ACREJEP</code>, raw or labelled)
+during the transplant admission (<code>REC_ACUTE_REJ_EPISODE</code>, or
+<code>REC_ACUTE_REJ_EPISODE_PA</code>) first, else the first follow-up form reporting
+one. An admission rejection is dated at discharge, a proxy: the transplant
+date plus <code>REC_POSTX_LOS</code>, else <code>REC_DISCHRG_DT</code>; a date before the
+transplant is not used. <code>FIRST_REJ_DATE_SOURCE</code> (<code>"admission_los"</code>,
+<code>"admission_discharge"</code>, <code>"admission_undated"</code> or <code>"follow_up"</code>) says which
+rule applied. Here a missing date does not always mean no event: an
+admission rejection with no usable date keeps <code>_BINARY = 1</code> with a missing
+censoring date and time, with a warning, so it drops out of time-to-event
+models instead of counting as rejection-free. A later follow-up rejection
+stays in <code>FIRST_FU_REJ_DATE</code> (<code>FIRST_FU_REJ_DATE_KI</code> and
+<code>FIRST_FU_REJ_DATE_PA</code> for <code>TX_KP</code>, with <code>FIRST_REJ_DATE_PA_SOURCE</code> for the
+pancreas) and is never used in its place. A date is unusable when it falls
+before the transplant; with no transplant date, the discharge date is kept,
+and the elapsed time is missing.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -162,6 +162,11 @@
   no longer fails unless dplyr is attached
   ([\#17](https://github.com/VagishHemmige/sRtr/issues/17)).
 
+- [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
+  gives a missing date, not an infinite one, when every positive
+  follow-up form for a recipient is undated
+  ([\#214](https://github.com/VagishHemmige/sRtr/issues/214)).
+
 - [`apply_srtr_factors()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.md)
   and
   [`apply_srtr_varlabels()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.md)
