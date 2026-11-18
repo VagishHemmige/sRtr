@@ -6,6 +6,20 @@ fake_tx <- function(file_key) {
   df
 }
 
+# The columns add_txf_outcomes() adds, for rejection column suffixes `organs`.
+fu_columns <- function(organs) {
+  c(
+    "FIRST_FU_MALIG_DATE",
+    "FIRST_FU_MALIG_STATUS",
+    "FIRST_FU_MALIG_LAST_NEG_DATE",
+    as.vector(t(outer(
+      organs,
+      c("FIRST_FU_REJ_DATE", "FIRST_FU_REJ_STATUS", "FIRST_FU_REJ_LAST_NEG_DATE"),
+      \(organ, stem) paste0(stem, organ)
+    )))
+  )
+}
+
 fake_txf <- function(org_ty) {
   tibble::tibble(
     TRR_ID = c(900001, 900001, 900002, 900003),
@@ -32,7 +46,7 @@ test_that("add_txf_outcomes() runs for a single-organ file without dplyr attache
 
   out <- add_txf_outcomes(fake_tx("TX_KI"))
 
-  expect_named(out, c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE"))
+  expect_named(out, c("TRR_ID", fu_columns("")))
   expect_equal(nrow(out), 3)
   expect_equal(out$FIRST_FU_MALIG_DATE, as.Date(c("2002-01-01", NA, NA)))
   expect_equal(
@@ -88,8 +102,9 @@ test_that("add_time_to_event_outcomes() builds rejection dates without dplyr att
       df
     },
     srtr_time_to_event = function(df, ...) df,
-    add_txf_outcomes = function(df) {
+    .srtr_add_txf_outcomes = function(df, ...) {
       df$FIRST_FU_REJ_DATE <- as.Date(c(NA, "2005-01-01"))
+      attr(df, ".srtr_eligible") <- list(FIRST_FU_REJ_DATE = df$FIRST_FU_REJ_DATE)
       df
     }
   )
@@ -121,7 +136,7 @@ no_rejection_txf <- function(org_ty) {
 test_that("a single-organ cohort with no rejections still gets FIRST_FU_REJ_DATE", {
   local_mocked_bindings(load_srtr_file = function(...) no_rejection_txf("KI"))
   out <- add_txf_outcomes(fake_tx("TX_KI"))
-  expect_named(out, c("TRR_ID", "FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE"))
+  expect_named(out, c("TRR_ID", fu_columns("")))
   expect_equal(out$FIRST_FU_REJ_DATE, rep(as.Date(NA), 3))
   expect_s3_class(out$FIRST_FU_REJ_DATE, "Date")
 })
@@ -138,15 +153,7 @@ test_that("a cohort with no malignancy still gets FIRST_FU_MALIG_DATE", {
 test_that("TX_KP keeps _KI and _PA columns when only kidney rejections occur", {
   local_mocked_bindings(load_srtr_file = function(...) fake_txf("KI"))
   out <- add_txf_outcomes(fake_tx("TX_KP"))
-  expect_named(
-    out,
-    c(
-      "TRR_ID",
-      "FIRST_FU_MALIG_DATE",
-      "FIRST_FU_REJ_DATE_KI",
-      "FIRST_FU_REJ_DATE_PA"
-    )
-  )
+  expect_named(out, c("TRR_ID", fu_columns(c("_KI", "_PA"))))
   expect_equal(
     out$FIRST_FU_REJ_DATE_KI,
     as.Date(c("2001-01-01", NA, "2003-01-01"))
@@ -430,4 +437,405 @@ test_that("a discharge date is kept when the transplant date is missing", {
   expect_equal(out$FIRST_REJ_DATE_SOURCE, "admission_discharge")
   expect_equal(out$FIRST_REJ_DATE_BINARY, 1L)
   expect_equal(out$FIRST_REJ_DATE_days, NA_real_)
+})
+
+# ---- #214: follow-up evidence kept apart from "no event" --------------------
+
+malig_forms <- function() {
+  # Made-up forms. 900001: N, N, Y, Y. 900002: U then N. 900003: U and no
+  # answer. 900004: no forms. 900005: an undated Y and an N. 900006: an N on
+  # the day of the first Y, and an earlier N.
+  tibble::tibble(
+    TRR_ID = c(900001, 900001, 900001, 900001, 900002, 900002, 900003, 900003,
+               900005, 900005, 900006, 900006, 900006),
+    ORG_TY = "KI",
+    TFL_MALIG = c("N", "N", "Y", "Y", "U", "N", "U", NA, "Y", "N", "N", "N", "Y"),
+    TFL_ACUTE_REJ_EPISODE = "3: No",
+    TFL_PX_STAT_DT = as.Date(c(
+      "2001-01-01", "2002-01-01", "2003-01-01", "2004-01-01",
+      "2001-01-01", "2002-01-01",
+      "2001-01-01", "2002-01-01",
+      NA, "2001-01-01",
+      "2000-06-01", "2001-01-01", "2001-01-01"
+    ))
+  )
+}
+
+six_tx <- function(file_key = "TX_KI") {
+  df <- tibble::tibble(TRR_ID = 900001:900006 + 0)
+  attr(df, "file_key") <- file_key
+  df
+}
+
+test_that("malignancy status keeps unknown and no follow-up apart from no event", {
+  local_mocked_bindings(load_srtr_file = function(...) malig_forms())
+
+  out <- add_txf_outcomes(six_tx())
+
+  expect_equal(
+    out$FIRST_FU_MALIG_STATUS,
+    c("event", "no event", "unknown", "no follow-up", "event", "event")
+  )
+  # The undated report is evidence of an event with an unknown date.
+  expect_equal(
+    out$FIRST_FU_MALIG_DATE,
+    as.Date(c("2003-01-01", NA, NA, NA, NA, "2001-01-01"))
+  )
+})
+
+test_that("the last negative malignancy form is strictly before the first report", {
+  local_mocked_bindings(load_srtr_file = function(...) malig_forms())
+
+  out <- add_txf_outcomes(six_tx())
+
+  # 900002: no report, so its last explicit "N"; 900003: no "N" at all;
+  # 900005: report undated, so no bound; 900006: the same-day "N" does not count.
+  expect_equal(
+    out$FIRST_FU_MALIG_LAST_NEG_DATE,
+    as.Date(c("2002-01-01", "2002-01-01", NA, NA, NA, "2000-06-01"))
+  )
+})
+
+rejection_forms <- function(codes = c(3, 2, 1, 3, 998, 2, 998)) {
+  # Made-up forms. 900001: no, untreated, treated. 900002: no, unknown.
+  # 900003: untreated only. 900004: no forms. 900005: unknown only.
+  tibble::tibble(
+    TRR_ID = c(900001, 900001, 900001, 900002, 900002, 900003, 900005),
+    ORG_TY = "KI",
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = codes,
+    TFL_PX_STAT_DT = as.Date(c(
+      "2001-01-01", "2002-01-01", "2003-01-01",
+      "2001-01-01", "2002-01-01",
+      "2001-01-01",
+      "2001-01-01"
+    ))
+  )
+}
+
+labelled_rejection <- function(codes) {
+  meaning <- sRtr::formats$Meaning[sRtr::formats$Format == "ACREJEPF"]
+  names(meaning) <- sRtr::formats$Code[sRtr::formats$Format == "ACREJEPF"]
+  unname(meaning[as.character(codes)])
+}
+
+test_that("rejection status keeps untreated, unknown and no follow-up apart", {
+  local_mocked_bindings(load_srtr_file = function(...) rejection_forms())
+
+  out <- add_txf_outcomes(six_tx()[1:5, ])
+
+  expect_equal(
+    out$FIRST_FU_REJ_STATUS,
+    c("event", "no event", "untreated", "no follow-up", "unknown")
+  )
+  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2003-01-01", NA, NA, NA, NA)))
+  # An untreated rejection is not a negative form: 900001's bound is the "no".
+  expect_equal(
+    out$FIRST_FU_REJ_LAST_NEG_DATE,
+    as.Date(c("2001-01-01", "2001-01-01", NA, NA, NA))
+  )
+})
+
+test_that("rejection status reads raw codes and labels alike", {
+  codes <- c(3, 2, 1, 3, 998, 2, 998)
+  labelled <- rejection_forms(labelled_rejection(codes))
+  local_mocked_bindings(load_srtr_file = function(...) rejection_forms(codes))
+  raw_out <- add_txf_outcomes(six_tx()[1:5, ])
+  local_mocked_bindings(load_srtr_file = function(...) labelled)
+  labelled_out <- add_txf_outcomes(six_tx()[1:5, ])
+
+  expect_equal(raw_out$FIRST_FU_REJ_STATUS, labelled_out$FIRST_FU_REJ_STATUS)
+  expect_equal(raw_out$FIRST_FU_REJ_DATE, labelled_out$FIRST_FU_REJ_DATE)
+  expect_equal(raw_out$FIRST_FU_REJ_DATE, as.Date(c("2003-01-01", NA, NA, NA, NA)))
+})
+
+test_that("TX_KP rejection status and bounds are kept per graft", {
+  # 900001: kidney "no" in 2001, pancreas treated rejection in 2002. The
+  # kidney form does not bound the pancreas rejection.
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = c("KI", "PA"),
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = labelled_rejection(c(3, 1)),
+    TFL_PX_STAT_DT = as.Date(c("2001-01-01", "2002-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- add_txf_outcomes(six_tx("TX_KP")[1:2, ])
+
+  expect_equal(out$FIRST_FU_REJ_STATUS_KI, c("no event", "no follow-up"))
+  expect_equal(out$FIRST_FU_REJ_STATUS_PA, c("event", "no follow-up"))
+  expect_equal(out$FIRST_FU_REJ_LAST_NEG_DATE_KI, as.Date(c("2001-01-01", NA)))
+  expect_equal(out$FIRST_FU_REJ_LAST_NEG_DATE_PA, as.Date(c(NA, NA)))
+  # Malignancy is patient-level: both organs' forms count.
+  expect_equal(out$FIRST_FU_MALIG_STATUS, c("no event", "no follow-up"))
+  expect_equal(out$FIRST_FU_MALIG_LAST_NEG_DATE, as.Date(c("2002-01-01", NA)))
+})
+
+# ---- #215: events counted only within follow-up and before death ------------
+
+window_cohort <- function() {
+  # Transplant 2000-01-01, last follow-up 2005-01-01.
+  # 900001: report exactly at last follow-up. 900002: report one day after.
+  # 900003: died 2003-01-01, report in 2004. 900004: died 2003-01-01, report
+  # that day. 900005: died 2003-01-01, no report. 900006: no last follow-up.
+  df <- tibble::tibble(
+    TRR_ID = 900001:900006 + 0,
+    REC_TX_DT = as.Date("2000-01-01"),
+    REC_POSTX_LOS = 10,
+    REC_ACUTE_REJ_EPISODE = "3: No",
+    PERS_OPTN_DEATH_DT = as.Date(c(NA, NA, "2003-01-01", "2003-01-01", "2003-01-01", NA)),
+    PERS_SSA_DEATH_DT = as.Date(NA),
+    TFL_DEATH_DT = as.Date(NA),
+    TFL_GRAFT_DT = as.Date(NA),
+    TFL_LAFUDATE = as.Date(c(rep("2005-01-01", 5), NA))
+  )
+  attr(df, "file_key") <- "TX_KI"
+  df
+}
+
+window_forms <- function() {
+  tibble::tibble(
+    TRR_ID = c(900001, 900002, 900003, 900004, 900006),
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(c(
+      "2005-01-01", "2005-01-02", "2004-01-01", "2003-01-01", "2002-01-01"
+    ))
+  )
+}
+
+test_that("malignancy counts only through last follow-up and death, inclusive", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+
+  out <- add_time_to_event_outcomes(window_cohort())
+
+  expect_equal(out$FIRST_FU_MALIG_DATE_BINARY, c(1L, 0L, 0L, 1L, 0L, 0L))
+  expect_equal(
+    out$FIRST_FU_MALIG_DATE_CENSOR,
+    as.Date(c("2005-01-01", "2005-01-01", "2003-01-01", "2003-01-01", "2003-01-01", NA))
+  )
+  # No last follow-up date: death is not substituted for it.
+  expect_equal(out$FIRST_FU_MALIG_DATE_days[6], NA_real_)
+  # Reports outside the window stay in the date column, for auditing.
+  expect_equal(out$FIRST_FU_MALIG_DATE, window_forms()$TFL_PX_STAT_DT[c(1:4, NA, 5)])
+})
+
+test_that("rejection counts only through last follow-up and death, inclusive", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+
+  out <- add_time_to_event_outcomes(window_cohort())
+
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(1L, 0L, 0L, 1L, 0L, 0L))
+  expect_equal(
+    out$FIRST_REJ_DATE_CENSOR,
+    as.Date(c("2005-01-01", "2005-01-01", "2003-01-01", "2003-01-01", "2003-01-01", NA))
+  )
+  expect_equal(out$FIRST_REJ_DATE, window_forms()$TFL_PX_STAT_DT[c(1:4, NA, 5)])
+})
+
+test_that("reports dated on the day of death are flagged", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+
+  out <- add_time_to_event_outcomes(window_cohort())
+
+  expect_equal(
+    out$FIRST_FU_MALIG_DATE_DEATH_DAY,
+    c(FALSE, FALSE, FALSE, TRUE, NA, FALSE)
+  )
+  expect_equal(out$FIRST_REJ_DATE_DEATH_DAY, c(FALSE, FALSE, FALSE, TRUE, NA, FALSE))
+})
+
+test_that("TX_KP rejection uses each graft's own follow-up window", {
+  # Kidney followed to 2003, pancreas to 2005; both report a rejection in 2004.
+  df <- fake_cohort("TX_KP")[1, ]
+  df$TFL_LAFUDATEKI <- as.Date("2003-01-01")
+  df$TFL_LAFUDATEPA <- as.Date("2005-01-01")
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = c("KI", "PA"),
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date("2004-01-01")
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$FIRST_REJ_DATE_BINARY, 0L)
+  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date("2003-01-01"))
+  expect_equal(out$FIRST_REJ_DATE_PA_BINARY, 1L)
+  expect_equal(out$FIRST_REJ_DATE_PA_CENSOR, as.Date("2004-01-01"))
+})
+
+test_that("live: follow-up status, bounds and window hold on real liver files", {
+  skip_if_no_srtr_file(c("TX_LI", "TXF_LI"))
+  out <- withCallingHandlers(
+    add_time_to_event_outcomes(load_live("TX_LI")),
+    sRtr_warning_unknown_codes = function(cnd) rlang::cnd_muffle(cnd),
+    sRtr_warning_undated_admission_rejection = function(cnd) rlang::cnd_muffle(cnd),
+    sRtr_warning_undated_follow_up_report = function(cnd) rlang::cnd_muffle(cnd)
+  )
+
+  expect_in(
+    out$FIRST_FU_MALIG_STATUS,
+    c("event", "no event", "unknown", "no follow-up")
+  )
+  expect_in(
+    out$FIRST_FU_REJ_STATUS,
+    c("event", "untreated", "no event", "unknown", "no follow-up")
+  )
+  for (stem in c("MALIG", "REJ")) {
+    date <- out[[paste0("FIRST_FU_", stem, "_DATE")]]
+    status <- out[[paste0("FIRST_FU_", stem, "_STATUS")]]
+    last_neg <- out[[paste0("FIRST_FU_", stem, "_LAST_NEG_DATE")]]
+    expect_in(status[!is.na(date)], "event")
+    both <- !is.na(date) & !is.na(last_neg)
+    expect_equal(sum(last_neg[both] >= date[both]), 0)
+  }
+  for (prefix in c("FIRST_FU_MALIG_DATE", "FIRST_REJ_DATE")) {
+    counted <- out[[paste0(prefix, "_BINARY")]] %in% 1 & !is.na(out[[prefix]])
+    end <- pmin(out$TFL_LAFUDATE, out$REC_DEATH_DT_COMPOSITE, na.rm = TRUE)
+    expect_equal(sum(out[[prefix]][counted] > end[counted], na.rm = TRUE), 0)
+  }
+})
+
+# ---- review of cae0f22 -------------------------------------------------------
+
+test_that("a registration listed twice gets the same outcomes on both rows", {
+  df <- tibble::tibble(TRR_ID = c(900001, 900002, 900001))
+  attr(df, "file_key") <- "TX_KI"
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = c("N", "Y"),
+    TFL_ACUTE_REJ_EPISODE = labelled_rejection(c(3, 1)),
+    TFL_PX_STAT_DT = as.Date(c("2001-01-01", "2002-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- add_txf_outcomes(df)
+
+  expect_equal(out$FIRST_FU_MALIG_STATUS, c("event", "no follow-up", "event"))
+  expect_equal(out$FIRST_FU_MALIG_DATE, as.Date(c("2002-01-01", NA, "2002-01-01")))
+  expect_equal(out$FIRST_FU_MALIG_LAST_NEG_DATE, as.Date(c("2001-01-01", NA, "2001-01-01")))
+  expect_equal(out$FIRST_FU_REJ_STATUS, c("event", "no follow-up", "event"))
+  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(c("2002-01-01", NA, "2002-01-01")))
+})
+
+test_that("a report dated before the transplant is not counted, but a later one is", {
+  # 900001: report the day before transplant only. 900002: one the day before
+  # and a later one in the window.
+  df <- window_cohort()[1:2, ]
+  forms <- tibble::tibble(
+    TRR_ID = c(900001, 900002, 900002),
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(c("1999-12-31", "1999-12-31", "2002-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- add_time_to_event_outcomes(df)
+
+  for (prefix in c("FIRST_FU_MALIG_DATE", "FIRST_REJ_DATE")) {
+    expect_equal(out[[paste0(prefix, "_BINARY")]], c(0L, 1L))
+    expect_equal(out[[paste0(prefix, "_CENSOR")]], as.Date(c("2005-01-01", "2002-01-01")))
+  }
+  # The follow-up date columns keep the first report, for auditing.
+  expect_equal(out$FIRST_FU_MALIG_DATE, as.Date(rep("1999-12-31", 2)))
+  expect_equal(out$FIRST_FU_REJ_DATE, as.Date(rep("1999-12-31", 2)))
+  expect_equal(out$FIRST_REJ_DATE, as.Date(c(NA, "2002-01-01")))
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, c(NA, "follow_up"))
+  expect_equal(grep("^\\.", names(out), value = TRUE), character())
+})
+
+test_that("an event reported only on undated forms has status 1 and no time", {
+  df <- window_cohort()[1:2, ]
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(NA)
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  out <- suppressWarnings(add_time_to_event_outcomes(df))
+
+  for (prefix in c("FIRST_FU_MALIG_DATE", "FIRST_REJ_DATE")) {
+    expect_equal(out[[paste0(prefix, "_BINARY")]], c(1L, 0L))
+    expect_equal(out[[paste0(prefix, "_CENSOR")]], as.Date(c(NA, "2005-01-01")))
+    expect_equal(out[[paste0(prefix, "_days")]], c(NA, 1828))
+  }
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, c("follow_up_undated", NA))
+})
+
+test_that("an event reported only on undated forms is reported", {
+  df <- window_cohort()[1:2, ]
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(NA)
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  expect_warning(
+    add_time_to_event_outcomes(df),
+    class = "sRtr_warning_undated_follow_up_report"
+  )
+  expect_snapshot(out <- add_time_to_event_outcomes(df))
+})
+
+test_that("a registration's transplant date is used whichever row has it", {
+  # 900001 twice: one row has no transplant date. Reports before and after
+  # the transplant; the later one counts, whichever row comes first.
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = "KI",
+    TFL_MALIG = "Y",
+    TFL_ACUTE_REJ_EPISODE = "1: Yes, at least one episode treated with anti-rejection agent",
+    TFL_PX_STAT_DT = as.Date(c("1999-12-31", "2002-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+  df <- window_cohort()[c(1, 1), ]
+  df$REC_TX_DT[1] <- NA
+
+  for (rows in list(1:2, 2:1)) {
+    out <- add_time_to_event_outcomes(df[rows, ])
+    known <- which(!is.na(out$REC_TX_DT))
+    expect_equal(out$FIRST_FU_MALIG_DATE_BINARY[known], 1L)
+    expect_equal(out$FIRST_FU_MALIG_DATE_CENSOR[known], as.Date("2002-01-01"))
+    expect_equal(out$FIRST_REJ_DATE[known], as.Date("2002-01-01"))
+  }
+})
+
+test_that("a caller's own columns that look like helpers are kept", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+  df <- window_cohort()
+  df$.FIRST_FU_note <- "kept"
+  df$.FIRST_FU_MALIG_ELIGIBLE <- "also kept"
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$.FIRST_FU_note, rep("kept", 6))
+  expect_equal(out$.FIRST_FU_MALIG_ELIGIBLE, rep("also kept", 6))
+  expect_equal(out$FIRST_FU_MALIG_DATE_BINARY, c(1L, 0L, 0L, 1L, 0L, 0L))
+})
+
+test_that("a plain data frame keeps its attributes", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+  df <- as.data.frame(window_cohort())
+  attr(df, "file_key") <- "TX_KI"
+  attr(df, "srtr_note") <- "kept"
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(attr(out, "file_key"), "TX_KI")
+  expect_equal(attr(out, "srtr_note"), "kept")
+  expect_null(attr(out, ".srtr_eligible"))
+  expect_null(attr(add_txf_outcomes(df), ".srtr_eligible"))
 })

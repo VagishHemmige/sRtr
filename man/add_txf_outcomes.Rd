@@ -7,93 +7,73 @@
 add_txf_outcomes(df)
 }
 \arguments{
-\item{df}{A data frame representing a transplant cohort (one row per recipient
-or transplant). Must include a \code{TRR_ID} column and have an attribute
-\code{file_key} (a string) indicating the originating SRTR table key (e.g.,
-\code{"KI_txf"}). The companion follow-up key is inferred as the same prefix
-with \code{"F"} inserted after the first two characters (e.g., \code{"KI_Ftxf"}).}
+\item{df}{A transplant data frame from \code{\link[=load_srtr_file]{load_srtr_file()}}, with a \code{TRR_ID}
+column and a \code{file_key} attribute.}
 }
 \value{
-The input \code{df} with additional columns:
+\code{df} with these columns added. For \code{TX_KP}, each rejection column
+comes once per graft, with the suffix \verb{_KI} or \verb{_PA}
+(\code{FIRST_FU_REJ_DATE_KI}, \code{FIRST_FU_REJ_STATUS_PA}, ...); malignancy is
+patient-level and uses the forms for both grafts.
 \describe{
-\item{FIRST_FU_MALIG_DATE}{Date of first follow-up malignancy (per TRR).}
-\item{FIRST_FU_REJ_DATE_{ORG}}{Date of first acute rejection per organ
-(wide columns by organ code).}
+\item{\code{FIRST_FU_MALIG_DATE}}{Date of the first form reporting a
+malignancy (\code{TFL_MALIG} \code{"Y"}).}
+\item{\code{FIRST_FU_MALIG_STATUS}}{What the forms say: \code{"event"} (at least
+one form reports a malignancy), \code{"no event"} (none does, and at least
+one says \code{"N"}), \code{"unknown"} (forms exist, but none says \code{"Y"} or
+\code{"N"}), or \code{"no follow-up"} (no form).}
+\item{\code{FIRST_FU_MALIG_LAST_NEG_DATE}}{Date of the last form saying
+\code{"N"}, strictly before \code{FIRST_FU_MALIG_DATE}; with no report, the
+last such form at all.}
+\item{\code{FIRST_FU_REJ_DATE}}{Date of the first form reporting a treated
+acute rejection (\code{TFL_ACUTE_REJ_EPISODE} code 1 of format \code{ACREJEPF},
+raw or labelled).}
+\item{\code{FIRST_FU_REJ_STATUS}}{\code{"event"} (a treated rejection),
+\code{"untreated"} (no treated rejection, but at least one untreated,
+code 2), \code{"no event"} (at least one form says no rejection, code 3),
+\code{"unknown"} (only code 998 or no answer), or \code{"no follow-up"}.}
+\item{\code{FIRST_FU_REJ_LAST_NEG_DATE}}{Date of the last form saying no
+rejection (code 3), strictly before \code{FIRST_FU_REJ_DATE}; with no
+report, the last such form at all. An untreated rejection is
+evidence of rejection, so it is not a negative form.}
 }
-Existing columns/attributes of \code{df} are preserved.
 }
 \description{
-Uses the cohort's \code{file_key} attribute (as set by your SRTR load helpers)
-to locate and load the corresponding follow-up table, then derives:
+Uses the cohort's \code{file_key} attribute (as set by \code{\link[=load_srtr_file]{load_srtr_file()}}) to
+load the matching follow-up file (\code{TX_KI} to \code{TXF_KI}, and so on), limited
+to the cohort's \code{TRR_ID}s and to the columns used here, and adds what the
+follow-up forms say about malignancy and acute rejection.
 }
 \details{
-\itemize{
-\item \code{FIRST_FU_MALIG_DATE} — first follow-up malignancy date per \code{TRR_ID}
-\item \verb{FIRST_FU_REJ_DATE_\{ORG\}} — first acute rejection date per organ code
-(e.g., \code{FIRST_FU_REJ_DATE_KI}, \code{FIRST_FU_REJ_DATE_PA})
-}
+\strong{The dates are report dates.} A follow-up form covers a period, and its
+date (\code{TFL_PX_STAT_DT}, the patient status date) is when the status was
+recorded, not when the malignancy or rejection began. The event happened
+at some time after the last negative form and on or before the first
+report, so \code{..._LAST_NEG_DATE} and the report date bound it for
+interval-censored or discrete-time models. Whether that interval bounds
+clinical onset depends on what each form asked.
 
-The function limits the follow-up load to the cohort's \code{TRR_ID}s for
-efficiency, and merges the derived dates back into \code{df}.
+\strong{Evidence and timing are kept apart.} A status of \code{"event"} with a
+missing date means a form reports the event but no positive form is dated;
+\code{..._LAST_NEG_DATE} is then missing too, since the bound is unknown. A
+missing date alone does not mean no event: read the status column.
 
-This helper:
-\enumerate{
-\item Infers the follow-up table key from \code{attr(df, "file_key")}.
-\item Loads the follow-up subset for the cohort's \code{TRR_ID}s via
-\code{load_srtr_file()}.
-\item Normalizes organ to a two-letter code (\code{ORG_TYPE} := first two
-characters of \code{ORG_TY}), selects core follow-up fields, and orders
-by \code{TRR_ID} and \code{TFL_PX_STAT_DT}.
-\item Computes the earliest malignancy date per \code{TRR_ID} where
-\code{TFL_MALIG == "Y"}.
-\item Computes the earliest acute rejection date per (\code{TRR_ID}, \code{ORG_TYPE})
-where \code{TFL_ACUTE_REJ_EPISODE} indicates at least one treated episode,
-and pivots to wide organ-specific columns.
-\item Left-joins both results back to \code{df}.
-}
+Forms for every period count here, whenever they are dated.
+\code{\link[=add_time_to_event_outcomes]{add_time_to_event_outcomes()}} counts a report as an event only inside
+the follow-up window.
 
-\strong{Assumptions/requirements}
-\itemize{
-\item The follow-up table contains: \code{TRR_ID}, \code{ORG_TY}, \code{TFL_PX_STAT_DT},
-\code{TFL_MALIG}, and \code{TFL_ACUTE_REJ_EPISODE}.
-\item \code{TFL_PX_STAT_DT} should be a \code{Date}; if stored as \code{YYYYMMDD}, convert
-upstream (e.g., \code{as.Date(as.character(x), "\%Y\%m\%d")}).
-\item Rejection is identified by the labeled value
-\code{"1: Yes, at least one episode treated with anti-rejection agent"}.
-Adjust the filter if your coding differs.
-}
-
-\strong{Notes}
-\itemize{
-\item Combined organ codes (e.g., \code{"HL"}) are not split; they will produce a
-column \code{FIRST_FU_REJ_DATE_HL}. If you prefer to split into heart/lung,
-duplicate those rows before pivoting.
-\item This function only derives event \emph{dates}. To build full time-to-event variables
-(censor date, indicator, elapsed time), pass these dates to your
-\code{srtr_time_to_event()} helper along with transplant and last-follow-up dates.
-}
+Combined organ codes in \code{TXF_KP} (\code{ORG_TY} other than \code{KI} or \code{PA}) cannot
+be assigned to one graft, and give a warning.
 }
 \examples{
 \dontrun{
-# df loaded earlier, e.g., df <- load_srtr_file("KI_txf")
-attr(df, "file_key")
-#> "KI_txf"
-
-df2 <- add_txf_outcomes(df)
-names(df2)
-# ... includes FIRST_FU_MALIG_DATE, FIRST_FU_REJ_DATE_KI, etc.
-
-# Then compute time-to-event from transplant date:
-df2 <- srtr_time_to_event(
-  df2,
-  event_date  = FIRST_FU_MALIG_DATE,
-  start_date  = REC_TX_DT,
-  censor_date = TFL_LAFUDATEKI,
-  prefix      = "REC_MALIG"
-)
+tx <- load_srtr_file("TX_KI")
+tx <- add_txf_outcomes(tx)
+table(tx$FIRST_FU_REJ_STATUS)
 }
 
 }
 \seealso{
-\code{\link{srtr_time_to_event}}, \code{\link{load_srtr_file}}
+\code{\link[=add_time_to_event_outcomes]{add_time_to_event_outcomes()}}, \code{\link[=srtr_time_to_event]{srtr_time_to_event()}},
+\code{\link[=load_srtr_file]{load_srtr_file()}}
 }

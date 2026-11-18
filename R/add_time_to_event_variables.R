@@ -98,91 +98,89 @@ srtr_time_to_event <- function(
 
 #' Add time-to-event follow-up outcomes to a transplant cohort
 #'
-#' Uses the cohort's `file_key` attribute (as set by your SRTR load helpers)
-#' to locate and load the corresponding follow-up table, then derives:
+#' Uses the cohort's `file_key` attribute (as set by [load_srtr_file()]) to
+#' load the matching follow-up file (`TX_KI` to `TXF_KI`, and so on), limited
+#' to the cohort's `TRR_ID`s and to the columns used here, and adds what the
+#' follow-up forms say about malignancy and acute rejection.
 #'
-#' * `FIRST_FU_MALIG_DATE` — first follow-up malignancy date per `TRR_ID`
-#' * `FIRST_FU_REJ_DATE_{ORG}` — first acute rejection date per organ code
-#'   (e.g., `FIRST_FU_REJ_DATE_KI`, `FIRST_FU_REJ_DATE_PA`)
+#' @param df A transplant data frame from [load_srtr_file()], with a `TRR_ID`
+#'   column and a `file_key` attribute.
 #'
-#' The function limits the follow-up load to the cohort's `TRR_ID`s for
-#' efficiency, and merges the derived dates back into `df`.
-#'
-#' @param df A data frame representing a transplant cohort (one row per recipient
-#'   or transplant). Must include a `TRR_ID` column and have an attribute
-#'   `file_key` (a string) indicating the originating SRTR table key (e.g.,
-#'   `"KI_txf"`). The companion follow-up key is inferred as the same prefix
-#'   with `"F"` inserted after the first two characters (e.g., `"KI_Ftxf"`).
-#'
-#' @return The input `df` with additional columns:
+#' @return `df` with these columns added. For `TX_KP`, each rejection column
+#'   comes once per graft, with the suffix `_KI` or `_PA`
+#'   (`FIRST_FU_REJ_DATE_KI`, `FIRST_FU_REJ_STATUS_PA`, ...); malignancy is
+#'   patient-level and uses the forms for both grafts.
 #'   \describe{
-#'     \item{FIRST_FU_MALIG_DATE}{Date of first follow-up malignancy (per TRR).}
-#'     \item{FIRST_FU_REJ_DATE_{ORG}}{Date of first acute rejection per organ
-#'       (wide columns by organ code).}
+#'     \item{`FIRST_FU_MALIG_DATE`}{Date of the first form reporting a
+#'       malignancy (`TFL_MALIG` `"Y"`).}
+#'     \item{`FIRST_FU_MALIG_STATUS`}{What the forms say: `"event"` (at least
+#'       one form reports a malignancy), `"no event"` (none does, and at least
+#'       one says `"N"`), `"unknown"` (forms exist, but none says `"Y"` or
+#'       `"N"`), or `"no follow-up"` (no form).}
+#'     \item{`FIRST_FU_MALIG_LAST_NEG_DATE`}{Date of the last form saying
+#'       `"N"`, strictly before `FIRST_FU_MALIG_DATE`; with no report, the
+#'       last such form at all.}
+#'     \item{`FIRST_FU_REJ_DATE`}{Date of the first form reporting a treated
+#'       acute rejection (`TFL_ACUTE_REJ_EPISODE` code 1 of format `ACREJEPF`,
+#'       raw or labelled).}
+#'     \item{`FIRST_FU_REJ_STATUS`}{`"event"` (a treated rejection),
+#'       `"untreated"` (no treated rejection, but at least one untreated,
+#'       code 2), `"no event"` (at least one form says no rejection, code 3),
+#'       `"unknown"` (only code 998 or no answer), or `"no follow-up"`.}
+#'     \item{`FIRST_FU_REJ_LAST_NEG_DATE`}{Date of the last form saying no
+#'       rejection (code 3), strictly before `FIRST_FU_REJ_DATE`; with no
+#'       report, the last such form at all. An untreated rejection is
+#'       evidence of rejection, so it is not a negative form.}
 #'   }
-#'   Existing columns/attributes of `df` are preserved.
 #'
 #' @details
-#' This helper:
-#' \enumerate{
-#'   \item Infers the follow-up table key from `attr(df, "file_key")`.
-#'   \item Loads the follow-up subset for the cohort's `TRR_ID`s via
-#'         `load_srtr_file()`.
-#'   \item Normalizes organ to a two-letter code (`ORG_TYPE` := first two
-#'         characters of `ORG_TY`), selects core follow-up fields, and orders
-#'         by `TRR_ID` and `TFL_PX_STAT_DT`.
-#'   \item Computes the earliest malignancy date per `TRR_ID` where
-#'         `TFL_MALIG == "Y"`.
-#'   \item Computes the earliest acute rejection date per (`TRR_ID`, `ORG_TYPE`)
-#'         where `TFL_ACUTE_REJ_EPISODE` indicates at least one treated episode,
-#'         and pivots to wide organ-specific columns.
-#'   \item Left-joins both results back to `df`.
-#' }
+#' **The dates are report dates.** A follow-up form covers a period, and its
+#' date (`TFL_PX_STAT_DT`, the patient status date) is when the status was
+#' recorded, not when the malignancy or rejection began. The event happened
+#' at some time after the last negative form and on or before the first
+#' report, so `..._LAST_NEG_DATE` and the report date bound it for
+#' interval-censored or discrete-time models. Whether that interval bounds
+#' clinical onset depends on what each form asked.
 #'
-#' **Assumptions/requirements**
-#' * The follow-up table contains: `TRR_ID`, `ORG_TY`, `TFL_PX_STAT_DT`,
-#'   `TFL_MALIG`, and `TFL_ACUTE_REJ_EPISODE`.
-#' * `TFL_PX_STAT_DT` should be a `Date`; if stored as `YYYYMMDD`, convert
-#'   upstream (e.g., `as.Date(as.character(x), "%Y%m%d")`).
-#' * Rejection is identified by the labeled value
-#'   `"1: Yes, at least one episode treated with anti-rejection agent"`.
-#'   Adjust the filter if your coding differs.
+#' **Evidence and timing are kept apart.** A status of `"event"` with a
+#' missing date means a form reports the event but no positive form is dated;
+#' `..._LAST_NEG_DATE` is then missing too, since the bound is unknown. A
+#' missing date alone does not mean no event: read the status column.
 #'
-#' **Notes**
-#' * Combined organ codes (e.g., `"HL"`) are not split; they will produce a
-#'   column `FIRST_FU_REJ_DATE_HL`. If you prefer to split into heart/lung,
-#'   duplicate those rows before pivoting.
-#' * This function only derives event *dates*. To build full time-to-event variables
-#'   (censor date, indicator, elapsed time), pass these dates to your
-#'   `srtr_time_to_event()` helper along with transplant and last-follow-up dates.
+#' Forms for every period count here, whenever they are dated.
+#' [add_time_to_event_outcomes()] counts a report as an event only inside
+#' the follow-up window.
 #'
-#' @seealso \code{\link{srtr_time_to_event}}, \code{\link{load_srtr_file}}
+#' Combined organ codes in `TXF_KP` (`ORG_TY` other than `KI` or `PA`) cannot
+#' be assigned to one graft, and give a warning.
+#'
+#' @seealso [add_time_to_event_outcomes()], [srtr_time_to_event()],
+#'   [load_srtr_file()]
 #'
 #' @examples
 #' \dontrun{
-#' # df loaded earlier, e.g., df <- load_srtr_file("KI_txf")
-#' attr(df, "file_key")
-#' #> "KI_txf"
-#'
-#' df2 <- add_txf_outcomes(df)
-#' names(df2)
-#' # ... includes FIRST_FU_MALIG_DATE, FIRST_FU_REJ_DATE_KI, etc.
-#'
-#' # Then compute time-to-event from transplant date:
-#' df2 <- srtr_time_to_event(
-#'   df2,
-#'   event_date  = FIRST_FU_MALIG_DATE,
-#'   start_date  = REC_TX_DT,
-#'   censor_date = TFL_LAFUDATEKI,
-#'   prefix      = "REC_MALIG"
-#' )
+#' tx <- load_srtr_file("TX_KI")
+#' tx <- add_txf_outcomes(tx)
+#' table(tx$FIRST_FU_REJ_STATUS)
 #' }
 #'
 #' @export
+add_txf_outcomes <- function(df) {
+  .srtr_add_txf_outcomes(df)
+}
 
-add_txf_outcomes <- function(
-  df
-) {
+#' add_txf_outcomes(), plus the first report on or after a start date
+#'
+#' With `start` (one date per row of `df`, normally `REC_TX_DT`), also sets
+#' an internal attribute `.srtr_eligible`: a list of `Date` vectors named by
+#' the public date column (`FIRST_FU_MALIG_DATE`, `FIRST_FU_REJ_DATE`, with
+#' `_KI` and `_PA` for TX_KP), each the first dated positive form on or after
+#' `start`. [add_time_to_event_outcomes()] times events from these and removes
+#' the attribute; the public date columns keep the first report of all. Kept
+#' out of the columns so no caller column can be overwritten. A registration
+#' listed more than once uses its earliest known `start` on every row.
+#' @noRd
+.srtr_add_txf_outcomes <- function(df, start = NULL) {
   #Save the key of the file passed to the function as well as the key of the appropriate follow-up file
   file_key <- attr(df, "file_key")
   follow_up_key <- paste0(substr(file_key, 1, 2), "F", substring(file_key, 3L))
@@ -216,43 +214,46 @@ add_txf_outcomes <- function(
     ) |>
     dplyr::arrange(.data$TRR_ID, .data$TFL_PX_STAT_DT)
 
-  #First form date per TRR_ID among `rows`, matched to the cohort's rows.
-  #NA where a recipient has no such form (no warning when `rows` is empty).
-  first_date <- function(rows) {
-    if (nrow(rows) == 0) {
-      return(rep(as.Date(NA), nrow(df)))
-    }
-    dates <- rows |>
-      dplyr::group_by(.data$TRR_ID) |>
-      dplyr::summarise(
-        #All forms undated: NA, not the Inf (with a warning) min() gives.
-        date = if (all(is.na(.data$TFL_PX_STAT_DT))) {
-          as.Date(NA)
-        } else {
-          min(.data$TFL_PX_STAT_DT, na.rm = TRUE)
-        },
-        .groups = "drop"
-      )
-    dates$date[match(df$TRR_ID, dates$TRR_ID)]
-  }
-
   out <- df
 
-  #Add first malignancy variable
-  out$FIRST_FU_MALIG_DATE <- first_date(dplyr::filter(
+  #Malignancy is patient-level: every form counts. TFL_MALIG has no format;
+  #"Y" and "N" are the explicit answers, anything else is unknown.
+  malig <- .srtr_txf_endpoint(
     follow_up_df,
-    .data$TFL_MALIG == "Y"
-  ))
+    ids = df$TRR_ID,
+    positive = follow_up_df$TFL_MALIG %in% "Y",
+    negative = follow_up_df$TFL_MALIG %in% "N",
+    start = start
+  )
+  out$FIRST_FU_MALIG_DATE <- malig$date
+  out$FIRST_FU_MALIG_STATUS <- malig$status
+  out$FIRST_FU_MALIG_LAST_NEG_DATE <- malig$last_neg
+  attr(out, ".srtr_eligible") <- list(FIRST_FU_MALIG_DATE = malig$eligible)
 
-  #Add first rejection date. The output columns depend on the file, not on
-  #which organs happen to have rejections (#16): TX_KP gets one column per
-  #organ, every other file gets a single FIRST_FU_REJ_DATE.
-  rejections <- follow_up_df |>
-    dplyr::filter(
-      .data$TFL_ACUTE_REJ_EPISODE ==
-        "1: Yes, at least one episode treated with anti-rejection agent"
+  #Rejection (format ACREJEPF, raw codes or labels): code 1 treated, 2
+  #untreated, 3 no, 998 unknown. Only code 3 is a negative form: an untreated
+  #rejection is evidence of rejection, so it cannot bound the interval.
+  episode <- follow_up_df$TFL_ACUTE_REJ_EPISODE
+  add_rejection <- function(out, rows, suffix) {
+    ep <- episode[rows]
+    result <- .srtr_txf_endpoint(
+      follow_up_df[rows, ],
+      ids = df$TRR_ID,
+      positive = .srtr_has_code(ep, "1", "ACREJEPF"),
+      negative = .srtr_has_code(ep, "3", "ACREJEPF"),
+      untreated = .srtr_has_code(ep, "2", "ACREJEPF"),
+      start = start
     )
+    out[[paste0("FIRST_FU_REJ_DATE", suffix)]] <- result$date
+    out[[paste0("FIRST_FU_REJ_STATUS", suffix)]] <- result$status
+    out[[paste0("FIRST_FU_REJ_LAST_NEG_DATE", suffix)]] <- result$last_neg
+    attr(out, ".srtr_eligible")[[paste0("FIRST_FU_REJ_DATE", suffix)]] <-
+      result$eligible
+    out
+  }
 
+  #The output columns depend on the file, not on which organs happen to have
+  #rejections (#16): TX_KP gets one set per organ, every other file one set.
   if (identical(file_key, "TX_KP")) {
     #ORG_TY uses the WLORG format, which also allows "KP". Rows coded
     #anything other than KI or PA cannot be assigned to one organ.
@@ -270,11 +271,15 @@ add_txf_outcomes <- function(
       )
     }
     for (organ in c("KI", "PA")) {
-      out[[paste0("FIRST_FU_REJ_DATE_", organ)]] <-
-        first_date(dplyr::filter(rejections, .data$ORG_TYPE == organ))
+      rows <- follow_up_df$ORG_TYPE %in% organ
+      out <- add_rejection(out, rows, paste0("_", organ))
     }
   } else {
-    out$FIRST_FU_REJ_DATE <- first_date(rejections)
+    out <- add_rejection(out, rep(TRUE, nrow(follow_up_df)), "")
+  }
+
+  if (is.null(start)) {
+    attr(out, ".srtr_eligible") <- NULL
   }
 
   #In future, consider use of nested join for other values such as hospitalization counts
@@ -339,7 +344,8 @@ add_txf_outcomes <- function(
 #' date plus `REC_POSTX_LOS`, else `REC_DISCHRG_DT`; a date before the
 #' transplant is not used. `FIRST_REJ_DATE_SOURCE` (`"admission_los"`,
 #' `"admission_discharge"`, `"admission_undated"` or `"follow_up"`) says which
-#' rule applied. Here a missing date does not always mean no event: an
+#' rule applied (`"follow_up_undated"` is described below). Here a missing
+#' date does not always mean no event: an
 #' admission rejection with no usable date keeps `_BINARY = 1` with a missing
 #' censoring date and time, with a warning, so it drops out of time-to-event
 #' models instead of counting as rejection-free. A later follow-up rejection
@@ -348,6 +354,39 @@ add_txf_outcomes <- function(
 #' pancreas) and is never used in its place. A date is unusable when it falls
 #' before the transplant; with no transplant date, the discharge date is kept,
 #' and the elapsed time is missing.
+#'
+#' Malignancy (`FIRST_FU_MALIG_DATE`) and rejection count only inside the
+#' window the recipient or graft is followed for: from the transplant date
+#' up to the earlier of the last follow-up date and death from any source
+#' (`REC_DEATH_DT_COMPOSITE`), both inclusive, whatever `death_window` is. Malignancy uses the patient's last
+#' follow-up (for `TX_KP`, the later of the two graft dates); rejection uses
+#' the graft's own (`TFL_LAFUDATEKI` or `TFL_LAFUDATEPA` for `TX_KP`). Without
+#' an event, the recipient is censored at the end of the window. A report
+#' dated after it is not an event, but its date stays in the date column, so
+#' `!is.na(FIRST_FU_MALIG_DATE) & FIRST_FU_MALIG_DATE_BINARY == 0` finds the
+#' reports left out. A report dated before the transplant is not used:
+#' events are timed from the first report on or after the transplant date,
+#' while `FIRST_FU_MALIG_DATE` and `FIRST_FU_REJ_DATE` keep the first report
+#' of all, for auditing (`FIRST_REJ_DATE` is the date used). With no last
+#' follow-up date the window's end is unknown: death is not used in its place,
+#' and the time is missing.
+#'
+#' A malignancy or rejection reported only on follow-up forms with no date
+#' (status `"event"` with a missing date in [add_txf_outcomes()]) is treated
+#' like an undated admission rejection: `_BINARY = 1` with a missing
+#' censoring date and time, with a warning, so it does not add event-free
+#' time. For rejection, `FIRST_REJ_DATE_SOURCE` is then
+#' `"follow_up_undated"`.
+#'
+#' Follow-up dates are report dates (see [add_txf_outcomes()]). A report
+#' dated on the day of death may come from the form filed at death, so the
+#' event may have happened earlier. `FIRST_FU_MALIG_DATE_DEATH_DAY` and
+#' `FIRST_REJ_DATE_DEATH_DAY` (and `FIRST_REJ_DATE_PA_DEATH_DAY`) are `TRUE`
+#' when the date is the day of death, `FALSE` when it is another day, and
+#' `NA` with no date, so you can run a sensitivity analysis without those
+#' events. Such reports count as events by default when follow-up covers the
+#' day of death. The status columns from [add_txf_outcomes()] say what the
+#' forms report, before the window is applied.
 #'
 add_time_to_event_outcomes <- function(
   df,
@@ -452,7 +491,11 @@ add_time_to_event_outcomes <- function(
   df$.graft_censor <- NULL
 
   #Add rejection and malignancy from follow up database
-  df <- add_txf_outcomes(df)
+  #Events are timed from the first report on or after the transplant date;
+  #the public date columns keep the first report of all, for auditing.
+  df <- .srtr_add_txf_outcomes(df, start = df$REC_TX_DT)
+  eligible <- attr(df, ".srtr_eligible")
+  attr(df, ".srtr_eligible") <- NULL
 
   #Rejection can be found during the transplant admission or on a follow-up
   #form. An admission rejection is dated at discharge: the transplant date
@@ -461,60 +504,112 @@ add_time_to_event_outcomes <- function(
   #in its own column and never substituted for it.
   if (is_kp) {
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE", df$FIRST_FU_REJ_DATE_KI
+      df, "REC_ACUTE_REJ_EPISODE", eligible$FIRST_FU_REJ_DATE_KI,
+      .srtr_undated_event(df, "FIRST_FU_REJ", "_KI")
     )
     df$FIRST_REJ_DATE <- rejection$date
     df$FIRST_REJ_DATE_SOURCE <- rejection$source
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE_PA", df$FIRST_FU_REJ_DATE_PA
+      df, "REC_ACUTE_REJ_EPISODE_PA", eligible$FIRST_FU_REJ_DATE_PA,
+      .srtr_undated_event(df, "FIRST_FU_REJ", "_PA")
     )
     df$FIRST_REJ_DATE_PA <- rejection$date
     df$FIRST_REJ_DATE_PA_SOURCE <- rejection$source
   } else {
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE", df$FIRST_FU_REJ_DATE
+      df, "REC_ACUTE_REJ_EPISODE", eligible$FIRST_FU_REJ_DATE,
+      .srtr_undated_event(df, "FIRST_FU_REJ", "")
     )
     df$FIRST_REJ_DATE <- rejection$date
     df$FIRST_REJ_DATE_SOURCE <- rejection$source
   }
 
-  if ("FIRST_FU_MALIG_DATE" %in% names(df)) {
-    df <- df |>
-      srtr_time_to_event(
-        event_date = .data$FIRST_FU_MALIG_DATE,
-        start_date = .data$REC_TX_DT,
-        censor_date = .data$.patient_lafu,
-        prefix = "FIRST_FU_MALIG_DATE",
-        units = "days",
-      )
-  }
-
-  if ("FIRST_REJ_DATE" %in% names(df)) {
-    df <- df |>
-      srtr_time_to_event(
-        event_date = .data$FIRST_REJ_DATE,
-        start_date = .data$REC_TX_DT,
-        censor_date = .data$.graft_lafu,
-        prefix = "FIRST_REJ_DATE",
-        units = "days",
-      )
-  }
-
-  if ("FIRST_REJ_DATE_PA" %in% names(df)) {
-    df <- df |>
-      srtr_time_to_event(
-        event_date = .data$FIRST_REJ_DATE_PA,
-        start_date = .data$REC_TX_DT,
-        censor_date = .data$TFL_LAFUDATEPA,
-        prefix = "FIRST_REJ_DATE_PA",
-        units = "days",
-      )
-  }
-
-  for (prefix in c("FIRST_REJ_DATE", "FIRST_REJ_DATE_PA")) {
-    if (paste0(prefix, "_SOURCE") %in% names(df)) {
-      df <- .srtr_mark_undated_rejection(df, prefix)
+  #Malignancy and rejection are first reports on follow-up forms. They count
+  #only through the end of the window everyone is followed for (#215): the
+  #earlier of the applicable last follow-up and death from any source,
+  #inclusive, and from the transplant date. Malignancy uses the patient's
+  #follow-up, rejection the graft's. A report outside the window stays in its
+  #date column, for auditing.
+  #Malignancy is timed from its first report on or after transplant (the
+  #date column keeps the first report of all); rejection from FIRST_REJ_DATE,
+  #already built that way.
+  report_lafu <- list(
+    FIRST_FU_MALIG_DATE = df$.patient_lafu,
+    FIRST_REJ_DATE = df$.graft_lafu,
+    FIRST_REJ_DATE_PA = if (is_kp) df$TFL_LAFUDATEPA
+  )
+  report_date <- list(
+    FIRST_FU_MALIG_DATE = eligible$FIRST_FU_MALIG_DATE,
+    FIRST_REJ_DATE = df$FIRST_REJ_DATE,
+    FIRST_REJ_DATE_PA = df[["FIRST_REJ_DATE_PA"]]
+  )
+  for (prefix in names(report_lafu)) {
+    if (!prefix %in% names(df)) {
+      next
     }
+    report <- report_date[[prefix]]
+    windowed <- .srtr_report_window(
+      report,
+      df$REC_TX_DT,
+      report_lafu[[prefix]],
+      death
+    )
+    df$.report_event <- windowed$event
+    df$.report_censor <- windowed$censor
+    df <- df |>
+      srtr_time_to_event(
+        event_date = .data$.report_event,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$.report_censor,
+        prefix = prefix,
+        units = "days",
+      )
+    #Whether the report is dated on the day of death: such a report may come
+    #from the form filed at death, so the event may be earlier.
+    df[[paste0(prefix, "_DEATH_DAY")]] <- dplyr::if_else(
+      is.na(report),
+      NA,
+      !is.na(death) & report == death
+    )
+  }
+  df$.report_event <- NULL
+  df$.report_censor <- NULL
+
+  #A known event with no usable date keeps status 1 with a missing time, so
+  #it drops out of time-to-event models instead of adding event-free time:
+  #an admission rejection with no discharge date (#213), and an event
+  #reported only on undated follow-up forms.
+  for (prefix in c("FIRST_REJ_DATE", "FIRST_REJ_DATE_PA")) {
+    source <- df[[paste0(prefix, "_SOURCE")]]
+    if (is.null(source)) {
+      next
+    }
+    df <- .srtr_mark_undated(
+      df,
+      prefix,
+      source %in% "admission_undated",
+      what = "had a treated rejection during the transplant admission with no usable length of stay or discharge date",
+      noun = "rejection",
+      class = "undated_admission_rejection"
+    )
+    df <- .srtr_mark_undated(
+      df,
+      prefix,
+      source %in% "follow_up_undated",
+      what = "had a rejection reported only on follow-up forms with no date",
+      noun = "rejection",
+      class = "undated_follow_up_report"
+    )
+  }
+  if ("FIRST_FU_MALIG_STATUS" %in% names(df)) {
+    df <- .srtr_mark_undated(
+      df,
+      "FIRST_FU_MALIG_DATE",
+      df$FIRST_FU_MALIG_STATUS %in% "event" & is.na(df$FIRST_FU_MALIG_DATE),
+      what = "had a malignancy reported only on follow-up forms with no date",
+      noun = "malignancy",
+      class = "undated_follow_up_report"
+    )
   }
 
   df$.patient_lafu <- NULL
@@ -546,16 +641,46 @@ add_time_to_event_outcomes <- function(
   )
 }
 
+#' Count a follow-up report only inside the observation window
+#'
+#' The window runs from the transplant date to the earlier of the last
+#' follow-up date and death from any source, both inclusive. A report outside
+#' it is not an event; the registration is censored at the window's end
+#' instead. A missing last follow-up date leaves the window's end missing:
+#' death is not substituted, because the forms do not show follow-up up to
+#' death. With no transplant date the start cannot be checked; the elapsed
+#' time is missing anyway.
+#'
+#' @param report,start,lafu,death `Date` vectors of the same length.
+#' @return A list with `event` and `censor` `Date` vectors.
+#' @noRd
+.srtr_report_window <- function(report, start, lafu, death) {
+  end <- dplyr::if_else(!is.na(death) & !is.na(lafu) & death < lafu, death, lafu)
+  after_start <- is.na(start) | report >= start
+  inside <- !is.na(report) & !is.na(end) & report <= end & after_start
+  list(
+    event = dplyr::if_else(inside, report, as.Date(NA)),
+    censor = end
+  )
+}
+
 #' First rejection date: at the transplant admission, else on follow-up
 #'
 #' @param df The transplant data frame.
 #' @param episode_col The admission rejection column (`REC_ACUTE_REJ_EPISODE`
 #'   or `REC_ACUTE_REJ_EPISODE_PA`), with format labels applied.
 #' @param follow_up_date The first follow-up rejection date for this graft.
+#' @param follow_up_undated Logical, one per row: a follow-up rejection is
+#'   reported for this graft, but on no dated form.
 #' @return A list with `date` (a `Date` vector) and `source` (`"admission_los"`,
-#'   `"admission_discharge"`, `"admission_undated"`, `"follow_up"` or `NA`).
+#'   `"admission_discharge"`, `"admission_undated"`, `"follow_up"`,
+#'   `"follow_up_undated"` or `NA`).
 #' @noRd
-.srtr_first_rejection <- function(df, episode_col, follow_up_date) {
+.srtr_first_rejection <- function(df, episode_col, follow_up_date,
+                                  follow_up_undated = NULL) {
+  if (is.null(follow_up_undated)) {
+    follow_up_undated <- rep(FALSE, nrow(df))
+  }
   check_columns(
     df,
     c("REC_TX_DT", "REC_POSTX_LOS", episode_col),
@@ -582,6 +707,7 @@ add_time_to_event_outcomes <- function(
     at_admission & !is.na(discharge_date) ~ "admission_discharge",
     at_admission ~ "admission_undated",
     !is.na(follow_up_date) ~ "follow_up",
+    follow_up_undated ~ "follow_up_undated",
     .default = NA_character_
   )
   date <- dplyr::if_else(
@@ -605,15 +731,28 @@ add_time_to_event_outcomes <- function(
   as.character(x) %in% c(code, meaning)
 }
 
-#' Keep an undated admission rejection as a rejection
-#'
-#' [srtr_time_to_event()] reads a missing event date as no event. A rejection
-#' found during the transplant admission with no date is still a rejection:
-#' it gets status 1 and a missing time, so it drops out of time-to-event
-#' models instead of counting as rejection-free.
+#' Which rows have a follow-up event reported only on undated forms
 #' @noRd
-.srtr_mark_undated_rejection <- function(df, prefix) {
-  undated <- df[[paste0(prefix, "_SOURCE")]] %in% "admission_undated"
+.srtr_undated_event <- function(df, stem, suffix) {
+  status <- df[[paste0(stem, "_STATUS", suffix)]]
+  date <- df[[paste0(stem, "_DATE", suffix)]]
+  if (is.null(status) || is.null(date)) {
+    return(rep(FALSE, nrow(df)))
+  }
+  status %in% "event" & is.na(date)
+}
+
+#' Keep a known event with no usable date as an event
+#'
+#' [srtr_time_to_event()] reads a missing event date as no event. A known
+#' event with no date is still an event: it gets status 1 and a missing
+#' censoring date and time, so it drops out of time-to-event models instead
+#' of counting as event-free. Warns with the count.
+#' @param undated Logical, one per row: the rows to mark.
+#' @param what,noun,class The warning's description of the rows, the event's
+#'   name, and the warning's class.
+#' @noRd
+.srtr_mark_undated <- function(df, prefix, undated, what, noun, class) {
   if (!any(undated)) {
     return(df)
   }
@@ -628,13 +767,132 @@ add_time_to_event_outcomes <- function(
     df[[col]][undated] <- NA_real_
   }
   n <- sum(undated)
+  as_what <- if (n == 1) paste("a", noun) else paste0(noun, "s")
   srtr_warn(
     c(
-      "{n} recipient{?s} had a treated rejection during the transplant admission with no usable length of stay or discharge date.",
-      "i" = "{cli::qty(n)}{?It counts/They count} as {?a rejection/rejections} with an unknown time: {.field {prefix}_BINARY} is 1 and the time is {.code NA}."
+      "{n} recipient{?s} {what}.",
+      "i" = "{cli::qty(n)}{?It counts/They count} as {as_what} with an unknown time: {.field {prefix}_BINARY} is 1 and the time is {.code NA}."
     ),
-    class = "undated_admission_rejection",
+    class = class,
     n = n
   )
   df
+}
+
+#' Summarise one follow-up endpoint per transplant registration
+#'
+#' Keeps what the forms say about an endpoint apart from when it was first
+#' reported: a positive form with no date is still an event, with a missing
+#' date.
+#'
+#' @param forms Follow-up forms with `TRR_ID` and `TFL_PX_STAT_DT`.
+#' @param ids The cohort's `TRR_ID`s, in row order.
+#' @param positive,negative,untreated Logical vectors, one per form: the form
+#'   reports the endpoint, explicitly reports its absence, or (rejection only)
+#'   reports an untreated rejection. Missing counts as `FALSE`.
+#' @return A list of vectors matched to `ids`: `date`, the first dated
+#'   positive form; `status`, one of `"event"`, `"untreated"`, `"no event"`,
+#'   `"unknown"` or `"no follow-up"`; and `last_neg`, the last explicitly
+#'   negative form strictly before `date`, or the last one at all when there
+#'   is no positive form. `last_neg` is missing when every positive form is
+#'   undated, since the bound is then unknown. With `start` (one date per
+#'   `ids`), `eligible` is the first dated positive form on or after it.
+#' @noRd
+.srtr_txf_endpoint <- function(forms, ids, positive, negative,
+                               untreated = NULL, start = NULL) {
+  n <- length(ids)
+  result <- list(
+    date = rep(as.Date(NA), n),
+    status = rep("no follow-up", n),
+    last_neg = rep(as.Date(NA), n),
+    eligible = rep(as.Date(NA), n)
+  )
+  if (nrow(forms) == 0) {
+    return(result)
+  }
+  if (is.null(untreated)) {
+    untreated <- rep(FALSE, nrow(forms))
+  }
+  positive <- positive %in% TRUE
+  negative <- negative %in% TRUE
+  untreated <- untreated %in% TRUE
+  form_date <- forms$TFL_PX_STAT_DT
+  #Registrations are matched by TRR_ID value, so a registration listed more
+  #than once in the cohort gets the same values on every row.
+  key <- forms$TRR_ID
+  in_cohort <- !is.na(key) & key %in% ids
+  #Each form's start date: its registration's earliest known start (the
+  #transplant date), whichever cohort row carries it.
+  form_start <- rep(as.Date(NA), nrow(forms))
+  if (!is.null(start)) {
+    known <- !is.na(ids) & !is.na(start)
+    if (any(known)) {
+      reg_start <- tibble::tibble(key = ids[known], start = start[known]) |>
+        dplyr::summarise(start = min(.data$start), .by = "key")
+      form_start <- reg_start$start[match(key, reg_start$key)]
+    }
+  }
+
+  #Per registration: any positive, untreated or negative form, and the first
+  #dated positive form.
+  by_id <- tibble::tibble(
+    key = key,
+    positive = positive,
+    untreated = untreated,
+    negative = negative,
+    positive_date = dplyr::if_else(positive, form_date, as.Date(NA)),
+    eligible_date = dplyr::if_else(
+      is.na(form_start) | positive_date >= form_start,
+      positive_date,
+      as.Date(NA)
+    )
+  )[in_cohort, ] |>
+    dplyr::summarise(
+      any_positive = any(.data$positive),
+      any_untreated = any(.data$untreated),
+      any_negative = any(.data$negative),
+      #All positive forms undated: NA, not the Inf (with a warning) min() gives.
+      first = if (all(is.na(.data$positive_date))) {
+        as.Date(NA)
+      } else {
+        min(.data$positive_date, na.rm = TRUE)
+      },
+      eligible = if (all(is.na(.data$eligible_date))) {
+        as.Date(NA)
+      } else {
+        min(.data$eligible_date, na.rm = TRUE)
+      },
+      .by = "key"
+    )
+
+  row <- match(ids, by_id$key)
+  seen <- !is.na(row)
+  result$date <- by_id$first[row]
+  result$eligible <- by_id$eligible[row]
+  result$status[seen] <- dplyr::case_when(
+    by_id$any_positive[row[seen]] ~ "event",
+    by_id$any_untreated[row[seen]] ~ "untreated",
+    by_id$any_negative[row[seen]] ~ "no event",
+    .default = "unknown"
+  )
+
+  #Last explicitly negative form: strictly before the first dated positive
+  #form, or any negative form when there is no positive form at all.
+  form_row <- match(key, by_id$key)
+  form_first <- by_id$first[form_row]
+  form_any_positive <- by_id$any_positive[form_row] %in% TRUE
+  bounds <- negative &
+    in_cohort &
+    !is.na(form_date) &
+    dplyr::if_else(
+      form_any_positive,
+      !is.na(form_first) & form_date < form_first,
+      TRUE
+    )
+  if (any(bounds)) {
+    last <- tibble::tibble(key = key[bounds], date = form_date[bounds]) |>
+      dplyr::summarise(date = max(.data$date), .by = "key")
+    result$last_neg <- last$date[match(ids, last$key)]
+  }
+  result
 }
