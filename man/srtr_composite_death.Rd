@@ -12,7 +12,9 @@ srtr_composite_death(
   out = "REC_DEATH_DT_COMPOSITE",
   keep_source = TRUE,
   add_conflict_flag = TRUE,
-  prefer_earliest = FALSE
+  prefer_earliest = FALSE,
+  conflict_days = 0,
+  add_spread_days = FALSE
 )
 }
 \arguments{
@@ -25,12 +27,29 @@ dates. Each must be a \code{Date} column.}
 
 \item{keep_source}{If TRUE, add \verb{\{out\}_source} with the chosen source label.}
 
-\item{add_conflict_flag}{If TRUE, add \verb{\{out\}_conflict} when sources disagree.}
+\item{add_conflict_flag}{If TRUE, add \verb{\{out\}_conflict}: \code{TRUE} when the
+earliest and latest non-missing source dates are more than
+\code{conflict_days} apart, \code{FALSE} otherwise, including when fewer than two
+sources have a date.}
 
 \item{prefer_earliest}{If TRUE, ignore precedence and choose the earliest date.}
+
+\item{conflict_days}{How many calendar days apart the earliest and latest
+source dates may be before \verb{\{out\}_conflict} is \code{TRUE}; only a spread strictly
+greater than it is flagged. The default, 0, flags any difference. A
+larger value is your choice of what counts as recording noise: a
+difference of a day can still change the order of death and another
+event. It changes only the flag, never the composite date or its source.}
+
+\item{add_spread_days}{If TRUE, add \verb{\{out\}_spread_days}: the calendar days
+between the earliest and latest non-missing source dates, 0 when two or
+more sources agree, and \code{NA} when fewer than two have a date. A column
+given for two sources counts once. Use it to compare thresholds without
+running this function again.}
 }
 \value{
-\code{df} with added composite column (and optional source/conflict columns).
+\code{df} with added composite column (and optional source, conflict and
+spread columns).
 }
 \description{
 Builds a composite death date column using precedence across the typical SRTR
