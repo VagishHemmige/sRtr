@@ -47,6 +47,10 @@ Creates three columns for an outcome defined by an event date and a censor date:
 }
 }
 \details{
+Infinite dates (from \code{min()} or \code{max()} of no dates, for example) are an
+error (\code{sRtr_error_nonfinite_dates}): they would otherwise count as an
+event with an infinite time.
+
 Units suffix mapping: \code{years -> "_yrs"}, \code{months -> "_months"}, \code{days -> "_days"}.
 Negative times (e.g., when \code{start_date > censor/event}) trigger a warning,
 and the numeric time is set to \code{NA}.#'
