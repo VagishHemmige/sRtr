@@ -702,6 +702,36 @@ test_that("live: follow-up status, bounds and window hold on real liver files", 
   }
 })
 
+test_that("live: excluding rejection after graft failure only removes events", {
+  skip_if_no_srtr_file(c("TX_LI", "TXF_LI"))
+  quiet <- function(expr) {
+    withCallingHandlers(
+      expr,
+      sRtr_warning_unknown_codes = function(cnd) rlang::cnd_muffle(cnd),
+      sRtr_warning_undated_admission_rejection = function(cnd) rlang::cnd_muffle(cnd),
+      sRtr_warning_undated_follow_up_report = function(cnd) rlang::cnd_muffle(cnd)
+    )
+  }
+  tx <- load_live("TX_LI")
+  ex <- quiet(add_time_to_event_outcomes(tx))
+  kp <- quiet(add_time_to_event_outcomes(tx, rejection_after_graft_failure = "keep"))
+
+  ex_event <- ex$FIRST_REJ_DATE_BINARY %in% 1L
+  kp_event <- kp$FIRST_REJ_DATE_BINARY %in% 1L
+  expect_equal(sum(ex_event & !kp_event), 0)
+
+  # A counted follow-up rejection is timed on or before graft failure;
+  # admission rejections may fall after a failure during the admission.
+  follow_up <- ex_event & !startsWith(dplyr::coalesce(ex$FIRST_REJ_DATE_SOURCE, ""), "admission")
+  timed <- ex$FIRST_REJ_DATE_CENSOR
+  expect_equal(sum(timed[follow_up] > ex$TFL_GRAFT_DT[follow_up], na.rm = TRUE), 0)
+
+  live_counts(
+    "Rejection after graft failure (#21)",
+    c(left_out_by_default = sum(kp_event & !ex_event))
+  )
+})
+
 # ---- #216: merge report ------------------------------------------------------
 
 test_that("add_txf_outcomes() reports the merge in transplant registrations", {
