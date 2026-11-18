@@ -1,18 +1,8 @@
 # sRtr (development version)
 
-* `add_time_to_event_outcomes()` gains `rejection_after_graft_failure`. By
-  default (`"exclude"`), a rejection reported after the graft failed no
-  longer counts: forms filed in the years after graft failure (follow-up
-  codes 801-850) are not used, and the rejection window ends at the graft
-  failure date. `"keep"` gives the previous behaviour (#21).
-
-* `add_time_to_event_outcomes()` now errors when one transplant
-  registration has two different transplant dates
-  (`sRtr_error_conflicting_transplant_dates`), instead of using the earliest.
-
-* `srtr_time_to_event()` now errors on infinite dates
-  (`sRtr_error_nonfinite_dates`) instead of counting them as events with an
-  infinite time (#97).
+* A new article, *Checking sRtr on your own SAFs*, shows how to run the
+  package's live tests on your release, collect sRtr's warnings by class,
+  and check keys, labels and derived outcomes, with output safe to share.
 
 * Two new articles under "Pitfalls in SRTR data" on the package website,
   *Follow-up forms are reports, not events* and *Follow-up windows and
@@ -152,6 +142,16 @@
 * `add_pvr()` is a new function that adds pulmonary vascular resistance from
   the catheterization values recorded at listing or at transplant (#179).
 
+* `add_time_to_event_outcomes()` gains `rejection_after_graft_failure`. By
+  default (`"exclude"`), a rejection reported after the graft failed no
+  longer counts: forms filed in the years after graft failure (follow-up
+  codes 801-850) are not used, and the rejection window ends at the graft
+  failure date. `"keep"` gives the previous behaviour (#21).
+
+* `add_time_to_event_outcomes()` now errors when one transplant
+  registration has two different transplant dates
+  (`sRtr_error_conflicting_transplant_dates`), instead of using the earliest.
+
 * `add_txf_outcomes()` no longer fails unless dplyr is attached (#17).
 
 * `add_txf_outcomes()` gives a missing date, not an infinite one, when every
@@ -209,6 +209,10 @@
 * `srtr_dictionary()` returns the dictionary or format code lists for a SAF
   release, from the new `dictionary_versions` dataset of stored SRTR
   dictionary versions (#26).
+
+* `srtr_time_to_event()` now errors on infinite dates
+  (`sRtr_error_nonfinite_dates`) instead of counting them as events with an
+  infinite time (#97).
 
 * `calculate_geography_coverage_gain()` now does what its arguments say
   (#58):
