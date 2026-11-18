@@ -84,4 +84,26 @@ stays in \code{FIRST_FU_REJ_DATE} (\code{FIRST_FU_REJ_DATE_KI} and
 pancreas) and is never used in its place. A date is unusable when it falls
 before the transplant; with no transplant date, the discharge date is kept,
 and the elapsed time is missing.
+
+Malignancy (\code{FIRST_FU_MALIG_DATE}) and rejection count only inside the
+window the recipient or graft is followed for: up to the earlier of the
+last follow-up date and death from any source (\code{REC_DEATH_DT_COMPOSITE}),
+inclusive, whatever \code{death_window} is. Malignancy uses the patient's last
+follow-up (for \code{TX_KP}, the later of the two graft dates); rejection uses
+the graft's own (\code{TFL_LAFUDATEKI} or \code{TFL_LAFUDATEPA} for \code{TX_KP}). Without
+an event, the recipient is censored at the end of the window. A report
+dated after it is not an event, but its date stays in the date column, so
+\code{!is.na(FIRST_FU_MALIG_DATE) & FIRST_FU_MALIG_DATE_BINARY == 0} finds the
+reports left out. With no last follow-up date the window's end is unknown:
+death is not used in its place, and the time is missing.
+
+Follow-up dates are report dates (see \code{\link[=add_txf_outcomes]{add_txf_outcomes()}}). A report
+dated on the day of death may come from the form filed at death, so the
+event may have happened earlier. \code{FIRST_FU_MALIG_DATE_DEATH_DAY} and
+\code{FIRST_REJ_DATE_DEATH_DAY} (and \code{FIRST_REJ_DATE_PA_DEATH_DAY}) are \code{TRUE}
+when the date is the day of death, \code{FALSE} when it is another day, and
+\code{NA} with no date, so you can run a sensitivity analysis without those
+events. Such reports count as events by default when follow-up covers the
+day of death. The status columns from \code{\link[=add_txf_outcomes]{add_txf_outcomes()}} say what the
+forms report, before the window is applied.
 }
