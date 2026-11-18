@@ -701,6 +701,67 @@ test_that("live: follow-up status, bounds and window hold on real liver files", 
   }
 })
 
+# ---- #216: merge report ------------------------------------------------------
+
+test_that("add_txf_outcomes() reports the merge in transplant registrations", {
+  # Cohort rows: 900001 twice, 900002 (no forms), and a missing TRR_ID.
+  # Forms: three for 900001 (one undated), one for 900003 (not in the
+  # cohort), and a positive one with a missing TRR_ID.
+  df <- tibble::tibble(TRR_ID = c(900001, 900001, 900002, NA))
+  attr(df, "file_key") <- "TX_KI"
+  forms <- tibble::tibble(
+    TRR_ID = c(900001, 900001, 900001, 900003, NA),
+    ORG_TY = "KI",
+    TFL_MALIG = c("Y", "Y", "N", "Y", "Y"),
+    TFL_ACUTE_REJ_EPISODE = labelled_rejection(c(1, 3, 3, 1, 1)),
+    TFL_PX_STAT_DT = as.Date(c(NA, "2002-01-01", "2001-01-01", "2001-01-01", "2001-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  report <- attr(add_txf_outcomes(df), "txf_report")
+
+  expect_equal(report$follow_up_file, "TXF_KI")
+  expect_equal(report$cohort_rows, 4)
+  expect_equal(report$registrations, 2)
+  expect_equal(report$registrations_with_forms, 1)
+  expect_equal(report$forms, 3)
+  expect_equal(report$forms_undated, 1)
+  expect_equal(report$outcomes$outcome, c("malignancy", "rejection"))
+  expect_equal(report$outcomes$column, c("FIRST_FU_MALIG_DATE", "FIRST_FU_REJ_DATE"))
+  expect_equal(report$outcomes$positive_forms, c(2, 1))
+  expect_equal(report$outcomes$registrations_with_report, c(1, 1))
+  # The only treated rejection form is undated.
+  expect_equal(report$outcomes$registrations_with_dated_report, c(1, 0))
+  # The form with a missing TRR_ID is evidence for no row.
+  out <- add_txf_outcomes(df)
+  expect_equal(out$FIRST_FU_MALIG_STATUS, c("event", "event", "no follow-up", "no follow-up"))
+})
+
+test_that("the TX_KP merge report counts rejection per graft", {
+  forms <- tibble::tibble(
+    TRR_ID = 900001,
+    ORG_TY = c("KI", "PA", "PA"),
+    TFL_MALIG = "N",
+    TFL_ACUTE_REJ_EPISODE = labelled_rejection(c(3, 1, 1)),
+    TFL_PX_STAT_DT = as.Date(c("2001-01-01", "2002-01-01", "2003-01-01"))
+  )
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+
+  report <- attr(add_txf_outcomes(six_tx("TX_KP")[1:2, ]), "txf_report")
+
+  expect_equal(report$outcomes$outcome, c("malignancy", "rejection, kidney", "rejection, pancreas"))
+  expect_equal(report$outcomes$positive_forms, c(0, 0, 2))
+  expect_equal(report$outcomes$registrations_with_report, c(0, 0, 1))
+})
+
+test_that("the merge report survives add_time_to_event_outcomes()", {
+  local_mocked_bindings(load_srtr_file = function(...) window_forms())
+
+  out <- add_time_to_event_outcomes(window_cohort())
+
+  expect_equal(attr(out, "txf_report")$registrations_with_forms, 5)
+})
+
 # ---- review of cae0f22 -------------------------------------------------------
 
 test_that("a registration listed twice gets the same outcomes on both rows", {
@@ -838,4 +899,5 @@ test_that("a plain data frame keeps its attributes", {
   expect_equal(attr(out, "srtr_note"), "kept")
   expect_null(attr(out, ".srtr_eligible"))
   expect_null(attr(add_txf_outcomes(df), ".srtr_eligible"))
+  expect_equal(attr(out, "txf_report")$registrations_with_forms, 5)
 })

@@ -37,6 +37,30 @@ rejection (code 3), strictly before \code{FIRST_FU_REJ_DATE}; with no
 report, the last such form at all. An untreated rejection is
 evidence of rejection, so it is not a negative form.}
 }
+
+The result also carries a \code{txf_report} attribute, a list of counts from
+the merge for a methods section. Counts are of transplant registrations
+(distinct \code{TRR_ID}s), not people, and of form rows:
+\describe{
+\item{\code{follow_up_file}}{The follow-up file read, such as \code{"TXF_KI"}.}
+\item{\code{cohort_rows}}{Rows of \code{df}.}
+\item{\code{registrations}}{Distinct non-missing \code{TRR_ID}s in \code{df}.}
+\item{\code{registrations_with_forms}}{Of those, how many have at least
+one follow-up form.}
+\item{\code{forms}}{Follow-up form rows for those registrations.}
+\item{\code{forms_undated}}{Of those, how many have no \code{TFL_PX_STAT_DT}.}
+\item{\code{outcomes}}{A tibble with one row per outcome (\code{"malignancy"},
+\code{"rejection"}, or for \code{TX_KP} \code{"rejection, kidney"} and
+\code{"rejection, pancreas"}): \code{column}, the date column;
+\code{positive_forms}, forms reporting it; \code{registrations_with_report},
+registrations with a positive form (status \code{"event"}); and
+\code{registrations_with_dated_report}, those with at least one dated
+positive form, the earliest of which gives the date column. An
+undated positive form cannot be ordered against the dated ones.}
+}
+Forms with a missing \code{TRR_ID} match no registration and count nowhere.
+The report describes the cohort at the time of the merge: filtering the
+result afterwards does not update it.
 }
 \description{
 Uses the cohort's \code{file_key} attribute (as set by \code{\link[=load_srtr_file]{load_srtr_file()}}) to
