@@ -107,3 +107,8 @@ articles:
     contents:
       - articles/follow-up-forms
       - articles/follow-up-windows
+
+  - title: Checking your data
+    navbar: ~
+    contents:
+      - articles/checking-your-safs
