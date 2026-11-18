@@ -116,6 +116,31 @@ test_that("conflict_days changes only the flag, not the date or its source", {
   }
 })
 
+test_that("a column given as two sources counts once", {
+  df <- spread_deaths()[c(4, 1), ]
+  out <- srtr_composite_death(
+    df,
+    optn = "PERS_SSA_DEATH_DT",
+    ssa = "PERS_SSA_DEATH_DT",
+    add_spread_days = TRUE
+  )
+
+  # 900004 has one date, in the column named twice; 900001 has SSA and TFL
+  # dates 5 days apart.
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_spread_days, c(NA, 5))
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_conflict, c(FALSE, TRUE))
+})
+
+test_that("the spread is in calendar days, as the old flag was", {
+  df <- spread_deaths()[6, ]
+  df$TFL_DEATH_DT <- df$PERS_OPTN_DEATH_DT + 0.5
+
+  out <- srtr_composite_death(df, add_spread_days = TRUE)
+
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_spread_days, 0)
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_conflict, FALSE)
+})
+
 test_that("conflict_days must be one non-negative number", {
   expect_error(
     srtr_composite_death(spread_deaths(), conflict_days = -1),

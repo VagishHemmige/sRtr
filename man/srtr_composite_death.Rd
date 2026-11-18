@@ -34,17 +34,18 @@ sources have a date.}
 
 \item{prefer_earliest}{If TRUE, ignore precedence and choose the earliest date.}
 
-\item{conflict_days}{How many days apart the earliest and latest source
-dates may be before \verb{\{out\}_conflict} is \code{TRUE}; only a spread strictly
+\item{conflict_days}{How many calendar days apart the earliest and latest
+source dates may be before \verb{\{out\}_conflict} is \code{TRUE}; only a spread strictly
 greater than it is flagged. The default, 0, flags any difference. A
 larger value is your choice of what counts as recording noise: a
 difference of a day can still change the order of death and another
 event. It changes only the flag, never the composite date or its source.}
 
-\item{add_spread_days}{If TRUE, add \verb{\{out\}_spread_days}: the days between
-the earliest and latest non-missing source dates, 0 when two or more
-sources agree, and \code{NA} when fewer than two have a date. Use it to
-compare thresholds without running this function again.}
+\item{add_spread_days}{If TRUE, add \verb{\{out\}_spread_days}: the calendar days
+between the earliest and latest non-missing source dates, 0 when two or
+more sources agree, and \code{NA} when fewer than two have a date. A column
+given for two sources counts once. Use it to compare thresholds without
+running this function again.}
 }
 \value{
 \code{df} with added composite column (and optional source, conflict and

@@ -38,16 +38,17 @@
 #'   `conflict_days` apart, `FALSE` otherwise, including when fewer than two
 #'   sources have a date.
 #' @param prefer_earliest If TRUE, ignore precedence and choose the earliest date.
-#' @param conflict_days How many days apart the earliest and latest source
-#'   dates may be before `{out}_conflict` is `TRUE`; only a spread strictly
+#' @param conflict_days How many calendar days apart the earliest and latest
+#'   source dates may be before `{out}_conflict` is `TRUE`; only a spread strictly
 #'   greater than it is flagged. The default, 0, flags any difference. A
 #'   larger value is your choice of what counts as recording noise: a
 #'   difference of a day can still change the order of death and another
 #'   event. It changes only the flag, never the composite date or its source.
-#' @param add_spread_days If TRUE, add `{out}_spread_days`: the days between
-#'   the earliest and latest non-missing source dates, 0 when two or more
-#'   sources agree, and `NA` when fewer than two have a date. Use it to
-#'   compare thresholds without running this function again.
+#' @param add_spread_days If TRUE, add `{out}_spread_days`: the calendar days
+#'   between the earliest and latest non-missing source dates, 0 when two or
+#'   more sources agree, and `NA` when fewer than two have a date. A column
+#'   given for two sources counts once. Use it to compare thresholds without
+#'   running this function again.
 #' @return `df` with added composite column (and optional source, conflict and
 #'   spread columns).
 #' @export
@@ -121,11 +122,13 @@ srtr_composite_death <- function(
     df[[paste0(out, "_source")]] <- src
   }
 
-  # Spread between the earliest and latest non-missing source dates; NA when
-  # fewer than two sources have a date. Any number of sources (#5).
-  n_dates <- Reduce(`+`, lapply(vals, function(v) !is.na(v)))
-  latest <- do.call(pmax, c(vals, list(na.rm = TRUE)))
-  earliest <- do.call(pmin, c(vals, list(na.rm = TRUE)))
+  # Spread in calendar days between the earliest and latest non-missing
+  # source dates; NA when fewer than two sources have a date. Any number of
+  # sources (#5); a column named twice counts once.
+  days <- lapply(unique(cols), function(nm) floor(unclass(df[[nm]])))
+  n_dates <- Reduce(`+`, lapply(days, function(v) !is.na(v)))
+  latest <- do.call(pmax, c(days, list(na.rm = TRUE)))
+  earliest <- do.call(pmin, c(days, list(na.rm = TRUE)))
   spread <- as.numeric(latest - earliest)
   spread[n_dates < 2] <- NA_real_
 
