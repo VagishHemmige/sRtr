@@ -125,7 +125,9 @@ srtr_composite_death <- function(
   # Spread in calendar days between the earliest and latest non-missing
   # source dates; NA when fewer than two sources have a date. Any number of
   # sources (#5); a column named twice counts once.
-  days <- lapply(unique(cols), function(nm) floor(unclass(df[[nm]])))
+  # Uses the source values read before `out` was written, in case `out`
+  # names a source column.
+  days <- lapply(vals[!duplicated(cols)], function(v) floor(unclass(v)))
   n_dates <- Reduce(`+`, lapply(days, function(v) !is.na(v)))
   latest <- do.call(pmax, c(days, list(na.rm = TRUE)))
   earliest <- do.call(pmin, c(days, list(na.rm = TRUE)))

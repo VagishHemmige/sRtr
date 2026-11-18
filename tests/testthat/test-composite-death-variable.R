@@ -131,6 +131,15 @@ test_that("a column given as two sources counts once", {
   expect_equal(out$REC_DEATH_DT_COMPOSITE_conflict, c(FALSE, TRUE))
 })
 
+test_that("an output named like a source does not hide a disagreement", {
+  df <- spread_deaths()[1:3, ]
+  fresh <- srtr_composite_death(df, add_spread_days = TRUE)
+  reused <- srtr_composite_death(df, out = "PERS_SSA_DEATH_DT", add_spread_days = TRUE)
+
+  expect_equal(reused$PERS_SSA_DEATH_DT_spread_days, fresh$REC_DEATH_DT_COMPOSITE_spread_days)
+  expect_equal(reused$PERS_SSA_DEATH_DT_conflict, fresh$REC_DEATH_DT_COMPOSITE_conflict)
+})
+
 test_that("the spread is in calendar days, as the old flag was", {
   df <- spread_deaths()[6, ]
   df$TFL_DEATH_DT <- df$PERS_OPTN_DEATH_DT + 0.5
