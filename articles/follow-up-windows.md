@@ -53,8 +53,15 @@ SAFs also hold `TFL_ENDTXFU` (labeled “Cohort date” in the data
 dictionary), which SRTR staff describe as “the variable to use to
 identify the last possible follow-up date” for each recipient, with a
 three-month lag to allow forms to be completed ([Kim and Snyder
-2012](#ref-kim2012), slide 25). sRtr does not use it yet. Compare it
-with `TFL_LAFUDATE` in your files.
+2012](#ref-kim2012), slide 25). sRtr does not use it yet. Check it
+before you rely on it: in one liver release, it varied between
+registrations, and the last follow-up date was later than it for about a
+fifth of them. Compare the two in your files:
+
+``` r
+
+mask_n(sum(tx$TFL_LAFUDATE > tx$TFL_ENDTXFU, na.rm = TRUE))
+```
 
 ![Timeline for three made-up recipients, in years since transplant, each
 with a shaded window from transplant to the earlier of last follow-up
