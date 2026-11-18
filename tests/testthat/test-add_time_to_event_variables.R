@@ -303,3 +303,15 @@ test_that("srtr_time_to_event() stops on infinite dates", {
     class = "sRtr_error_nonfinite_dates"
   )
 })
+
+test_that("the infinite-date error counts rows, not values", {
+  df <- data.frame(
+    start = as.Date(c("2000-01-01", "2000-01-01")),
+    event = as.Date(c(Inf, NA)),
+    censor = structure(c(Inf, 12784), class = "Date")
+  )
+  expect_error(
+    srtr_time_to_event(df, event, start, censor, prefix = "X"),
+    "infinite dates in 1 row"
+  )
+})

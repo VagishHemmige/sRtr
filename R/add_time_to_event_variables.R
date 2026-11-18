@@ -51,17 +51,14 @@ srtr_time_to_event <- function(
     start_date = rlang::eval_tidy(start_q, df),
     censor_date = rlang::eval_tidy(censor_q, df)
   )
-  n_inf <- vapply(
-    dates,
-    \(x) sum(is.infinite(suppressWarnings(as.numeric(x)))),
-    integer(1)
-  )
-  if (any(n_inf > 0)) {
-    bad <- names(n_inf)[n_inf > 0]
+  is_inf <- lapply(dates, \(x) is.infinite(suppressWarnings(as.numeric(x))))
+  bad <- names(is_inf)[vapply(is_inf, any, logical(1))]
+  if (length(bad) > 0) {
+    n_rows <- sum(Reduce(`|`, is_inf[bad]))
     srtr_abort(
       c(
-        "{.arg {bad}} {cli::qty(length(bad))}{?has/have} infinite dates in {sum(n_inf)} row{?s}.",
-        "i" = "An infinite date comes from an error upstream, such as {.code min()} of no dates. Set {cli::qty(sum(n_inf))}{?it/them} to {.code NA} or fix the source."
+        "{.arg {bad}} {cli::qty(length(bad))}{?has/have} infinite dates in {n_rows} row{?s}.",
+        "i" = "An infinite date comes from an error upstream, such as {.code min()} of no dates. Set {cli::qty(n_rows)}{?it/them} to {.code NA} or fix the source."
       ),
       class = "nonfinite_dates",
       arguments = bad
@@ -425,14 +422,23 @@ add_txf_outcomes <- function(df) {
 #' @param rejection_after_graft_failure Whether a rejection reported after
 #'   the graft failed counts:
 #'   * `"exclude"` (default): a graft is at risk of rejection only until it
-#'     fails. Forms filed in the years after graft failure (`TFL_FOL_CD` codes
-#'     801 to 850, "N year after graft failure") are not used, and the
-#'     rejection window ends at the graft failure date (`TFL_GRAFT_DT`, or
-#'     that graft's own date for `TX_KP`), inclusive. The form filed at
-#'     failure (code 800) is used: it may report the rejection that led to
-#'     the failure. A rejection during the transplant admission counts even
-#'     if the graft failed in the same admission.
+#'     fails. Forms filed in the years after graft failure are not used, and
+#'     the rejection window ends at the graft failure date (`TFL_GRAFT_DT`,
+#'     or that graft's own date, `TFL_GRAFT_DT_KI` or `TFL_GRAFT_DT_PA`, for
+#'     `TX_KP`); grafts without a rejection are censored there. These columns
+#'     are then required.
 #'   * `"keep"`: every form counts, as before.
+#'
+#'   The follow-up code `TFL_FOL_CD` uses format `FOLCD` of the SRTR data
+#'   dictionary (SAF releases 2203 and 2609): code 800 is the form filed at
+#'   graft failure and codes 801 to 850 are "N year after graft failure".
+#'   Under `"exclude"`, sRtr leaves out codes 801 to 850. These are package
+#'   conventions, not SRTR rules: the form filed at failure (code 800) is
+#'   kept, since it may report the rejection that led to the failure; a
+#'   rejection reported on the day of failure counts; and a rejection during
+#'   the transplant admission counts if it falls inside the ordinary window,
+#'   even when the graft failed in the same admission (its date is only a
+#'   discharge-date proxy). Censoring still ends at the failure date.
 #'
 #'   Malignancy is patient-level and always uses every form. The columns from
 #'   [add_txf_outcomes()] (`FIRST_FU_REJ_DATE`, `FIRST_FU_REJ_STATUS`) describe
@@ -536,6 +542,13 @@ add_time_to_event_outcomes <- function(
 
   needed <- if (is_kp) c("TFL_LAFUDATEKI", "TFL_LAFUDATEPA") else "TFL_LAFUDATE"
   check_columns(df, needed, why = "Follow-up dates are needed to censor outcomes.")
+  if (rejection_after_graft_failure == "exclude") {
+    check_columns(
+      df,
+      if (is_kp) c("TFL_GRAFT_DT_KI", "TFL_GRAFT_DT_PA") else "TFL_GRAFT_DT",
+      why = "Graft failure dates end the rejection window; use {.code rejection_after_graft_failure = \"keep\"} to count every form."
+    )
+  }
 
   #Patient-level outcomes (death, malignancy) are censored at the patient's
   #last follow-up. TX_KP has no TFL_LAFUDATE, only one date per graft, so use
@@ -613,12 +626,11 @@ add_time_to_event_outcomes <- function(
   #the same TRR_ID can only come from the caller's own data handling, and
   #would make which report counts depend on row order.
   known <- !is.na(df$TRR_ID) & !is.na(df$REC_TX_DT)
-  n_dates <- tapply(
-    df$REC_TX_DT[known],
-    df$TRR_ID[known],
-    \(x) length(unique(x))
-  )
-  n_bad <- sum(n_dates > 1)
+  pairs <- unique(data.frame(
+    id = as.character(df$TRR_ID[known]),
+    date = df$REC_TX_DT[known]
+  ))
+  n_bad <- sum(duplicated(pairs$id) & !duplicated(pairs$id, fromLast = TRUE))
   if (n_bad > 0) {
     srtr_abort(
       c(
@@ -683,27 +695,31 @@ add_time_to_event_outcomes <- function(
   #rejection only until it fails: the rejection window also ends at that
   #graft's failure date, except for a rejection found during the transplant
   #admission, which came before any failure in the same admission.
-  rejection_end <- function(lafu, graft_col, source_col) {
-    failure <- df[[graft_col]]
-    if (rejection_after_graft_failure == "keep" || is.null(failure)) {
+  #The bound applies to censoring in every case. Only accepting an event is
+  #different for an admission rejection: it may count beyond the failure
+  #date, as long as it falls inside the ordinary window.
+  rejection_end <- function(lafu, graft_col) {
+    if (rejection_after_graft_failure == "keep") {
       return(lafu)
     }
-    use <- !is.na(failure) &
-      !is.na(lafu) &
-      failure < lafu &
-      !startsWith(dplyr::coalesce(df[[source_col]], ""), "admission")
+    failure <- df[[graft_col]]
+    use <- !is.na(failure) & !is.na(lafu) & failure < lafu
     dplyr::if_else(use, failure, lafu)
   }
   report_lafu <- list(
     FIRST_FU_MALIG_DATE = df$.patient_lafu,
     FIRST_REJ_DATE = rejection_end(
       df$.graft_lafu,
-      if (is_kp) "TFL_GRAFT_DT_KI" else "TFL_GRAFT_DT",
-      "FIRST_REJ_DATE_SOURCE"
+      if (is_kp) "TFL_GRAFT_DT_KI" else "TFL_GRAFT_DT"
     ),
     FIRST_REJ_DATE_PA = if (is_kp) {
-      rejection_end(df$TFL_LAFUDATEPA, "TFL_GRAFT_DT_PA", "FIRST_REJ_DATE_PA_SOURCE")
+      rejection_end(df$TFL_LAFUDATEPA, "TFL_GRAFT_DT_PA")
     }
+  )
+  #The window without the graft failure bound, for admission rejections.
+  accept_lafu <- list(
+    FIRST_REJ_DATE = df$.graft_lafu,
+    FIRST_REJ_DATE_PA = if (is_kp) df$TFL_LAFUDATEPA
   )
   report_date <- list(
     FIRST_FU_MALIG_DATE = eligible$FIRST_FU_MALIG_DATE,
@@ -721,6 +737,17 @@ add_time_to_event_outcomes <- function(
       report_lafu[[prefix]],
       death
     )
+    source <- df[[paste0(prefix, "_SOURCE")]]
+    if (!is.null(source) && rejection_after_graft_failure == "exclude") {
+      admission <- startsWith(dplyr::coalesce(source, ""), "admission")
+      free <- .srtr_report_window(
+        report,
+        df$REC_TX_DT,
+        accept_lafu[[prefix]],
+        death
+      )
+      windowed$event <- dplyr::if_else(admission, free$event, windowed$event)
+    }
     df$.report_event <- windowed$event
     df$.report_censor <- windowed$censor
     df <- df |>

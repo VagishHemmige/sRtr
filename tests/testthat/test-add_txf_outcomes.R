@@ -116,7 +116,8 @@ test_that("add_time_to_event_outcomes() builds rejection dates without dplyr att
       "1: Yes, at least one episode treated with anti-rejection agent",
       "3: No"
     ),
-    TFL_LAFUDATE = as.Date(c("2006-01-01", "2006-01-01"))
+    TFL_LAFUDATE = as.Date(c("2006-01-01", "2006-01-01")),
+    TFL_GRAFT_DT = as.Date(NA)
   )
   attr(df, "file_key") <- "TX_KI"
 
@@ -1022,4 +1023,55 @@ test_that("a registration with two different transplant dates is an error", {
 
   expect_error(add_time_to_event_outcomes(df), class = "sRtr_error_conflicting_transplant_dates")
   expect_snapshot(error = TRUE, add_time_to_event_outcomes(df))
+})
+
+# ---- review of d38a824 ----------------------------------------------------------
+
+test_that("excluding rejection after graft failure needs the graft failure date", {
+  df <- gf_cohort()
+  df$TFL_GRAFT_DT <- NULL
+  local_mocked_bindings(load_srtr_file = function(...) gf_forms())
+
+  expect_error(add_time_to_event_outcomes(df), class = "sRtr_error_missing_columns")
+  # With "keep", the column is not needed.
+  out <- add_time_to_event_outcomes(df, rejection_after_graft_failure = "keep")
+  expect_equal(out$FIRST_REJ_DATE_BINARY, rep(1L, 5))
+  # A present column with unknown dates is fine: no failure, no bound. The
+  # ordinary form (900002) counts; the 801 forms are still left out.
+  df$TFL_GRAFT_DT <- as.Date(NA)
+  out <- add_time_to_event_outcomes(df)
+  expect_equal(out$FIRST_REJ_DATE_BINARY, c(0L, 1L, 1L, 1L, 0L))
+})
+
+test_that("an admission rejection outside the window is censored at graft failure", {
+  # Graft failed 2000-01-05, last follow-up 2000-01-10; the discharge proxy
+  # (transplant + 20 days) falls after last follow-up, so the rejection is
+  # not counted, and the graft is censored at its failure, not at last
+  # follow-up.
+  df <- gf_cohort()[1, ]
+  df$REC_ACUTE_REJ_EPISODE <- "1: Yes, at least one episode treated with anti-rejection agent"
+  df$REC_POSTX_LOS <- 20
+  df$TFL_GRAFT_DT <- as.Date("2000-01-05")
+  df$TFL_LAFUDATE <- as.Date("2000-01-10")
+  local_mocked_bindings(load_srtr_file = function(...) gf_forms()[1, ])
+
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$FIRST_REJ_DATE_SOURCE, "admission_los")
+  expect_equal(out$FIRST_REJ_DATE_BINARY, 0L)
+  expect_equal(out$FIRST_REJ_DATE_CENSOR, as.Date("2000-01-05"))
+})
+
+test_that("a factor TRR_ID with unused levels does not upset the transplant-date check", {
+  df <- window_cohort()
+  df$TRR_ID <- factor(df$TRR_ID)
+  df <- df[1:3, ]
+  forms <- window_forms()
+  forms$TRR_ID <- factor(forms$TRR_ID, levels = levels(df$TRR_ID))
+  local_mocked_bindings(load_srtr_file = function(...) forms)
+  expect_no_error(add_time_to_event_outcomes(df))
+
+  df2 <- df[c(1, 1), ]
+  df2$REC_TX_DT[2] <- as.Date("2000-06-01")
+  expect_error(add_time_to_event_outcomes(df2), class = "sRtr_error_conflicting_transplant_dates")
 })

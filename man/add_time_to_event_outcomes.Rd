@@ -49,15 +49,24 @@ how much your results depend on it.}
 the graft failed counts:
 \itemize{
 \item \code{"exclude"} (default): a graft is at risk of rejection only until it
-fails. Forms filed in the years after graft failure (\code{TFL_FOL_CD} codes
-801 to 850, "N year after graft failure") are not used, and the
-rejection window ends at the graft failure date (\code{TFL_GRAFT_DT}, or
-that graft's own date for \code{TX_KP}), inclusive. The form filed at
-failure (code 800) is used: it may report the rejection that led to
-the failure. A rejection during the transplant admission counts even
-if the graft failed in the same admission.
+fails. Forms filed in the years after graft failure are not used, and
+the rejection window ends at the graft failure date (\code{TFL_GRAFT_DT},
+or that graft's own date, \code{TFL_GRAFT_DT_KI} or \code{TFL_GRAFT_DT_PA}, for
+\code{TX_KP}); grafts without a rejection are censored there. These columns
+are then required.
 \item \code{"keep"}: every form counts, as before.
 }
+
+The follow-up code \code{TFL_FOL_CD} uses format \code{FOLCD} of the SRTR data
+dictionary (SAF releases 2203 and 2609): code 800 is the form filed at
+graft failure and codes 801 to 850 are "N year after graft failure".
+Under \code{"exclude"}, sRtr leaves out codes 801 to 850. These are package
+conventions, not SRTR rules: the form filed at failure (code 800) is
+kept, since it may report the rejection that led to the failure; a
+rejection reported on the day of failure counts; and a rejection during
+the transplant admission counts if it falls inside the ordinary window,
+even when the graft failed in the same admission (its date is only a
+discharge-date proxy). Censoring still ends at the failure date.
 
 Malignancy is patient-level and always uses every form. The columns from
 \code{\link[=add_txf_outcomes]{add_txf_outcomes()}} (\code{FIRST_FU_REJ_DATE}, \code{FIRST_FU_REJ_STATUS}) describe
