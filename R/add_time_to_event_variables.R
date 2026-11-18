@@ -171,11 +171,13 @@ add_txf_outcomes <- function(df) {
 
 #' add_txf_outcomes(), plus the first report on or after a start date
 #'
-#' With `start` (one date per row of `df`, normally `REC_TX_DT`), also adds
-#' internal columns `.FIRST_FU_MALIG_ELIGIBLE` and `.FIRST_FU_REJ_ELIGIBLE`
-#' (with `_KI` and `_PA` for TX_KP): the first dated positive form on or after
-#' `start`. [add_time_to_event_outcomes()] times events from these and drops
-#' them; the public date columns keep the first report of all. A registration
+#' With `start` (one date per row of `df`, normally `REC_TX_DT`), also sets
+#' an internal attribute `.srtr_eligible`: a list of `Date` vectors named by
+#' the public date column (`FIRST_FU_MALIG_DATE`, `FIRST_FU_REJ_DATE`, with
+#' `_KI` and `_PA` for TX_KP), each the first dated positive form on or after
+#' `start`. [add_time_to_event_outcomes()] times events from these and removes
+#' the attribute; the public date columns keep the first report of all. Kept
+#' out of the columns so no caller column can be overwritten. A registration
 #' listed more than once uses its earliest known `start` on every row.
 #' @noRd
 .srtr_add_txf_outcomes <- function(df, start = NULL) {
@@ -226,9 +228,7 @@ add_txf_outcomes <- function(df) {
   out$FIRST_FU_MALIG_DATE <- malig$date
   out$FIRST_FU_MALIG_STATUS <- malig$status
   out$FIRST_FU_MALIG_LAST_NEG_DATE <- malig$last_neg
-  if (!is.null(start)) {
-    out$.FIRST_FU_MALIG_ELIGIBLE <- malig$eligible
-  }
+  attr(out, ".srtr_eligible") <- list(FIRST_FU_MALIG_DATE = malig$eligible)
 
   #Rejection (format ACREJEPF, raw codes or labels): code 1 treated, 2
   #untreated, 3 no, 998 unknown. Only code 3 is a negative form: an untreated
@@ -247,9 +247,8 @@ add_txf_outcomes <- function(df) {
     out[[paste0("FIRST_FU_REJ_DATE", suffix)]] <- result$date
     out[[paste0("FIRST_FU_REJ_STATUS", suffix)]] <- result$status
     out[[paste0("FIRST_FU_REJ_LAST_NEG_DATE", suffix)]] <- result$last_neg
-    if (!is.null(start)) {
-      out[[paste0(".FIRST_FU_REJ_ELIGIBLE", suffix)]] <- result$eligible
-    }
+    attr(out, ".srtr_eligible")[[paste0("FIRST_FU_REJ_DATE", suffix)]] <-
+      result$eligible
     out
   }
 
@@ -277,6 +276,10 @@ add_txf_outcomes <- function(df) {
     }
   } else {
     out <- add_rejection(out, rep(TRUE, nrow(follow_up_df)), "")
+  }
+
+  if (is.null(start)) {
+    attr(out, ".srtr_eligible") <- NULL
   }
 
   #In future, consider use of nested join for other values such as hospitalization counts
@@ -490,12 +493,9 @@ add_time_to_event_outcomes <- function(
   #Add rejection and malignancy from follow up database
   #Events are timed from the first report on or after the transplant date;
   #the public date columns keep the first report of all, for auditing.
-  before <- names(df)
   df <- .srtr_add_txf_outcomes(df, start = df$REC_TX_DT)
-  helpers <- setdiff(
-    grep("^\\.FIRST_FU_.*_ELIGIBLE", names(df), value = TRUE),
-    before
-  )
+  eligible <- attr(df, ".srtr_eligible")
+  attr(df, ".srtr_eligible") <- NULL
 
   #Rejection can be found during the transplant admission or on a follow-up
   #form. An admission rejection is dated at discharge: the transplant date
@@ -504,20 +504,20 @@ add_time_to_event_outcomes <- function(
   #in its own column and never substituted for it.
   if (is_kp) {
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE", df$.FIRST_FU_REJ_ELIGIBLE_KI,
+      df, "REC_ACUTE_REJ_EPISODE", eligible$FIRST_FU_REJ_DATE_KI,
       .srtr_undated_event(df, "FIRST_FU_REJ", "_KI")
     )
     df$FIRST_REJ_DATE <- rejection$date
     df$FIRST_REJ_DATE_SOURCE <- rejection$source
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE_PA", df$.FIRST_FU_REJ_ELIGIBLE_PA,
+      df, "REC_ACUTE_REJ_EPISODE_PA", eligible$FIRST_FU_REJ_DATE_PA,
       .srtr_undated_event(df, "FIRST_FU_REJ", "_PA")
     )
     df$FIRST_REJ_DATE_PA <- rejection$date
     df$FIRST_REJ_DATE_PA_SOURCE <- rejection$source
   } else {
     rejection <- .srtr_first_rejection(
-      df, "REC_ACUTE_REJ_EPISODE", df$.FIRST_FU_REJ_ELIGIBLE,
+      df, "REC_ACUTE_REJ_EPISODE", eligible$FIRST_FU_REJ_DATE,
       .srtr_undated_event(df, "FIRST_FU_REJ", "")
     )
     df$FIRST_REJ_DATE <- rejection$date
@@ -539,7 +539,7 @@ add_time_to_event_outcomes <- function(
     FIRST_REJ_DATE_PA = if (is_kp) df$TFL_LAFUDATEPA
   )
   report_date <- list(
-    FIRST_FU_MALIG_DATE = df$.FIRST_FU_MALIG_ELIGIBLE,
+    FIRST_FU_MALIG_DATE = eligible$FIRST_FU_MALIG_DATE,
     FIRST_REJ_DATE = df$FIRST_REJ_DATE,
     FIRST_REJ_DATE_PA = df[["FIRST_REJ_DATE_PA"]]
   )
@@ -612,7 +612,6 @@ add_time_to_event_outcomes <- function(
     )
   }
 
-  df <- df[setdiff(names(df), helpers)]
   df$.patient_lafu <- NULL
   df$.graft_lafu <- NULL
   df$.death_event <- NULL
