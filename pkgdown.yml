@@ -4,13 +4,14 @@ pkgdown_sha: ~
 articles:
   adding-columns: adding-columns.html
   building-cohort-with-flowchart: building-cohort-with-flowchart.html
+  articles/checking-your-safs: checking-your-safs.html
   articles/follow-up-forms: follow-up-forms.html
   articles/follow-up-windows: follow-up-windows.html
   articles/geographic-coverage-gain: geographic-coverage-gain.html
   getting-started: getting-started.html
   mapping: mapping.html
   missing-data: missing-data.html
-last_built: 2026-11-18T12:49Z
+last_built: 2026-11-18T14:22Z
 urls:
   reference: https://vagishhemmige.github.io/sRtr/reference
   article: https://vagishhemmige.github.io/sRtr/articles

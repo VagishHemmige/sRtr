@@ -39,3 +39,8 @@ your own SAFs and is not run on this site.
   events](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.md):
 - [Follow-up windows and
   death](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.md):
+
+### Checking your data
+
+- [Checking sRtr on your own
+  SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md):

@@ -2,6 +2,11 @@
 
 ## sRtr (development version)
 
+- A new article, *Checking sRtr on your own SAFs*, shows how to run the
+  package’s live tests on your release, collect sRtr’s warnings by
+  class, and check keys, labels and derived outcomes, with output safe
+  to share.
+
 - Two new articles under “Pitfalls in SRTR data” on the package website,
   *Follow-up forms are reports, not events* and *Follow-up windows and
   death*, show subtleties in SRTR follow-up and death data that change
