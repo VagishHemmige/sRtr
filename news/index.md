@@ -167,6 +167,18 @@
   follow-up form for a recipient is undated
   ([\#214](https://github.com/VagishHemmige/sRtr/issues/214)).
 
+- [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
+  now says what the follow-up forms report, not only when an event was
+  first reported. New `FIRST_FU_MALIG_STATUS` and `FIRST_FU_REJ_STATUS`
+  columns keep an event, an untreated rejection, an explicit “no”, an
+  unknown answer and no follow-up form apart; before, everything but an
+  event read as no event. New `..._LAST_NEG_DATE` columns give the last
+  explicitly negative form before the first report (for `TX_KP`, per
+  graft), for interval-censored analyses. The help page now says that
+  these dates are report dates, not onset dates. Rejections are also
+  found in raw codes, not only in labelled columns
+  ([\#214](https://github.com/VagishHemmige/sRtr/issues/214)).
+
 - [`apply_srtr_factors()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.md)
   and
   [`apply_srtr_varlabels()`](https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.md)

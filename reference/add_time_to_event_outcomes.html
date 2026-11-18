@@ -126,7 +126,8 @@ one. An admission rejection is dated at discharge, a proxy: the transplant
 date plus <code>REC_POSTX_LOS</code>, else <code>REC_DISCHRG_DT</code>; a date before the
 transplant is not used. <code>FIRST_REJ_DATE_SOURCE</code> (<code>"admission_los"</code>,
 <code>"admission_discharge"</code>, <code>"admission_undated"</code> or <code>"follow_up"</code>) says which
-rule applied. Here a missing date does not always mean no event: an
+rule applied (<code>"follow_up_undated"</code> is described below). Here a missing
+date does not always mean no event: an
 admission rejection with no usable date keeps <code>_BINARY = 1</code> with a missing
 censoring date and time, with a warning, so it drops out of time-to-event
 models instead of counting as rejection-free. A later follow-up rejection
@@ -135,6 +136,36 @@ stays in <code>FIRST_FU_REJ_DATE</code> (<code>FIRST_FU_REJ_DATE_KI</code> and
 pancreas) and is never used in its place. A date is unusable when it falls
 before the transplant; with no transplant date, the discharge date is kept,
 and the elapsed time is missing.</p>
+<p>Malignancy (<code>FIRST_FU_MALIG_DATE</code>) and rejection count only inside the
+window the recipient or graft is followed for: from the transplant date
+up to the earlier of the last follow-up date and death from any source
+(<code>REC_DEATH_DT_COMPOSITE</code>), both inclusive, whatever <code>death_window</code> is. Malignancy uses the patient's last
+follow-up (for <code>TX_KP</code>, the later of the two graft dates); rejection uses
+the graft's own (<code>TFL_LAFUDATEKI</code> or <code>TFL_LAFUDATEPA</code> for <code>TX_KP</code>). Without
+an event, the recipient is censored at the end of the window. A report
+dated after it is not an event, but its date stays in the date column, so
+<code>!is.na(FIRST_FU_MALIG_DATE) &amp; FIRST_FU_MALIG_DATE_BINARY == 0</code> finds the
+reports left out. A report dated before the transplant is not used:
+events are timed from the first report on or after the transplant date,
+while <code>FIRST_FU_MALIG_DATE</code> and <code>FIRST_FU_REJ_DATE</code> keep the first report
+of all, for auditing (<code>FIRST_REJ_DATE</code> is the date used). With no last
+follow-up date the window's end is unknown: death is not used in its place,
+and the time is missing.</p>
+<p>A malignancy or rejection reported only on follow-up forms with no date
+(status <code>"event"</code> with a missing date in <code><a href="add_txf_outcomes.html">add_txf_outcomes()</a></code>) is treated
+like an undated admission rejection: <code>_BINARY = 1</code> with a missing
+censoring date and time, with a warning, so it does not add event-free
+time. For rejection, <code>FIRST_REJ_DATE_SOURCE</code> is then
+<code>"follow_up_undated"</code>.</p>
+<p>Follow-up dates are report dates (see <code><a href="add_txf_outcomes.html">add_txf_outcomes()</a></code>). A report
+dated on the day of death may come from the form filed at death, so the
+event may have happened earlier. <code>FIRST_FU_MALIG_DATE_DEATH_DAY</code> and
+<code>FIRST_REJ_DATE_DEATH_DAY</code> (and <code>FIRST_REJ_DATE_PA_DEATH_DAY</code>) are <code>TRUE</code>
+when the date is the day of death, <code>FALSE</code> when it is another day, and
+<code>NA</code> with no date, so you can run a sensitivity analysis without those
+events. Such reports count as events by default when follow-up covers the
+day of death. The status columns from <code><a href="add_txf_outcomes.html">add_txf_outcomes()</a></code> say what the
+forms report, before the window is applied.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

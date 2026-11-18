@@ -1,8 +1,10 @@
 # Add time-to-event follow-up outcomes to a transplant cohort
 
-Uses the cohort's `file_key` attribute (as set by your SRTR load
-helpers) to locate and load the corresponding follow-up table, then
-derives:
+Uses the cohort's `file_key` attribute (as set by
+[`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md))
+to load the matching follow-up file (`TX_KI` to `TXF_KI`, and so on),
+limited to the cohort's `TRR_ID`s and to the columns used here, and adds
+what the follow-up forms say about malignancy and acute rejection.
 
 ## Usage
 
@@ -14,105 +16,88 @@ add_txf_outcomes(df)
 
 - df:
 
-  A data frame representing a transplant cohort (one row per recipient
-  or transplant). Must include a `TRR_ID` column and have an attribute
-  `file_key` (a string) indicating the originating SRTR table key (e.g.,
-  `"KI_txf"`). The companion follow-up key is inferred as the same
-  prefix with `"F"` inserted after the first two characters (e.g.,
-  `"KI_Ftxf"`).
+  A transplant data frame from
+  [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md),
+  with a `TRR_ID` column and a `file_key` attribute.
 
 ## Value
 
-The input `df` with additional columns:
+`df` with these columns added. For `TX_KP`, each rejection column comes
+once per graft, with the suffix `_KI` or `_PA` (`FIRST_FU_REJ_DATE_KI`,
+`FIRST_FU_REJ_STATUS_PA`, ...); malignancy is patient-level and uses the
+forms for both grafts.
 
-- FIRST_FU_MALIG_DATE:
+- `FIRST_FU_MALIG_DATE`:
 
-  Date of first follow-up malignancy (per TRR).
+  Date of the first form reporting a malignancy (`TFL_MALIG` `"Y"`).
 
-- FIRST_FU_REJ_DATE_ORG:
+- `FIRST_FU_MALIG_STATUS`:
 
-  Date of first acute rejection per organ (wide columns by organ code).
+  What the forms say: `"event"` (at least one form reports a
+  malignancy), `"no event"` (none does, and at least one says `"N"`),
+  `"unknown"` (forms exist, but none says `"Y"` or `"N"`), or
+  `"no follow-up"` (no form).
 
-Existing columns/attributes of `df` are preserved.
+- `FIRST_FU_MALIG_LAST_NEG_DATE`:
+
+  Date of the last form saying `"N"`, strictly before
+  `FIRST_FU_MALIG_DATE`; with no report, the last such form at all.
+
+- `FIRST_FU_REJ_DATE`:
+
+  Date of the first form reporting a treated acute rejection
+  (`TFL_ACUTE_REJ_EPISODE` code 1 of format `ACREJEPF`, raw or
+  labelled).
+
+- `FIRST_FU_REJ_STATUS`:
+
+  `"event"` (a treated rejection), `"untreated"` (no treated rejection,
+  but at least one untreated, code 2), `"no event"` (at least one form
+  says no rejection, code 3), `"unknown"` (only code 998 or no answer),
+  or `"no follow-up"`.
+
+- `FIRST_FU_REJ_LAST_NEG_DATE`:
+
+  Date of the last form saying no rejection (code 3), strictly before
+  `FIRST_FU_REJ_DATE`; with no report, the last such form at all. An
+  untreated rejection is evidence of rejection, so it is not a negative
+  form.
 
 ## Details
 
-- `FIRST_FU_MALIG_DATE` — first follow-up malignancy date per `TRR_ID`
+**The dates are report dates.** A follow-up form covers a period, and
+its date (`TFL_PX_STAT_DT`, the patient status date) is when the status
+was recorded, not when the malignancy or rejection began. The event
+happened at some time after the last negative form and on or before the
+first report, so `..._LAST_NEG_DATE` and the report date bound it for
+interval-censored or discrete-time models. Whether that interval bounds
+clinical onset depends on what each form asked.
 
-- `FIRST_FU_REJ_DATE_{ORG}` — first acute rejection date per organ code
-  (e.g., `FIRST_FU_REJ_DATE_KI`, `FIRST_FU_REJ_DATE_PA`)
+**Evidence and timing are kept apart.** A status of `"event"` with a
+missing date means a form reports the event but no positive form is
+dated; `..._LAST_NEG_DATE` is then missing too, since the bound is
+unknown. A missing date alone does not mean no event: read the status
+column.
 
-The function limits the follow-up load to the cohort's `TRR_ID`s for
-efficiency, and merges the derived dates back into `df`.
+Forms for every period count here, whenever they are dated.
+[`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
+counts a report as an event only inside the follow-up window.
 
-This helper:
-
-1.  Infers the follow-up table key from `attr(df, "file_key")`.
-
-2.  Loads the follow-up subset for the cohort's `TRR_ID`s via
-    [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md).
-
-3.  Normalizes organ to a two-letter code (`ORG_TYPE` := first two
-    characters of `ORG_TY`), selects core follow-up fields, and orders
-    by `TRR_ID` and `TFL_PX_STAT_DT`.
-
-4.  Computes the earliest malignancy date per `TRR_ID` where
-    `TFL_MALIG == "Y"`.
-
-5.  Computes the earliest acute rejection date per (`TRR_ID`,
-    `ORG_TYPE`) where `TFL_ACUTE_REJ_EPISODE` indicates at least one
-    treated episode, and pivots to wide organ-specific columns.
-
-6.  Left-joins both results back to `df`.
-
-**Assumptions/requirements**
-
-- The follow-up table contains: `TRR_ID`, `ORG_TY`, `TFL_PX_STAT_DT`,
-  `TFL_MALIG`, and `TFL_ACUTE_REJ_EPISODE`.
-
-- `TFL_PX_STAT_DT` should be a `Date`; if stored as `YYYYMMDD`, convert
-  upstream (e.g., `as.Date(as.character(x), "%Y%m%d")`).
-
-- Rejection is identified by the labeled value
-  `"1: Yes, at least one episode treated with anti-rejection agent"`.
-  Adjust the filter if your coding differs.
-
-**Notes**
-
-- Combined organ codes (e.g., `"HL"`) are not split; they will produce a
-  column `FIRST_FU_REJ_DATE_HL`. If you prefer to split into heart/lung,
-  duplicate those rows before pivoting.
-
-- This function only derives event *dates*. To build full time-to-event
-  variables (censor date, indicator, elapsed time), pass these dates to
-  your
-  [`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)
-  helper along with transplant and last-follow-up dates.
+Combined organ codes in `TXF_KP` (`ORG_TY` other than `KI` or `PA`)
+cannot be assigned to one graft, and give a warning.
 
 ## See also
 
-[`srtr_time_to_event`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md),
-[`load_srtr_file`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+[`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md),
+[`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md),
+[`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-# df loaded earlier, e.g., df <- load_srtr_file("KI_txf")
-attr(df, "file_key")
-#> "KI_txf"
-
-df2 <- add_txf_outcomes(df)
-names(df2)
-# ... includes FIRST_FU_MALIG_DATE, FIRST_FU_REJ_DATE_KI, etc.
-
-# Then compute time-to-event from transplant date:
-df2 <- srtr_time_to_event(
-  df2,
-  event_date  = FIRST_FU_MALIG_DATE,
-  start_date  = REC_TX_DT,
-  censor_date = TFL_LAFUDATEKI,
-  prefix      = "REC_MALIG"
-)
+tx <- load_srtr_file("TX_KI")
+tx <- add_txf_outcomes(tx)
+table(tx$FIRST_FU_REJ_STATUS)
 } # }
 ```
