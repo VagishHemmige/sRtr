@@ -332,7 +332,10 @@ narrower end point than SRTR's graft failure: it misses a retransplant
 that came first, or dates it too late. To follow SRTR's definition, take
 the earliest of the recorded failure, the retransplant date and death,
 inside the observation window. Lung and heart-lung leave out retransplant,
-and heart uses only death and retransplant. Combining events this way is a
+and heart uses only death and retransplant. For heart, SRTR also does not
+stop at the last OPTN follow-up date: deaths and retransplants after it
+still count, up to the reporting time point
+([SRTR Technical Methods](#ref-psr)). Combining events this way is a
 modeling choice: a composite end point disregards the possibility that the
 exposure affects its parts differently
 ([Sapir-Pichhadze et al. 2016](#ref-sapir)).
