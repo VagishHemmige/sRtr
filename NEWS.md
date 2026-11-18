@@ -132,6 +132,11 @@
   says that these dates are report dates, not onset dates. Rejections are
   also found in raw codes, not only in labelled columns (#214).
 
+* `add_txf_outcomes()` attaches a `txf_report` attribute counting the
+  merge: registrations in the cohort and with follow-up forms, forms read
+  and undated, and for each outcome the positive forms and the registrations
+  with a report and with a dated report (#216).
+
 * `apply_srtr_factors()` and `apply_srtr_varlabels()` no longer fail when
   called as `sRtr::fun()` without sRtr attached (#90).
 

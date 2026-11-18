@@ -133,6 +133,28 @@ srtr_time_to_event <- function(
 #'       evidence of rejection, so it is not a negative form.}
 #'   }
 #'
+#'   The result also carries a `txf_report` attribute, a list of counts from
+#'   the merge for a methods section. Counts are of transplant registrations
+#'   (distinct `TRR_ID`s), not people, and of form rows:
+#'   \describe{
+#'     \item{`follow_up_file`}{The follow-up file read, such as `"TXF_KI"`.}
+#'     \item{`cohort_rows`}{Rows of `df`.}
+#'     \item{`registrations`}{Distinct non-missing `TRR_ID`s in `df`.}
+#'     \item{`registrations_with_forms`}{Of those, how many have at least
+#'       one follow-up form.}
+#'     \item{`forms`}{Follow-up form rows for those registrations.}
+#'     \item{`forms_undated`}{Of those, how many have no `TFL_PX_STAT_DT`.}
+#'     \item{`outcomes`}{A tibble with one row per outcome (`"malignancy"`,
+#'       `"rejection"`, or for `TX_KP` `"rejection, kidney"` and
+#'       `"rejection, pancreas"`): `column`, the date column;
+#'       `positive_forms`, forms reporting it; `registrations_with_report`,
+#'       registrations with a positive form (status `"event"`); and
+#'       `registrations_with_dated_report`, those whose first report is
+#'       dated.}
+#'   }
+#'   The report describes the cohort at the time of the merge: filtering the
+#'   result afterwards does not update it.
+#'
 #' @details
 #' **The dates are report dates.** A follow-up form covers a period, and its
 #' date (`TFL_PX_STAT_DT`, the patient status date) is when the status was
@@ -217,20 +239,24 @@ add_txf_outcomes <- function(
   out$FIRST_FU_MALIG_DATE <- malig$date
   out$FIRST_FU_MALIG_STATUS <- malig$status
   out$FIRST_FU_MALIG_LAST_NEG_DATE <- malig$last_neg
+  endpoints <- list(malig)
+  endpoint_names <- c(FIRST_FU_MALIG_DATE = "malignancy")
 
   #Rejection (format ACREJEPF, raw codes or labels): code 1 treated, 2
   #untreated, 3 no, 998 unknown. Only code 3 is a negative form: an untreated
   #rejection is evidence of rejection, so it cannot bound the interval.
   episode <- follow_up_df$TFL_ACUTE_REJ_EPISODE
-  add_rejection <- function(out, rows, suffix) {
+  rejection_endpoint <- function(rows) {
     ep <- episode[rows]
-    result <- .srtr_txf_endpoint(
+    .srtr_txf_endpoint(
       follow_up_df[rows, ],
       ids = df$TRR_ID,
       positive = .srtr_has_code(ep, "1", "ACREJEPF"),
       negative = .srtr_has_code(ep, "3", "ACREJEPF"),
       untreated = .srtr_has_code(ep, "2", "ACREJEPF")
     )
+  }
+  set_rejection <- function(out, result, suffix) {
     out[[paste0("FIRST_FU_REJ_DATE", suffix)]] <- result$date
     out[[paste0("FIRST_FU_REJ_STATUS", suffix)]] <- result$status
     out[[paste0("FIRST_FU_REJ_LAST_NEG_DATE", suffix)]] <- result$last_neg
@@ -255,13 +281,28 @@ add_txf_outcomes <- function(
         class = "kp_unknown_organ"
       )
     }
-    for (organ in c("KI", "PA")) {
-      rows <- follow_up_df$ORG_TYPE %in% organ
-      out <- add_rejection(out, rows, paste0("_", organ))
+    graft <- c(KI = "kidney", PA = "pancreas")
+    for (organ in names(graft)) {
+      result <- rejection_endpoint(follow_up_df$ORG_TYPE %in% organ)
+      out <- set_rejection(out, result, paste0("_", organ))
+      endpoints <- c(endpoints, list(result))
+      endpoint_names[[paste0("FIRST_FU_REJ_DATE_", organ)]] <-
+        paste0("rejection, ", graft[[organ]])
     }
   } else {
-    out <- add_rejection(out, rep(TRUE, nrow(follow_up_df)), "")
+    result <- rejection_endpoint(rep(TRUE, nrow(follow_up_df)))
+    out <- set_rejection(out, result, "")
+    endpoints <- c(endpoints, list(result))
+    endpoint_names[["FIRST_FU_REJ_DATE"]] <- "rejection"
   }
+
+  attr(out, "txf_report") <- .srtr_txf_report(
+    df,
+    follow_up_df,
+    follow_up_key,
+    endpoints,
+    endpoint_names
+  )
 
   #In future, consider use of nested join for other values such as hospitalization counts
   #  df<-df |>
@@ -671,6 +712,43 @@ add_time_to_event_outcomes <- function(
   df
 }
 
+#' The merge report attached to the result of add_txf_outcomes()
+#'
+#' Counts are of transplant registrations (distinct non-missing `TRR_ID`s),
+#' not people, and of form rows, at the time of the merge.
+#' @noRd
+.srtr_txf_report <- function(df, forms, follow_up_key, endpoints, labels) {
+  ids <- df$TRR_ID
+  registration <- !is.na(ids) & !duplicated(ids)
+  matched <- !is.na(forms$TRR_ID) & forms$TRR_ID %in% ids[registration]
+  per_endpoint <- function(endpoint, measure) {
+    switch(
+      measure,
+      positive_forms = endpoint$positive_forms,
+      with_report = sum(endpoint$status[registration] == "event"),
+      dated = sum(!is.na(endpoint$date[registration]))
+    )
+  }
+  count <- function(measure) {
+    vapply(endpoints, per_endpoint, numeric(1), measure = measure)
+  }
+  list(
+    follow_up_file = follow_up_key,
+    cohort_rows = nrow(df),
+    registrations = sum(registration),
+    registrations_with_forms = sum(ids[registration] %in% forms$TRR_ID[matched]),
+    forms = sum(matched),
+    forms_undated = sum(matched & is.na(forms$TFL_PX_STAT_DT)),
+    outcomes = tibble::tibble(
+      outcome = unname(labels),
+      column = names(labels),
+      positive_forms = count("positive_forms"),
+      registrations_with_report = count("with_report"),
+      registrations_with_dated_report = count("dated")
+    )
+  )
+}
+
 #' Summarise one follow-up endpoint per transplant registration
 #'
 #' Keeps what the forms say about an endpoint apart from when it was first
@@ -687,7 +765,8 @@ add_time_to_event_outcomes <- function(
 #'   `"unknown"` or `"no follow-up"`; and `last_neg`, the last explicitly
 #'   negative form strictly before `date`, or the last one at all when there
 #'   is no positive form. `last_neg` is missing when every positive form is
-#'   undated, since the bound is then unknown.
+#'   undated, since the bound is then unknown. Also `positive_forms`, the
+#'   number of positive forms for the cohort, for the merge report.
 #' @noRd
 .srtr_txf_endpoint <- function(forms, ids, positive, negative, untreated = NULL) {
   n <- length(ids)
@@ -696,6 +775,7 @@ add_time_to_event_outcomes <- function(
     status = rep("no follow-up", n),
     last_neg = rep(as.Date(NA), n)
   )
+  result$positive_forms <- 0
   if (nrow(forms) == 0) {
     return(result)
   }
@@ -707,6 +787,7 @@ add_time_to_event_outcomes <- function(
   untreated <- untreated %in% TRUE
   form_date <- forms$TFL_PX_STAT_DT
   key <- match(forms$TRR_ID, ids)
+  result$positive_forms <- sum(positive & !is.na(key))
 
   #Per registration: any positive, untreated or negative form, and the first
   #dated positive form. A registration listed twice in the cohort gets the
