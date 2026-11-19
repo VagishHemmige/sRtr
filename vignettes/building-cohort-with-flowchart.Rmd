@@ -63,6 +63,10 @@ Give each criterion two steps: first exclude rows where eligibility is
 unknown, then rows that are known to be ineligible.
 
 ```{r cohort}
+# The date window below would count a missing date as "outside". These
+# made-up dates are complete; on real files, add an unknown step if not.
+stopifnot(!anyNA(tx$REC_TX_DT))
+
 cohort_fc <- tx |>
   as_fc(label = "Kidney transplants", text_fs = 9) |>
   fc_filter(
@@ -104,11 +108,20 @@ cohort_fc <- tx |>
 
 The `text_fs`, `text_fs_exc` and `offset_exc` arguments only set the text
 size and the gap between the boxes. The transplant dates have no missing
-values, so that criterion needs one step. Check before assuming so: `sum(is.na(tx$REC_TX_DT))`.
+values, so that criterion needs one step; the `stopifnot()` line makes the
+code stop if that ever changes.
 
-```{r draw, fig.height = 10, fig.alt = "Flow diagram from 40 kidney transplants to the final cohort. Each criterion has its own exclusion box: transplanted outside 2015-2019, recipient age unknown, recipient under 18, donor type unknown, and living donor."}
+```{r draw, fig.height = 10, fig.alt = "Flow diagram. 40 kidney transplants; 10 transplanted outside 2015-2019 leaves 30; 2 with recipient age unknown leaves 28; 4 recipients under 18 leaves 24; 5 with donor type unknown leaves 19; 4 living donors leaves a final cohort of 15 deceased-donor transplants."}
 cohort_fc |>
   fc_draw()
+```
+
+The same counts as a table, from `cohort_fc$fc`:
+
+```{r counts}
+cohort_fc$fc |>
+  select(box = text, n) |>
+  mutate(box = sub("\n.*", "", box))
 ```
 
 The order of the steps changes the counts in each box, though not the
@@ -117,9 +130,12 @@ the order of the criteria the same across the analyses you compare.
 
 # What counts as unknown
 
-In SRTR files a value can be unknown without being `NA`: a code such as 998
-means "unknown" and a blank can mean "not answered". Decide what each code
-means before you filter. `srtr_normalize_missing()` turns the codes you
+In SRTR files a value can be unknown without being `NA`. In
+`DON_HIST_DIAB` (donor history of diabetes), code 998 means "unknown", and
+a blank can mean "not answered". But a code means what its column's format
+says: in follow-up files the same number, 998 in `TFL_FOL_CD`, means "lost
+to follow-up", which is an outcome, not missing data. So decide column by
+column, never by code number across columns. `srtr_normalize_missing()` turns the codes you
 choose into `NA`, and `srtr_missing_report()` counts them first; see
 [Missing data](missing-data.html).
 
@@ -148,10 +164,11 @@ from 1 to 10, and no box that can be worked out from the others.
 ```{r export, eval = FALSE}
 cohort_fc |>
   fc_draw() |>
-  fc_export("cohort.png", width = 3000, height = 3000, res = 500)
+  fc_export("cohort.png", width = 7, height = 10, units = "in", res = 300)
 ```
 
-`fc_draw()` and `fc_filter()` have many arguments for box size, text and
+Export at the size you checked on screen; a different shape can make
+boxes overlap. `fc_draw()` and `fc_filter()` have many arguments for box size, text and
 color; see the
 [`flowchart` reference](https://bruigtp.github.io/flowchart/reference/index.html).
 
