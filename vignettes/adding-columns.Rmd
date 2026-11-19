@@ -29,7 +29,7 @@ library(sRtr)
 |---|---|---|---|
 | `add_kdpi()` | KDRI and KDPI | Deceased kidney donors | `DONOR_DECEASED`, or `TX_KI` |
 | `add_epts()` | EPTS | Adult kidney candidates or recipients | `CAND_KIPA` (at listing) or `TX_KI` (at transplant) |
-| `add_donor_egfr()` | Donor eGFR (CKD-EPI) | Donors | `DONOR_DECEASED` or `DONOR_LIVE` |
+| `add_donor_egfr()` | Donor eGFR (CKD-EPI) | Donors | `DONOR_DECEASED`, or `DONOR_LIVE` with `creatinine = "DON_KI_CREAT_PREOP"` |
 | `add_lkdpi()` | LKDPI | Living donor kidney transplants | `DONOR_LIVE` joined to `TX_KI` |
 | `add_pdri()` | PDRI | Pancreas and kidney-pancreas transplants | `TX_PA` or `TX_KP` |
 | `add_pvr()` | Pulmonary vascular resistance | Heart, lung and heart-lung candidates | `CAND_THOR` (at listing) or `TX_HR`, `TX_LU`, `TX_HL` (at transplant) |
@@ -65,7 +65,8 @@ The `table` argument chooses the table:
 - `"latest"` (the default) uses the newest stored table for every row.
 - `"in_force"` uses, for each row, the table OPTN was using on the
   **donor recovery date** (`DON_RECOV_DT`), not the transplant date.
-- A label such as `"2018"` uses that table for every row.
+- A label such as `"2018"` uses that table for every row. The table must
+  match the formula: `"2018"` needs `version = "rao2009"`.
 
 ```{r in-force}
 kdpi <- add_kdpi(donors, version = "rao2009", table = "in_force")
@@ -76,9 +77,9 @@ data.frame(
 )
 ```
 
-The rows with no KDPI are not errors in the donor's data. In 2010 the
-first stored table was not yet in force, and from 2024-10-31 OPTN used the
-refit formula (`version = "refit2024"`, the default), whose tables are
+The rows with no KDPI are not errors in the donor's data. In March 2010
+no KDPI table was yet in force, and from 2024-10-31 OPTN used the refit
+formula (`version = "refit2024"`, the default), whose tables are
 separate:
 
 ```{r refit}
@@ -103,9 +104,18 @@ eff <- optn_mapping_tables$effective
 eff[eff$score == "kdpi", c("label", "kdri_formula", "effective_from")]
 ```
 
-The list includes tables OPTN used that sRtr does not store: the 2010,
-2011 and 2024-donors KDPI tables. Rows recovered while one of those was in
-force get no KDPI with `table = "in_force"`.
+A missing KDPI from a table can have three causes:
+
+- **The table is not stored.** OPTN has not archived the 2024-donors table,
+  in force from 2025-05-21.
+- **The table is stored but incomplete.** The 2010 and 2011 tables lack the
+  scaling factor that turns KDRI into a percentile, so they give no KDPI.
+- **The table lacks what one donor needs.** The 2012 and 2013 tables do
+  not print the share of reference donors with hypertension or diabetes,
+  so a donor with unknown history (code 998) gets no KDPI from them under
+  the default `unknown_history = "optn"`.
+
+sRtr says so each time, in a warning or a message.
 
 `add_epts()` works the same way, on the listing date or the transplant
 date (`at = "listing"` or `"transplant"`).
@@ -122,7 +132,7 @@ documents its exceptions, and a few are options:
 | `add_epts()` | Unknown diabetes (998) | Missing EPTS | `unknown_diabetes = "no"`, a convention |
 | `add_epts()` | Missing dialysis start date | 0 years if not on dialysis, else missing | `missing_dialysis_date = "zero"`, a convention |
 | `add_epts()`, `add_donor_egfr()` | Age under 18 | Missing | `adults_only = FALSE` |
-| `add_pdri()` | Any missing input, including race | Missing PDRI | `mean_impute = TRUE`, for the calculation only |
+| `add_pdri()` | Any missing input, including race | Missing PDRI. A missing BMI is first computed from height and weight. | `mean_impute = TRUE`: continuous inputs take the mean of their dplyr group (of all rows if ungrouped), and missing yes/no terms count as 0, for the calculation only |
 
 Decide these before computing scores, and report the choice. To see how
 many rows lose a score, count them:
@@ -153,13 +163,15 @@ own missing code (`"."`, labelled `"Missing"`) counts as missing. See
 | `add_epts()` | Raw EPTS and the 2024 table for the candidates in the OPTN EPTS guide | Not yet |
 | `add_donor_egfr()` | The equations in Inker et al. 2021, Table 2 | Yes: values on one release's `DONOR_DECEASED` |
 | `add_lkdpi()` | The equation in Massie et al. 2016 | Not yet |
-| `add_pdri()` | The formula; not yet against published PDRI values | Not yet |
+| `add_pdri()` | The formula, and rounded examples from the paper ([#93](https://github.com/VagishHemmige/sRtr/issues/93)); two copies of the paper print different BMI coefficients | Not yet |
 | `add_pvr()` | The definition | Not yet |
 
-A check against the source shows the formula is right. A run on real
-SAFs shows the function reads the real columns and codes. Neither shows
-that a score matches published cohort results; that comparison is planned
-for PDRI and the SRTR program reports.
+A check against the source shows agreement on the examples checked. A
+run on real SAFs shows the function reads the real columns and codes.
+Neither shows that a score matches published cohort results; that
+comparison is planned for PDRI
+([#93](https://github.com/VagishHemmige/sRtr/issues/93)) and the SRTR
+program reports.
 
 The KDPI guide prints 63% for its Rao 2009 example, but the stored 2018
 table maps that donor's KDRI to 83%. sRtr gives 83, and the test records
