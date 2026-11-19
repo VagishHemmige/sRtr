@@ -223,6 +223,8 @@ check that sRtr reads your own release correctly.
   sRtr](https://vagishhemmige.github.io/sRtr/articles/getting-started.md):
 - [Checking sRtr on your own
   SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md):
+- [Releases, the data dictionary and
+  warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.md):
 
 ### Prepare an analysis cohort
 

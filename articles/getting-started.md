@@ -39,7 +39,10 @@ dictionary entries. If your folder is named after the release (such as
 sRtr stores copies of SRTR’s online data dictionary from some releases
 only. For a release in between, it uses the entries that are the same in
 the copies on either side, so the labels may not be the exact ones SRTR
-published for that release. The check after loading shows which you got.
+published for that release. The check after loading shows which you got;
+[Releases, the data dictionary and
+warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.md)
+explains it in full.
 
 To keep the folder for later sessions, add `permanent = TRUE`. This
 writes the path to your `~/.Renviron` file.
@@ -216,7 +219,9 @@ explains this in full.
 
 The [`load_srtr_file()` help
 page](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
-describes every loading option.
+describes every loading option, and [Releases, the data dictionary and
+warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.md)
+explains each warning and how to collect warnings in a script.
 
 ## Next steps
 
