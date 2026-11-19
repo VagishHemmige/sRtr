@@ -68,47 +68,41 @@ reference:
       - optn_mapping_tables
 
 articles:
-  - title: Getting Started
-    navbar: ~
+  - title: Start here
+    navbar: Start here
+    desc: >
+      Install sRtr, point it at your SAF folder and load a first file. Then
+      check that sRtr reads your own release correctly.
     contents:
       - getting-started
+      - articles/checking-your-safs
 
-  - title: Cohort Building
-    navbar: ~
-    contents:
-      - building-cohort-with-flowchart
-
-  - title: Missing data
-    navbar: ~
+  - title: Prepare an analysis cohort
+    navbar: Prepare an analysis cohort
+    desc: >
+      Decide what missing and unknown codes mean, select a cohort with a
+      record of each exclusion, and add derived columns.
     contents:
       - missing-data
-
-  - title: Adding columns
-    navbar: ~
-    contents:
+      - building-cohort-with-flowchart
       - adding-columns
 
-  - title: Mapping
-    navbar: ~
-    contents:
-      - mapping
-
-  - title: Geographic calculations
-    navbar: ~
-    contents:
-      - articles/geographic-coverage-gain
-
-  - title: Pitfalls in SRTR data
-    navbar: ~
+  - title: Define outcomes
+    navbar: Define outcomes
     desc: >
-      Subtleties in SRTR files that change results, each with a naive
-      approach that trips on it and the sRtr function that handles it.
-      The code needs your own SAFs and is not run on this site.
+      Pitfalls in post-transplant outcomes: what the follow-up forms record,
+      and which reports fall inside the analysis window. Each shows a naive
+      approach that trips on it and the sRtr function that handles it. The
+      code needs your own SAFs and is not run on this site.
     contents:
       - articles/follow-up-forms
       - articles/follow-up-windows
 
-  - title: Checking your data
-    navbar: ~
+  - title: Geography
+    navbar: Geography
+    desc: >
+      Map transplant centers, OPTN regions and OPO service areas, then
+      estimate how much new centers would add to geographic coverage.
     contents:
-      - articles/checking-your-safs
+      - mapping
+      - articles/geographic-coverage-gain
