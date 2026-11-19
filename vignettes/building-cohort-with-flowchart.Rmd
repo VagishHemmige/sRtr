@@ -1,8 +1,8 @@
 ---
-title: "Building Cohorts with Flow Diagrams"
+title: "Building cohorts with flow diagrams"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Building Cohorts with Flow Diagrams}
+  %\VignetteIndexEntry{Building cohorts with flow diagrams}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -11,105 +11,158 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 10,
-  fig.height = 8
+  fig.width = 7,
+  fig.height = 7,
+  eval = requireNamespace("flowchart", quietly = TRUE)
 )
 ```
-
-## Introduction
 
 The STROBE (Strengthening the Reporting of Observational Studies in
 Epidemiology) statement asks observational studies to report how the study
 population was selected, usually as a flow diagram. The
-[`flowchart`](https://bruigtp.github.io/flowchart/) package on CRAN builds
-that diagram while you build your cohort: each filtering step records how
-many records were kept and how many were excluded.
+[`flowchart`](https://bruigtp.github.io/flowchart/) package builds that
+diagram while you build your cohort: each filtering step records how many
+rows were kept and how many were excluded.
 
-This vignette shows how to:
+This article builds a small cohort from made-up rows, so it runs on this
+site. On your own files, start from `load_srtr_file()` instead.
 
-1. Start a flow diagram from a loaded SRTR file
-2. Apply inclusion criteria one at a time, with exclusion boxes
-3. Draw and export the diagram
-4. Get the final cohort back as a data frame
-
-The code below needs your own SRTR files, so it is shown but not run.
-
-## Setup
-
-```{r setup, eval=FALSE}
-install.packages("flowchart")
-
-library(sRtr)
+```{r setup, message = FALSE}
+library(dplyr)
 library(flowchart)
-
-TX_KI <- load_srtr_file("TX_KI")
 ```
 
-## Example: a kidney transplant cohort
+# Made-up transplants
 
-`as_fc()` starts the diagram from a data frame. Each `fc_filter()` keeps the
-rows where its condition is true; `show_exc = TRUE` adds a box counting the
-rows it removed.
+Forty kidney transplants, with a few missing values of the kind real files
+have:
 
-```{r basic_example, eval=FALSE}
-kidney_fc <- TX_KI |>
-  as_fc(label = "All kidney transplants") |>
+```{r data}
+n <- 40
+tx <- tibble(
+  TRR_ID = 1:n,
+  REC_AGE_AT_TX = c(rep(c(45, 62, 33, 70, 15, 58, 29, 51), 4), rep(NA, 8)),
+  DON_TY = rep(c("C", "C", "L", "C", NA), 8),
+  REC_TX_DT = as.Date("2014-07-01") + 60 * (seq_len(n) - 1)
+)
+```
+
+`REC_AGE_AT_TX` is the recipient's age at transplant and `DON_TY` the donor
+type (`"C"` deceased, `"L"` living). Load real files with
+`col_select` to keep only the columns your criteria need.
+
+# Known ineligible is not unknown
+
+A row can fail a criterion for two reasons: its value shows it is
+ineligible, or its value is missing, so eligibility is unknown. A filter
+such as `REC_AGE_AT_TX >= 18` drops both, as `dplyr::filter()` does, and
+the exclusion box counts them together. Readers then cannot tell how much
+of the exclusion is missing data.
+
+Give each criterion two steps: first exclude rows where eligibility is
+unknown, then rows that are known to be ineligible.
+
+```{r cohort}
+cohort_fc <- tx |>
+  as_fc(label = "Kidney transplants", text_fs = 9) |>
   fc_filter(
-    DON_AGE > 18,
-    label = "Donor over 18 years old",
+    REC_TX_DT >= as.Date("2015-01-01") & REC_TX_DT <= as.Date("2019-12-31"),
+    label = "Transplanted 2015-2019",
     show_exc = TRUE,
-    label_exc = "Donor 18 or younger"
+    label_exc = "Transplanted outside 2015-2019",
+    text_fs = 9, text_fs_exc = 8, offset_exc = 0.15
   ) |>
   fc_filter(
-    DON_ABO == "B",
-    label = "Donor blood type B",
+    !is.na(REC_AGE_AT_TX),
+    label = "Recipient age known",
     show_exc = TRUE,
-    label_exc = "Donor blood type not B"
+    label_exc = "Recipient age unknown",
+    text_fs = 9, text_fs_exc = 8, offset_exc = 0.15
   ) |>
   fc_filter(
-    REC_AGE >= 18 & REC_AGE <= 65,
-    label = "Recipient age 18 to 65",
+    REC_AGE_AT_TX >= 18,
+    label = "Adult recipient",
     show_exc = TRUE,
-    label_exc = "Recipient age outside 18 to 65"
+    label_exc = "Recipient under 18",
+    text_fs = 9, text_fs_exc = 8, offset_exc = 0.15
+  ) |>
+  fc_filter(
+    !is.na(DON_TY),
+    label = "Donor type known",
+    show_exc = TRUE,
+    label_exc = "Donor type unknown",
+    text_fs = 9, text_fs_exc = 8, offset_exc = 0.15
+  ) |>
+  fc_filter(
+    DON_TY == "C",
+    label = "Deceased donor",
+    show_exc = TRUE,
+    label_exc = "Living donor",
+    text_fs = 9, text_fs_exc = 8, offset_exc = 0.15
   )
 ```
 
-Rows where a condition is `NA` (for example, a missing donor age) are
-excluded, the same as in `dplyr::filter()`. If missing values should be
-handled differently, recode them first, for example with
-`srtr_normalize_missing()`.
+The `text_fs`, `text_fs_exc` and `offset_exc` arguments only set the text
+size and the gap between the boxes. The transplant dates have no missing
+values, so that criterion needs one step. Check before assuming so: `sum(is.na(tx$REC_TX_DT))`.
 
-## What the boxes count
-
-`flowchart` counts rows. In `TX_KI` a row is a transplant, so a recipient
-with two kidney transplants is counted twice; label the boxes as transplants,
-or reduce to one row per recipient (for example on `PERS_ID`) as a labelled
-step of its own. Build the diagram before joining files with many rows per
-transplant, such as the follow-up file `TXF_KI`: after that join each row is
-a follow-up form, and the counts no longer describe transplants.
-
-## Drawing and exporting the diagram
-
-```{r draw, eval=FALSE}
-kidney_fc |>
+```{r draw, fig.height = 10, fig.alt = "Flow diagram from 40 kidney transplants to the final cohort. Each criterion has its own exclusion box: transplanted outside 2015-2019, recipient age unknown, recipient under 18, donor type unknown, and living donor."}
+cohort_fc |>
   fc_draw()
+```
 
-kidney_fc |>
+The order of the steps changes the counts in each box, though not the
+final cohort. Put the unknown step first within each criterion, and keep
+the order of the criteria the same across the analyses you compare.
+
+# What counts as unknown
+
+In SRTR files a value can be unknown without being `NA`: a code such as 998
+means "unknown" and a blank can mean "not answered". Decide what each code
+means before you filter. `srtr_normalize_missing()` turns the codes you
+choose into `NA`, and `srtr_missing_report()` counts them first; see
+[Missing data](missing-data.html).
+
+A value can also be "not applicable", such as a dialysis start date for a
+recipient never on dialysis. That is not unknown eligibility; handle it in
+the criterion itself.
+
+# What the boxes count
+
+`flowchart` counts rows. In a transplant file a row is a transplant, so a
+recipient with two transplants is counted twice; label the boxes as
+transplants, or reduce to one row per recipient as a labelled step of its
+own (see [Files, keys and joins](files-and-keys.html)). Build the diagram
+before joining files with many rows per transplant, such as the follow-up
+file `TXF_KI`: after that join each row is a follow-up form, and the
+counts no longer describe transplants.
+
+The counts above are made up, which is why some are small. On real files
+the boxes show real counts. Before you share a diagram,
+check every box against
+[Share counts only](checking-your-safs.html#share-counts-only): no box
+from 1 to 10, and no box that can be worked out from the others.
+
+# Exporting the diagram
+
+```{r export, eval = FALSE}
+cohort_fc |>
   fc_draw() |>
-  fc_export("kidney-cohort.png", width = 3000, height = 4000, res = 700)
+  fc_export("cohort.png", width = 3000, height = 3000, res = 500)
 ```
 
 `fc_draw()` and `fc_filter()` have many arguments for box size, text and
-color; see the [`flowchart` reference](https://bruigtp.github.io/flowchart/reference/index.html).
+color; see the
+[`flowchart` reference](https://bruigtp.github.io/flowchart/reference/index.html).
 
-## Getting the cohort back
+# Getting the cohort back
 
 The flowchart object keeps the filtered data in its `data` element, so the
-cohort used in the diagram is the cohort you analyze:
+cohort in the diagram is the cohort you analyze:
 
-```{r cohort, eval=FALSE}
-kidney_cohort <- kidney_fc$data
-nrow(kidney_cohort)
+```{r cohort-data}
+cohort <- cohort_fc$data
+nrow(cohort)
 ```
 
-The step-by-step counts behind the boxes are in `kidney_fc$fc`.
+The step-by-step counts behind the boxes are in `cohort_fc$fc`.
