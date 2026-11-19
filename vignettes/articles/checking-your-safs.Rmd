@@ -14,9 +14,11 @@ sRtr's automatic tests run on made-up data, because SRTR files cannot be
 shared. Real files differ from release to release: columns come and go,
 codes appear that no format lists, and identifiers that should match
 sometimes do not. Before you rely on sRtr for an analysis, run the checks
-below on your own standard analysis files (SAFs). They take a few minutes
-and tell you whether sRtr behaves on your release as it does on the
-releases it has been checked against. The checks cover the three kinds of
+below on your own standard analysis files (SAFs). Checks 1 to 4 take a few
+minutes in your usual R session. Check 5, the package's own live tests,
+needs a copy of the source code and is worth running once per release.
+Together they tell you whether sRtr behaves on your release as it does on
+the releases it has been checked against. The checks cover the three kinds of
 data quality in a common framework: whether values conform to the
 documented formats, whether they are complete, and whether they are
 plausible ([Kahn et al. 2016](#ref-kahn)).
@@ -26,14 +28,34 @@ liver files; change the file keys for other organs.
 
 # Share counts only
 
+The SRTR data use agreement does not allow sharing patient-level data.
 Everything below prints counts, never rows. Keep it that way if you change
-the code, so you can share the results, for example in a GitHub issue,
-without breaking the SRTR data use agreement. Mask any count from 1 to 10.
-Masking each number is not enough on its own. If you share a total next to
-masked parts, or two counts that differ by a few, a reader can subtract to
-recover a small count. The CMS cell size suppression policy sets the same
-rule: no count from 1 to 10, and none that can be worked out from other
-reported numbers ([CMS 2020](#ref-cms)).
+the code, so you can share the results, for example in a GitHub issue. The
+other sRtr articles that run on real files follow the same rules and link
+here.
+
+- **Mask any count from 1 to 10.** The helpers in the setup chunk print
+  such a count as `<11`: `mask_n()` for counts you have computed, `mask()`
+  for a frequency table of a column of categories, such as a status. Never
+  use `mask()` on an identifier or a date: the table's labels are the
+  values themselves, so masking the counts hides nothing.
+- **Do not share a total beside masked parts.** If a table of a column
+  shows every cell but one, together with the total, a reader recovers the
+  masked cell by subtraction. Share the table or the total, not both, or
+  check that no single masked cell can be worked out.
+- **Do not share two counts that differ by a little.** "1,204 registrations
+  and 1,198 people" reveals 6. Print the difference instead, masked, or as
+  a check that should be 0.
+- **Summaries can describe a few people.** A median or quartile of a small
+  group is close to individual values. Look at such summaries yourself, and
+  share them only when the group behind them is large.
+- **Keep raw output on your computer.** Test failures and warning messages
+  can include exact counts and values from your files. Rewrite what they say
+  in your own words, as in the example at the end of this article.
+
+The first three rules follow the CMS cell size suppression policy: no
+count from 1 to 10, and none that can be worked out from other reported
+numbers ([CMS 2020](#ref-cms)). The last two are sRtr's own practice.
 
 ```{r setup}
 library(sRtr)
@@ -45,54 +67,11 @@ set_srtr_wd(wd, release = "2303") # your release, named by year and month
 mask_n <- function(n) {
   noquote(ifelse(n > 0 & n < 11, "<11", format(n, big.mark = ",")))
 }
+# For a column of categories only, never identifiers or dates.
 mask <- function(x) mask_n(table(x, useNA = "ifany"))
 ```
 
-# 1. Run the package's live tests
-
-sRtr's test suite includes live tests that run only on real files. They
-check, among other things, that columns load with the right types, that
-codes match the dictionary, and that derived outcomes are consistent. The
-tests are not installed with the package, so you need a copy of the
-source that matches the version you have installed:
-
-```{r}
-# The commit your installed copy was built from, if installed from GitHub:
-packageDescription("sRtr")$RemoteSha
-```
-
-Clone the repository and check out that commit. In a terminal:
-
-```
-git clone https://github.com/VagishHemmige/sRtr
-git -C sRtr checkout <commit>
-```
-
-Then start a fresh R session, run the setup chunk at the top of this
-article again (it sets `wd` and the masking helpers), and run the tests:
-
-```{r}
-Sys.setenv(
-  SRTR_LIVE_TESTS = "true",
-  SRTR_WD = wd,
-  SRTR_RELEASE = "2303"
-)
-testthat::test_local(
-  "path/to/the/sRtr/clone",
-  reporter = "summary",
-  stop_on_failure = FALSE
-)
-```
-
-Each live test names the files it needs and skips when your folder does
-not have them, so you can run the whole suite with whatever files you
-have. To run one area, add `filter`, such as `filter = "add_txf_outcomes"`.
-A failure means sRtr does something on your release that it has not been
-checked for. Please report it (see the end of this article). The test
-output itself stays on your computer: a failure message can print values
-from your files.
-
-# 2. Load with the warnings counted, not hidden
+# 1. Load with the warnings counted, not hidden
 
 Loading a real file can give several warnings. Every sRtr warning has a
 class, so you can collect each kind instead of hiding them all with
@@ -136,7 +115,7 @@ only that class, such as `sRtr_warning_unknown_codes`.
 Read the messages in `seen` yourself, but do not share them as they are:
 some include exact row counts and the codes found.
 
-# 3. Check the keys
+# 2. Check the keys
 
 Joins between SAF files rely on identifiers. These should hold, and
 anything else is worth knowing before you join:
@@ -175,7 +154,8 @@ if (one_person_per_registration) {
 - `follow_up_registrations_not_in_tx` should be 0: every follow-up form
   belongs to a registration in the transplant file.
 
-Each difference is printed on its own, masked, rather than as two totals.
+Each difference is printed on its own, masked, rather than as two totals
+(see [Share counts only](#share-counts-only)).
 
 For donors, a deceased donor file covers only deceased donors, so some
 transplant `DONOR_ID`s will not be in it:
@@ -193,7 +173,7 @@ This counts distinct donors. One donor can give organs to several
 recipients, so it can be smaller than the number of transplants
 concerned.
 
-# 4. Check labels
+# 3. Check labels
 
 ```{r}
 unlabelled <- vapply(tx, \(x) is.null(attr(x, "label")), logical(1))
@@ -203,7 +183,7 @@ mask_n(c(columns = ncol(tx), without_a_label = sum(unlabelled)))
 Almost every column should have a label, either the one stored in the SAS
 file or one from the dictionary.
 
-# 5. Check that derived outcomes add up
+# 4. Check that derived outcomes add up
 
 Derived variables should be consistent with each other. These checks use
 the follow-up outcomes; the reasons behind them are in
@@ -267,6 +247,50 @@ mask_n(c(
 
 The first three should be 0. `counted_but_undated` is the events reported
 only on undated forms: they count, with an unknown time.
+
+# 5. Run the package's live tests
+
+sRtr's test suite includes live tests that run only on real files. They
+check, among other things, that columns load with the right types, that
+codes match the dictionary, and that derived outcomes are consistent. The
+tests are not installed with the package, so you need a copy of the
+source that matches the version you have installed:
+
+```{r}
+# The commit your installed copy was built from, if installed from GitHub:
+packageDescription("sRtr")$RemoteSha
+```
+
+Clone the repository and check out that commit. In a terminal:
+
+```
+git clone https://github.com/VagishHemmige/sRtr
+git -C sRtr checkout <commit>
+```
+
+Then start a fresh R session, so the tests run against the version you
+checked out, run the setup chunk at the top of this article again (it sets `wd` and the masking helpers), and run the tests:
+
+```{r}
+Sys.setenv(
+  SRTR_LIVE_TESTS = "true",
+  SRTR_WD = wd,
+  SRTR_RELEASE = "2303"
+)
+testthat::test_local(
+  "path/to/the/sRtr/clone",
+  reporter = "summary",
+  stop_on_failure = FALSE
+)
+```
+
+Each live test names the files it needs and skips when your folder does
+not have them, so you can run the whole suite with whatever files you
+have. To run one area, add `filter`, such as `filter = "add_txf_outcomes"`.
+A failure means sRtr does something on your release that it has not been
+checked for. Please report it (see below). The test
+output itself stays on your computer: a failure message can print values
+from your files.
 
 # 6. Report what you find
 
