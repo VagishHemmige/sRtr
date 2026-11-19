@@ -1,8 +1,8 @@
 ---
-title: "adding-columns"
+title: "Adding risk scores"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{adding-columns}
+  %\VignetteIndexEntry{Adding risk scores}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,6 +14,153 @@ knitr::opts_chunk$set(
 )
 ```
 
+sRtr adds published donor and candidate scores to a data frame as new
+columns. Each function reads SRTR column names, so it works on a file
+loaded with `load_srtr_file()`. The examples here use a few made-up rows,
+so they run on this site.
+
 ```{r setup}
 library(sRtr)
 ```
+
+# The scores
+
+| Function | Adds | For | Columns come from |
+|---|---|---|---|
+| `add_kdpi()` | KDRI and KDPI | Deceased kidney donors | `DONOR_DECEASED`, or `TX_KI` |
+| `add_epts()` | EPTS | Adult kidney candidates or recipients | `CAND_KIPA` (at listing) or `TX_KI` (at transplant) |
+| `add_donor_egfr()` | Donor eGFR (CKD-EPI) | Donors | `DONOR_DECEASED` or `DONOR_LIVE` |
+| `add_lkdpi()` | LKDPI | Living donor kidney transplants | `DONOR_LIVE` joined to `TX_KI` |
+| `add_pdri()` | PDRI | Pancreas and kidney-pancreas transplants | `TX_PA` or `TX_KP` |
+| `add_pvr()` | Pulmonary vascular resistance | Heart, lung and heart-lung candidates | `CAND_THOR` (at listing) or `TX_HR`, `TX_LU`, `TX_HL` (at transplant) |
+
+Each function's help page lists the exact input columns, the codes it
+reads and the paper or OPTN guide that defines the score.
+
+# Which mapping table: KDPI and EPTS
+
+KDPI and EPTS are percentiles. The raw score (KDRI or raw EPTS) is mapped
+to a percentile with a table that OPTN publishes each year, built from the
+donors or candidates of a reference year. The same donor can get a
+different KDPI from a different table. sRtr stores the tables in
+`optn_mapping_tables`.
+
+A made-up donor, recovered on five dates:
+
+```{r donor}
+donor <- data.frame(
+  DON_AGE = 52, DON_HGT_CM = 183, DON_WGT_KG = 81,
+  DON_HIST_HYPERTEN = 2, DON_HIST_DIAB = 1, DON_CAD_DON_COD = 2,
+  DON_CREAT = 1.7, DON_NON_HR_BEAT = "Y", DON_RACE = 2000,
+  DON_ANTI_HCV = "N"
+)
+donors <- donor[rep(1, 5), ]
+donors$DON_RECOV_DT <- as.Date(
+  c("2010-03-01", "2015-03-01", "2023-03-01", "2025-01-15", "2025-08-01")
+)
+```
+
+The `table` argument chooses the table:
+
+- `"latest"` (the default) uses the newest stored table for every row.
+- `"in_force"` uses, for each row, the table OPTN was using on the
+  **donor recovery date** (`DON_RECOV_DT`), not the transplant date.
+- A label such as `"2018"` uses that table for every row.
+
+```{r in-force}
+kdpi <- add_kdpi(donors, version = "rao2009", table = "in_force")
+data.frame(
+  recovered = kdpi$DON_RECOV_DT,
+  KDPI = kdpi$KDPI,
+  table = attr(kdpi$KDPI, "optn_table")
+)
+```
+
+The rows with no KDPI are not errors in the donor's data. In 2010 the
+first stored table was not yet in force, and from 2024-10-31 OPTN used the
+refit formula (`version = "refit2024"`, the default), whose tables are
+separate:
+
+```{r refit}
+refit <- add_kdpi(donors, table = "in_force")
+data.frame(
+  recovered = refit$DON_RECOV_DT,
+  KDPI = refit$KDPI,
+  table = attr(refit$KDPI, "optn_table")
+)
+```
+
+The last row has no KDPI either way: OPTN has not archived the table it
+used from 2025-05-21. sRtr warns each time a row gets no table.
+
+The start date of each table is in `optn_mapping_tables$effective`, with
+its basis. Where OPTN published a date, that date is used. Otherwise the
+start is June 1 of the following year, the deadline in OPTN policy, which
+is a convention:
+
+```{r effective}
+eff <- optn_mapping_tables$effective
+eff[eff$score == "kdpi", c("label", "kdri_formula", "effective_from")]
+```
+
+The list includes tables OPTN used that sRtr does not store: the 2010,
+2011 and 2024-donors KDPI tables. Rows recovered while one of those was in
+force get no KDPI with `table = "in_force"`.
+
+`add_epts()` works the same way, on the listing date or the transplant
+date (`at = "listing"` or `"transplant"`).
+
+# Missing and unknown inputs
+
+A missing or unknown input usually gives a missing score. Each function
+documents its exceptions, and a few are options:
+
+| Function | Input | Default | Option |
+|---|---|---|---|
+| `add_kdpi()` | Unknown hypertension or diabetes history (998) | Weighted by the reference donors' share, as in the OPTN calculator | `unknown_history = "na"` |
+| `add_kdpi()` | Unknown or pending HCV, Rao 2009 only | Counted as negative, as in the OPTN calculator | none |
+| `add_epts()` | Unknown diabetes (998) | Missing EPTS | `unknown_diabetes = "no"`, a convention |
+| `add_epts()` | Missing dialysis start date | 0 years if not on dialysis, else missing | `missing_dialysis_date = "zero"`, a convention |
+| `add_epts()`, `add_donor_egfr()` | Age under 18 | Missing | `adults_only = FALSE` |
+| `add_pdri()` | Any missing input, including race | Missing PDRI | `mean_impute = TRUE`, for the calculation only |
+
+Decide these before computing scores, and report the choice. To see how
+many rows lose a score, count them:
+
+```{r missing}
+unknown <- donor
+unknown$DON_HIST_DIAB <- 998
+both <- rbind(donor, unknown)
+data.frame(
+  diabetes = c("no", "unknown"),
+  default = as.numeric(add_kdpi(both)$KDPI),
+  na = as.numeric(add_kdpi(both, unknown_history = "na")$KDPI)
+)
+```
+
+# Codes or labels
+
+The functions read raw codes and the factor labels that
+`load_srtr_file()` applies, so a file loaded either way works. A format's
+own missing code (`"."`, labelled `"Missing"`) counts as missing. See
+[Missing data](missing-data.html) for what the other unknown codes mean.
+
+# What has been checked
+
+| Function | Checked against its source | Run on real SAFs |
+|---|---|---|
+| `add_kdpi()` | KDRI for the donors in the OPTN KDPI guides (refit and Rao 2009) | Yes: KDPI range on one release's `DONOR_DECEASED` |
+| `add_epts()` | Raw EPTS and the 2024 table for the candidates in the OPTN EPTS guide | Not yet |
+| `add_donor_egfr()` | The equations in Inker et al. 2021, Table 2 | Yes: values on one release's `DONOR_DECEASED` |
+| `add_lkdpi()` | The equation in Massie et al. 2016 | Not yet |
+| `add_pdri()` | The formula; not yet against published PDRI values | Not yet |
+| `add_pvr()` | The definition | Not yet |
+
+A check against the source shows the formula is right. A run on real
+SAFs shows the function reads the real columns and codes. Neither shows
+that a score matches published cohort results; that comparison is planned
+for PDRI and the SRTR program reports.
+
+The KDPI guide prints 63% for its Rao 2009 example, but the stored 2018
+table maps that donor's KDRI to 83%. sRtr gives 83, and the test records
+the difference.
