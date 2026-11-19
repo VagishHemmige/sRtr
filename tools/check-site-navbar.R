@@ -10,7 +10,12 @@
 config <- yaml::read_yaml("_pkgdown.yml")
 site <- "docs"
 
-menu_links <- unlist(lapply(config$navbar$components, function(component) {
+# Only components the navbar actually shows count: a component defined under
+# `components:` but left out of `structure:` is never displayed.
+shown <- unlist(config$navbar$structure[c("left", "right")])
+components <- config$navbar$components
+components <- components[names(components) %in% shown]
+menu_links <- unlist(lapply(components, function(component) {
   vapply(component$menu %||% list(), function(item) item$href %||% NA_character_,
          character(1))
 }))
