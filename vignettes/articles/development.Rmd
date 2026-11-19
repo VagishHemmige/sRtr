@@ -20,14 +20,36 @@ organ_names <- c(
 split_organs <- function(x) strsplit(x, ";", fixed = TRUE)
 
 # The tables are hand-edited, so check them before drawing anything from them.
-stopifnot(
-  !anyDuplicated(projects$issue),
-  !anyDuplicated(tasks$issue),
-  all(grepl("^[0-9]+$", c(projects$issue, tasks$issue))),
-  all(unlist(split_organs(c(projects$organs, tasks$organs))) %in% names(organ_names)),
-  all(tasks$role %in% c("verify", "supervise new")),
-  all(nzchar(unlist(tasks[c("question", "deliverable", "needs", "done")])))
+# Any problem stops the site build with a message naming the table and row.
+check_table <- function(df, name, required) {
+  problems <- character()
+  absent <- setdiff(required, names(df))
+  if (length(absent) > 0) {
+    problems <- paste0(name, ": missing column ", absent)
+  }
+  for (col in intersect(required, names(df))) {
+    blank <- which(is.na(df[[col]]) | !nzchar(trimws(as.character(df[[col]]))))
+    if (length(blank) > 0) {
+      problems <- c(problems, sprintf("%s: blank %s in row %s", name, col, blank))
+    }
+  }
+  if (length(problems) == 0) {
+    if (anyDuplicated(df$issue)) problems <- paste0(name, ": an issue number appears twice")
+    if (!all(grepl("^[0-9]+$", df$issue))) problems <- c(problems, paste0(name, ": an issue is not a number"))
+    bad <- setdiff(unlist(split_organs(df$organs)), names(organ_names))
+    if (length(bad) > 0) problems <- c(problems, paste0(name, ": unknown organ ", bad))
+  }
+  problems
+}
+problems <- c(
+  check_table(projects, "projects.csv", c("issue", "project", "type", "organs", "summary")),
+  check_table(tasks, "starter-tasks.csv",
+              c("issue", "title", "role", "organs", "question", "deliverable", "needs", "done"))
 )
+if (!all(tasks$role %in% c("verify", "supervise new"))) {
+  problems <- c(problems, "starter-tasks.csv: role must be \"verify\" or \"supervise new\"")
+}
+if (length(problems) > 0) stop(paste(problems, collapse = "\n"), call. = FALSE)
 
 issue_link <- function(n) sprintf("[#%s](%s/issues/%s)", n, repo, n)
 sentence_case <- function(x) paste0(toupper(substr(x, 1, 1)), substring(x, 2))
@@ -81,7 +103,8 @@ for (i in seq_len(nrow(tasks))) {
    change.
 
 Pull requests are reviewed by an automated ChatGPT review and merged by the
-maintainer; a pull request cannot be merged until that review has run. If
+maintainer. A pull request into the main branch (`master`) cannot be merged
+until that review has run. If
 you are a trainee working with the maintainer, start through your usual
 supervision channel instead of a public comment.
 
