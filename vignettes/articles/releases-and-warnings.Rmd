@@ -1,0 +1,237 @@
+---
+title: "Releases, the data dictionary and warnings"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Most of the warnings a new sRtr user sees come from one question: which
+version of the SRTR data dictionary describes my files? This article
+answers it, explains each warning `load_srtr_file()` gives, and shows how a
+script can count warnings instead of hiding them.
+
+The examples use sRtr's stored dictionaries and one tiny made-up file, so
+they run on this site.
+
+```{r setup, message = FALSE}
+library(sRtr)
+```
+
+# Releases
+
+SRTR delivers standard analysis files (SAFs) in releases named by year and
+month: `"2303"` is the March 2023 release. Variables are added and dropped
+between releases, so the dictionary that labels your files should be the
+one for your release.
+
+sRtr stores copies of SRTR's public data dictionary page, one per version
+it has seen:
+
+```{r snapshots}
+dictionary_versions$releases[, c("snapshot", "release", "retrieved")]
+```
+
+For a release that has a stored copy, sRtr uses that copy. For a release
+between two copies, it uses what the two have in common:
+
+```{r interpolated}
+d2303 <- srtr_dictionary("2303")
+attr(d2303, "basis")
+```
+
+# What a release between two copies can and cannot know
+
+Between the stored 2203 and 2609 copies, no variable's label, type or
+format changed, and no format code changed meaning. The differences are
+variables that appear in only one copy:
+
+```{r differences}
+key <- function(d) paste(d$Dataset, d$Variable)
+d2203 <- srtr_dictionary("2203")
+d2609 <- srtr_dictionary("2609")
+
+c(
+  only_in_2203 = length(setdiff(key(d2203), key(d2609))),
+  only_in_2609 = length(setdiff(key(d2609), key(d2203))),
+  in_both = length(intersect(key(d2203), key(d2609)))
+)
+head(setdiff(key(d2203), key(d2609)), 3)
+head(setdiff(key(d2609), key(d2203)), 3)
+```
+
+For example, the waitlist files list `CAN_LISTING_CTR_ID` in 2203 and
+`CAN_LISTING_CTR_CD` with `CAN_LISTING_CTR_TY` in 2609. Whether a 2303
+file has the old column, the new ones or both cannot be known from the two
+copies, so the 2303 dictionary leaves all of them out:
+
+```{r left-out}
+nrow(d2303) == length(intersect(key(d2203), key(d2609)))
+```
+
+`load_srtr_file()` does not lose those columns: it reads them from your
+file and labels them from whichever copy lists them.
+
+Two more points about the stored copies:
+
+- A copy's date is when SRTR published that page or sRtr retrieved it, not
+  when a variable was first collected. A variable that first appears in the
+  2609 copy may have been collected long before. To find when a variable is
+  actually filled in, look at the data (see
+  [Missing data](missing-data.html)).
+- If a later copy changes a variable between two copies, a release in
+  between gets the earlier definition, with a warning. `gaps = "error"`
+  stops instead, and `gaps = "nearest"` stays silent. With the two copies
+  sRtr has now, this does not happen.
+
+A release before the first copy or after the last uses the nearest one,
+with a warning:
+
+```{r outside}
+early <- srtr_dictionary("2101")
+attr(early, "snapshot")
+```
+
+# Telling sRtr your release
+
+sRtr takes the release from, in order:
+
+1. the `release` argument of `load_srtr_file()`;
+2. `set_srtr_wd(release = )`;
+3. a folder named `pubsafYYMM`, such as `pubsaf2303`;
+4. otherwise, the bundled dictionary (`sRtr::dictionary`).
+
+Every loaded file records which it used. Here is a tiny made-up waitlist
+file in a folder named for release 2303:
+
+```{r make-file}
+dir <- file.path(tempdir(), "pubsaf2303")
+dir.create(dir, showWarnings = FALSE)
+cand <- data.frame(
+  PX_ID = 1:4,
+  CAN_LISTING_CTR_ID = c(11, 11, 12, 13),
+  CAN_ABO = c("A", "O", "UNK", "B"),
+  CAN_LISTING_DT = as.Date("2021-01-01") + 0:3
+)
+suppressWarnings(haven::write_sas(cand, file.path(dir, "cand_kipa.sas7bdat")))
+set_srtr_wd(dir)
+```
+
+```{r load}
+cand_kipa <- load_srtr_file("CAND_KIPA")
+```
+
+The two warnings are the subject of the next sections. First, what was
+recorded:
+
+```{r recorded}
+str(attr(cand_kipa, "srtr_release"))
+```
+
+`release` came from the folder name (`basis`), and `dictionary` says it
+was filled in between two copies. Save this attribute, or the release, with
+your analysis code: it is what someone needs to repeat your labels.
+
+`CAN_LISTING_CTR_ID` kept its label even though the 2303 dictionary left it
+out:
+
+```{r kept-label}
+attr(cand_kipa$CAN_LISTING_CTR_ID, "label")
+```
+
+# Missing columns
+
+The first warning lists the dictionary's columns that the file lacks. Real
+files usually have every column; this made-up file has four. A file you
+requested with fewer columns, or a dictionary for the wrong release, also
+gives this warning. Check the release first. `column_check = "error"`
+turns the warning into an error, and `column_check = "none"` turns it off.
+
+# Codes in no format
+
+The second warning is about values that no SRTR format lists, here
+`"UNK"` in `CAN_ABO`. Their meaning is not documented, so sRtr keeps them
+as their own factor level and names them as such:
+
+```{r not-in-format}
+table(cand_kipa$CAN_ABO)
+```
+
+sRtr warns every time, rather than recoding them, because only a source
+document can say what they mean. Decide for your analysis, and say what you
+decided. [Checking sRtr on your own SAFs](checking-your-safs.html) shows how
+to count these values on your files.
+
+# Corrections to SRTR's dictionary
+
+sRtr corrects a few entries of SRTR's web dictionary that do not match the
+files. Each has an ID, and every load records which were applied (the
+`corrections` field above). The one correction so far gives `REC_COD`, the
+recipient cause of death, the format `COD` instead of the thoracic `THCOD`:
+
+```{r corrections}
+web <- srtr_dictionary("2609", view = "web")
+corrected <- srtr_dictionary("2609")
+c(
+  web = unique(web$FormatID[web$Variable == "REC_COD"]),
+  corrected = unique(corrected$FormatID[corrected$Variable == "REC_COD"])
+)
+```
+
+`view = "web"`, in `srtr_dictionary()` or `load_srtr_file()`, gives the
+dictionary exactly as SRTR's page has it. The
+[`srtr_dictionary()` help page](../reference/srtr_dictionary.html) lists
+every correction and its evidence.
+
+# Counting warnings instead of hiding them
+
+`suppressWarnings()` hides every warning, including ones you have not seen
+before. Every sRtr warning has a class, so a script can collect each kind
+and decide what to do with it:
+
+```{r collect}
+seen <- list()
+collect <- function(expr) {
+  withCallingHandlers(
+    expr,
+    sRtr_warning = function(w) {
+      kind <- class(w)[1]
+      seen[[kind]] <<- c(seen[[kind]], conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+}
+
+cand_kipa <- collect(load_srtr_file("CAND_KIPA"))
+lengths(seen)
+```
+
+Warnings from other packages still reach you. Read `seen` yourself; on
+real files the messages can contain values from your data, so do not
+share them as they are (see
+[Share counts only](checking-your-safs.html#share-counts-only)).
+
+To silence one kind you have already looked at, and only that kind:
+
+```{r one-kind}
+quiet_codes <- function(expr) {
+  withCallingHandlers(
+    expr,
+    sRtr_warning_unknown_codes = function(w) invokeRestart("muffleWarning")
+  )
+}
+cand_kipa <- quiet_codes(load_srtr_file("CAND_KIPA", column_check = "none"))
+```
+
+# Checklist
+
+- Know your release, and give it to `set_srtr_wd()` or name the folder
+  `pubsafYYMM`.
+- Save `attr(x, "srtr_release")` with your analysis.
+- Read each missing-columns warning once; check the release if you did not
+  expect it.
+- Decide what each code in no format means for your analysis.
+- Collect warnings by class rather than suppressing them all.

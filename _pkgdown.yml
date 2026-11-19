@@ -76,6 +76,7 @@ articles:
     contents:
       - getting-started
       - articles/checking-your-safs
+      - articles/releases-and-warnings
 
   - title: Prepare an analysis cohort
     navbar: Prepare an analysis cohort

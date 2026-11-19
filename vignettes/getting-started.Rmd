@@ -50,7 +50,9 @@ sRtr reads the release from the name.
 sRtr stores copies of SRTR's online data dictionary from some releases
 only. For a release in between, it uses the entries that are the same in
 the copies on either side, so the labels may not be the exact ones SRTR
-published for that release. The check after loading shows which you got.
+published for that release. The check after loading shows which you got;
+[Releases, the data dictionary and warnings](releases-and-warnings.html)
+explains it in full.
 
 To keep the folder for later sessions, add `permanent = TRUE`. This writes
 the path to your `~/.Renviron` file.
@@ -194,7 +196,9 @@ explains this in full.
   `blank_text = "keep"` to keep them as they are.
 
 The [`load_srtr_file()` help page](../reference/load_srtr_file.html)
-describes every loading option.
+describes every loading option, and
+[Releases, the data dictionary and warnings](releases-and-warnings.html)
+explains each warning and how to collect warnings in a script.
 
 # Next steps
 
