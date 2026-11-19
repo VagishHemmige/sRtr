@@ -48,3 +48,11 @@ estimate how much new centers would add to geographic coverage.
   geography](https://vagishhemmige.github.io/sRtr/articles/mapping.md):
 - [Calculating geographic coverage
   gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.md):
+
+### Contribute
+
+Tasks you can start today, every open project, and how to take part
+without sharing SRTR data.
+
+- [Development and how to
+  contribute](https://vagishhemmige.github.io/sRtr/articles/development.md):

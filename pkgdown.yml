@@ -5,6 +5,7 @@ articles:
   adding-columns: adding-columns.html
   building-cohort-with-flowchart: building-cohort-with-flowchart.html
   articles/checking-your-safs: checking-your-safs.html
+  articles/development: development.html
   articles/files-and-keys: files-and-keys.html
   articles/follow-up-forms: follow-up-forms.html
   articles/follow-up-windows: follow-up-windows.html
@@ -13,7 +14,7 @@ articles:
   mapping: mapping.html
   missing-data: missing-data.html
   articles/releases-and-warnings: releases-and-warnings.html
-last_built: 2026-11-19T17:20Z
+last_built: 2026-11-19T17:24Z
 urls:
   reference: https://vagishhemmige.github.io/sRtr/reference
   article: https://vagishhemmige.github.io/sRtr/articles
