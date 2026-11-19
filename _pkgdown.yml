@@ -11,6 +11,63 @@ template:
     in_header: |
       <meta name="google-site-verification" content="TBumihuxSFxK8muRvdo69ca7bmvzWmy-3OMfCZ2692A" />
 
+# One short dropdown per article group (#253). Each menu ends with a link to
+# the article index, where every group's description lives (pkgdown gives the
+# index sections no anchors, so the link cannot jump to one group).
+# tools/check-site-navbar.R fails the site build if an article listed under
+# `articles:` is in no menu, or a menu link points at a missing page.
+navbar:
+  structure:
+    left: [start, cohort, outcomes, geography, reference, news]
+    right: [search, github]
+  components:
+    start:
+      text: Start here
+      menu:
+        - text: Getting started
+          href: articles/getting-started.html
+        - text: Checking sRtr on your own SAFs
+          href: articles/checking-your-safs.html
+        - text: Releases, the data dictionary and warnings
+          href: articles/releases-and-warnings.html
+        - text: "---"
+        - text: All guides, with descriptions
+          href: articles/index.html
+    cohort:
+      text: Prepare a cohort
+      menu:
+        - text: Files, keys and joins
+          href: articles/files-and-keys.html
+        - text: Missing data
+          href: articles/missing-data.html
+        - text: Building cohorts
+          href: articles/building-cohort-with-flowchart.html
+        - text: Adding risk scores
+          href: articles/adding-columns.html
+        - text: "---"
+        - text: All guides, with descriptions
+          href: articles/index.html
+    outcomes:
+      text: Define outcomes
+      menu:
+        - text: Follow-up forms
+          href: articles/follow-up-forms.html
+        - text: Follow-up windows and death
+          href: articles/follow-up-windows.html
+        - text: "---"
+        - text: All guides, with descriptions
+          href: articles/index.html
+    geography:
+      text: Geography
+      menu:
+        - text: Mapping
+          href: articles/mapping.html
+        - text: Coverage gain
+          href: articles/geographic-coverage-gain.html
+        - text: "---"
+        - text: All guides, with descriptions
+          href: articles/index.html
+
 reference:
   - title: File Loading
     contents:
