@@ -195,7 +195,7 @@ explains this in full.
 - **Blank text.** Blank text values become `NA` before labelling. Use
   `blank_text = "keep"` to keep them as they are.
 
-The [`load_srtr_file()` help page](../reference/load_srtr_file.html)
+The [`load_srtr_file()` help page](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.html)
 describes every loading option, and
 [Releases, the data dictionary and warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html)
 explains each warning and how to collect warnings in a script.
