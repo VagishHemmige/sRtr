@@ -352,4 +352,4 @@ The built-in `UNOS_regions_sf` object is included with the package and is useful
 
 # Next steps
 
-- [Coverage gain](geographic-coverage-gain.html): estimate how much of a population additional centers would cover.
+- [Coverage gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html): estimate how much of a population additional centers would cover.
