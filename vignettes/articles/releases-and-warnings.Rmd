@@ -262,3 +262,8 @@ The codes warning is gone; the missing-columns warning still shows.
   expect it.
 - Decide what each code in no format means for your analysis.
 - Collect warnings by class rather than suppressing them all.
+
+# Next steps
+
+- [Files, keys and joins](files-and-keys.html): link the files you have loaded.
+- [Checking sRtr on your own SAFs](checking-your-safs.html): check a release systematically before an analysis.

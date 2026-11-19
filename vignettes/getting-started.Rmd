@@ -204,11 +204,15 @@ explains each warning and how to collect warnings in a script.
 
 - [Checking sRtr on your own SAFs](checking-your-safs.html):
   confirm that sRtr reads your release correctly.
+- [Files, keys and joins](files-and-keys.html): link the files you load
+  without changing what a row means.
 - [Missing data](missing-data.html): decide what unknown and not-done codes
   mean for your analysis.
 - [Building cohorts with flow diagrams](building-cohort-with-flowchart.html):
   select a cohort with a record of each exclusion.
-- [Follow-up forms](follow-up-forms.html) and
-  [follow-up windows](follow-up-windows.html): pitfalls in
+- [Adding risk scores](adding-columns.html): KDPI, EPTS, PDRI and other
+  published scores.
+- [Rejection and malignancy on follow-up forms](follow-up-forms.html) and
+  [Death, graft failure, and censoring](follow-up-windows.html): pitfalls in
   post-transplant outcomes.
 - [Mapping transplant geography](mapping.html).

@@ -50,9 +50,9 @@ navbar:
     outcomes:
       text: Define outcomes
       menu:
-        - text: Follow-up forms
+        - text: Rejection and malignancy
           href: articles/follow-up-forms.html
-        - text: Follow-up windows and death
+        - text: Death, graft failure, and censoring
           href: articles/follow-up-windows.html
         - text: "---"
         - text: All guides, with descriptions
@@ -69,20 +69,50 @@ navbar:
           href: articles/index.html
     contribute:
       text: Contribute
-      href: articles/development.html
+      menu:
+        - text: Find a first task
+          href: articles/development.html#start-with-one-of-these
+        - text: Find work by organ
+          href: articles/development.html#find-work-by-organ
+        - text: Browse all projects
+          href: articles/development.html#all-projects
 
 reference:
-  - title: File Loading
+  # Sections follow the guides' workflow order (#287); each points to its guide.
+  - title: Load files
+    desc: >
+      Point sRtr at your SAFs and load them. Start with
+      [Getting started](../articles/getting-started.html); joining files is in
+      [Files, keys and joins](../articles/files-and-keys.html).
     contents:
-      - load_srtr_file
       - set_srtr_wd
+      - load_srtr_file
 
-  - title: Variable and Factor Labeling
+  - title: Labels and the data dictionary
+    desc: >
+      Factor and variable labels, and the SRTR dictionary they come from. See
+      [Releases, the data dictionary and warnings](../articles/releases-and-warnings.html).
     contents:
-      - apply_srtr_varlabels
       - apply_srtr_factors
+      - apply_srtr_varlabels
+      - srtr_dictionary
+      - dictionary
+      - dictionary_versions
+      - formats
 
-  - title: Risk and Score Calculators
+  - title: Missing data
+    desc: >
+      Count and normalize SRTR's missing-value codes. See
+      [Missing data](../articles/missing-data.html).
+    contents:
+      - srtr_missing_report
+      - srtr_normalize_missing
+      - missing_codes
+
+  - title: Risk scores
+    desc: >
+      Add published donor and candidate scores. See
+      [Adding risk scores](../articles/adding-columns.html).
     contents:
       - add_kdpi
       - add_epts
@@ -90,42 +120,33 @@ reference:
       - add_lkdpi
       - add_pdri
       - add_pvr
+      - optn_mapping_tables
 
-  - title: Missing data
-    contents:
-      - srtr_missing_report
-      - srtr_normalize_missing
-
-  - title: Time-to-event & composite dates
-    desc: Helpers for composing event dates and simple time-to-event calculations
+  - title: Outcomes
+    desc: >
+      Death, graft failure, rejection and malignancy, and the time to each. See
+      [Rejection and malignancy on follow-up forms](../articles/follow-up-forms.html)
+      and [Death, graft failure, and censoring](../articles/follow-up-windows.html).
     contents:
       - srtr_composite_death
       - add_txf_outcomes
       - add_time_to_event_outcomes
       - srtr_time_to_event
 
-  - title: Mapping transplant geography
+  - title: Geography
+    desc: >
+      Transplant centers, OPTN regions, OPO service areas and coverage. See
+      [Mapping](../articles/mapping.html) and
+      [Coverage gain](../articles/geographic-coverage-gain.html).
     contents:
       - get_hrsa_transplant_centers
       - get_hrsa_optn_regions
       - get_hrsa_opo_service_areas
       - shift_noncontiguous
-      - calculate_geography_coverage_gain
-      - rank_individual_coverage_gains
-
-  - title: Spatial datasets
-    contents:
       - transplant_centers_sf
       - UNOS_regions_sf
-
-  - title: Package data
-    contents:
-      - formats
-      - dictionary
-      - dictionary_versions
-      - srtr_dictionary
-      - missing_codes
-      - optn_mapping_tables
+      - calculate_geography_coverage_gain
+      - rank_individual_coverage_gains
 
 articles:
   - title: Start here

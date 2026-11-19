@@ -183,3 +183,9 @@ nrow(cohort)
 ```
 
 The step-by-step counts behind the boxes are in `cohort_fc$fc`.
+
+# Next steps
+
+- To add donor or candidate scores: [Adding risk scores](adding-columns.html).
+- To define outcomes: [Rejection and malignancy on follow-up forms](follow-up-forms.html) and [Death, graft failure, and censoring](follow-up-windows.html).
+- To map where the cohort was transplanted: [Mapping transplant geography](mapping.html).

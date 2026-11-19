@@ -260,3 +260,8 @@ ranked_gains$area_cases |>
 ```
 
 The highest yield centers are in metropolitan areas with high numbers of PLWH not served by the current network.  The lowest yield are centers that are in areas with low numbers of PLWH or centers with extensive overlap with the existing centers in New York and Alabama.
+
+# Next steps
+
+- [Mapping transplant geography](mapping.html): the centers, regions and service areas used here.
+- [Development and how to contribute](development.html#all-projects): the geography project lists open work, including split states.

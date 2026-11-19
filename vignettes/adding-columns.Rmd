@@ -174,3 +174,8 @@ agreement has not been established for any of these scores.
 The KDPI guide prints 63% for its Rao 2009 example, but the stored 2018
 table maps that donor's KDRI to 83%. sRtr gives 83, and the test records
 the difference.
+
+# Next steps
+
+- [Rejection and malignancy on follow-up forms](follow-up-forms.html) and [Death, graft failure, and censoring](follow-up-windows.html): define outcomes for the cohort.
+- [Building cohorts with flow diagrams](building-cohort-with-flowchart.html): if you have not selected the cohort yet.

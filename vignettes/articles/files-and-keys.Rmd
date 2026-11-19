@@ -324,3 +324,8 @@ reads less. See [Getting started](getting-started.html#join-files-on-their-keys)
 - Choose which file each shared column comes from.
 - Explain unmatched rows rather than dropping them silently.
 - Share counts only, masked.
+
+# Next steps
+
+- [Missing data](missing-data.html): decide what unknown and not-done codes mean before you filter on them.
+- [Building cohorts with flow diagrams](building-cohort-with-flowchart.html): select the cohort with a record of each exclusion.
