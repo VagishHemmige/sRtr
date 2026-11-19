@@ -31,7 +31,8 @@ Every count in an SRTR analysis counts something. Say which.
 |---|---|---|---|
 | Waitlist registration | `PX_ID` | `CAND_*`, `STATHIST_*`, `TX_*`, `TXF_*` | One person can be listed more than once, at several centers or for several organs |
 | Person | `PERS_ID` | `CAND_*`, `TX_*`, `TXF_*` | A person transplanted twice has two transplant registrations |
-| Transplant registration | `TRR_ID` | `TX_*`, `TXF_*`, `IMMUNO` | One per recipient per transplant event |
+| Transplant registration | `TRR_ID` | `TX_*`, `TXF_*`, `IMMUNO` | One per recipient per transplant registration |
+| Transplant event | `TX_ID` | `TX_*`, `TXF_*` | Labelled "set same for multi\_org": one transplant event can have registrations in several organ files |
 | Follow-up form | `TRR_FOL_ID` | `TXF_*`, `FOL_IMMUNO`, `MALIG`, `TREATMENT` | Several per transplant registration |
 | Donor | `DONOR_ID` | `DONOR_DECEASED`, `DONOR_LIVE`, `TX_*`, `CAND_*` | A deceased donor can give organs to several recipients |
 | Center | `CTR_ID` | `INSTITUTION` | Transplant files hold center identifiers such as `REC_CTR_ID` |
@@ -57,10 +58,12 @@ made-up transplant file and its follow-up forms:
 
 ```{r data}
 tx <- tibble(
-  TRR_ID = c(101, 102, 103, 104),
-  PERS_ID = c(1, 1, 2, 3),
-  DONOR_ID = c(51, 52, 51, 53),
-  REC_TX_DT = as.Date(c("2015-03-01", "2019-06-01", "2015-03-02", "2018-01-01"))
+  TRR_ID = c(101, 102, 103, 104, 106),
+  PERS_ID = c(1, 1, 2, 3, 4),
+  DONOR_ID = c(51, 52, 51, 53, NA),
+  REC_TX_DT = as.Date(c(
+    "2015-03-01", "2019-06-01", "2015-03-02", "2018-01-01", "2020-05-01"
+  ))
 )
 txf <- tibble(
   TRR_FOL_ID = 1:7,
@@ -73,8 +76,8 @@ txf <- tibble(
 ```
 
 Person 1 has two transplants (registrations 101 and 102). Donor 51 gave
-organs to two recipients. One follow-up form (registration 105) has no
-transplant in this file.
+organs to two recipients. Registration 106 has no donor identifier. One
+follow-up form (registration 105) has no transplant in this file.
 
 Check that the key is complete and unique:
 
@@ -89,12 +92,15 @@ Both should be 0. Then check how the two files match:
 
 ```{r match}
 c(
-  forms_without_transplant = sum(!txf$TRR_ID %in% tx$TRR_ID),
+  forms_missing_key = sum(is.na(txf$TRR_ID)),
+  forms_without_transplant = sum(!is.na(txf$TRR_ID) & !txf$TRR_ID %in% tx$TRR_ID),
   transplants_without_forms = sum(!tx$TRR_ID %in% txf$TRR_ID)
 )
 ```
 
-Neither has to be 0, but each needs an explanation. A transplant without
+Count missing keys apart from known keys with no match: they have
+different explanations. None of these has to be 0, but each needs an
+explanation. A transplant without
 forms may be too recent for its first follow-up, or lost to follow-up. A
 form without a transplant usually means the transplant file was filtered
 first, or comes from another organ.
@@ -109,22 +115,35 @@ A join that should keep one row per transplant must not change the number
 of transplants:
 
 ```{r join-donor}
-donors <- tibble(DONOR_ID = c(51, 52, 53), DON_AGE = c(40, 22, 61))
+donors <- tibble(
+  DONOR_ID = c(51, 52, 53, NA),
+  DON_AGE = c(40, 22, 61, 35)
+)
 
 tx_donor <- left_join(tx, donors, by = "DONOR_ID",
-                      relationship = "many-to-one")
+                      relationship = "many-to-one", na_matches = "never")
 c(before = nrow(tx), after = nrow(tx_donor))
+tx_donor$DON_AGE
 ```
 
-`relationship = "many-to-one"` makes dplyr stop with an error if a donor
-appears twice in `donors`, instead of silently duplicating transplants.
-Use it whenever each row should find at most one match.
+Three arguments do the work:
+
+- `relationship = "many-to-one"` makes dplyr stop with an error if a donor
+  appears twice in `donors`, instead of silently duplicating transplants.
+- `na_matches = "never"` stops a missing key from matching a missing key.
+  dplyr's default lets them match, so registration 106 would take the age
+  of the donor record with no identifier. Here its donor age stays missing.
+- `by` names the key. Never let a join pick its own columns: the
+  transplant and donor files share many columns besides `DONOR_ID`.
+
+Use the first two whenever each row should find at most one match.
 
 Joining follow-up forms is different: the result has one row per form, not
 per transplant.
 
 ```{r join-forms}
-forms <- inner_join(tx, txf, by = "TRR_ID", relationship = "one-to-many")
+forms <- inner_join(tx, txf, by = "TRR_ID",
+                    relationship = "one-to-many", na_matches = "never")
 c(transplants = n_distinct(forms$TRR_ID), rows = nrow(forms))
 ```
 
@@ -132,6 +151,33 @@ Counting rows of `forms` counts forms. To count transplants with an event,
 count distinct `TRR_ID`, or summarize to one row per transplant first.
 `add_txf_outcomes()` does this for malignancy and rejection; see
 [Follow-up forms](follow-up-forms.html).
+
+# Columns in both files
+
+Transplant files repeat many donor columns. In the dictionary, `TX_KI`
+and `DONOR_DECEASED` share `DON_AGE`, `DON_CREAT`, `DON_RACE`, `PERS_ID`
+and dozens more. Joining the full files keeps both copies, renamed with
+`.x` and `.y` suffixes, and the two can differ: each file records the
+value from its own form. Decide which file you take each column from, and
+drop or rename the other copy before joining:
+
+```{r overlap}
+tx_with_age <- tx |> mutate(DON_AGE = c(41, 22, 40, 61, NA))
+
+joined <- left_join(tx_with_age, donors, by = "DONOR_ID",
+                    relationship = "many-to-one", na_matches = "never")
+names(joined)
+
+# Keep the transplant file's donor age; take nothing else from donors here.
+joined <- left_join(
+  tx_with_age,
+  donors |> rename(DON_AGE_DONOR_FILE = DON_AGE),
+  by = "DONOR_ID", relationship = "many-to-one", na_matches = "never"
+)
+sum(joined$DON_AGE != joined$DON_AGE_DONOR_FILE, na.rm = TRUE)
+```
+
+On real files, count such disagreements, masked, before you choose.
 
 # Transplants are not people
 
@@ -152,9 +198,21 @@ needs:
 
 ```{r first-tx}
 first_tx <- tx |>
-  slice_min(REC_TX_DT, by = PERS_ID, with_ties = FALSE)
-first_tx$TRR_ID
+  filter(!is.na(PERS_ID), !is.na(REC_TX_DT)) |>
+  slice_min(REC_TX_DT, by = PERS_ID, with_ties = TRUE)
+
+c(
+  set_aside = sum(is.na(tx$PERS_ID) | is.na(tx$REC_TX_DT)),
+  people = n_distinct(first_tx$PERS_ID),
+  people_with_same_day_ties = sum(duplicated(first_tx$PERS_ID))
+)
 ```
+
+Rows with a missing person or date are set aside and counted, not grouped
+together. `with_ties = TRUE` keeps every registration on a person's
+earliest date, so same-day ties stay visible; decide how to handle them
+before the cohort is final (a multi-organ transplant is one cause; see
+below).
 
 The first transplant in your file may not be the person's first ever: the
 file covers a fixed period, and a person may have had a transplant of
@@ -184,8 +242,29 @@ Files that cover several organs, such as `CAND_KIPA` (kidney and pancreas
 listings), need filtering to the organ you study. Transplant files list
 the organs involved in each transplant in `REC_TX_ORG_TY`.
 
-Before you combine organs, check whether a person or transplant event
-appears in more than one file, using the checks above.
+A multi-organ transplant can have a registration in each organ's file.
+`TX_ID` identifies the transplant event and, by its dictionary label, is
+the same across organs. So before you combine organ files, keep the source
+file and compare distinct registrations with distinct transplant events:
+
+```{r multi-organ}
+tx_ki <- tibble(TRR_ID = c(201, 202), TX_ID = c(9001, 9002), PERS_ID = c(5, 6))
+tx_li <- tibble(TRR_ID = c(301, 302), TX_ID = c(9002, 9003), PERS_ID = c(6, 5))
+
+both <- bind_rows(TX_KI = tx_ki, TX_LI = tx_li, .id = "file")
+c(
+  registrations = n_distinct(both$TRR_ID),
+  transplant_events = n_distinct(both$TX_ID),
+  events_in_both_files = sum(table(both$TX_ID) > 1)
+)
+```
+
+Transplant event 9002 is a kidney-liver transplant for person 6, with one
+registration in each file. Person 5 appears in both files too, but for two
+separate transplants: a repeated `PERS_ID` alone does not mean a
+multi-organ transplant. Whether `TX_ID` is the same across files, and
+whether `TRR_ID` ever repeats across them, should be checked on your own
+release before you rely on it.
 
 # Load less
 
@@ -209,7 +288,8 @@ reads less. See [Getting started](getting-started.html#join-files-on-their-keys)
   donor or center.
 - Before a join, check the key is complete and unique on the side that
   should have one row per key.
-- Use `relationship =` in dplyr joins, and compare row counts before and
-  after.
+- Use `by`, `relationship =` and `na_matches = "never"` in dplyr joins, and
+  compare row counts before and after.
+- Choose which file each shared column comes from.
 - Explain unmatched rows rather than dropping them silently.
 - Share counts only, masked.
