@@ -168,10 +168,8 @@ own missing code (`"."`, labelled `"Missing"`) counts as missing. See
 
 A check against the source shows agreement on the examples checked. A
 run on real SAFs shows the function reads the real columns and codes.
-Neither shows that a score matches published cohort results; that
-comparison is planned for PDRI
-([#93](https://github.com/VagishHemmige/sRtr/issues/93)) and the SRTR
-program reports.
+Neither shows that a score matches published cohort results: that
+agreement has not been established for any of these scores.
 
 The KDPI guide prints 63% for its Rao 2009 example, but the stored 2018
 table maps that donor's KDRI to 83%. sRtr gives 83, and the test records
