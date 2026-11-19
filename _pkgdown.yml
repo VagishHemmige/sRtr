@@ -80,9 +80,11 @@ articles:
   - title: Prepare an analysis cohort
     navbar: Prepare an analysis cohort
     desc: >
-      Decide what missing and unknown codes mean, select a cohort with a
-      record of each exclusion, and add risk scores.
+      Link files on the right keys, decide what missing and unknown codes
+      mean, select a cohort with a record of each exclusion, and add risk
+      scores.
     contents:
+      - articles/files-and-keys
       - missing-data
       - building-cohort-with-flowchart
       - adding-columns

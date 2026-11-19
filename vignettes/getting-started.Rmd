@@ -158,6 +158,8 @@ c(people = n_distinct(recent$PERS_ID),
 ```
 
 These three counts usually differ. Say which unit each result counts.
+[Files, keys and joins](files-and-keys.html) covers the other files and
+how to check a join.
 
 # Share counts, never rows
 
