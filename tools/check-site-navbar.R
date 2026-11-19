@@ -2,8 +2,8 @@
 # the site into docs/. Run from the package root:
 #   Rscript tools/check-site-navbar.R
 # Fails if an article listed under `articles:` in _pkgdown.yml is in no navbar
-# menu, if a menu links to a page that was not built, or if a menu links to an
-# anchor that the page does not have.
+# menu or direct navbar link, if a navbar link points at a page that was not
+# built, or if it points at an anchor that the page does not have.
 
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
@@ -11,13 +11,15 @@ config <- yaml::read_yaml("_pkgdown.yml")
 site <- "docs"
 
 # Only components the navbar actually shows count: a component defined under
-# `components:` but left out of `structure:` is never displayed.
+# `components:` but left out of `structure:` is never displayed. A component
+# counts through its own link (`href`) and through its menu items.
 shown <- unlist(config$navbar$structure[c("left", "right")])
 components <- config$navbar$components
 components <- components[names(components) %in% shown]
 menu_links <- unlist(lapply(components, function(component) {
-  vapply(component$menu %||% list(), function(item) item$href %||% NA_character_,
-         character(1))
+  c(component$href %||% NA_character_,
+    vapply(component$menu %||% list(), function(item) item$href %||% NA_character_,
+           character(1)))
 }))
 menu_links <- menu_links[!is.na(menu_links) & !grepl("^https?://", menu_links)]
 
