@@ -80,8 +80,8 @@ articles:
   - title: Prepare an analysis cohort
     navbar: Prepare an analysis cohort
     desc: >
-      Decide what missing and unknown codes mean, select a cohort with a
-      record of each exclusion, and add derived columns.
+      Decide what missing and unknown codes mean, and select a cohort with
+      a record of each exclusion.
     contents:
       - missing-data
       - building-cohort-with-flowchart
