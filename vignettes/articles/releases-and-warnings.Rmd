@@ -107,13 +107,12 @@ sRtr takes the release from, in order:
 Every loaded file records which it used. Here is a tiny made-up waitlist
 file in a folder named for release 2303.
 
-`set_srtr_wd()` changes the folder and release for the whole R session. If
-you run this example in a session you analyze in, call `set_srtr_wd()` with
-your own folder and release again afterwards, or use a fresh session; the
-last chunk of this article puts your folder back but not your release.
+On your own files you would call `set_srtr_wd()`. That changes the folder
+and release for the whole R session, so the example instead points sRtr at
+the made-up folder only while each call runs, with `in_example()`. Your own
+folder and release are untouched if you run it.
 
 ```{r make-file}
-old_wd <- Sys.getenv("SRTR_WD")
 dir <- file.path(tempdir(), "pubsaf2303")
 dir.create(dir, showWarnings = FALSE)
 cand <- data.frame(
@@ -123,11 +122,13 @@ cand <- data.frame(
   CAN_LISTING_DT = as.Date("2021-01-01") + 0:3
 )
 suppressWarnings(haven::write_sas(cand, file.path(dir, "cand_kipa.sas7bdat")))
-set_srtr_wd(dir)
+
+# Instead of set_srtr_wd(dir), for this example only.
+in_example <- function(expr) withr::with_envvar(c(SRTR_WD = dir), expr)
 ```
 
 ```{r load}
-cand_kipa <- load_srtr_file("CAND_KIPA")
+cand_kipa <- in_example(load_srtr_file("CAND_KIPA"))
 ```
 
 The two warnings are the subject of the next sections. First, what was
@@ -203,8 +204,10 @@ c(
 ```
 
 `view = "web"`, in `srtr_dictionary()` or `load_srtr_file()`, gives the
-dictionary as SRTR's pages have it, without corrections. For a release with
-no stored copy, it is still filled in from the copies on either side. The
+dictionary as SRTR's pages have it, without corrections. For a release
+between two stored copies, it is still filled in from the copies on either
+side; before the first or after the last, it uses the nearest copy, with a
+warning. The
 [`srtr_dictionary()` help page](../reference/srtr_dictionary.html) lists
 every correction and its evidence.
 
@@ -227,7 +230,7 @@ collect <- function(expr) {
   )
 }
 
-cand_kipa <- collect(load_srtr_file("CAND_KIPA"))
+cand_kipa <- collect(in_example(load_srtr_file("CAND_KIPA")))
 lengths(seen)
 ```
 
@@ -245,7 +248,7 @@ quiet_codes <- function(expr) {
     sRtr_warning_unknown_codes = function(w) invokeRestart("muffleWarning")
   )
 }
-cand_kipa <- quiet_codes(load_srtr_file("CAND_KIPA"))
+cand_kipa <- quiet_codes(in_example(load_srtr_file("CAND_KIPA")))
 ```
 
 The codes warning is gone; the missing-columns warning still shows.
@@ -259,12 +262,3 @@ The codes warning is gone; the missing-columns warning still shows.
   expect it.
 - Decide what each code in no format means for your analysis.
 - Collect warnings by class rather than suppressing them all.
-
-# Clean up
-
-If you ran this example in your own session, put your folder back, then
-call `set_srtr_wd()` with your release if you had given one:
-
-```{r cleanup}
-if (nzchar(old_wd)) Sys.setenv(SRTR_WD = old_wd) else Sys.unsetenv("SRTR_WD")
-```
