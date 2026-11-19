@@ -35,7 +35,7 @@ tx <- load_srtr_file("TX_LI")
 mask_n <- function(n) {
   noquote(ifelse(n > 0 & n < 11, "<11", format(n, big.mark = ",")))
 }
-# The same for a frequency table of a column.
+# The same for a column of categories; never identifiers or dates.
 mask <- function(x) mask_n(table(x, useNA = "ifany"))
 ```
 

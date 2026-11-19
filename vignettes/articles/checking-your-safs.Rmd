@@ -36,7 +36,9 @@ here.
 
 - **Mask any count from 1 to 10.** The helpers in the setup chunk print
   such a count as `<11`: `mask_n()` for counts you have computed, `mask()`
-  for a frequency table of a column.
+  for a frequency table of a column of categories, such as a status. Never
+  use `mask()` on an identifier or a date: the table's labels are the
+  values themselves, so masking the counts hides nothing.
 - **Do not share a total beside masked parts.** If a table of a column
   shows every cell but one, together with the total, a reader recovers the
   masked cell by subtraction. Share the table or the total, not both, or
@@ -51,9 +53,9 @@ here.
   can include exact counts and values from your files. Rewrite what they say
   in your own words, as in the example at the end of this article.
 
-These are the rules of the CMS cell size suppression policy: no count from
-1 to 10, and none that can be worked out from other reported numbers
-([CMS 2020](#ref-cms)).
+The first three rules follow the CMS cell size suppression policy: no
+count from 1 to 10, and none that can be worked out from other reported
+numbers ([CMS 2020](#ref-cms)). The last two are sRtr's own practice.
 
 ```{r setup}
 library(sRtr)
@@ -65,6 +67,7 @@ set_srtr_wd(wd, release = "2303") # your release, named by year and month
 mask_n <- function(n) {
   noquote(ifelse(n > 0 & n < 11, "<11", format(n, big.mark = ",")))
 }
+# For a column of categories only, never identifiers or dates.
 mask <- function(x) mask_n(table(x, useNA = "ifany"))
 ```
 

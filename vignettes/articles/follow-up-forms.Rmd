@@ -47,7 +47,7 @@ txf <- load_srtr_file(
 mask_n <- function(n) {
   noquote(ifelse(n > 0 & n < 11, "<11", format(n, big.mark = ",")))
 }
-# The same for a frequency table of a column.
+# The same for a column of categories; never identifiers or dates.
 mask <- function(x) mask_n(table(x, useNA = "ifany"))
 ```
 
@@ -303,16 +303,28 @@ a person. A person transplanted twice has two rows, and two sets of
 follow-up forms.
 
 ```{r}
-mask_n(c(registrations = n_distinct(tx$TRR_ID), people = n_distinct(tx$PERS_ID)))
+# Print the difference, masked, not two totals that differ by a little.
+mask_n(c(
+  registrations = n_distinct(tx$TRR_ID),
+  beyond_one_per_person = n_distinct(tx$TRR_ID) - n_distinct(tx$PERS_ID)
+))
 ```
 
-`add_txf_outcomes()` attaches a report of the merge, in registrations,
-ready for a methods section: how many registrations have any follow-up
-form, how many forms were read and how many were undated, and for each
-outcome the positive forms, the registrations with a report, and the
-registrations whose report is dated.
+`beyond_one_per_person` counts repeat registrations only if each
+registration belongs to one person;
+[Check the keys](checking-your-safs.html#check-the-keys) shows how to
+confirm that.
+
+`add_txf_outcomes()` attaches a report of the merge, in registrations: how
+many registrations have any follow-up form, how many forms were read and
+how many were undated, and for each outcome the positive forms, the
+registrations with a report, and the registrations whose report is dated.
+These counts are nested, so the difference between two of them can be a
+small count. Look at the report yourself, and before you put any of it in
+a methods section, check that no such difference is under 11.
 
 ```{r}
+# For your own inspection.
 report <- attr(tx, "txf_report")
 mask_n(unlist(report[setdiff(names(report), c("follow_up_file", "outcomes"))]))
 report$outcomes |>
