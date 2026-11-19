@@ -18,3 +18,4 @@
 ^tools/audit$
 ^tools/reference-review$
 ^\.gitattributes$
+^tools/check-site-navbar\.R$
