@@ -349,3 +349,7 @@ centers_with_region |>
 The HRSA transplant center and OPO functions download public GIS layers from HRSA. These layers may change over time as HRSA updates the source data. On the package website, the maps that use them are drawn from HRSA's layers at the time the site was last built.
 
 The built-in `UNOS_regions_sf` object is included with the package and is useful for reproducible examples and basic region mapping.
+
+# Next steps
+
+- [Coverage gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html): estimate how much of a population additional centers would cover.

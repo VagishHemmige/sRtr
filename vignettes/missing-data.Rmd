@@ -162,3 +162,7 @@ A blank can mean that a field was not collected in that era, and a
 continuous variable can hold an implausible value or a placeholder such as
 999. Neither is a coded missing value, and `srtr_normalize_missing()` does
 not look for them.
+
+# Next steps
+
+- [Building cohorts with flow diagrams](building-cohort-with-flowchart.html): apply these choices when you select the cohort, with unknown values as their own step.
