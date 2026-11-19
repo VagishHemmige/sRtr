@@ -103,9 +103,10 @@ attr(tx, "srtr_release")      # the release and dictionary used
 range(tx$REC_TX_DT, na.rm = TRUE)
 ```
 
-In `attr(tx, "srtr_release")`, `dictionary` is `"observed"` when sRtr has
-the dictionary for your release and `"interpolated"` when it filled the gap
-between two stored copies. Transplant dates are `Date` columns, ready for
+In `attr(tx, "srtr_release")`, `dictionary` names the stored copy used
+when sRtr has one for your release (such as `"2609-1"` for release 2609),
+and says `"interpolated"` when it filled the gap between two copies, as for
+release 2303. With no release given, it says `"bundled"`. Transplant dates are `Date` columns, ready for
 date arithmetic.
 
 # Labels and codes
