@@ -303,17 +303,22 @@ a person. A person transplanted twice has two rows, and two sets of
 follow-up forms.
 
 ```{r}
-# Print the difference, masked, not two totals that differ by a little.
-mask_n(c(
-  registrations = n_distinct(tx$TRR_ID),
-  beyond_one_per_person = n_distinct(tx$TRR_ID) - n_distinct(tx$PERS_ID)
-))
+# Complete, distinct pairs of registration and person.
+ids <- tx |>
+  filter(!is.na(TRR_ID), !is.na(PERS_ID)) |>
+  distinct(TRR_ID, PERS_ID)
+one_person_per_registration <- !anyDuplicated(ids$TRR_ID)
+one_person_per_registration
+# Print only the masked repeat count, and only if the check passes.
+if (one_person_per_registration) {
+  mask_n(c(repeat_registrations = nrow(ids) - n_distinct(ids$PERS_ID)))
+}
 ```
 
-`beyond_one_per_person` counts repeat registrations only if each
-registration belongs to one person;
-[Check the keys](checking-your-safs.html#check-the-keys) shows how to
-confirm that.
+`repeat_registrations` counts registrations after a person's first one.
+Keep the registration total for yourself: shared beside it, the repeat
+count gives away the number of people. This is the same check as in
+[Check the keys](checking-your-safs.html#check-the-keys).
 
 `add_txf_outcomes()` attaches a report of the merge, in registrations: how
 many registrations have any follow-up form, how many forms were read and
