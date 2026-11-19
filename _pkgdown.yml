@@ -18,7 +18,7 @@ template:
 # `articles:` is in no menu, or a menu link points at a missing page.
 navbar:
   structure:
-    left: [start, cohort, outcomes, geography, reference, news]
+    left: [start, cohort, outcomes, geography, reference, contribute, news]
     right: [search, github]
   components:
     start:
@@ -67,6 +67,9 @@ navbar:
         - text: "---"
         - text: All guides, with descriptions
           href: articles/index.html
+    contribute:
+      text: Contribute
+      href: articles/development.html
 
 reference:
   - title: File Loading
@@ -166,3 +169,11 @@ articles:
     contents:
       - mapping
       - articles/geographic-coverage-gain
+
+  - title: Contribute
+    navbar: Contribute
+    desc: >
+      Tasks you can start today, every open project, and how to take part
+      without sharing SRTR data.
+    contents:
+      - articles/development

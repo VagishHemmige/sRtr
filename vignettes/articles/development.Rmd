@@ -1,0 +1,146 @@
+---
+title: "Development and how to contribute"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r data}
+repo <- "https://github.com/VagishHemmige/sRtr"
+projects <- utils::read.csv("data/projects.csv", stringsAsFactors = FALSE)
+tasks <- utils::read.csv("data/starter-tasks.csv", stringsAsFactors = FALSE)
+
+organ_names <- c(
+  kidney = "Kidney", liver = "Liver", pancreas = "Pancreas",
+  "kidney-pancreas" = "Kidney-pancreas", heart = "Heart", lung = "Lung",
+  "heart-lung" = "Heart-lung", all = "All organs", none = "Not organ-specific"
+)
+
+split_organs <- function(x) strsplit(x, ";", fixed = TRUE)
+
+# The tables are hand-edited, so check them before drawing anything from them.
+stopifnot(
+  !anyDuplicated(projects$issue),
+  !anyDuplicated(tasks$issue),
+  all(grepl("^[0-9]+$", c(projects$issue, tasks$issue))),
+  all(unlist(split_organs(c(projects$organs, tasks$organs))) %in% names(organ_names)),
+  all(tasks$role %in% c("verify", "supervise new")),
+  all(nzchar(unlist(tasks[c("question", "deliverable", "needs", "done")])))
+)
+
+issue_link <- function(n) sprintf("[#%s](%s/issues/%s)", n, repo, n)
+sentence_case <- function(x) paste0(toupper(substr(x, 1, 1)), substring(x, 2))
+
+# Issue searches are built here rather than typed by hand, so every link uses
+# the same encoding. Several values in one label: qualifier means "any of".
+search_link <- function(text, ...) {
+  query <- paste(c("is:issue", "is:open", ...), collapse = " ")
+  sprintf("[%s](%s/issues?q=%s)", text, repo, utils::URLencode(query, reserved = TRUE))
+}
+label <- function(...) sprintf('label:%s', paste0('"', c(...), '"', collapse = ","))
+```
+
+sRtr is in early development (version `r as.character(utils::packageVersion("sRtr"))`, before
+its first CRAN release), so functions and their arguments can still change.
+Most of the code is written by Claude, an AI model, and reviewed by an
+automated ChatGPT review and by the maintainer, Vagish Hemmige. What sRtr needs
+most from people is judgment: checking that a calculation matches its source,
+and deciding what a definition should be. Neither needs much R, and most of it
+needs no SRTR data.
+
+This page lists tasks you can start today, then every open project.
+
+# Start with one of these
+
+Each of these has a defined finish, and none needs SRTR data.
+
+```{r starter, results = "asis"}
+role_text <- c("verify" = "Verify existing work", "supervise new" = "Supervise something new")
+for (i in seq_len(nrow(tasks))) {
+  t <- tasks[i, ]
+  cat(sprintf("## %s (%s)\n\n", t$title, issue_link(t$issue)))
+  cat(sprintf("*%s; %s.*\n\n", role_text[[t$role]],
+              paste(organ_names[split_organs(t$organs)[[1]]], collapse = ", ")))
+  cat(sprintf("- **Question:** %s\n", t$question))
+  cat(sprintf("- **What you produce:** %s\n", t$deliverable))
+  cat(sprintf("- **What you need:** %s\n", t$needs))
+  cat(sprintf("- **Done when:** %s\n\n", t$done))
+}
+```
+
+# How to take one on
+
+1. Comment on the issue with one sentence saying what you will do, for example
+   "I can check the PDRI coefficients against the paper and post my
+   comparison."
+2. A maintainer replies with the scope, who will review it, and what to post.
+   Please wait for that reply before starting substantial work.
+3. Post your result on the issue. A comparison, a reading of the options or a
+   short note is a complete contribution, even if it never becomes a code
+   change.
+
+Pull requests are reviewed by an automated ChatGPT review and merged by the
+maintainer; a pull request cannot be merged until that review has run. If
+you are a trainee working with the maintainer, start through your usual
+supervision channel instead of a public comment.
+
+# Keep SRTR data out of public places
+
+Most tasks need no SRTR data. Tasks labelled `needs SAF access` need your own
+access to SRTR's standard analysis files, under your own data use agreement
+(DUA) with SRTR.
+
+Never post patient-level data, or anything that looks like it, in an issue or a
+pull request. Real results go on GitHub only as aggregate counts with no cell
+from 1 to 10, and only when no hidden cell can be recovered by subtracting one
+posted number from another. [Checking sRtr on your own
+SAFs](checking-your-safs.html#share-counts-only) explains how to do this.
+Made-up examples and zero counts are fine.
+
+# Find work by organ
+
+```{r organ-links, results = "asis"}
+organ_rows <- setdiff(names(organ_names), c("all", "none"))
+cat(paste0("- ", vapply(organ_rows, function(o) {
+  search_link(organ_names[[o]], label(paste0("organ: ", o), "organ: all"))
+}, character(1)), collapse = "\n"), "\n")
+cat("- ", search_link("Not about any organ's data", label("organ: none")),
+    ": geography, the website and the package's own setup\n\n", sep = "")
+```
+
+Each organ link includes the methods that apply to every organ, such as joins
+and outcome definitions. To find something you can finish without SRTR data,
+open `r search_link("tasks you can verify without SRTR data", label("role: verify"), label("no SAF needed"))`
+or `r search_link("decisions and designs to supervise without SRTR data", label("role: supervise new"), label("no SAF needed"))`.
+
+# All projects
+
+Each project is a GitHub issue that lists its tasks and says who is working on
+what.
+
+```{r projects, results = "asis"}
+for (i in seq_len(nrow(projects))) {
+  p <- projects[i, ]
+  cat(sprintf("- **%s** (%s). *%s; %s.* %s\n", p$project, issue_link(p$issue),
+              sentence_case(p$type),
+              paste(organ_names[split_organs(p$organs)[[1]]], collapse = ", "),
+              p$summary))
+}
+cat("\n")
+```
+
+# What the labels mean
+
+Every task on GitHub carries four kinds of label.
+
+| Label | Meaning |
+|---|---|
+| `organ: ...` | The organ whose data the task concerns. `organ: all` means a method for every organ's data; `organ: none` means the task is not about any organ's data. |
+| `role: verify` | Check existing or generated work against a known answer, such as a paper, a published table or a real-data run. |
+| `role: supervise new` | Decide what should be built, or judge whether a new design or definition is right. Claude drafts the options. |
+| `complexity: low`, `medium`, `high` | How complex the thing being checked or built is: one function with a known answer, several pieces or a judgment between options, or shared machinery many analyses depend on. |
+| `no SAF needed`, `needs SAF access` | Whether finishing the task needs your own access to SRTR data. |
+
+Project types (data handling, outcomes, geography and so on) are written on
+each project issue and in the list above, not as labels.
