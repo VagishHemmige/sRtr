@@ -164,7 +164,7 @@ it in the criterion itself.
 a recipient with two transplants is counted twice; label the boxes as
 transplants, or reduce to one row per recipient as a labelled step of
 its own (see [Files, keys and
-joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.md)).
+joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html)).
 Build the diagram before joining files with many rows per transplant,
 such as the follow-up file `TXF_KI`: after that join each row is a
 follow-up form, and the counts no longer describe transplants.
@@ -205,3 +205,14 @@ nrow(cohort)
 ```
 
 The step-by-step counts behind the boxes are in `cohort_fc$fc`.
+
+## Next steps
+
+- To add donor or candidate scores: [Adding risk
+  scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.md).
+- To define outcomes: [Rejection and malignancy on follow-up
+  forms](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html)
+  and [Death, graft failure, and
+  censoring](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html).
+- To map where the cohort was transplanted: [Mapping transplant
+  geography](https://vagishhemmige.github.io/sRtr/articles/mapping.md).

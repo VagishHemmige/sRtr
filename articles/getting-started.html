@@ -58,8 +58,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-define-outcomes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Define outcomes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-define-outcomes">
-<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms</a></li>
-    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
+<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Rejection and malignancy</a></li>
+    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Death, graft failure, and censoring</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">All guides, with descriptions</a></li>
   </ul>
@@ -74,7 +74,14 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/development.html">Contribute</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-contribute" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Contribute</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-contribute">
+<li><a class="dropdown-item" href="../articles/development.html#start-with-one-of-these">Find a first task</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#find-work-by-organ">Find work by organ</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#all-projects">Browse all projects</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -136,8 +143,8 @@ name.</p>
 releases only. For a release in between, it uses the entries that are
 the same in the copies on either side, so the labels may not be the
 exact ones SRTR published for that release. The check after loading
-shows which you got; <a href="releases-and-warnings.html">Releases, the
-data dictionary and warnings</a> explains it in full.</p>
+shows which you got; <a href="https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html">Releases,
+the data dictionary and warnings</a> explains it in full.</p>
 <p>To keep the folder for later sessions, add
 <code>permanent = TRUE</code>. This writes the path to your
 <code>~/.Renviron</code> file.</p>
@@ -234,8 +241,8 @@ from what you typed.</p>
 <code class="sourceCode R"><span><span class="va">tx_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_KI"</span>, factor_labels <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                           col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TRR_ID"</span>, <span class="st">"DON_RACE"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Codes that no format lists are kept and named
-<code>&lt;code&gt;: not in format</code>, with a warning. <a href="checking-your-safs.html">Checking sRtr on your own SAFs</a> shows
-how to count them.</p>
+<code>&lt;code&gt;: not in format</code>, with a warning. <a href="https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html">Checking
+sRtr on your own SAFs</a> shows how to count them.</p>
 </div>
 <div class="section level2">
 <h2 id="join-files-on-their-keys">Join files on their keys<a class="anchor" aria-label="anchor" href="#join-files-on-their-keys"></a>
@@ -256,8 +263,8 @@ need:</p>
 <span>  transplants <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span><span class="va">recent</span><span class="op">$</span><span class="va">TRR_ID</span><span class="op">)</span>,</span>
 <span>  forms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">txf</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>These three counts usually differ. Say which unit each result counts.
-<a href="files-and-keys.html">Files, keys and joins</a> covers the other
-files and how to check a join.</p>
+<a href="https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html">Files,
+keys and joins</a> covers the other files and how to check a join.</p>
 </div>
 <div class="section level2">
 <h2 id="share-counts-never-rows">Share counts, never rows<a class="anchor" aria-label="anchor" href="#share-counts-never-rows"></a>
@@ -270,8 +277,8 @@ data. Share aggregate counts only, and mask any count from 1 to 10:</p>
 <span><span class="op">}</span></span>
 <span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>transplants <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">recent</span><span class="op">)</span>, forms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">txf</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Masking each number is not enough: a total shared beside masked parts
-lets a reader work out the small count by subtraction. <a href="checking-your-safs.html#share-counts-only">Checking sRtr on your
-own SAFs</a> explains this in full.</p>
+lets a reader work out the small count by subtraction. <a href="https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#share-counts-only">Checking
+sRtr on your own SAFs</a> explains this in full.</p>
 </div>
 <div class="section level2">
 <h2 id="if-something-goes-wrong">If something goes wrong<a class="anchor" aria-label="anchor" href="#if-something-goes-wrong"></a>
@@ -296,18 +303,23 @@ read.</li>
 <code>NA</code> before labelling. Use <code>blank_text = "keep"</code>
 to keep them as they are.</li>
 </ul>
-<p>The <a href="../reference/load_srtr_file.html"><code>load_srtr_file()</code>
-help page</a> describes every loading option, and <a href="releases-and-warnings.html">Releases, the data dictionary and
-warnings</a> explains each warning and how to collect warnings in a
-script.</p>
+<p>The <a href="https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.html"><code>load_srtr_file()</code>
+help page</a> describes every loading option, and <a href="https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html">Releases,
+the data dictionary and warnings</a> explains each warning and how to
+collect warnings in a script.</p>
 </div>
 <div class="section level2">
 <h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
 </h2>
 <ul>
 <li>
-<a href="checking-your-safs.html">Checking sRtr on your own
-SAFs</a>: confirm that sRtr reads your release correctly.</li>
+<a href="https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html">Checking
+sRtr on your own SAFs</a>: confirm that sRtr reads your release
+correctly.</li>
+<li>
+<a href="https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html">Files,
+keys and joins</a>: link the files you load without changing what a row
+means.</li>
 <li>
 <a href="missing-data.html">Missing data</a>: decide what unknown
 and not-done codes mean for your analysis.</li>
@@ -315,8 +327,13 @@ and not-done codes mean for your analysis.</li>
 <a href="building-cohort-with-flowchart.html">Building cohorts with
 flow diagrams</a>: select a cohort with a record of each exclusion.</li>
 <li>
-<a href="follow-up-forms.html">Follow-up forms</a> and <a href="follow-up-windows.html">follow-up windows</a>: pitfalls in
-post-transplant outcomes.</li>
+<a href="adding-columns.html">Adding risk scores</a>: KDPI, EPTS,
+PDRI and other published scores.</li>
+<li>
+<a href="https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html">Rejection
+and malignancy on follow-up forms</a> and <a href="https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html">Death,
+graft failure, and censoring</a>: pitfalls in post-transplant
+outcomes.</li>
 <li>
 <a href="mapping.html">Mapping transplant geography</a>.</li>
 </ul>

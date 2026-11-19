@@ -233,3 +233,10 @@ continuous variable can hold an implausible value or a placeholder such
 as 999. Neither is a coded missing value, and
 [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
 does not look for them.
+
+## Next steps
+
+- [Building cohorts with flow
+  diagrams](https://vagishhemmige.github.io/sRtr/articles/building-cohort-with-flowchart.md):
+  apply these choices when you select the cohort, with unknown values as
+  their own step.

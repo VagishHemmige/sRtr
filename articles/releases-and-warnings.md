@@ -340,3 +340,12 @@ The codes warning is gone; the missing-columns warning still shows.
   not expect it.
 - Decide what each code in no format means for your analysis.
 - Collect warnings by class rather than suppressing them all.
+
+## Next steps
+
+- [Files, keys and
+  joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.md):
+  link the files you have loaded.
+- [Checking sRtr on your own
+  SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md):
+  check a release systematically before an analysis.

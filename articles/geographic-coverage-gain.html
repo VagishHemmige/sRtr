@@ -58,8 +58,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-define-outcomes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Define outcomes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-define-outcomes">
-<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms</a></li>
-    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
+<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Rejection and malignancy</a></li>
+    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Death, graft failure, and censoring</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">All guides, with descriptions</a></li>
   </ul>
@@ -74,7 +74,14 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/development.html">Contribute</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-contribute" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Contribute</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-contribute">
+<li><a class="dropdown-item" href="../articles/development.html#start-with-one-of-these">Find a first task</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#find-work-by-organ">Find work by organ</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#all-projects">Browse all projects</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -103,9 +110,9 @@
 
     
     
-<div class="section level2">
-<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h2>
+<div class="section level3">
+<h3 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h3>
 <p>Geography matters greatly in solid organ transplantation. Donor and
 recipient practices vary greatly by region, and distance-related
 barriers can magnify geographic disparities. In this article, we
@@ -127,9 +134,9 @@ code without its output.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/walkerke/tigris" class="external-link">tigris</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="create-geography-objects">Create geography objects<a class="anchor" aria-label="anchor" href="#create-geography-objects"></a>
-</h2>
+<div class="section level3">
+<h3 id="create-geography-objects">Create geography objects<a class="anchor" aria-label="anchor" href="#create-geography-objects"></a>
+</h3>
 <p>We begin by using the <code><a href="../reference/get_hrsa_transplant_centers.html">get_hrsa_transplant_centers()</a></code>
 function from the <code>sRtr</code> package to create an <code>sf</code>
 object containing heart transplant centers not in PR or HI. We
@@ -161,9 +168,9 @@ subsequently perform a substantial amount of data cleaning</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">Transplant_centers_all_sf</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="define-existing-centers-and-additional-centers">Define existing centers and additional centers<a class="anchor" aria-label="anchor" href="#define-existing-centers-and-additional-centers"></a>
-</h2>
+<div class="section level3">
+<h3 id="define-existing-centers-and-additional-centers">Define existing centers and additional centers<a class="anchor" aria-label="anchor" href="#define-existing-centers-and-additional-centers"></a>
+</h3>
 <p>For the purposes of this analysis, we assume baseline coverage with
 two centers, <em>ALUA</em> (University of Alabama-Birmingham) and
 <em>NYMA</em> (Montefiore Medical Center).</p>
@@ -215,9 +222,9 @@ centers in the previous objects</p>
 <span></span>
 <span></span>
 <span>  </span></code></pre></div>
-<div class="section level3">
-<h3 id="importing-hiv-data">Importing HIV data<a class="anchor" aria-label="anchor" href="#importing-hiv-data"></a>
-</h3>
+<div class="section level4">
+<h4 id="importing-hiv-data">Importing HIV data<a class="anchor" aria-label="anchor" href="#importing-hiv-data"></a>
+</h4>
 <p>We use the <code>CDCAtlas</code> package to estimate the number of
 PLWH in each census tract. <code>get_atlas()</code> downloads
 county-level HIV data, <code>impute_suppressed()</code> fills in
@@ -260,9 +267,9 @@ the <code>tigris</code> package.</p>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<div class="section level2">
-<h2 id="estimating-additional-coverage-gain">Estimating additional coverage gain<a class="anchor" aria-label="anchor" href="#estimating-additional-coverage-gain"></a>
-</h2>
+<div class="section level3">
+<h3 id="estimating-additional-coverage-gain">Estimating additional coverage gain<a class="anchor" aria-label="anchor" href="#estimating-additional-coverage-gain"></a>
+</h3>
 <p>We finally use the <code>calculate_geography_coverage_gain</code>
 function to estimate the number of PLWH who would gain geographic
 proximity to a transplant center given the additional centers.</p>
@@ -286,9 +293,9 @@ full continental US.</p>
 <p>We also see that for people without HIV, an additional 7.3 million
 people gain geographical proximity with the added centers.</p>
 </div>
-<div class="section level2">
-<h2 id="starting-from-a-null-base">Starting from a <code>NULL</code> base<a class="anchor" aria-label="anchor" href="#starting-from-a-null-base"></a>
-</h2>
+<div class="section level3">
+<h3 id="starting-from-a-null-base">Starting from a <code>NULL</code> base<a class="anchor" aria-label="anchor" href="#starting-from-a-null-base"></a>
+</h3>
 <p>The <code><a href="../reference/calculate_geography_coverage_gain.html">calculate_geography_coverage_gain()</a></code> function can
 take a <code>NULL</code> input for <code>existing_areas</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -305,9 +312,9 @@ take a <code>NULL</code> input for <code>existing_areas</code>.</p>
 <span>    output <span class="op">=</span> <span class="st">"long"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="ranking-centers-by-incremental-gain">Ranking centers by incremental gain<a class="anchor" aria-label="anchor" href="#ranking-centers-by-incremental-gain"></a>
-</h2>
+<div class="section level3">
+<h3 id="ranking-centers-by-incremental-gain">Ranking centers by incremental gain<a class="anchor" aria-label="anchor" href="#ranking-centers-by-incremental-gain"></a>
+</h3>
 <p>The previous examples estimate the total population covered by a set
 of candidate geographic areas. In some settings, however, the goal is to
 compare candidate centers individually and ask which additional center
@@ -359,6 +366,19 @@ additional gain.</p>
 of PLWH not served by the current network. The lowest yield are centers
 that are in areas with low numbers of PLWH or centers with extensive
 overlap with the existing centers in New York and Alabama.</p>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<ul>
+<li>
+<a href="mapping.html">Mapping transplant geography</a>: the
+centers, regions and service areas used here.</li>
+<li>
+<a href="development.html#all-projects">Development and how to
+contribute</a>: the geography project lists open work, including split
+states.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

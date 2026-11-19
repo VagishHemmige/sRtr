@@ -5,6 +5,26 @@ Scientific Registry of Transplant Recipients (SRTR) Standard Analysis
 Files (SAFs) in R. It supports automatic variable labeling and factor
 conversion using the official SRTR data dictionary.
 
+## What do you want to do?
+
+- [Load my first SRTR
+  file](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#install-and-load)
+- [Link candidate, transplant, and follow-up
+  files](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html)
+- [Build a cohort and track
+  exclusions](https://vagishhemmige.github.io/sRtr/articles/building-cohort-with-flowchart.html)
+- [Define rejection, malignancy, graft failure, or
+  death](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#which-section-answers-your-question)
+- [Map transplant centers and service
+  areas](https://vagishhemmige.github.io/sRtr/articles/mapping.html)
+
+Every guide is listed in the [article
+index](https://vagishhemmige.github.io/sRtr/articles/index.html), and
+every function in the [function
+reference](https://vagishhemmige.github.io/sRtr/reference/index.html).
+To help develop sRtr, see [Development and how to
+contribute](https://vagishhemmige.github.io/sRtr/articles/development.html).
+
 ## Installation
 
 You can install the development version of **sRtr** from
@@ -16,106 +36,23 @@ You can install the development version of **sRtr** from
 devtools::install_github("VagishHemmige/sRtr")
 ```
 
-## Setup
+## A first load
 
-Before using
-[`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md),
-you must initialize the file registry using your local file paths:
+Point sRtr at the folder that holds your SAFs, then load a file with its
+factor and variable labels:
 
 ``` r
 
 library(sRtr)
 
-# Example: point to a folder of .sas7bdat or .parquet files for the session only
 set_srtr_wd("path/to/srtr/files")
+# or remember the folder for later sessions:
+# set_srtr_wd("path/to/srtr/files", permanent = TRUE)
 
-# Or set permanently:
-set_srtr_wd("path/to/srtr/files", permanent = TRUE)
+tx_li <- load_srtr_file("TX_LI")
 ```
 
-## Example
-
-The primary function is
-[`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md),
-which loads and (optionally) labels SRTR files:
-
-``` r
-
-# Load the TX_LI file with factor and variable labels
-tx_li <- load_srtr_file("TX_LI", factor_labels = TRUE, var_labels = TRUE)
-
-# View factor labels
-str(tx_li$DON_RACE)  # Example factor column
-
-# View variable label
-labelled::var_label(tx_li$DON_RACE)
-```
-
-You can also use the labeling functions independently:
-
-``` r
-
-df <- haven::read_sas("TX_KI.sas7bdat")
-
-df <- apply_srtr_factors(df, file_key = "TX_KI")
-df <- apply_srtr_varlabels(df, file_key = "TX_KI")
-```
-
-If the name of the data frame corresponds to the name of the underlying
-file, then the `file_key` argument can be omitted:
-
-``` r
-
-TX_KI <- haven::read_sas("TX_KI.sas7bdat")
-
-TX_KI_labelled <- TX_KI |>
-  apply_srtr_factors()
-```
-
-## Missing values
-
-SRTR variables record missing information in many ways, and the codes
-differ from variable to variable: code `4` is “Unknown” in one format,
-“N/A” in another and “Not tested” in a third. sRtr recognises each code
-by what it means in its own variable, for raw codes and labelled columns
-alike.
-
-``` r
-
-tx_ki <- load_srtr_file("TX_KI")
-
-# Count the unknown, not-done, pending and other codes in each variable
-srtr_missing_report(tx_ki)
-
-# Turn them into NA, in a new data frame
-tx_ki_clean <- srtr_normalize_missing(tx_ki)
-```
-
-Which kinds of missing value should become `NA` depends on the analysis,
-so it is a choice. The default policy, `"analysis"`, removes unknown,
-not done, pending, withheld and blank values, and keeps “not
-applicable”, “indeterminate” and partly known answers.
-`policy = "strict"` removes those too, and `actions` or `overrides`
-change the rule for one kind of value or one variable:
-
-``` r
-
-# From the original data: keep "not done" as a value, and record why
-# each value became NA
-tx_ki_clean <- srtr_normalize_missing(
-  tx_ki,
-  actions = c(not_done = "keep"),
-  reason = "changed"
-)
-```
-
-The `missing_codes` dataset lists every code and its type. See the
-[Missing data
-article](https://vagishhemmige.github.io/sRtr/articles/missing-data.html)
-for the full walk-through.
-
-See [Function
-Reference](https://vagishhemmige.github.io/sRtr/reference/index.html)
-for full documentation.
-
-Much more, including help files, vignettes, etc. will be coming soon!
+[Getting
+started](https://vagishhemmige.github.io/sRtr/articles/getting-started.html)
+goes on from here: how sRtr finds your release, what the labels and
+codes mean, how to join files, and how to share results safely.

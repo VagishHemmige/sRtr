@@ -41,7 +41,7 @@ only. For a release in between, it uses the entries that are the same in
 the copies on either side, so the labels may not be the exact ones SRTR
 published for that release. The check after loading shows which you got;
 [Releases, the data dictionary and
-warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.md)
+warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html)
 explains it in full.
 
 To keep the folder for later sessions, add `permanent = TRUE`. This
@@ -153,7 +153,7 @@ tx_codes <- load_srtr_file("TX_KI", factor_labels = FALSE,
 
 Codes that no format lists are kept and named `<code>: not in format`,
 with a warning. [Checking sRtr on your own
-SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md)
+SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html)
 shows how to count them.
 
 ## Join files on their keys
@@ -178,7 +178,7 @@ c(people = n_distinct(recent$PERS_ID),
 
 These three counts usually differ. Say which unit each result counts.
 [Files, keys and
-joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.md)
+joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html)
 covers the other files and how to check a join.
 
 ## Share counts, never rows
@@ -218,26 +218,32 @@ explains this in full.
   `blank_text = "keep"` to keep them as they are.
 
 The [`load_srtr_file()` help
-page](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
+page](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.html)
 describes every loading option, and [Releases, the data dictionary and
-warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.md)
+warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html)
 explains each warning and how to collect warnings in a script.
 
 ## Next steps
 
 - [Checking sRtr on your own
-  SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md):
+  SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html):
   confirm that sRtr reads your release correctly.
+- [Files, keys and
+  joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html):
+  link the files you load without changing what a row means.
 - [Missing
   data](https://vagishhemmige.github.io/sRtr/articles/missing-data.md):
   decide what unknown and not-done codes mean for your analysis.
 - [Building cohorts with flow
   diagrams](https://vagishhemmige.github.io/sRtr/articles/building-cohort-with-flowchart.md):
   select a cohort with a record of each exclusion.
-- [Follow-up
-  forms](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.md)
-  and [follow-up
-  windows](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.md):
+- [Adding risk
+  scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.md):
+  KDPI, EPTS, PDRI and other published scores.
+- [Rejection and malignancy on follow-up
+  forms](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html)
+  and [Death, graft failure, and
+  censoring](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html):
   pitfalls in post-transplant outcomes.
 - [Mapping transplant
   geography](https://vagishhemmige.github.io/sRtr/articles/mapping.md).

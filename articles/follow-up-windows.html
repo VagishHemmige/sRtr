@@ -58,8 +58,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-define-outcomes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Define outcomes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-define-outcomes">
-<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms</a></li>
-    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
+<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Rejection and malignancy</a></li>
+    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Death, graft failure, and censoring</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">All guides, with descriptions</a></li>
   </ul>
@@ -74,7 +74,14 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/development.html">Contribute</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-contribute" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Contribute</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-contribute">
+<li><a class="dropdown-item" href="../articles/development.html#start-with-one-of-these">Find a first task</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#find-work-by-organ">Find work by organ</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#all-projects">Browse all projects</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -108,7 +115,9 @@ and a date until which the person was watched. SRTR files supply all
 three, but from different sources that do not always agree. This article
 shows where they disagree and what that does to an analysis. The
 companion article, <a href="follow-up-forms.html">Follow-up forms are
-reports, not events</a>, covers what the forms themselves record.</p>
+reports, not events</a>, covers what the forms themselves record, and
+opens with <a href="follow-up-forms.html#which-section-answers-your-question">a table
+of which section answers each outcome question</a>.</p>
 <p>As there, the code is not run on this website because it needs real
 SAFs. Run it on your own files and compare the naive version with the
 sRtr one. Share counts only, masked with the <code>mask()</code> and
@@ -415,6 +424,20 @@ far apart the sources are.</li>
 <li>Run graft failure both ways for failures on the day of death.</li>
 <li>Stop counting rejection when the graft fails.</li>
 <li>For kidney-pancreas, use each graft’s own follow-up.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<ul>
+<li>
+<a href="follow-up-forms.html">Rejection and malignancy on follow-up
+forms</a>: the companion article, on what the forms themselves
+record.</li>
+<li>
+<a href="checking-your-safs.html#check-that-derived-outcomes-add-up">Checking
+sRtr on your own SAFs</a>: check that the derived outcomes add up on
+your release.</li>
 </ul>
 </div>
 <div class="section level2">

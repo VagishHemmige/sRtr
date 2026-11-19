@@ -1,6 +1,6 @@
 # Calculating geographic coverage gain
 
-## Introduction
+### Introduction
 
 Geography matters greatly in solid organ transplantation. Donor and
 recipient practices vary greatly by region, and distance-related
@@ -28,7 +28,7 @@ library(tigris)
 library(ggplot2)
 ```
 
-## Create geography objects
+### Create geography objects
 
 We begin by using the
 [`get_hrsa_transplant_centers()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_transplant_centers.md)
@@ -73,7 +73,7 @@ ggplot()+
   theme_minimal()
 ```
 
-## Define existing centers and additional centers
+### Define existing centers and additional centers
 
 For the purposes of this analysis, we assume baseline coverage with two
 centers, *ALUA* (University of Alabama-Birmingham) and *NYMA*
@@ -138,7 +138,7 @@ ggplot()+
   
 ```
 
-### Importing HIV data
+#### Importing HIV data
 
 We use the `CDCAtlas` package to estimate the number of PLWH in each
 census tract. `get_atlas()` downloads county-level HIV data,
@@ -183,7 +183,7 @@ hiv_tract_sf <- tract_geography |>
   )
 ```
 
-## Estimating additional coverage gain
+### Estimating additional coverage gain
 
 We finally use the `calculate_geography_coverage_gain` function to
 estimate the number of PLWH who would gain geographic proximity to a
@@ -213,7 +213,7 @@ continental US.
 We also see that for people without HIV, an additional 7.3 million
 people gain geographical proximity with the added centers.
 
-## Starting from a `NULL` base
+### Starting from a `NULL` base
 
 The
 [`calculate_geography_coverage_gain()`](https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.md)
@@ -235,7 +235,7 @@ calculate_geography_coverage_gain(
 )
 ```
 
-## Ranking centers by incremental gain
+### Ranking centers by incremental gain
 
 The previous examples estimate the total population covered by a set of
 candidate geographic areas. In some settings, however, the goal is to
@@ -299,3 +299,12 @@ The highest yield centers are in metropolitan areas with high numbers of
 PLWH not served by the current network. The lowest yield are centers
 that are in areas with low numbers of PLWH or centers with extensive
 overlap with the existing centers in New York and Alabama.
+
+## Next steps
+
+- [Mapping transplant
+  geography](https://vagishhemmige.github.io/sRtr/articles/mapping.md):
+  the centers, regions and service areas used here.
+- [Development and how to
+  contribute](https://vagishhemmige.github.io/sRtr/articles/development.html#all-projects):
+  the geography project lists open work, including split states.

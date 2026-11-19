@@ -58,8 +58,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-define-outcomes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Define outcomes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-define-outcomes">
-<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms</a></li>
-    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
+<li><a class="dropdown-item" href="../articles/follow-up-forms.html">Rejection and malignancy</a></li>
+    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Death, graft failure, and censoring</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">All guides, with descriptions</a></li>
   </ul>
@@ -74,7 +74,14 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/development.html">Contribute</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-contribute" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Contribute</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-contribute">
+<li><a class="dropdown-item" href="../articles/development.html#start-with-one-of-these">Find a first task</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#find-work-by-organ">Find work by organ</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#all-projects">Browse all projects</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -239,16 +246,16 @@ handle it in the criterion itself.</p>
 <p><code>flowchart</code> counts rows. In a transplant file a row is a
 transplant, so a recipient with two transplants is counted twice; label
 the boxes as transplants, or reduce to one row per recipient as a
-labelled step of its own (see <a href="files-and-keys.html">Files, keys
-and joins</a>). Build the diagram before joining files with many rows
-per transplant, such as the follow-up file <code>TXF_KI</code>: after
-that join each row is a follow-up form, and the counts no longer
+labelled step of its own (see <a href="https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html">Files,
+keys and joins</a>). Build the diagram before joining files with many
+rows per transplant, such as the follow-up file <code>TXF_KI</code>:
+after that join each row is a follow-up form, and the counts no longer
 describe transplants.</p>
 <p>The counts above are made up, which is why some are small. On real
 files the boxes show real counts. Before you share a diagram, check
-every box against <a href="checking-your-safs.html#share-counts-only">Share counts only</a>:
-no box from 1 to 10, and no box that can be worked out from the
-others.</p>
+every box against <a href="https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#share-counts-only">Share
+counts only</a>: no box from 1 to 10, and no box that can be worked out
+from the others.</p>
 </div>
 <div class="section level2">
 <h2 id="exporting-the-diagram">Exporting the diagram<a class="anchor" aria-label="anchor" href="#exporting-the-diagram"></a>
@@ -273,6 +280,17 @@ element, so the cohort in the diagram is the cohort you analyze:</p>
 <span><span class="co">#&gt; [1] 15</span></span></code></pre></div>
 <p>The step-by-step counts behind the boxes are in
 <code>cohort_fc$fc</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<ul>
+<li>To add donor or candidate scores: <a href="adding-columns.html">Adding risk scores</a>.</li>
+<li>To define outcomes: <a href="https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html">Rejection
+and malignancy on follow-up forms</a> and <a href="https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html">Death,
+graft failure, and censoring</a>.</li>
+<li>To map where the cohort was transplanted: <a href="mapping.html">Mapping transplant geography</a>.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

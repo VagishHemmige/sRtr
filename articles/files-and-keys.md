@@ -356,3 +356,12 @@ started](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#join
 - Choose which file each shared column comes from.
 - Explain unmatched rows rather than dropping them silently.
 - Share counts only, masked.
+
+## Next steps
+
+- [Missing
+  data](https://vagishhemmige.github.io/sRtr/articles/missing-data.md):
+  decide what unknown and not-done codes mean before you filter on them.
+- [Building cohorts with flow
+  diagrams](https://vagishhemmige.github.io/sRtr/articles/building-cohort-with-flowchart.md):
+  select the cohort with a record of each exclusion.

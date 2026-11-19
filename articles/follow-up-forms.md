@@ -10,6 +10,20 @@ windows and
 death](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.md),
 covers what happens around the end of follow-up and death.
 
+## Which section answers your question
+
+Each outcome is spread across both articles. This table points to the
+sections that matter for each one.
+
+| Outcome | Sections |
+|----|----|
+| Rejection, treated or untreated | [“Rejection” has more than one meaning](#rejection-has-more-than-one-meaning); [Rejection during the transplant admission](#rejection-during-the-transplant-admission-is-not-on-the-follow-up-forms); [Rejection after the graft has failed](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#rejection-after-the-graft-has-failed) |
+| Malignancy | [A form date is not an onset date](#a-form-date-is-not-an-onset-date); [A missing date does not mean “no event”](#a-missing-date-does-not-mean-no-event); [Reports dated on the day of death](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#reports-dated-on-the-day-of-death) |
+| Graft failure | [Graft failure and death on the same day](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#graft-failure-and-death-on-the-same-day); [Whose follow-up?](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#whose-follow-up) |
+| Death | [Which death date?](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#which-death-date); [Deaths found after follow-up ends](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#deaths-found-after-follow-up-ends) |
+| When follow-up ends | [Events count only while someone is watching](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#events-count-only-while-someone-is-watching); [Whose follow-up?](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#whose-follow-up) |
+| People or transplants | [Count registrations, and say so](#count-registrations-and-say-so); [Transplants are not people](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html#transplants-are-not-people) |
+
 The code here is not run on this website, because it needs real SAFs.
 You can run it yourself: each section shows a naive version first, then
 the sRtr function that handles the problem. Every chunk prints counts,
@@ -326,6 +340,16 @@ if you want it to describe your analysis cohort.
 - Look for forms dated before the transplant.
 - Report counts in registrations, and mask counts under 11 when you
   share them.
+
+## Next steps
+
+- [Death, graft failure, and
+  censoring](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.md):
+  the companion article, on what happens around the end of follow-up and
+  death.
+- [Checking sRtr on your own
+  SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#check-that-derived-outcomes-add-up):
+  check that the derived outcomes add up on your release.
 
 ## References
 

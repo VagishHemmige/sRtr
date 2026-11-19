@@ -6,7 +6,9 @@ but from different sources that do not always agree. This article shows
 where they disagree and what that does to an analysis. The companion
 article, [Follow-up forms are reports, not
 events](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.md),
-covers what the forms themselves record.
+covers what the forms themselves record, and opens with [a table of
+which section answers each outcome
+question](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#which-section-answers-your-question).
 
 As there, the code is not run on this website because it needs real
 SAFs. Run it on your own files and compare the naive version with the
@@ -374,6 +376,15 @@ rejection” does not bound a pancreas rejection.
 - Run graft failure both ways for failures on the day of death.
 - Stop counting rejection when the graft fails.
 - For kidney-pancreas, use each graft’s own follow-up.
+
+## Next steps
+
+- [Rejection and malignancy on follow-up
+  forms](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.md):
+  the companion article, on what the forms themselves record.
+- [Checking sRtr on your own
+  SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#check-that-derived-outcomes-add-up):
+  check that the derived outcomes add up on your release.
 
 ## References
 

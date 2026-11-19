@@ -16,7 +16,7 @@ library(dplyr)
 #>     intersect, setdiff, setequal, union
 ```
 
-## Overview
+### Overview
 
 The `sRtr` package includes helper functions and spatial datasets for
 working with transplant geography in R.
@@ -30,7 +30,7 @@ This vignette introduces basic mapping of:
 The examples use `sf`, which is the standard R package for working with
 vector geographic data in R.
 
-## Coordinate reference systems
+### Coordinate reference systems
 
 Spatial objects in `sRtr` are returned as `sf` objects. For many
 transplant geography tasks, a projected coordinate reference system is
@@ -89,7 +89,7 @@ sf::st_crs(UNOS_regions_sf)
 #>     ID["EPSG",5070]]
 ```
 
-## Built-in spatial datasets
+### Built-in spatial datasets
 
 The package includes state-level UNOS/OPTN region geometries and
 transplant center point locations.
@@ -138,7 +138,7 @@ transplant_centers_sf
 #> # ℹ 244 more rows
 ```
 
-## Plotting UNOS/OPTN regions
+### Plotting UNOS/OPTN regions
 
 The object `UNOS_regions_sf` contains state-level geometries with a
 `Region` field. It includes Alaska and Hawaii (Region 6) and Puerto Rico
@@ -178,7 +178,7 @@ plot(optn_regions["Region"], key.pos = 4)
 
 ![](mapping_files/figure-html/plot-dissolved-unos-regions-1.png)
 
-## Plotting transplant centers
+### Plotting transplant centers
 
 The package can download transplant center locations from the HRSA
 ArcGIS REST service.
@@ -214,7 +214,7 @@ transplant_centers_sf$OTCName[outside]
 #> [3] "Auxilio Mutuo Hospital"
 ```
 
-## National maps with Alaska, Hawaii and Puerto Rico
+### National maps with Alaska, Hawaii and Puerto Rico
 
 Region 6 includes Alaska and Hawaii, and Region 3 includes Puerto Rico.
 Hawaii has one transplant center, Puerto Rico two and Alaska none. On a
@@ -238,7 +238,7 @@ plot(sf::st_geometry(centers_shifted), add = TRUE, pch = 16, cex = 0.4)
 
 ![](mapping_files/figure-html/national-shifted-1.png)
 
-## An inset for the Washington-to-Boston corridor
+### An inset for the Washington-to-Boston corridor
 
 Between Washington and Boston, transplant centers sit so close together
 that they overlap on a national map. An inset repeats that corridor at a
@@ -259,7 +259,7 @@ corridor_box <- sf::st_bbox(
 region_colors <- grDevices::palette.colors(11, "Set 3")
 ```
 
-### With ggplot2
+#### With ggplot2
 
 ggplot2 has no inset of its own, so the corridor is drawn as a second
 plot and placed beside the national map with
@@ -326,7 +326,7 @@ ggplot() +
 
 ![](mapping_files/figure-html/ggplot-corridor-1.png)
 
-### With tmap
+#### With tmap
 
 tmap draws the inset itself with
 [`tm_inset()`](https://r-tmap.github.io/tmap/reference/tm_inset.html)
@@ -370,7 +370,7 @@ tm_shape(regions_shifted) +
 
 ![](mapping_files/figure-html/tmap-corridor-1.png)
 
-## Downloading current HRSA transplant center locations
+### Downloading current HRSA transplant center locations
 
 To retrieve the current HRSA transplant center layer:
 
@@ -439,7 +439,7 @@ plot(sf::st_geometry(centers), add = TRUE, pch = 16, cex = 0.5)
 
 ![](mapping_files/figure-html/current-centers-map-1.png)
 
-## Plotting OPO service areas
+### Plotting OPO service areas
 
 The HRSA service also includes Organ Procurement Organization service
 area geography.
@@ -485,7 +485,7 @@ plot(
 
 ![](mapping_files/figure-html/plot-opo-with-centers-1.png)
 
-## Adding state outlines with tigris
+### Adding state outlines with tigris
 
 The `tigris` package is useful for adding Census boundary layers, such
 as states or counties.
@@ -505,7 +505,7 @@ plot(
 )
 ```
 
-## Filtering by organ or service list
+### Filtering by organ or service list
 
 The HRSA transplant center layer includes a `Service_Lst` field.
 Depending on the analysis, this can be used to identify centers that
@@ -522,7 +522,7 @@ plot(sf::st_geometry(kidney_centers), add = TRUE, pch = 16, cex = 0.5)
 
 ![](mapping_files/figure-html/filter-service-list-1.png)
 
-## Working with geometries
+### Working with geometries
 
 Because these are `sf` objects, they can be used with standard spatial
 operations.
@@ -561,7 +561,7 @@ centers_with_region |>
 #> 11  Region 6  9
 ```
 
-## Notes
+### Notes
 
 The HRSA transplant center and OPO functions download public GIS layers
 from HRSA. These layers may change over time as HRSA updates the source
@@ -570,3 +570,9 @@ HRSA’s layers at the time the site was last built.
 
 The built-in `UNOS_regions_sf` object is included with the package and
 is useful for reproducible examples and basic region mapping.
+
+## Next steps
+
+- [Coverage
+  gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html):
+  estimate how much of a population additional centers would cover.

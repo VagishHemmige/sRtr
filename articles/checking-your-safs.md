@@ -316,6 +316,15 @@ For example: “Release 2303, `TX_LI`. `sRtr_warning_unknown_codes` for
 `REC_COD`: \<11 rows with codes not in the format.” Never attach SAF
 files, rows from them, or unmasked counts.
 
+## Next steps
+
+- [Releases, the data dictionary and
+  warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.md):
+  what each warning counted in check 1 means.
+- [Files, keys and
+  joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.md):
+  start preparing a cohort from the files you have checked.
+
 ## References
 
 Centers for Medicare & Medicaid Services. CMS cell size suppression

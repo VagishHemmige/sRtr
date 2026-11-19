@@ -34,8 +34,8 @@
   </ul></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-define-outcomes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Define outcomes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-define-outcomes"><li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms</a></li>
-    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-define-outcomes"><li><a class="dropdown-item" href="../articles/follow-up-forms.html">Rejection and malignancy</a></li>
+    <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Death, graft failure, and censoring</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">All guides, with descriptions</a></li>
   </ul></li>
@@ -47,7 +47,12 @@
     <li><a class="dropdown-item" href="../articles/index.html">All guides, with descriptions</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/development.html">Contribute</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-contribute" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Contribute</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-contribute"><li><a class="dropdown-item" href="../articles/development.html#start-with-one-of-these">Find a first task</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#find-work-by-organ">Find work by organ</a></li>
+    <li><a class="dropdown-item" href="../articles/development.html#all-projects">Browse all projects</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -63,9 +68,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="file-loading">File Loading<a class="anchor" aria-label="anchor" href="#file-loading"></a></h2>
+      <h2 id="load-files">Load files<a class="anchor" aria-label="anchor" href="#load-files"></a></h2>
 
-
+      <div class="section-desc"><p>Point sRtr at your SAFs and load them. Start with <a href="../articles/getting-started.html">Getting started</a>; joining files is in <a href="../articles/files-and-keys.html">Files, keys and joins</a>.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -73,22 +78,22 @@
 
 
       <dl><dt>
-
-          <code><a href="load_srtr_file.html">load_srtr_file()</a></code>
-
-        </dt>
-        <dd>Load an SRTR file and optionally apply labels</dd>
-
-        <dt>
 
           <code><a href="set_srtr_wd.html">set_srtr_wd()</a></code>
 
         </dt>
         <dd>Set the SRTR working directory</dd>
+
+        <dt>
+
+          <code><a href="load_srtr_file.html">load_srtr_file()</a></code>
+
+        </dt>
+        <dd>Load an SRTR file and optionally apply labels</dd>
       </dl></div><div class="section level2">
-      <h2 id="variable-and-factor-labeling">Variable and Factor Labeling<a class="anchor" aria-label="anchor" href="#variable-and-factor-labeling"></a></h2>
+      <h2 id="labels-and-the-data-dictionary">Labels and the data dictionary<a class="anchor" aria-label="anchor" href="#labels-and-the-data-dictionary"></a></h2>
 
-
+      <div class="section-desc"><p>Factor and variable labels, and the SRTR dictionary they come from. See <a href="../articles/releases-and-warnings.html">Releases, the data dictionary and warnings</a>.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -96,6 +101,13 @@
 
 
       <dl><dt>
+
+          <code><a href="apply_srtr_factors.html">apply_srtr_factors()</a></code>
+
+        </dt>
+        <dd>Apply SRTR factor labels to a data frame</dd>
+
+        <dt>
 
           <code><a href="apply_srtr_varlabels.html">apply_srtr_varlabels()</a></code>
 
@@ -104,14 +116,65 @@
 
         <dt>
 
-          <code><a href="apply_srtr_factors.html">apply_srtr_factors()</a></code>
+          <code><a href="srtr_dictionary.html">srtr_dictionary()</a></code>
 
         </dt>
-        <dd>Apply SRTR factor labels to a data frame</dd>
+        <dd>SRTR data dictionary for a SAF release</dd>
+
+        <dt>
+
+          <code><a href="dictionary.html">dictionary</a></code>
+
+        </dt>
+        <dd>SRTR Variable Dictionary</dd>
+
+        <dt>
+
+          <code><a href="dictionary_versions.html">dictionary_versions</a></code>
+
+        </dt>
+        <dd>Stored versions of the SRTR data dictionary</dd>
+
+        <dt>
+
+          <code><a href="formats.html">formats</a></code>
+
+        </dt>
+        <dd>SRTR Format Lookup Table</dd>
       </dl></div><div class="section level2">
-      <h2 id="risk-and-score-calculators">Risk and Score Calculators<a class="anchor" aria-label="anchor" href="#risk-and-score-calculators"></a></h2>
+      <h2 id="missing-data">Missing data<a class="anchor" aria-label="anchor" href="#missing-data"></a></h2>
+
+      <div class="section-desc"><p>Count and normalize SRTR’s missing-value codes. See <a href="../articles/missing-data.html">Missing data</a>.</p></div>
+
+      <dl></dl></div><div class="section level2">
 
 
+
+
+      <dl><dt>
+
+          <code><a href="srtr_missing_report.html">srtr_missing_report()</a></code>
+
+        </dt>
+        <dd>Count the missing-value codes in SRTR data</dd>
+
+        <dt>
+
+          <code><a href="srtr_normalize_missing.html">srtr_normalize_missing()</a></code>
+
+        </dt>
+        <dd>Normalize missing-value codes in SRTR data</dd>
+
+        <dt>
+
+          <code><a href="missing_codes.html">missing_codes</a></code>
+
+        </dt>
+        <dd>Missing-value codes in the SRTR formats, by type</dd>
+      </dl></div><div class="section level2">
+      <h2 id="risk-scores">Risk scores<a class="anchor" aria-label="anchor" href="#risk-scores"></a></h2>
+
+      <div class="section-desc"><p>Add published donor and candidate scores. See <a href="../articles/adding-columns.html">Adding risk scores</a>.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -159,33 +222,17 @@
 
         </dt>
         <dd>Add pulmonary vascular resistance</dd>
-      </dl></div><div class="section level2">
-      <h2 id="missing-data">Missing data<a class="anchor" aria-label="anchor" href="#missing-data"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="srtr_missing_report.html">srtr_missing_report()</a></code>
-
-        </dt>
-        <dd>Count the missing-value codes in SRTR data</dd>
 
         <dt>
 
-          <code><a href="srtr_normalize_missing.html">srtr_normalize_missing()</a></code>
+          <code><a href="optn_mapping_tables.html">optn_mapping_tables</a></code>
 
         </dt>
-        <dd>Normalize missing-value codes in SRTR data</dd>
+        <dd>OPTN KDPI and EPTS mapping tables</dd>
       </dl></div><div class="section level2">
-      <h2 id="time-to-event-composite-dates">Time-to-event &amp; composite dates<a class="anchor" aria-label="anchor" href="#time-to-event-composite-dates"></a></h2>
+      <h2 id="outcomes">Outcomes<a class="anchor" aria-label="anchor" href="#outcomes"></a></h2>
 
-      <div class="section-desc"><p>Helpers for composing event dates and simple time-to-event calculations</p></div>
+      <div class="section-desc"><p>Death, graft failure, rejection and malignancy, and the time to each. See <a href="../articles/follow-up-forms.html">Rejection and malignancy on follow-up forms</a> and <a href="../articles/follow-up-windows.html">Death, graft failure, and censoring</a>.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -220,9 +267,9 @@
         </dt>
         <dd>Helper function to add a time-to-event outcome from a date function</dd>
       </dl></div><div class="section level2">
-      <h2 id="mapping-transplant-geography">Mapping transplant geography<a class="anchor" aria-label="anchor" href="#mapping-transplant-geography"></a></h2>
+      <h2 id="geography">Geography<a class="anchor" aria-label="anchor" href="#geography"></a></h2>
 
-
+      <div class="section-desc"><p>Transplant centers, OPTN regions, OPO service areas and coverage. See <a href="../articles/mapping.html">Mapping</a> and <a href="../articles/geographic-coverage-gain.html">Coverage gain</a>.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -259,29 +306,6 @@
 
         <dt>
 
-          <code><a href="calculate_geography_coverage_gain.html">calculate_geography_coverage_gain()</a></code>
-
-        </dt>
-        <dd>Calculate net geographic coverage gain from adding new coverage areas to an existing coverage base</dd>
-
-        <dt>
-
-          <code><a href="rank_individual_coverage_gains.html">rank_individual_coverage_gains()</a></code>
-
-        </dt>
-        <dd>Rank individual candidate areas by marginal coverage gain</dd>
-      </dl></div><div class="section level2">
-      <h2 id="spatial-datasets">Spatial datasets<a class="anchor" aria-label="anchor" href="#spatial-datasets"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
           <code><a href="transplant_centers_sf.html">transplant_centers_sf</a></code>
 
         </dt>
@@ -293,57 +317,20 @@
 
         </dt>
         <dd>UNOS Regions by State (sf), EPSG:5070</dd>
-      </dl></div><div class="section level2">
-      <h2 id="package-data">Package data<a class="anchor" aria-label="anchor" href="#package-data"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="formats.html">formats</a></code>
-
-        </dt>
-        <dd>SRTR Format Lookup Table</dd>
 
         <dt>
 
-          <code><a href="dictionary.html">dictionary</a></code>
+          <code><a href="calculate_geography_coverage_gain.html">calculate_geography_coverage_gain()</a></code>
 
         </dt>
-        <dd>SRTR Variable Dictionary</dd>
+        <dd>Calculate net geographic coverage gain from adding new coverage areas to an existing coverage base</dd>
 
         <dt>
 
-          <code><a href="dictionary_versions.html">dictionary_versions</a></code>
+          <code><a href="rank_individual_coverage_gains.html">rank_individual_coverage_gains()</a></code>
 
         </dt>
-        <dd>Stored versions of the SRTR data dictionary</dd>
-
-        <dt>
-
-          <code><a href="srtr_dictionary.html">srtr_dictionary()</a></code>
-
-        </dt>
-        <dd>SRTR data dictionary for a SAF release</dd>
-
-        <dt>
-
-          <code><a href="missing_codes.html">missing_codes</a></code>
-
-        </dt>
-        <dd>Missing-value codes in the SRTR formats, by type</dd>
-
-        <dt>
-
-          <code><a href="optn_mapping_tables.html">optn_mapping_tables</a></code>
-
-        </dt>
-        <dd>OPTN KDPI and EPTS mapping tables</dd>
+        <dd>Rank individual candidate areas by marginal coverage gain</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
