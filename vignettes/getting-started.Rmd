@@ -43,9 +43,14 @@ set_srtr_wd("path/to/your/SAFs", release = "2303")
 
 Give the release your files come from. SRTR names releases by year and
 month, so `"2303"` is the March 2023 release. Codes and labels change from
-release to release, and sRtr uses the release to pick the matching data
-dictionary. If your folder is named after the release (such as
-`pubsaf2303`), sRtr reads the release from the name.
+release to release, and sRtr uses the release to choose its dictionary
+entries. If your folder is named after the release (such as `pubsaf2303`),
+sRtr reads the release from the name.
+
+sRtr stores copies of SRTR's online data dictionary from some releases
+only. For a release in between, it uses the entries that are the same in
+the copies on either side, so the labels may not be the exact ones SRTR
+published for that release. The check after loading shows which you got.
 
 To keep the folder for later sessions, add `permanent = TRUE`. This writes
 the path to your `~/.Renviron` file.
@@ -98,7 +103,10 @@ attr(tx, "srtr_release")      # the release and dictionary used
 range(tx$REC_TX_DT, na.rm = TRUE)
 ```
 
-Transplant dates are `Date` columns, ready for date arithmetic.
+In `attr(tx, "srtr_release")`, `dictionary` is `"observed"` when sRtr has
+the dictionary for your release and `"interpolated"` when it filled the gap
+between two stored copies. Transplant dates are `Date` columns, ready for
+date arithmetic.
 
 # Labels and codes
 
@@ -134,11 +142,14 @@ shows how to count them.
 `TRR_ID` identifies a transplant registration and `PERS_ID` a person. One
 person can have several transplants, and one transplant several follow-up
 forms. To load only the follow-up forms of the transplants you selected,
-pass their `TRR_ID` values:
+pass their `TRR_ID` values to `trr_id_filter`. sRtr still reads every row
+and then keeps the matching ones, so also select only the columns you
+need:
 
 ```{r join}
 recent <- filter(tx, REC_TX_DT >= as.Date("2020-01-01"))
-txf <- load_srtr_file("TXF_KI", trr_id_filter = recent$TRR_ID)
+txf <- load_srtr_file("TXF_KI", trr_id_filter = recent$TRR_ID,
+                      col_select = c("TRR_ID", "TFL_PX_STAT_DT"))
 
 c(people = n_distinct(recent$PERS_ID),
   transplants = n_distinct(recent$TRR_ID),
@@ -171,9 +182,16 @@ explains this in full.
   its extension, matches the key.
 - **A warning about missing columns.** Your file's columns differ from the
   dictionary for that release. Check the release you gave
-  `set_srtr_wd()`.
-- **Slow loads or running out of memory.** Use `col_select`, and
-  `trr_id_filter` for follow-up files.
+  `set_srtr_wd()`. The `column_check` argument turns this into an error or
+  turns it off.
+- **Slow loads or running out of memory.** Use `col_select`: it is the only
+  option that reads less of the file. `trr_id_filter` makes the result
+  smaller, not the read.
+- **Blank text.** Blank text values become `NA` before labelling. Use
+  `blank_text = "keep"` to keep them as they are.
+
+The [`load_srtr_file()` help page](../reference/load_srtr_file.html)
+describes every loading option.
 
 # Next steps
 
