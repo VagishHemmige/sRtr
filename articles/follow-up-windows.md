@@ -9,11 +9,12 @@ events](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.md),
 covers what the forms themselves record.
 
 As there, the code is not run on this website because it needs real
-SAFs. Run it on your own files, compare the naive version with the sRtr
-one, and share counts only, masking any count under 11 with the `mask()`
-and `mask_n()` helpers below. As explained in the companion article,
-also avoid sharing counts whose difference is small: subtraction undoes
-the masking.
+SAFs. Run it on your own files and compare the naive version with the
+sRtr one. Share counts only, masked with the `mask()` and `mask_n()`
+helpers below, and never two counts whose difference is small:
+subtraction undoes the masking. [Share counts
+only](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#share-counts-only)
+explains the rules.
 
 ``` r
 
@@ -27,7 +28,7 @@ tx <- load_srtr_file("TX_LI")
 mask_n <- function(n) {
   noquote(ifelse(n > 0 & n < 11, "<11", format(n, big.mark = ",")))
 }
-# The same for a frequency table of a column.
+# The same for a column of categories; never identifiers or dates.
 mask <- function(x) mask_n(table(x, useNA = "ifany"))
 ```
 

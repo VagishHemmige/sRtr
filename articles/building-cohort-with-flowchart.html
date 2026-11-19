@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Building Cohorts with Flow Diagrams • sRtr</title>
+<title>Building cohorts with flow diagrams • sRtr</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -14,7 +14,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Building Cohorts with Flow Diagrams">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Building cohorts with flow diagrams">
 <meta name="google-site-verification" content="TBumihuxSFxK8muRvdo69ca7bmvzWmy-3OMfCZ2692A">
 </head>
 <body>
@@ -38,15 +38,24 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started with sRtr</a></li>
-    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building Cohorts with Flow Diagrams</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Start here</h6></li>
+    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with sRtr</a></li>
+    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Prepare an analysis cohort</h6></li>
+    <li><a class="dropdown-item" href="../articles/files-and-keys.html">Files, keys and joins</a></li>
     <li><a class="dropdown-item" href="../articles/missing-data.html">Missing data</a></li>
-    <li><a class="dropdown-item" href="../articles/adding-columns.html">adding-columns</a></li>
-    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
-    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
+    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building cohorts with flow diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/adding-columns.html">Adding risk scores</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Define outcomes</h6></li>
     <li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms are reports, not events</a></li>
     <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
-    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Geography</h6></li>
+    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
+    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -68,7 +77,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Building Cohorts with Flow Diagrams</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Building cohorts with flow diagrams</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/master/vignettes/building-cohort-with-flowchart.Rmd" class="external-link"><code>vignettes/building-cohort-with-flowchart.Rmd</code></a></small>
@@ -77,105 +86,176 @@
 
     
     
-<div class="section level2">
-<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h2>
 <p>The STROBE (Strengthening the Reporting of Observational Studies in
 Epidemiology) statement asks observational studies to report how the
 study population was selected, usually as a flow diagram. The <a href="https://bruigtp.github.io/flowchart/" class="external-link"><code>flowchart</code></a>
-package on CRAN builds that diagram while you build your cohort: each
-filtering step records how many records were kept and how many were
-excluded.</p>
-<p>This vignette shows how to:</p>
-<ol style="list-style-type: decimal">
-<li>Start a flow diagram from a loaded SRTR file</li>
-<li>Apply inclusion criteria one at a time, with exclusion boxes</li>
-<li>Draw and export the diagram</li>
-<li>Get the final cohort back as a data frame</li>
-</ol>
-<p>The code below needs your own SRTR files, so it is shown but not
-run.</p>
-</div>
-<div class="section level2">
-<h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
-</h2>
+package builds that diagram while you build your cohort: each filtering
+step records how many rows were kept and how many were excluded.</p>
+<p>This article builds a small cohort from made-up rows, so it runs on
+this site. On your own files, start from <code><a href="../reference/load_srtr_file.html">load_srtr_file()</a></code>
+instead.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"flowchart"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bruigtp.github.io/flowchart/" class="external-link">flowchart</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">TX_KI</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"TX_KI"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bruigtp.github.io/flowchart/" class="external-link">flowchart</a></span><span class="op">)</span></span></code></pre></div>
+<div class="section level2">
+<h2 id="made-up-transplants">Made-up transplants<a class="anchor" aria-label="anchor" href="#made-up-transplants"></a>
+</h2>
+<p>Forty kidney transplants, with a few missing values of the kind real
+files have:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">40</span></span>
+<span><span class="va">tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  TRR_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span>,</span>
+<span>  REC_AGE_AT_TX <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">45</span>, <span class="fl">62</span>, <span class="fl">33</span>, <span class="fl">70</span>, <span class="fl">15</span>, <span class="fl">58</span>, <span class="fl">29</span>, <span class="fl">51</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  DON_TY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="st">"C"</span>, <span class="st">"L"</span>, <span class="st">"C"</span>, <span class="cn">NA</span><span class="op">)</span>, <span class="fl">8</span><span class="op">)</span>,</span>
+<span>  REC_TX_DT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2014-07-01"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">60</span> <span class="op">*</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><code>REC_AGE_AT_TX</code> is the recipient’s age at transplant and
+<code>DON_TY</code> the donor type (<code>"C"</code> deceased,
+<code>"L"</code> living). Load real files with <code>col_select</code>
+to keep only the columns your criteria need.</p>
 </div>
 <div class="section level2">
-<h2 id="example-a-kidney-transplant-cohort">Example: a kidney transplant cohort<a class="anchor" aria-label="anchor" href="#example-a-kidney-transplant-cohort"></a>
+<h2 id="known-ineligible-is-not-unknown">Known ineligible is not unknown<a class="anchor" aria-label="anchor" href="#known-ineligible-is-not-unknown"></a>
 </h2>
-<p><code><a href="https://bruigtp.github.io/flowchart/reference/as_fc.html" class="external-link">as_fc()</a></code> starts the diagram from a data frame. Each
-<code><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter()</a></code> keeps the rows where its condition is true;
-<code>show_exc = TRUE</code> adds a box counting the rows it
-removed.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">kidney_fc</span> <span class="op">&lt;-</span> <span class="va">TX_KI</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/as_fc.html" class="external-link">as_fc</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"All kidney transplants"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<p>A row can fail a criterion for two reasons: its value shows it is
+ineligible, or its value is missing, so eligibility is unknown. A filter
+such as <code>REC_AGE_AT_TX &gt;= 18</code> drops both, as
+<code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code> does, and the exclusion box counts them
+together. Readers then cannot tell how much of the exclusion is missing
+data.</p>
+<p>Give each criterion two steps: first exclude rows where eligibility
+is unknown, then rows that are known to be ineligible.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The date window below would count a missing date as "outside". These</span></span>
+<span><span class="co"># made-up dates are complete; on real files, add an unknown step if not.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">anyNA</a></span><span class="op">(</span><span class="va">tx</span><span class="op">$</span><span class="va">REC_TX_DT</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cohort_fc</span> <span class="op">&lt;-</span> <span class="va">tx</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/as_fc.html" class="external-link">as_fc</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"Kidney transplants"</span>, text_fs <span class="op">=</span> <span class="fl">9</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter</a></span><span class="op">(</span></span>
-<span>    <span class="va">DON_AGE</span> <span class="op">&gt;</span> <span class="fl">18</span>,</span>
-<span>    label <span class="op">=</span> <span class="st">"Donor over 18 years old"</span>,</span>
+<span>    <span class="va">REC_TX_DT</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2015-01-01"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">REC_TX_DT</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2019-12-31"</span><span class="op">)</span>,</span>
+<span>    label <span class="op">=</span> <span class="st">"Transplanted 2015-2019"</span>,</span>
 <span>    show_exc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    label_exc <span class="op">=</span> <span class="st">"Donor 18 or younger"</span></span>
+<span>    label_exc <span class="op">=</span> <span class="st">"Transplanted outside 2015-2019"</span>,</span>
+<span>    text_fs <span class="op">=</span> <span class="fl">9</span>, text_fs_exc <span class="op">=</span> <span class="fl">8</span>, offset_exc <span class="op">=</span> <span class="fl">0.15</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter</a></span><span class="op">(</span></span>
-<span>    <span class="va">DON_ABO</span> <span class="op">==</span> <span class="st">"B"</span>,</span>
-<span>    label <span class="op">=</span> <span class="st">"Donor blood type B"</span>,</span>
+<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">REC_AGE_AT_TX</span><span class="op">)</span>,</span>
+<span>    label <span class="op">=</span> <span class="st">"Recipient age known"</span>,</span>
 <span>    show_exc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    label_exc <span class="op">=</span> <span class="st">"Donor blood type not B"</span></span>
+<span>    label_exc <span class="op">=</span> <span class="st">"Recipient age unknown"</span>,</span>
+<span>    text_fs <span class="op">=</span> <span class="fl">9</span>, text_fs_exc <span class="op">=</span> <span class="fl">8</span>, offset_exc <span class="op">=</span> <span class="fl">0.15</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter</a></span><span class="op">(</span></span>
-<span>    <span class="va">REC_AGE</span> <span class="op">&gt;=</span> <span class="fl">18</span> <span class="op">&amp;</span> <span class="va">REC_AGE</span> <span class="op">&lt;=</span> <span class="fl">65</span>,</span>
-<span>    label <span class="op">=</span> <span class="st">"Recipient age 18 to 65"</span>,</span>
+<span>    <span class="va">REC_AGE_AT_TX</span> <span class="op">&gt;=</span> <span class="fl">18</span>,</span>
+<span>    label <span class="op">=</span> <span class="st">"Adult recipient"</span>,</span>
 <span>    show_exc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    label_exc <span class="op">=</span> <span class="st">"Recipient age outside 18 to 65"</span></span>
+<span>    label_exc <span class="op">=</span> <span class="st">"Recipient under 18"</span>,</span>
+<span>    text_fs <span class="op">=</span> <span class="fl">9</span>, text_fs_exc <span class="op">=</span> <span class="fl">8</span>, offset_exc <span class="op">=</span> <span class="fl">0.15</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter</a></span><span class="op">(</span></span>
+<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">DON_TY</span><span class="op">)</span>,</span>
+<span>    label <span class="op">=</span> <span class="st">"Donor type known"</span>,</span>
+<span>    show_exc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    label_exc <span class="op">=</span> <span class="st">"Donor type unknown"</span>,</span>
+<span>    text_fs <span class="op">=</span> <span class="fl">9</span>, text_fs_exc <span class="op">=</span> <span class="fl">8</span>, offset_exc <span class="op">=</span> <span class="fl">0.15</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter</a></span><span class="op">(</span></span>
+<span>    <span class="va">DON_TY</span> <span class="op">==</span> <span class="st">"C"</span>,</span>
+<span>    label <span class="op">=</span> <span class="st">"Deceased donor"</span>,</span>
+<span>    show_exc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    label_exc <span class="op">=</span> <span class="st">"Living donor"</span>,</span>
+<span>    text_fs <span class="op">=</span> <span class="fl">9</span>, text_fs_exc <span class="op">=</span> <span class="fl">8</span>, offset_exc <span class="op">=</span> <span class="fl">0.15</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p>Rows where a condition is <code>NA</code> (for example, a missing
-donor age) are excluded, the same as in <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code>. If
-missing values should be handled differently, recode them first, for
-example with <code><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing()</a></code>.</p>
+<p>The <code>text_fs</code>, <code>text_fs_exc</code> and
+<code>offset_exc</code> arguments only set the text size and the gap
+between the boxes. The transplant dates have no missing values, so that
+criterion needs one step; the <code><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot()</a></code> line makes the
+code stop if that ever changes.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cohort_fc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_draw.html" class="external-link">fc_draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="building-cohort-with-flowchart_files/figure-html/draw-1.png" class="r-plt" alt="Flow diagram. 40 kidney transplants; 10 transplanted outside 2015-2019 leaves 30; 2 with recipient age unknown leaves 28; 4 recipients under 18 leaves 24; 5 with donor type unknown leaves 19; 4 living donors leaves a final cohort of 15 deceased-donor transplants." width="672"></p>
+<p>The same counts as a table, from <code>cohort_fc$fc</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cohort_fc</span><span class="op">$</span><span class="va">fc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>box <span class="op">=</span> <span class="va">text</span>, <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>box <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\n.*"</span>, <span class="st">""</span>, <span class="va">box</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 11 × 2</span></span></span>
+<span><span class="co">#&gt;    box                                n</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Kidney transplants                40</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Transplanted 2015-2019            30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Transplanted outside 2015-2019    10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Recipient age known               28</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Recipient age unknown              2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Adult recipient                   24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Recipient under 18                 4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Donor type known                  19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Donor type unknown                 5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Deceased donor                    15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Living donor                       4</span></span></code></pre></div>
+<p>The order of the steps changes the counts in each box, though not the
+final cohort. Put the unknown step first within each criterion, and keep
+the order of the criteria the same across the analyses you compare.</p>
+</div>
+<div class="section level2">
+<h2 id="what-counts-as-unknown">What counts as unknown<a class="anchor" aria-label="anchor" href="#what-counts-as-unknown"></a>
+</h2>
+<p>In SRTR files a value can be unknown without being <code>NA</code>.
+In <code>DON_HIST_DIAB</code> (donor history of diabetes), code 998
+means “unknown”, and a blank can mean “not answered”. But a code means
+what its column’s format says: in follow-up files the same number, 998
+in <code>TFL_FOL_CD</code>, means “lost to follow-up”, which is an
+outcome, not missing data. So decide column by column, never by code
+number across columns. <code><a href="../reference/srtr_normalize_missing.html">srtr_normalize_missing()</a></code> turns the
+codes you choose into <code>NA</code>, and
+<code><a href="../reference/srtr_missing_report.html">srtr_missing_report()</a></code> counts them first; see <a href="missing-data.html">Missing data</a>.</p>
+<p>A value can also be “not applicable”, such as a dialysis start date
+for a recipient never on dialysis. That is not unknown eligibility;
+handle it in the criterion itself.</p>
 </div>
 <div class="section level2">
 <h2 id="what-the-boxes-count">What the boxes count<a class="anchor" aria-label="anchor" href="#what-the-boxes-count"></a>
 </h2>
-<p><code>flowchart</code> counts rows. In <code>TX_KI</code> a row is a
-transplant, so a recipient with two kidney transplants is counted twice;
-label the boxes as transplants, or reduce to one row per recipient (for
-example on <code>PERS_ID</code>) as a labelled step of its own. Build
-the diagram before joining files with many rows per transplant, such as
-the follow-up file <code>TXF_KI</code>: after that join each row is a
-follow-up form, and the counts no longer describe transplants.</p>
+<p><code>flowchart</code> counts rows. In a transplant file a row is a
+transplant, so a recipient with two transplants is counted twice; label
+the boxes as transplants, or reduce to one row per recipient as a
+labelled step of its own (see <a href="files-and-keys.html">Files, keys
+and joins</a>). Build the diagram before joining files with many rows
+per transplant, such as the follow-up file <code>TXF_KI</code>: after
+that join each row is a follow-up form, and the counts no longer
+describe transplants.</p>
+<p>The counts above are made up, which is why some are small. On real
+files the boxes show real counts. Before you share a diagram, check
+every box against <a href="checking-your-safs.html#share-counts-only">Share counts only</a>:
+no box from 1 to 10, and no box that can be worked out from the
+others.</p>
 </div>
 <div class="section level2">
-<h2 id="drawing-and-exporting-the-diagram">Drawing and exporting the diagram<a class="anchor" aria-label="anchor" href="#drawing-and-exporting-the-diagram"></a>
+<h2 id="exporting-the-diagram">Exporting the diagram<a class="anchor" aria-label="anchor" href="#exporting-the-diagram"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">kidney_fc</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_draw.html" class="external-link">fc_draw</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">kidney_fc</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cohort_fc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_draw.html" class="external-link">fc_draw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_export.html" class="external-link">fc_export</a></span><span class="op">(</span><span class="st">"kidney-cohort.png"</span>, width <span class="op">=</span> <span class="fl">3000</span>, height <span class="op">=</span> <span class="fl">4000</span>, res <span class="op">=</span> <span class="fl">700</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="https://bruigtp.github.io/flowchart/reference/fc_draw.html" class="external-link">fc_draw()</a></code> and <code><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter()</a></code> have many
-arguments for box size, text and color; see the <a href="https://bruigtp.github.io/flowchart/reference/index.html" class="external-link"><code>flowchart</code>
+<span>  <span class="fu"><a href="https://bruigtp.github.io/flowchart/reference/fc_export.html" class="external-link">fc_export</a></span><span class="op">(</span><span class="st">"cohort.png"</span>, width <span class="op">=</span> <span class="fl">7</span>, height <span class="op">=</span> <span class="fl">10</span>, units <span class="op">=</span> <span class="st">"in"</span>, res <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span></code></pre></div>
+<p>Export at the size you checked on screen; a different shape can make
+boxes overlap. <code><a href="https://bruigtp.github.io/flowchart/reference/fc_draw.html" class="external-link">fc_draw()</a></code> and <code><a href="https://bruigtp.github.io/flowchart/reference/fc_filter.html" class="external-link">fc_filter()</a></code> have
+many arguments for box size, text and color; see the <a href="https://bruigtp.github.io/flowchart/reference/index.html" class="external-link"><code>flowchart</code>
 reference</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="getting-the-cohort-back">Getting the cohort back<a class="anchor" aria-label="anchor" href="#getting-the-cohort-back"></a>
 </h2>
 <p>The flowchart object keeps the filtered data in its <code>data</code>
-element, so the cohort used in the diagram is the cohort you
-analyze:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">kidney_cohort</span> <span class="op">&lt;-</span> <span class="va">kidney_fc</span><span class="op">$</span><span class="va">data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">kidney_cohort</span><span class="op">)</span></span></code></pre></div>
+element, so the cohort in the diagram is the cohort you analyze:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cohort</span> <span class="op">&lt;-</span> <span class="va">cohort_fc</span><span class="op">$</span><span class="va">data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">cohort</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 15</span></span></code></pre></div>
 <p>The step-by-step counts behind the boxes are in
-<code>kidney_fc$fc</code>.</p>
+<code>cohort_fc$fc</code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

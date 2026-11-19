@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>adding-columns • sRtr</title>
+<title>Adding risk scores • sRtr</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -14,7 +14,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="adding-columns">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Adding risk scores">
 <meta name="google-site-verification" content="TBumihuxSFxK8muRvdo69ca7bmvzWmy-3OMfCZ2692A">
 </head>
 <body>
@@ -38,15 +38,24 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started with sRtr</a></li>
-    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building Cohorts with Flow Diagrams</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Start here</h6></li>
+    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with sRtr</a></li>
+    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Prepare an analysis cohort</h6></li>
+    <li><a class="dropdown-item" href="../articles/files-and-keys.html">Files, keys and joins</a></li>
     <li><a class="dropdown-item" href="../articles/missing-data.html">Missing data</a></li>
-    <li><a class="dropdown-item" href="../articles/adding-columns.html">adding-columns</a></li>
-    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
-    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
+    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building cohorts with flow diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/adding-columns.html">Adding risk scores</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Define outcomes</h6></li>
     <li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms are reports, not events</a></li>
     <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
-    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Geography</h6></li>
+    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
+    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -68,7 +77,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>adding-columns</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Adding risk scores</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/master/vignettes/adding-columns.Rmd" class="external-link"><code>vignettes/adding-columns.Rmd</code></a></small>
@@ -77,9 +86,356 @@
 
     
     
+<p>sRtr adds published donor and candidate scores to a data frame as new
+columns. Each function reads SRTR column names, so it works on a file
+loaded with <code><a href="../reference/load_srtr_file.html">load_srtr_file()</a></code>. The examples here use a few
+made-up rows, so they run on this site.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span></code></pre></div>
-  </main>
+<div class="section level2">
+<h2 id="the-scores">The scores<a class="anchor" aria-label="anchor" href="#the-scores"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Adds</th>
+<th>For</th>
+<th>Columns come from</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/add_kdpi.html">add_kdpi()</a></code></td>
+<td>KDRI and KDPI</td>
+<td>Deceased kidney donors</td>
+<td>
+<code>DONOR_DECEASED</code>, or <code>TX_KI</code>
+</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_epts.html">add_epts()</a></code></td>
+<td>EPTS</td>
+<td>Adult kidney candidates or recipients</td>
+<td>
+<code>CAND_KIPA</code> (at listing) or <code>TX_KI</code> (at
+transplant)</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/add_donor_egfr.html">add_donor_egfr()</a></code></td>
+<td>Donor eGFR (CKD-EPI)</td>
+<td>Donors</td>
+<td>
+<code>DONOR_DECEASED</code>, or <code>DONOR_LIVE</code> with
+<code>creatinine = "DON_KI_CREAT_PREOP"</code>
+</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_lkdpi.html">add_lkdpi()</a></code></td>
+<td>LKDPI</td>
+<td>Living donor kidney transplants</td>
+<td>
+<code>DONOR_LIVE</code> joined to <code>TX_KI</code>
+</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/add_pdri.html">add_pdri()</a></code></td>
+<td>PDRI</td>
+<td>Pancreas and kidney-pancreas transplants</td>
+<td>
+<code>TX_PA</code> or <code>TX_KP</code>
+</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_pvr.html">add_pvr()</a></code></td>
+<td>Pulmonary vascular resistance</td>
+<td>Heart, lung and heart-lung candidates</td>
+<td>
+<code>CAND_THOR</code> (at listing) or <code>TX_HR</code>,
+<code>TX_LU</code>, <code>TX_HL</code> (at transplant)</td>
+</tr>
+</tbody>
+</table>
+<p>Each function’s help page lists the exact input columns, the codes it
+reads and the paper or OPTN guide that defines the score.</p>
+</div>
+<div class="section level2">
+<h2 id="which-mapping-table-kdpi-and-epts">Which mapping table: KDPI and EPTS<a class="anchor" aria-label="anchor" href="#which-mapping-table-kdpi-and-epts"></a>
+</h2>
+<p>KDPI and EPTS are percentiles. The raw score (KDRI or raw EPTS) is
+mapped to a percentile with a table that OPTN publishes each year, built
+from the donors or candidates of a reference year. The same donor can
+get a different KDPI from a different table. sRtr stores the tables in
+<code>optn_mapping_tables</code>.</p>
+<p>A made-up donor, recovered on five dates:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">donor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  DON_AGE <span class="op">=</span> <span class="fl">52</span>, DON_HGT_CM <span class="op">=</span> <span class="fl">183</span>, DON_WGT_KG <span class="op">=</span> <span class="fl">81</span>,</span>
+<span>  DON_HIST_HYPERTEN <span class="op">=</span> <span class="fl">2</span>, DON_HIST_DIAB <span class="op">=</span> <span class="fl">1</span>, DON_CAD_DON_COD <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  DON_CREAT <span class="op">=</span> <span class="fl">1.7</span>, DON_NON_HR_BEAT <span class="op">=</span> <span class="st">"Y"</span>, DON_RACE <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  DON_ANTI_HCV <span class="op">=</span> <span class="st">"N"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">donors</span> <span class="op">&lt;-</span> <span class="va">donor</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">donors</span><span class="op">$</span><span class="va">DON_RECOV_DT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2010-03-01"</span>, <span class="st">"2015-03-01"</span>, <span class="st">"2023-03-01"</span>, <span class="st">"2025-01-15"</span>, <span class="st">"2025-08-01"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The <code>table</code> argument chooses the table:</p>
+<ul>
+<li>
+<code>"latest"</code> (the default) uses the newest stored table for
+every row.</li>
+<li>
+<code>"in_force"</code> uses, for each row, the table OPTN was using
+on the <strong>donor recovery date</strong> (<code>DON_RECOV_DT</code>),
+not the transplant date.</li>
+<li>A label such as <code>"2018"</code> uses that table for every row.
+The table must match the formula: <code>"2018"</code> needs
+<code>version = "rao2009"</code>.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">kdpi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_kdpi.html">add_kdpi</a></span><span class="op">(</span><span class="va">donors</span>, version <span class="op">=</span> <span class="st">"rao2009"</span>, table <span class="op">=</span> <span class="st">"in_force"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: No stored rao2009 KDPI table was in force on the recovery date for 3 rows; KDPI</span></span>
+<span><span class="co">#&gt; set to <span style="color: #0000BB;">NA</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Stored rao2009 tables: <span style="color: #0000BB;">"2012"</span>, <span style="color: #0000BB;">"2013"</span>, <span style="color: #0000BB;">"2014"</span>, <span style="color: #0000BB;">"2015"</span>, <span style="color: #0000BB;">"2016"</span>, <span style="color: #0000BB;">"2017"</span>,</span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">"2018"</span>, <span style="color: #0000BB;">"2019"</span>, <span style="color: #0000BB;">"2020"</span>, <span style="color: #0000BB;">"2021"</span>, <span style="color: #0000BB;">"2022"</span>, and <span style="color: #0000BB;">"2023"</span>. See</span></span>
+<span><span class="co">#&gt;   `optn_mapping_tables$effective` for the dates.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  recovered <span class="op">=</span> <span class="va">kdpi</span><span class="op">$</span><span class="va">DON_RECOV_DT</span>,</span>
+<span>  KDPI <span class="op">=</span> <span class="va">kdpi</span><span class="op">$</span><span class="va">KDPI</span>,</span>
+<span>  table <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">kdpi</span><span class="op">$</span><span class="va">KDPI</span>, <span class="st">"optn_table"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;    recovered KDPI table</span></span>
+<span><span class="co">#&gt; 1 2010-03-01   NA  &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2 2015-03-01   84  2013</span></span>
+<span><span class="co">#&gt; 3 2023-03-01   79  2021</span></span>
+<span><span class="co">#&gt; 4 2025-01-15   NA  &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5 2025-08-01   NA  &lt;NA&gt;</span></span></code></pre></div>
+<p>The rows with no KDPI are not errors in the donor’s data. In March
+2010 no KDPI table was yet in force, and from 2024-10-31 OPTN used the
+refit formula (<code>version = "refit2024"</code>, the default), whose
+tables are separate:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">refit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_kdpi.html">add_kdpi</a></span><span class="op">(</span><span class="va">donors</span>, table <span class="op">=</span> <span class="st">"in_force"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: No stored refit2024 KDPI table was in force on the recovery date for 4 rows;</span></span>
+<span><span class="co">#&gt; KDPI set to <span style="color: #0000BB;">NA</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Stored refit2024 tables: <span style="color: #0000BB;">"2024"</span> and <span style="color: #0000BB;">"current"</span>. See</span></span>
+<span><span class="co">#&gt;   `optn_mapping_tables$effective` for the dates.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  recovered <span class="op">=</span> <span class="va">refit</span><span class="op">$</span><span class="va">DON_RECOV_DT</span>,</span>
+<span>  KDPI <span class="op">=</span> <span class="va">refit</span><span class="op">$</span><span class="va">KDPI</span>,</span>
+<span>  table <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">refit</span><span class="op">$</span><span class="va">KDPI</span>, <span class="st">"optn_table"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;    recovered KDPI table</span></span>
+<span><span class="co">#&gt; 1 2010-03-01   NA  &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2 2015-03-01   NA  &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3 2023-03-01   NA  &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4 2025-01-15   79  2024</span></span>
+<span><span class="co">#&gt; 5 2025-08-01   NA  &lt;NA&gt;</span></span></code></pre></div>
+<p>The last row has no KDPI either way: OPTN has not archived the table
+it used from 2025-05-21. sRtr warns each time a row gets no table.</p>
+<p>The start date of each table is in
+<code>optn_mapping_tables$effective</code>, with its basis. Where OPTN
+published a date, that date is used. Otherwise the start is June 1 of
+the following year, the deadline in OPTN policy, which is a
+convention:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">eff</span> <span class="op">&lt;-</span> <span class="va">optn_mapping_tables</span><span class="op">$</span><span class="va">effective</span></span>
+<span><span class="va">eff</span><span class="op">[</span><span class="va">eff</span><span class="op">$</span><span class="va">score</span> <span class="op">==</span> <span class="st">"kdpi"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"label"</span>, <span class="st">"kdri_formula"</span>, <span class="st">"effective_from"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;          label kdri_formula effective_from</span></span>
+<span><span class="co">#&gt; 13        2010      rao2009     2011-06-01</span></span>
+<span><span class="co">#&gt; 14        2011      rao2009     2012-06-01</span></span>
+<span><span class="co">#&gt; 15        2012      rao2009     2013-06-01</span></span>
+<span><span class="co">#&gt; 16        2013      rao2009     2014-06-01</span></span>
+<span><span class="co">#&gt; 17        2014      rao2009     2015-06-01</span></span>
+<span><span class="co">#&gt; 18        2015      rao2009     2016-06-01</span></span>
+<span><span class="co">#&gt; 19        2016      rao2009     2017-06-01</span></span>
+<span><span class="co">#&gt; 20        2017      rao2009     2018-06-01</span></span>
+<span><span class="co">#&gt; 21        2018      rao2009     2019-06-01</span></span>
+<span><span class="co">#&gt; 22        2019      rao2009     2020-06-01</span></span>
+<span><span class="co">#&gt; 23        2020      rao2009     2021-06-01</span></span>
+<span><span class="co">#&gt; 24        2021      rao2009     2022-06-01</span></span>
+<span><span class="co">#&gt; 25        2022      rao2009     2023-06-01</span></span>
+<span><span class="co">#&gt; 26        2023      rao2009     2024-05-29</span></span>
+<span><span class="co">#&gt; 27        2024    refit2024     2024-10-31</span></span>
+<span><span class="co">#&gt; 28 2024-donors    refit2024     2025-05-21</span></span>
+<span><span class="co">#&gt; 29     current    refit2024     2026-06-01</span></span></code></pre></div>
+<p>A missing KDPI from a table can have three causes:</p>
+<ul>
+<li>
+<strong>The table is not stored.</strong> OPTN has not archived the
+2024-donors table, in force from 2025-05-21.</li>
+<li>
+<strong>The table is stored but incomplete.</strong> The 2010 and
+2011 tables lack the scaling factor that turns KDRI into a percentile,
+so they give no KDPI.</li>
+<li>
+<strong>The table lacks what one donor needs.</strong> The 2012 and
+2013 tables do not print the share of reference donors with hypertension
+or diabetes, so a donor with unknown history (code 998) gets no KDPI
+from them under the default <code>unknown_history = "optn"</code>.</li>
+</ul>
+<p>sRtr says so each time, in a warning or a message.</p>
+<p><code><a href="../reference/add_epts.html">add_epts()</a></code> works the same way, on the listing date or
+the transplant date (<code>at = "listing"</code> or
+<code>"transplant"</code>).</p>
+</div>
+<div class="section level2">
+<h2 id="missing-and-unknown-inputs">Missing and unknown inputs<a class="anchor" aria-label="anchor" href="#missing-and-unknown-inputs"></a>
+</h2>
+<p>A missing or unknown input usually gives a missing score. Each
+function documents its exceptions, and a few are options:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Input</th>
+<th>Default</th>
+<th>Option</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/add_kdpi.html">add_kdpi()</a></code></td>
+<td>Unknown hypertension or diabetes history (998)</td>
+<td>Weighted by the reference donors’ share, as in the OPTN
+calculator</td>
+<td><code>unknown_history = "na"</code></td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_kdpi.html">add_kdpi()</a></code></td>
+<td>Unknown or pending HCV, Rao 2009 only</td>
+<td>Counted as negative, as in the OPTN calculator</td>
+<td>none</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/add_epts.html">add_epts()</a></code></td>
+<td>Unknown diabetes (998)</td>
+<td>Missing EPTS</td>
+<td>
+<code>unknown_diabetes = "no"</code>, a convention</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_epts.html">add_epts()</a></code></td>
+<td>Missing dialysis start date</td>
+<td>0 years if not on dialysis, else missing</td>
+<td>
+<code>missing_dialysis_date = "zero"</code>, a convention</td>
+</tr>
+<tr class="odd">
+<td>
+<code><a href="../reference/add_epts.html">add_epts()</a></code>, <code><a href="../reference/add_donor_egfr.html">add_donor_egfr()</a></code>
+</td>
+<td>Age under 18</td>
+<td>Missing</td>
+<td><code>adults_only = FALSE</code></td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_pdri.html">add_pdri()</a></code></td>
+<td>Any missing input, including race</td>
+<td>Missing PDRI. A missing BMI is first computed from height and
+weight.</td>
+<td>
+<code>mean_impute = TRUE</code>: continuous inputs take the mean of
+their dplyr group (of all rows if ungrouped), and missing yes/no terms
+count as 0, for the calculation only</td>
+</tr>
+</tbody>
+</table>
+<p>Decide these before computing scores, and report the choice. To see
+how many rows lose a score, count them:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">unknown</span> <span class="op">&lt;-</span> <span class="va">donor</span></span>
+<span><span class="va">unknown</span><span class="op">$</span><span class="va">DON_HIST_DIAB</span> <span class="op">&lt;-</span> <span class="fl">998</span></span>
+<span><span class="va">both</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">donor</span>, <span class="va">unknown</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  diabetes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"no"</span>, <span class="st">"unknown"</span><span class="op">)</span>,</span>
+<span>  default <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="../reference/add_kdpi.html">add_kdpi</a></span><span class="op">(</span><span class="va">both</span><span class="op">)</span><span class="op">$</span><span class="va">KDPI</span><span class="op">)</span>,</span>
+<span>  na <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="../reference/add_kdpi.html">add_kdpi</a></span><span class="op">(</span><span class="va">both</span>, unknown_history <span class="op">=</span> <span class="st">"na"</span><span class="op">)</span><span class="op">$</span><span class="va">KDPI</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; KDRI is missing for 1 row with a missing or unusable input.</span></span>
+<span><span class="co">#&gt;   diabetes default na</span></span>
+<span><span class="co">#&gt; 1       no      67 67</span></span>
+<span><span class="co">#&gt; 2  unknown      73 NA</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="codes-or-labels">Codes or labels<a class="anchor" aria-label="anchor" href="#codes-or-labels"></a>
+</h2>
+<p>The functions read raw codes and the factor labels that
+<code><a href="../reference/load_srtr_file.html">load_srtr_file()</a></code> applies, so a file loaded either way
+works. A format’s own missing code (<code>"."</code>, labelled
+<code>"Missing"</code>) counts as missing. See <a href="missing-data.html">Missing data</a> for what the other unknown
+codes mean.</p>
+</div>
+<div class="section level2">
+<h2 id="what-has-been-checked">What has been checked<a class="anchor" aria-label="anchor" href="#what-has-been-checked"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Checked against its source</th>
+<th>Run on real SAFs</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/add_kdpi.html">add_kdpi()</a></code></td>
+<td>KDRI for the donors in the OPTN KDPI guides (refit and Rao
+2009)</td>
+<td>Yes: KDPI range on one release’s <code>DONOR_DECEASED</code>
+</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_epts.html">add_epts()</a></code></td>
+<td>Raw EPTS and the 2024 table for the candidates in the OPTN EPTS
+guide</td>
+<td>Not yet</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/add_donor_egfr.html">add_donor_egfr()</a></code></td>
+<td>The equations in Inker et al. 2021, Table 2</td>
+<td>Yes: values on one release’s <code>DONOR_DECEASED</code>
+</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_lkdpi.html">add_lkdpi()</a></code></td>
+<td>The equation in Massie et al. 2016</td>
+<td>Not yet</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/add_pdri.html">add_pdri()</a></code></td>
+<td>The formula, and rounded examples from the paper (<a href="https://github.com/VagishHemmige/sRtr/issues/93" class="external-link">#93</a>); two
+copies of the paper print different BMI coefficients</td>
+<td>Not yet</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/add_pvr.html">add_pvr()</a></code></td>
+<td>The definition</td>
+<td>Not yet</td>
+</tr>
+</tbody>
+</table>
+<p>A check against the source shows agreement on the examples checked. A
+run on real SAFs shows the function reads the real columns and codes.
+Neither shows that a score matches published cohort results: that
+agreement has not been established for any of these scores.</p>
+<p>The KDPI guide prints 63% for its Rao 2009 example, but the stored
+2018 table maps that donor’s KDRI to 83%. sRtr gives 83, and the test
+records the difference.</p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

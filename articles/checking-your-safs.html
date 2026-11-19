@@ -38,15 +38,24 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started with sRtr</a></li>
-    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building Cohorts with Flow Diagrams</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Start here</h6></li>
+    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with sRtr</a></li>
+    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Prepare an analysis cohort</h6></li>
+    <li><a class="dropdown-item" href="../articles/files-and-keys.html">Files, keys and joins</a></li>
     <li><a class="dropdown-item" href="../articles/missing-data.html">Missing data</a></li>
-    <li><a class="dropdown-item" href="../articles/adding-columns.html">adding-columns</a></li>
-    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
-    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
+    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building cohorts with flow diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/adding-columns.html">Adding risk scores</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Define outcomes</h6></li>
     <li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms are reports, not events</a></li>
     <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
-    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Geography</h6></li>
+    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
+    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -81,26 +90,58 @@
 be shared. Real files differ from release to release: columns come and
 go, codes appear that no format lists, and identifiers that should match
 sometimes do not. Before you rely on sRtr for an analysis, run the
-checks below on your own standard analysis files (SAFs). They take a few
-minutes and tell you whether sRtr behaves on your release as it does on
-the releases it has been checked against. The checks cover the three
-kinds of data quality in a common framework: whether values conform to
-the documented formats, whether they are complete, and whether they are
-plausible (<a href="#ref-kahn">Kahn et al. 2016</a>).</p>
+checks below on your own standard analysis files (SAFs). Checks 1 to 4
+take a few minutes in your usual R session. Check 5, the package’s own
+live tests, needs a copy of the source code and is worth running once
+per release. Together they tell you whether sRtr behaves on your release
+as it does on the releases it has been checked against. The checks cover
+the three kinds of data quality in a common framework: whether values
+conform to the documented formats, whether they are complete, and
+whether they are plausible (<a href="#ref-kahn">Kahn et
+al. 2016</a>).</p>
 <p>The code is not run on this website, because it needs real SAFs. It
 uses liver files; change the file keys for other organs.</p>
 <div class="section level2">
 <h2 id="share-counts-only">Share counts only<a class="anchor" aria-label="anchor" href="#share-counts-only"></a>
 </h2>
-<p>Everything below prints counts, never rows. Keep it that way if you
-change the code, so you can share the results, for example in a GitHub
-issue, without breaking the SRTR data use agreement. Mask any count from
-1 to 10. Masking each number is not enough on its own. If you share a
-total next to masked parts, or two counts that differ by a few, a reader
-can subtract to recover a small count. The CMS cell size suppression
-policy sets the same rule: no count from 1 to 10, and none that can be
-worked out from other reported numbers (<a href="#ref-cms">CMS
-2020</a>).</p>
+<p>The SRTR data use agreement does not allow sharing patient-level
+data. Everything below prints counts, never rows. Keep it that way if
+you change the code, so you can share the results, for example in a
+GitHub issue. The other sRtr articles that run on real files follow the
+same rules and link here.</p>
+<ul>
+<li>
+<strong>Mask any count from 1 to 10.</strong> The helpers in the
+setup chunk print such a count as <code>&lt;11</code>:
+<code>mask_n()</code> for counts you have computed, <code>mask()</code>
+for a frequency table of a column of categories, such as a status. Never
+use <code>mask()</code> on an identifier or a date: the table’s labels
+are the values themselves, so masking the counts hides nothing.</li>
+<li>
+<strong>Do not share a total beside masked parts.</strong> If a
+table of a column shows every cell but one, together with the total, a
+reader recovers the masked cell by subtraction. Share the table or the
+total, not both, or check that no single masked cell can be worked
+out.</li>
+<li>
+<strong>Do not share two counts that differ by a little.</strong>
+“1,204 registrations and 1,198 people” reveals 6. Print the difference
+instead, masked, or as a check that should be 0.</li>
+<li>
+<strong>Summaries can describe a few people.</strong> A median or
+quartile of a small group is close to individual values. Look at such
+summaries yourself, and share them only when the group behind them is
+large.</li>
+<li>
+<strong>Keep raw output on your computer.</strong> Test failures and
+warning messages can include exact counts and values from your files.
+Rewrite what they say in your own words, as in the example at the end of
+this article.</li>
+</ul>
+<p>The first three rules follow the CMS cell size suppression policy: no
+count from 1 to 10, and none that can be worked out from other reported
+numbers (<a href="#ref-cms">CMS 2020</a>). The last two are sRtr’s own
+practice.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -111,51 +152,16 @@ worked out from other reported numbers (<a href="#ref-cms">CMS
 <span><span class="va">mask_n</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/noquote.html" class="external-link">noquote</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">n</span> <span class="op">&lt;</span> <span class="fl">11</span>, <span class="st">"&lt;11"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">n</span>, big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
+<span><span class="co"># For a column of categories only, never identifiers or dates.</span></span>
 <span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">x</span>, useNA <span class="op">=</span> <span class="st">"ifany"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="run-the-packages-live-tests">1. Run the package’s live tests<a class="anchor" aria-label="anchor" href="#run-the-packages-live-tests"></a>
-</h2>
-<p>sRtr’s test suite includes live tests that run only on real files.
-They check, among other things, that columns load with the right types,
-that codes match the dictionary, and that derived outcomes are
-consistent. The tests are not installed with the package, so you need a
-copy of the source that matches the version you have installed:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># The commit your installed copy was built from, if installed from GitHub:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/packageDescription.html" class="external-link">packageDescription</a></span><span class="op">(</span><span class="st">"sRtr"</span><span class="op">)</span><span class="op">$</span><span class="va">RemoteSha</span></span></code></pre></div>
-<p>Clone the repository and check out that commit. In a terminal:</p>
-<pre><code>git clone https://github.com/VagishHemmige/sRtr
-git -C sRtr checkout &lt;commit&gt;</code></pre>
-<p>Then start a fresh R session, run the setup chunk at the top of this
-article again (it sets <code>wd</code> and the masking helpers), and run
-the tests:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
-<span>  SRTR_LIVE_TESTS <span class="op">=</span> <span class="st">"true"</span>,</span>
-<span>  SRTR_WD <span class="op">=</span> <span class="va">wd</span>,</span>
-<span>  SRTR_RELEASE <span class="op">=</span> <span class="st">"2303"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">test_local</a></span><span class="op">(</span></span>
-<span>  <span class="st">"path/to/the/sRtr/clone"</span>,</span>
-<span>  reporter <span class="op">=</span> <span class="st">"summary"</span>,</span>
-<span>  stop_on_failure <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Each live test names the files it needs and skips when your folder
-does not have them, so you can run the whole suite with whatever files
-you have. To run one area, add <code>filter</code>, such as
-<code>filter = "add_txf_outcomes"</code>. A failure means sRtr does
-something on your release that it has not been checked for. Please
-report it (see the end of this article). The test output itself stays on
-your computer: a failure message can print values from your files.</p>
-</div>
-<div class="section level2">
-<h2 id="load-with-the-warnings-counted-not-hidden">2. Load with the warnings counted, not hidden<a class="anchor" aria-label="anchor" href="#load-with-the-warnings-counted-not-hidden"></a>
+<h2 id="load-with-the-warnings-counted-not-hidden">1. Load with the warnings counted, not hidden<a class="anchor" aria-label="anchor" href="#load-with-the-warnings-counted-not-hidden"></a>
 </h2>
 <p>Loading a real file can give several warnings. Every sRtr warning has
 a class, so you can collect each kind instead of hiding them all with
 <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings()</a></code>:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seen</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">collect</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers</a></span><span class="op">(</span></span>
@@ -198,11 +204,11 @@ muffle only that class, such as
 them as they are: some include exact row counts and the codes found.</p>
 </div>
 <div class="section level2">
-<h2 id="check-the-keys">3. Check the keys<a class="anchor" aria-label="anchor" href="#check-the-keys"></a>
+<h2 id="check-the-keys">2. Check the keys<a class="anchor" aria-label="anchor" href="#check-the-keys"></a>
 </h2>
 <p>Joins between SAF files rely on identifiers. These should hold, and
 anything else is worth knowing before you join:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  registrations <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span><span class="va">tx</span><span class="op">$</span><span class="va">TRR_ID</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>  rows_beyond_one_per_registration <span class="op">=</span></span>
@@ -242,10 +248,10 @@ nor all their registrations.</li>
 follow-up form belongs to a registration in the transplant file.</li>
 </ul>
 <p>Each difference is printed on its own, masked, rather than as two
-totals.</p>
+totals (see <a href="#share-counts-only">Share counts only</a>).</p>
 <p>For donors, a deceased donor file covers only deceased donors, so
 some transplant <code>DONOR_ID</code>s will not be in it:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">donors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="fu"><a href="../reference/load_srtr_file.html">load_srtr_file</a></span><span class="op">(</span><span class="st">"DONOR_DECEASED"</span>, col_select <span class="op">=</span> <span class="st">"DONOR_ID"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  donors_not_in_deceased_donors <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span></span>
@@ -257,22 +263,22 @@ recipients, so it can be smaller than the number of transplants
 concerned.</p>
 </div>
 <div class="section level2">
-<h2 id="check-labels">4. Check labels<a class="anchor" aria-label="anchor" href="#check-labels"></a>
+<h2 id="check-labels">3. Check labels<a class="anchor" aria-label="anchor" href="#check-labels"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">unlabelled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">tx</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"label"</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span>, without_a_label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">unlabelled</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Almost every column should have a label, either the one stored in the
 SAS file or one from the dictionary.</p>
 </div>
 <div class="section level2">
-<h2 id="check-that-derived-outcomes-add-up">5. Check that derived outcomes add up<a class="anchor" aria-label="anchor" href="#check-that-derived-outcomes-add-up"></a>
+<h2 id="check-that-derived-outcomes-add-up">4. Check that derived outcomes add up<a class="anchor" aria-label="anchor" href="#check-that-derived-outcomes-add-up"></a>
 </h2>
 <p>Derived variables should be consistent with each other. These checks
 use the follow-up outcomes; the reasons behind them are in <a href="follow-up-forms.html">Follow-up forms are reports, not events</a>
 and <a href="follow-up-windows.html">Follow-up windows and
 death</a>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_txf_outcomes.html">add_txf_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The status columns cover every registration once. Look at these tables</span></span>
@@ -289,7 +295,7 @@ death</a>.</p>
 registrations with forms plus those with no follow-up make up all
 registrations. The report counts distinct registrations, so count those
 on the other side too, and print only whether they agree:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">tx</span>, <span class="st">"txf_report"</span><span class="op">)</span></span>
 <span><span class="va">no_follow_up</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span></span>
 <span>  <span class="va">tx</span><span class="op">$</span><span class="va">TRR_ID</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">tx</span><span class="op">$</span><span class="va">TRR_ID</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">tx</span><span class="op">$</span><span class="va">FIRST_FU_MALIG_STATUS</span> <span class="op">==</span> <span class="st">"no follow-up"</span><span class="op">]</span></span>
@@ -299,7 +305,7 @@ on the other side too, and print only whether they agree:</p>
 <p>The time-to-event outcomes come from
 <code><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes()</a></code>, which is not yet exported, so
 it is called with <code>sRtr:::</code>:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The date a counted event is timed at is the _CENSOR column, not</span></span>
@@ -322,6 +328,43 @@ it is called with <code>sRtr:::</code>:</p>
 <p>The first three should be 0. <code>counted_but_undated</code> is the
 events reported only on undated forms: they count, with an unknown
 time.</p>
+</div>
+<div class="section level2">
+<h2 id="run-the-packages-live-tests">5. Run the package’s live tests<a class="anchor" aria-label="anchor" href="#run-the-packages-live-tests"></a>
+</h2>
+<p>sRtr’s test suite includes live tests that run only on real files.
+They check, among other things, that columns load with the right types,
+that codes match the dictionary, and that derived outcomes are
+consistent. The tests are not installed with the package, so you need a
+copy of the source that matches the version you have installed:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The commit your installed copy was built from, if installed from GitHub:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/packageDescription.html" class="external-link">packageDescription</a></span><span class="op">(</span><span class="st">"sRtr"</span><span class="op">)</span><span class="op">$</span><span class="va">RemoteSha</span></span></code></pre></div>
+<p>Clone the repository and check out that commit. In a terminal:</p>
+<pre><code>git clone https://github.com/VagishHemmige/sRtr
+git -C sRtr checkout &lt;commit&gt;</code></pre>
+<p>Then start a fresh R session, so the tests run against the version
+you checked out, run the setup chunk at the top of this article again
+(it sets <code>wd</code> and the masking helpers), and run the
+tests:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
+<span>  SRTR_LIVE_TESTS <span class="op">=</span> <span class="st">"true"</span>,</span>
+<span>  SRTR_WD <span class="op">=</span> <span class="va">wd</span>,</span>
+<span>  SRTR_RELEASE <span class="op">=</span> <span class="st">"2303"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">test_local</a></span><span class="op">(</span></span>
+<span>  <span class="st">"path/to/the/sRtr/clone"</span>,</span>
+<span>  reporter <span class="op">=</span> <span class="st">"summary"</span>,</span>
+<span>  stop_on_failure <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Each live test names the files it needs and skips when your folder
+does not have them, so you can run the whole suite with whatever files
+you have. To run one area, add <code>filter</code>, such as
+<code>filter = "add_txf_outcomes"</code>. A failure means sRtr does
+something on your release that it has not been checked for. Please
+report it (see below). The test output itself stays on your computer: a
+failure message can print values from your files.</p>
 </div>
 <div class="section level2">
 <h2 id="report-what-you-find">6. Report what you find<a class="anchor" aria-label="anchor" href="#report-what-you-find"></a>

@@ -38,15 +38,24 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started with sRtr</a></li>
-    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building Cohorts with Flow Diagrams</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Start here</h6></li>
+    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with sRtr</a></li>
+    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Prepare an analysis cohort</h6></li>
+    <li><a class="dropdown-item" href="../articles/files-and-keys.html">Files, keys and joins</a></li>
     <li><a class="dropdown-item" href="../articles/missing-data.html">Missing data</a></li>
-    <li><a class="dropdown-item" href="../articles/adding-columns.html">adding-columns</a></li>
-    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
-    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
+    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building cohorts with flow diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/adding-columns.html">Adding risk scores</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Define outcomes</h6></li>
     <li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms are reports, not events</a></li>
     <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
-    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Geography</h6></li>
+    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
+    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -84,11 +93,11 @@ shows where they disagree and what that does to an analysis. The
 companion article, <a href="follow-up-forms.html">Follow-up forms are
 reports, not events</a>, covers what the forms themselves record.</p>
 <p>As there, the code is not run on this website because it needs real
-SAFs. Run it on your own files, compare the naive version with the sRtr
-one, and share counts only, masking any count under 11 with the
-<code>mask()</code> and <code>mask_n()</code> helpers below. As
-explained in the companion article, also avoid sharing counts whose
-difference is small: subtraction undoes the masking.</p>
+SAFs. Run it on your own files and compare the naive version with the
+sRtr one. Share counts only, masked with the <code>mask()</code> and
+<code>mask_n()</code> helpers below, and never two counts whose
+difference is small: subtraction undoes the masking. <a href="checking-your-safs.html#share-counts-only">Share counts only</a>
+explains the rules.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -100,7 +109,7 @@ difference is small: subtraction undoes the masking.</p>
 <span><span class="va">mask_n</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/noquote.html" class="external-link">noquote</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">n</span> <span class="op">&lt;</span> <span class="fl">11</span>, <span class="st">"&lt;11"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">n</span>, big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co"># The same for a frequency table of a column.</span></span>
+<span><span class="co"># The same for a column of categories; never identifiers or dates.</span></span>
 <span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">x</span>, useNA <span class="op">=</span> <span class="st">"ifany"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><strong>A note on <code><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes()</a></code>.</strong>
 It builds the death, graft failure, malignancy and rejection outcomes

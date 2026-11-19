@@ -12,19 +12,13 @@ covers what happens around the end of follow-up and death.
 
 The code here is not run on this website, because it needs real SAFs.
 You can run it yourself: each section shows a naive version first, then
-the sRtr function that handles the problem. When you share what you
-find, share counts only, and mask any count under 11, as the SRTR data
-use agreement requires. The helpers below do that: `mask()` for a table
-of a column, `mask_n()` for counts you have already computed. The
-threshold is the same as in the CMS cell size suppression policy, which
-also rules out any count from 1 to 10 that can be worked out from other
-reported numbers ([CMS 2020](#ref-cms)). Every chunk here prints counts
-only, never rows; keep it that way when you adapt the code. Masking each
-number is not enough on its own: if you share a total next to masked
-parts, or two counts that differ by a few, a reader can subtract to
-recover a count under 11. Summaries such as quartiles can also describe
-a handful of people; look at them yourself, and share them only when the
-group behind them is large.
+the sRtr function that handles the problem. Every chunk prints counts,
+never rows, and masks any count from 1 to 10 with the `mask()` and
+`mask_n()` helpers below. Masking each number is not enough on its own:
+a total shared beside masked parts, or two counts that differ by a
+little, gives a small count away. [Share counts
+only](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#share-counts-only)
+explains the rules; follow them when you adapt the code.
 
 ``` r
 
@@ -46,7 +40,7 @@ txf <- load_srtr_file(
 mask_n <- function(n) {
   noquote(ifelse(n > 0 & n < 11, "<11", format(n, big.mark = ",")))
 }
-# The same for a frequency table of a column.
+# The same for a column of categories; never identifiers or dates.
 mask <- function(x) mask_n(table(x, useNA = "ifany"))
 ```
 
@@ -278,18 +272,36 @@ follow-up forms.
 
 ``` r
 
-mask_n(c(registrations = n_distinct(tx$TRR_ID), people = n_distinct(tx$PERS_ID)))
+# Complete, distinct pairs of registration and person.
+ids <- tx |>
+  filter(!is.na(TRR_ID), !is.na(PERS_ID)) |>
+  distinct(TRR_ID, PERS_ID)
+one_person_per_registration <- !anyDuplicated(ids$TRR_ID)
+one_person_per_registration
+# Print only the masked repeat count, and only if the check passes.
+if (one_person_per_registration) {
+  mask_n(c(repeat_registrations = nrow(ids) - n_distinct(ids$PERS_ID)))
+}
 ```
 
+`repeat_registrations` counts registrations after a person’s first one.
+Keep the registration total for yourself: shared beside it, the repeat
+count gives away the number of people. This is the same check as in
+[Check the
+keys](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#check-the-keys).
+
 [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
-attaches a report of the merge, in registrations, ready for a methods
-section: how many registrations have any follow-up form, how many forms
-were read and how many were undated, and for each outcome the positive
-forms, the registrations with a report, and the registrations whose
-report is dated.
+attaches a report of the merge, in registrations: how many registrations
+have any follow-up form, how many forms were read and how many were
+undated, and for each outcome the positive forms, the registrations with
+a report, and the registrations whose report is dated. These counts are
+nested, so the difference between two of them can be a small count. Look
+at the report yourself, and before you put any of it in a methods
+section, check that no such difference is under 11.
 
 ``` r
 
+# For your own inspection.
 report <- attr(tx, "txf_report")
 mask_n(unlist(report[setdiff(names(report), c("follow_up_file", "outcomes"))]))
 report$outcomes |>
@@ -321,10 +333,6 @@ Cheng EY, Feng S, Bucuvalas J, et al. Not everything that counts can be
 counted: tracking long-term outcomes in pediatric liver transplant
 recipients. *Am J Transplant*. 2022;22(4):1182-1190.
 [doi:10.1111/ajt.16932](https://doi.org/10.1111/ajt.16932)
-
-Centers for Medicare & Medicaid Services. CMS cell size suppression
-policy. 2020.
-<https://www.hhs.gov/guidance/document/cms-cell-suppression-policy>
 
 Engels EA, Pfeiffer RM, Fraumeni JF Jr, et al. Spectrum of cancer risk
 among US solid organ transplant recipients. *JAMA*.

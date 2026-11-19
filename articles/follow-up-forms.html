@@ -38,15 +38,24 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started with sRtr</a></li>
-    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building Cohorts with Flow Diagrams</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Start here</h6></li>
+    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with sRtr</a></li>
+    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Prepare an analysis cohort</h6></li>
+    <li><a class="dropdown-item" href="../articles/files-and-keys.html">Files, keys and joins</a></li>
     <li><a class="dropdown-item" href="../articles/missing-data.html">Missing data</a></li>
-    <li><a class="dropdown-item" href="../articles/adding-columns.html">adding-columns</a></li>
-    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
-    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
+    <li><a class="dropdown-item" href="../articles/building-cohort-with-flowchart.html">Building cohorts with flow diagrams</a></li>
+    <li><a class="dropdown-item" href="../articles/adding-columns.html">Adding risk scores</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Define outcomes</h6></li>
     <li><a class="dropdown-item" href="../articles/follow-up-forms.html">Follow-up forms are reports, not events</a></li>
     <li><a class="dropdown-item" href="../articles/follow-up-windows.html">Follow-up windows and death</a></li>
-    <li><a class="dropdown-item" href="../articles/checking-your-safs.html">Checking sRtr on your own SAFs</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Geography</h6></li>
+    <li><a class="dropdown-item" href="../articles/mapping.html">Mapping transplant geography</a></li>
+    <li><a class="dropdown-item" href="../articles/geographic-coverage-gain.html">Calculating geographic coverage gain</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -88,20 +97,13 @@ death</a>, covers what happens around the end of follow-up and
 death.</p>
 <p>The code here is not run on this website, because it needs real SAFs.
 You can run it yourself: each section shows a naive version first, then
-the sRtr function that handles the problem. When you share what you
-find, share counts only, and mask any count under 11, as the SRTR data
-use agreement requires. The helpers below do that: <code>mask()</code>
-for a table of a column, <code>mask_n()</code> for counts you have
-already computed. The threshold is the same as in the CMS cell size
-suppression policy, which also rules out any count from 1 to 10 that can
-be worked out from other reported numbers (<a href="#ref-cms">CMS
-2020</a>). Every chunk here prints counts only, never rows; keep it that
-way when you adapt the code. Masking each number is not enough on its
-own: if you share a total next to masked parts, or two counts that
-differ by a few, a reader can subtract to recover a count under 11.
-Summaries such as quartiles can also describe a handful of people; look
-at them yourself, and share them only when the group behind them is
-large.</p>
+the sRtr function that handles the problem. Every chunk prints counts,
+never rows, and masks any count from 1 to 10 with the
+<code>mask()</code> and <code>mask_n()</code> helpers below. Masking
+each number is not enough on its own: a total shared beside masked
+parts, or two counts that differ by a little, gives a small count away.
+<a href="checking-your-safs.html#share-counts-only">Share counts
+only</a> explains the rules; follow them when you adapt the code.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/VagishHemmige/sRtr" class="external-link">sRtr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -121,7 +123,7 @@ large.</p>
 <span><span class="va">mask_n</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/noquote.html" class="external-link">noquote</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">n</span> <span class="op">&lt;</span> <span class="fl">11</span>, <span class="st">"&lt;11"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">n</span>, big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co"># The same for a frequency table of a column.</span></span>
+<span><span class="co"># The same for a column of categories; never identifiers or dates.</span></span>
 <span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">x</span>, useNA <span class="op">=</span> <span class="st">"ifany"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The examples use liver files and malignancy and acute rejection, the
 two outcomes <code><a href="../reference/add_txf_outcomes.html">add_txf_outcomes()</a></code> derives. The same issues
@@ -305,14 +307,32 @@ keep the first report of all, so you can find these cases.</p>
 (<code>TRR_ID</code>), not a person. A person transplanted twice has two
 rows, and two sets of follow-up forms.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>registrations <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span><span class="va">tx</span><span class="op">$</span><span class="va">TRR_ID</span><span class="op">)</span>, people <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span><span class="va">tx</span><span class="op">$</span><span class="va">PERS_ID</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Complete, distinct pairs of registration and person.</span></span>
+<span><span class="va">ids</span> <span class="op">&lt;-</span> <span class="va">tx</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">TRR_ID</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">PERS_ID</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">TRR_ID</span>, <span class="va">PERS_ID</span><span class="op">)</span></span>
+<span><span class="va">one_person_per_registration</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">anyDuplicated</a></span><span class="op">(</span><span class="va">ids</span><span class="op">$</span><span class="va">TRR_ID</span><span class="op">)</span></span>
+<span><span class="va">one_person_per_registration</span></span>
+<span><span class="co"># Print only the masked repeat count, and only if the check passes.</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">one_person_per_registration</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>repeat_registrations <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ids</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span><span class="va">ids</span><span class="op">$</span><span class="va">PERS_ID</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p><code>repeat_registrations</code> counts registrations after a
+person’s first one. Keep the registration total for yourself: shared
+beside it, the repeat count gives away the number of people. This is the
+same check as in <a href="checking-your-safs.html#check-the-keys">Check
+the keys</a>.</p>
 <p><code><a href="../reference/add_txf_outcomes.html">add_txf_outcomes()</a></code> attaches a report of the merge, in
-registrations, ready for a methods section: how many registrations have
-any follow-up form, how many forms were read and how many were undated,
-and for each outcome the positive forms, the registrations with a
-report, and the registrations whose report is dated.</p>
+registrations: how many registrations have any follow-up form, how many
+forms were read and how many were undated, and for each outcome the
+positive forms, the registrations with a report, and the registrations
+whose report is dated. These counts are nested, so the difference
+between two of them can be a small count. Look at the report yourself,
+and before you put any of it in a methods section, check that no such
+difference is under 11.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">tx</span>, <span class="st">"txf_report"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># For your own inspection.</span></span>
+<span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">tx</span>, <span class="st">"txf_report"</span><span class="op">)</span></span>
 <span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">report</span><span class="op">[</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"follow_up_file"</span>, <span class="st">"outcomes"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">outcomes</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="va">mask_n</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -346,8 +366,6 @@ share them.</li>
 everything that counts can be counted: tracking long-term outcomes in
 pediatric liver transplant recipients. <em>Am J Transplant</em>.
 2022;22(4):1182-1190. <a href="https://doi.org/10.1111/ajt.16932" class="external-link">doi:10.1111/ajt.16932</a></p>
-<p><a id="ref-cms"></a>Centers for Medicare &amp; Medicaid Services. CMS
-cell size suppression policy. 2020. <a href="https://www.hhs.gov/guidance/document/cms-cell-suppression-policy" class="external-link uri">https://www.hhs.gov/guidance/document/cms-cell-suppression-policy</a></p>
 <p><a id="ref-engels"></a>Engels EA, Pfeiffer RM, Fraumeni JF Jr, et al.
 Spectrum of cancer risk among US solid organ transplant recipients.
 <em>JAMA</em>. 2011;306(17):1891-1901. <a href="https://doi.org/10.1001/jama.2011.1592" class="external-link">doi:10.1001/jama.2011.1592</a></p>
