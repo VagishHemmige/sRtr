@@ -105,9 +105,15 @@ sRtr takes the release from, in order:
 4. otherwise, the bundled dictionary (`sRtr::dictionary`).
 
 Every loaded file records which it used. Here is a tiny made-up waitlist
-file in a folder named for release 2303:
+file in a folder named for release 2303.
+
+`set_srtr_wd()` changes the folder and release for the whole R session. If
+you run this example in a session you analyze in, call `set_srtr_wd()` with
+your own folder and release again afterwards, or use a fresh session; the
+last chunk of this article puts your folder back but not your release.
 
 ```{r make-file}
+old_wd <- Sys.getenv("SRTR_WD")
 dir <- file.path(tempdir(), "pubsaf2303")
 dir.create(dir, showWarnings = FALSE)
 cand <- data.frame(
@@ -132,8 +138,18 @@ str(attr(cand_kipa, "srtr_release"))
 ```
 
 `release` came from the folder name (`basis`), and `dictionary` says it
-was filled in between two copies. Save this attribute, or the release, with
-your analysis code: it is what someone needs to repeat your labels.
+was filled in between two copies. To repeat your labels, someone needs all
+of this attribute and the same version of sRtr, because a later version
+can store another copy of the dictionary or change a correction. Save the
+attribute with your results, and record the sRtr version you used:
+
+```{r version, eval = FALSE}
+packageVersion("sRtr")
+# Installed from GitHub: the commit, if recorded
+packageDescription("sRtr")$RemoteSha
+```
+
+A lockfile (for example from renv) pins the version for you.
 
 `CAN_LISTING_CTR_ID` kept its label even though the 2303 dictionary left it
 out:
@@ -144,11 +160,16 @@ attr(cand_kipa$CAN_LISTING_CTR_ID, "label")
 
 # Missing columns
 
-The first warning lists the dictionary's columns that the file lacks. Real
-files usually have every column; this made-up file has four. A file you
-requested with fewer columns, or a dictionary for the wrong release, also
-gives this warning. Check the release first. `column_check = "error"`
-turns the warning into an error, and `column_check = "none"` turns it off.
+The first warning lists the dictionary's columns that the file lacks.
+This made-up file has only four columns. On real files, the usual causes
+are a dictionary for the wrong release, or an extract SRTR delivered with
+fewer columns. Check the release first. `column_check = "error"` turns the
+warning into an error, and `column_check = "none"` turns it off.
+
+The check runs only when you read every column. With `col_select`, sRtr
+reads the columns you name (a name the file lacks is an error) and does not
+compare the file with the dictionary, so no warning there says nothing
+about the columns you did not select.
 
 # Codes in no format
 
@@ -182,7 +203,8 @@ c(
 ```
 
 `view = "web"`, in `srtr_dictionary()` or `load_srtr_file()`, gives the
-dictionary exactly as SRTR's page has it. The
+dictionary as SRTR's pages have it, without corrections. For a release with
+no stored copy, it is still filled in from the copies on either side. The
 [`srtr_dictionary()` help page](../reference/srtr_dictionary.html) lists
 every correction and its evidence.
 
@@ -223,15 +245,26 @@ quiet_codes <- function(expr) {
     sRtr_warning_unknown_codes = function(w) invokeRestart("muffleWarning")
   )
 }
-cand_kipa <- quiet_codes(load_srtr_file("CAND_KIPA", column_check = "none"))
+cand_kipa <- quiet_codes(load_srtr_file("CAND_KIPA"))
 ```
+
+The codes warning is gone; the missing-columns warning still shows.
 
 # Checklist
 
 - Know your release, and give it to `set_srtr_wd()` or name the folder
   `pubsafYYMM`.
-- Save `attr(x, "srtr_release")` with your analysis.
+- Save `attr(x, "srtr_release")` and the sRtr version with your analysis.
 - Read each missing-columns warning once; check the release if you did not
   expect it.
 - Decide what each code in no format means for your analysis.
 - Collect warnings by class rather than suppressing them all.
+
+# Clean up
+
+If you ran this example in your own session, put your folder back, then
+call `set_srtr_wd()` with your release if you had given one:
+
+```{r cleanup}
+if (nzchar(old_wd)) Sys.setenv(SRTR_WD = old_wd) else Sys.unsetenv("SRTR_WD")
+```
