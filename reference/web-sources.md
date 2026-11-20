@@ -27,9 +27,7 @@
   graft-failure date, and continues beyond last OPTN follow-up. Lung/heart-lung
   use reported failure/death with last-OPTN-follow-up censoring; the abdominal
   group adds retransplantation. These are PSR definitions, not defaults for
-  every research analysis. sRtr nonetheless takes them as its defaults
-  where they apply (maintainer decision 2026-11-20), and offers other
-  practice as options.
+  every research analysis.
 - **Key passages (quoted):**
   - Missing data: "In general, 10 iterations of multiple imputation via
     chained equations handles missing values." "To determine the expected
