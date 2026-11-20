@@ -61,8 +61,11 @@ SAFs also hold `TFL_ENDTXFU` (labeled "Cohort date" in the data
 dictionary), which SRTR staff describe as "the variable to
 use to identify the last possible follow-up date" for each recipient, with a
 three-month lag to allow forms to be completed
-([Kim and Snyder 2012](#ref-kim2012), slide 25). sRtr does not use it yet.
-Check it before you rely on it: in one liver release, it varied between
+([Kim and Snyder 2012](#ref-kim2012), slide 25). By default, sRtr uses it
+only to end death ascertainment for patient survival (see
+[Deaths found after follow-up ends](#deaths-found-after-follow-up-ends));
+malignancy, rejection and graft failure still end at the last follow-up
+date. Check it before you rely on it: in one liver release, it varied between
 registrations, and the last follow-up date was later than it for about a
 fifth of them. Compare the two in your files:
 
@@ -310,25 +313,36 @@ mask_n(sum(d$REC_DEATH_DT_COMPOSITE > d$TFL_LAFUDATE, na.rm = TRUE))
 ```
 
 `add_time_to_event_outcomes()` offers two consistent choices through
-`death_window`. The default, `"follow_up"`, counts deaths on or before the
-last follow-up date and censors everyone else there. `"ascertainment"`
-shares the principle of the SRTR program-specific reports: deaths from any
-source count up to an ascertainment date, and everyone else is assumed
-alive and censored at that date. In SRTR's words, patients "not reported to
-have died in any source are assumed to be alive"
-([SRTR Technical Methods](#ref-psr)). Take the date from your SAF release
-notes.
+`death_window`. The default, `"ascertainment"`, follows the SRTR
+program-specific reports: deaths from any source count up to where death
+ascertainment ends, and everyone else is assumed alive and censored there.
+In SRTR's words, patients "not reported to have died in any source are
+assumed to be alive" ([SRTR Technical Methods](#ref-psr)). Ascertainment
+ends at each transplant's `TFL_ENDTXFU`, which SRTR describes as "the
+variable to use to identify the last possible follow-up date", with a
+"Built in lag of 3 months to allow for form completion"
+([Kim and Snyder 2012](#ref-kim2012), slide 25). `"follow_up"` instead
+counts deaths on or before the last follow-up date and censors everyone
+else there.
 
-It does not reproduce the published patient survival estimates. Those
-draw on death sources that `srtr_composite_death()` does not combine, and
-report survival at fixed times after transplant; see [SRTR Technical Methods for the
+sRtr's defaults follow SRTR's published definitions where SRTR gives one,
+and offer other practice as options. The default does not reproduce the
+published patient survival estimates. Those draw on death sources that
+`srtr_composite_death()` does not combine, and report survival at fixed
+times after transplant; see [SRTR Technical Methods for the
 Program-Specific Reports, Section C](https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/).
 
 ```{r}
-out_ascertainment <- sRtr:::add_time_to_event_outcomes(
+# Default: deaths from any source up to each transplant's TFL_ENDTXFU
+out <- sRtr:::add_time_to_event_outcomes(tx)
+
+# Censor everyone at their last follow-up form instead
+out_follow_up <- sRtr:::add_time_to_event_outcomes(tx, death_window = "follow_up")
+
+# Or one ascertainment date for everyone, from the release notes
+out_one_date <- sRtr:::add_time_to_event_outcomes(
   tx,
-  death_window = "ascertainment",
-  ascertainment_date = "YYYY-MM-DD" # from the release notes
+  ascertainment_date = "YYYY-MM-DD"
 )
 ```
 

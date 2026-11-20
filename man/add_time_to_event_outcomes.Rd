@@ -7,8 +7,8 @@ loaded using a load function.}
 \usage{
 add_time_to_event_outcomes(
   df,
-  death_window = c("follow_up", "ascertainment"),
-  ascertainment_date = NULL,
+  death_window = c("ascertainment", "follow_up"),
+  ascertainment_date = "TFL_ENDTXFU",
   graft_death_same_day = c("censor", "event"),
   rejection_after_graft_failure = c("exclude", "keep")
 )
@@ -20,16 +20,24 @@ attribute decides which follow-up file and outcome columns are used.}
 \item{death_window}{Which deaths count as events, and where recipients
 without one are censored:
 \itemize{
-\item \code{"follow_up"} (default): deaths on or before the recipient's last
-follow-up date count; everyone else is censored at last follow-up.
-\item \code{"ascertainment"}: the SRTR program-specific report method for patient
-survival. Deaths from any source on or before \code{ascertainment_date}
-count; everyone else is assumed alive and censored at that date.
-}}
+\item \code{"ascertainment"} (default): the SRTR program-specific report method
+for patient survival. Deaths from any source on or before
+\code{ascertainment_date} count; everyone else is assumed alive and censored
+at that date, even if their last follow-up form is earlier.
+\item \code{"follow_up"}: deaths on or before the recipient's last follow-up date
+count; everyone else is censored at last follow-up.
+}
 
-\item{ascertainment_date}{One date up to which deaths are ascertained in
-your SAF release, from its release notes. Required when
-\code{death_window = "ascertainment"}.}
+sRtr's defaults follow SRTR's published definitions where SRTR gives
+one; other practice is available as an option.}
+
+\item{ascertainment_date}{Where death ascertainment ends, used when
+\code{death_window = "ascertainment"}. Either the name of a date column with
+one date per recipient, or one date for everyone (a \code{Date} or text such
+as \code{"2023-06-30"}). The default, \code{"TFL_ENDTXFU"}, is the column SRTR
+describes as the last possible follow-up date for each transplant, with
+a built-in lag of 3 months. A recipient whose date is missing gets no
+death event and a missing time, with a warning.}
 
 \item{graft_death_same_day}{How to treat a graft failure dated on the day
 the recipient died:
@@ -146,6 +154,15 @@ when the date is the day of death, \code{FALSE} when it is another day, and
 events. Such reports count as events by default when follow-up covers the
 day of death. The status columns from \code{\link[=add_txf_outcomes]{add_txf_outcomes()}} say what the
 forms report, before the window is applied.
+}
+\references{
+Scientific Registry of Transplant Recipients. Technical Methods for the
+Program-Specific Reports, section C, patient survival.
+\url{https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/}
+
+Kim SJ, Snyder JJ. OPTN/SRTR registry analysis: the devil is in the
+details. Slides, American Transplant Congress; 2012. Slide 25
+(\code{TFL_ENDTXFU}). \url{https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf}
 }
 \seealso{
 Guides:

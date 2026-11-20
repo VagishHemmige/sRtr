@@ -412,14 +412,22 @@ add_txf_outcomes <- function(df) {
 #'   attribute decides which follow-up file and outcome columns are used.
 #' @param death_window Which deaths count as events, and where recipients
 #'   without one are censored:
-#'   * `"follow_up"` (default): deaths on or before the recipient's last
-#'     follow-up date count; everyone else is censored at last follow-up.
-#'   * `"ascertainment"`: the SRTR program-specific report method for patient
-#'     survival. Deaths from any source on or before `ascertainment_date`
-#'     count; everyone else is assumed alive and censored at that date.
-#' @param ascertainment_date One date up to which deaths are ascertained in
-#'   your SAF release, from its release notes. Required when
-#'   `death_window = "ascertainment"`.
+#'   * `"ascertainment"` (default): the SRTR program-specific report method
+#'     for patient survival. Deaths from any source on or before
+#'     `ascertainment_date` count; everyone else is assumed alive and censored
+#'     at that date, even if their last follow-up form is earlier.
+#'   * `"follow_up"`: deaths on or before the recipient's last follow-up date
+#'     count; everyone else is censored at last follow-up.
+#'
+#'   sRtr's defaults follow SRTR's published definitions where SRTR gives
+#'   one; other practice is available as an option.
+#' @param ascertainment_date Where death ascertainment ends, used when
+#'   `death_window = "ascertainment"`. Either the name of a date column with
+#'   one date per recipient, or one date for everyone (a `Date` or text such
+#'   as `"2023-06-30"`). The default, `"TFL_ENDTXFU"`, is the column SRTR
+#'   describes as the last possible follow-up date for each transplant, with
+#'   a built-in lag of 3 months. A recipient whose date is missing gets no
+#'   death event and a missing time, with a warning.
 #' @param graft_death_same_day How to treat a graft failure dated on the day
 #'   the recipient died:
 #'   * `"censor"` (default): as death with a functioning graft. The graft is
@@ -455,6 +463,15 @@ add_txf_outcomes <- function(df) {
 #'   Malignancy is patient-level and always uses every form. The columns from
 #'   [add_txf_outcomes()] (`FIRST_FU_REJ_DATE`, `FIRST_FU_REJ_STATUS`) describe
 #'   every form either way.
+#'
+#' @references
+#' Scientific Registry of Transplant Recipients. Technical Methods for the
+#' Program-Specific Reports, section C, patient survival.
+#' <https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/>
+#'
+#' Kim SJ, Snyder JJ. OPTN/SRTR registry analysis: the devil is in the
+#' details. Slides, American Transplant Congress; 2012. Slide 25
+#' (`TFL_ENDTXFU`). <https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf>
 #'
 #' @details
 #' `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only the
@@ -525,8 +542,8 @@ add_txf_outcomes <- function(df) {
 #'
 add_time_to_event_outcomes <- function(
   df,
-  death_window = c("follow_up", "ascertainment"),
-  ascertainment_date = NULL,
+  death_window = c("ascertainment", "follow_up"),
+  ascertainment_date = "TFL_ENDTXFU",
   graft_death_same_day = c("censor", "event"),
   rejection_after_graft_failure = c("exclude", "keep")
 ) {
@@ -534,20 +551,7 @@ add_time_to_event_outcomes <- function(
   graft_death_same_day <- match.arg(graft_death_same_day)
   rejection_after_graft_failure <- rlang::arg_match(rejection_after_graft_failure)
   if (death_window == "ascertainment") {
-    if (
-      is.null(ascertainment_date) ||
-        length(ascertainment_date) != 1 ||
-        is.na(suppressWarnings(as.Date(ascertainment_date)))
-    ) {
-      srtr_abort(
-        c(
-          "{.code death_window = \"ascertainment\"} needs {.arg ascertainment_date}.",
-          "i" = "Give one date up to which deaths are ascertained in the SAF release."
-        ),
-        class = "ascertainment_date_missing"
-      )
-    }
-    ascertainment_date <- as.Date(ascertainment_date)
+    ascertainment_end <- .srtr_ascertainment_end(df, ascertainment_date)
   }
 
   is_kp <- identical(attr(df, "file_key"), "TX_KP")
@@ -578,11 +582,12 @@ add_time_to_event_outcomes <- function(
 
   #Deaths count only inside the window survivors are followed for (#18).
   #"follow_up": up to the patient's last follow-up date.
-  #"ascertainment": up to one closing date for everyone (SRTR PSR method).
+  #"ascertainment": up to where ascertainment ends, per row or one date for
+  #everyone (SRTR PSR method for patient survival).
   df$.death_censor <- if (death_window == "follow_up") {
     df$.patient_lafu
   } else {
-    rep(ascertainment_date, nrow(df))
+    ascertainment_end
   }
   death <- df$REC_DEATH_DT_COMPOSITE
   in_window <- !is.na(death) &
@@ -827,6 +832,73 @@ add_time_to_event_outcomes <- function(
   df$.death_event <- NULL
   df$.death_censor <- NULL
   df
+}
+
+#' Where death ascertainment ends, one date per row
+#'
+#' `ascertainment_date` is either a column name (one date per row, such as
+#' `"TFL_ENDTXFU"`) or one date for everyone. Text that reads as a date is a
+#' date; any other text is a column name. Missing per-row dates warn.
+#'
+#' @param df The cohort.
+#' @param ascertainment_date A column name, a `Date` or text date.
+#' @return A `Date` vector with one element per row of `df`.
+#' @noRd
+.srtr_ascertainment_end <- function(
+  df,
+  ascertainment_date,
+  call = rlang::caller_env()
+) {
+  if (is.null(ascertainment_date) || length(ascertainment_date) != 1 ||
+    is.na(ascertainment_date)) {
+    srtr_abort(
+      c(
+        "{.code death_window = \"ascertainment\"} needs {.arg ascertainment_date}.",
+        "i" = "Give a date column such as {.val TFL_ENDTXFU}, or one date up to which deaths are ascertained in the SAF release."
+      ),
+      class = "ascertainment_date_missing",
+      call = call
+    )
+  }
+  as_date <- if (inherits(ascertainment_date, "Date")) {
+    ascertainment_date
+  } else if (is.character(ascertainment_date)) {
+    suppressWarnings(as.Date(ascertainment_date, optional = TRUE))
+  } else {
+    as.Date(NA)
+  }
+  if (!is.na(as_date)) {
+    return(rep(as_date, nrow(df)))
+  }
+  if (!is.character(ascertainment_date)) {
+    srtr_abort(
+      c(
+        "{.arg ascertainment_date} must be a column name or one date.",
+        "x" = "It is {.obj_type_friendly {ascertainment_date}}."
+      ),
+      class = "ascertainment_date_missing",
+      call = call
+    )
+  }
+  check_columns(
+    df,
+    ascertainment_date,
+    why = "It gives where death ascertainment ends; use {.code death_window = \"follow_up\"} or give one date instead.",
+    call = call
+  )
+  check_date_columns(df, ascertainment_date, call = call)
+  end <- df[[ascertainment_date]]
+  n_missing <- sum(is.na(end))
+  if (n_missing > 0) {
+    srtr_warn(
+      c(
+        "{n_missing} recipient{?s} ha{?s/ve} no {.field {ascertainment_date}}.",
+        "i" = "{cli::qty(n_missing)}{?Its/Their} death event{?s} {?is/are} not counted and {?its/their} time{?s} {?is/are} missing."
+      ),
+      class = "ascertainment_date_missing"
+    )
+  }
+  end
 }
 
 #' Censor an outcome at death
