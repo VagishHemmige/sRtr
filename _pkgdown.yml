@@ -30,6 +30,8 @@ navbar:
           href: articles/checking-your-safs.html
         - text: Releases, the data dictionary and warnings
           href: articles/releases-and-warnings.html
+        - text: Glossary
+          href: articles/glossary.html
         - text: "---"
         - text: All guides, with descriptions
           href: articles/index.html
@@ -158,6 +160,7 @@ articles:
       - getting-started
       - articles/checking-your-safs
       - articles/releases-and-warnings
+      - articles/glossary
 
   - title: Prepare an analysis cohort
     navbar: Prepare an analysis cohort
