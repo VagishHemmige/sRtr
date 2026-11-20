@@ -13,7 +13,8 @@ death_cohort <- function() {
     PERS_SSA_DEATH_DT = as.Date(c(NA, NA, "2006-01-01")),
     TFL_DEATH_DT = as.Date(NA),
     TFL_GRAFT_DT = as.Date(NA),
-    TFL_LAFUDATE = as.Date("2004-01-01")
+    TFL_LAFUDATE = as.Date("2004-01-01"),
+    TFL_ENDTXFU = as.Date("2007-01-01")
   )
   attr(df, "file_key") <- "TX_KI"
   df
@@ -29,9 +30,60 @@ no_follow_up_forms <- function(...) {
   )
 }
 
-test_that("by default, deaths after last follow-up are censored there (#18)", {
+test_that("by default, deaths count up to each recipient's TFL_ENDTXFU", {
   local_mocked_bindings(load_srtr_file = no_follow_up_forms)
-  out <- add_time_to_event_outcomes(death_cohort())
+  df <- death_cohort()
+  df$TFL_ENDTXFU <- as.Date(c("2007-01-01", "2007-01-01", "2005-01-01"))
+  out <- add_time_to_event_outcomes(df)
+
+  # 900001 is assumed alive past last follow-up; 900003's SSA death falls
+  # after its own TFL_ENDTXFU, so it is censored there.
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY, c(0L, 1L, 0L))
+  expect_equal(
+    out$REC_DEATH_DT_COMPOSITE_CENSOR,
+    as.Date(c("2007-01-01", "2003-01-01", "2005-01-01"))
+  )
+  expect_equal(
+    add_time_to_event_outcomes(death_cohort())$REC_DEATH_DT_COMPOSITE_BINARY,
+    c(0L, 1L, 1L)
+  )
+})
+
+test_that("a recipient with no TFL_ENDTXFU has no death event or time, with a warning", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- death_cohort()
+  df$TFL_ENDTXFU[2:3] <- as.Date(NA)
+  expect_warning(
+    out <- add_time_to_event_outcomes(df),
+    class = "sRtr_warning_ascertainment_date_missing"
+  )
+  expect_snapshot(out <- add_time_to_event_outcomes(df))
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY, c(0L, 0L, 0L))
+  expect_equal(out$REC_DEATH_DT_COMPOSITE_days[2:3], c(NA_real_, NA_real_))
+  # The composite death date itself still reports every source.
+  expect_equal(out$REC_DEATH_DT_COMPOSITE[2], as.Date("2003-01-01"))
+})
+
+test_that("ascertainment_date names a column that must exist and hold dates", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- death_cohort()
+  df$TFL_ENDTXFU <- NULL
+  expect_error(
+    add_time_to_event_outcomes(df),
+    class = "sRtr_error_missing_columns"
+  )
+  expect_snapshot(error = TRUE, add_time_to_event_outcomes(df))
+  df$TFL_ENDTXFU <- "2007-01-01"
+  expect_error(
+    add_time_to_event_outcomes(df),
+    class = "sRtr_error_non_date_columns"
+  )
+  expect_snapshot(error = TRUE, add_time_to_event_outcomes(df))
+})
+
+test_that("death_window = 'follow_up' censors deaths after last follow-up there (#18)", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  out <- add_time_to_event_outcomes(death_cohort(), death_window = "follow_up")
 
   expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY, c(0L, 1L, 0L))
   expect_equal(
@@ -75,11 +127,11 @@ test_that("deaths after the ascertainment date are censored at it", {
   )
 })
 
-test_that("a recipient with no last follow-up date has no death time by default", {
+test_that("under death_window = 'follow_up', no last follow-up date means no death time", {
   local_mocked_bindings(load_srtr_file = no_follow_up_forms)
   df <- death_cohort()
   df$TFL_LAFUDATE[2] <- as.Date(NA)
-  out <- add_time_to_event_outcomes(df)
+  out <- add_time_to_event_outcomes(df, death_window = "follow_up")
 
   expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY[2], 0L)
   expect_equal(out$REC_DEATH_DT_COMPOSITE_days[2], NA_real_)
@@ -88,12 +140,16 @@ test_that("a recipient with no last follow-up date has no death time by default"
 test_that("death_window = 'ascertainment' needs one valid ascertainment_date", {
   local_mocked_bindings(load_srtr_file = no_follow_up_forms)
   expect_error(
-    add_time_to_event_outcomes(death_cohort(), death_window = "ascertainment"),
+    add_time_to_event_outcomes(death_cohort(), ascertainment_date = NULL),
     class = "sRtr_error_ascertainment_date_missing"
   )
   expect_snapshot(
     error = TRUE,
-    add_time_to_event_outcomes(death_cohort(), death_window = "ascertainment")
+    add_time_to_event_outcomes(death_cohort(), ascertainment_date = NULL)
+  )
+  expect_error(
+    add_time_to_event_outcomes(death_cohort(), ascertainment_date = 2007),
+    class = "sRtr_error_ascertainment_date_missing"
   )
   expect_snapshot(
     error = TRUE,
@@ -117,7 +173,7 @@ test_that("a death on the last follow-up date counts", {
   local_mocked_bindings(load_srtr_file = no_follow_up_forms)
   df <- death_cohort()
   df$PERS_SSA_DEATH_DT[3] <- as.Date("2004-01-01")
-  out <- add_time_to_event_outcomes(df)
+  out <- add_time_to_event_outcomes(df, death_window = "follow_up")
 
   expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY, c(0L, 1L, 1L))
 })
@@ -154,7 +210,8 @@ graft_cohort <- function() {
     TFL_GRAFT_DT = as.Date(
       c(NA, "2001-06-01", "2003-01-01", NA, NA, "2002-06-01")
     ),
-    TFL_LAFUDATE = as.Date("2004-01-01")
+    TFL_LAFUDATE = as.Date("2004-01-01"),
+    TFL_ENDTXFU = as.Date("2010-01-01")
   )
   attr(df, "file_key") <- "TX_KI"
   df
@@ -243,6 +300,7 @@ test_that("TX_KP kidney and pancreas graft failure are each censored at death", 
     TFL_GRAFT_DT_KI = as.Date(c("2001-01-01", NA)),
     TFL_GRAFT_DT_PA = as.Date(c(NA, "2003-01-01")),
     TFL_LAFUDATEKI = as.Date(c("2003-01-01", "2004-01-01")),
+    TFL_ENDTXFU = as.Date("2010-01-01"),
     TFL_LAFUDATEPA = as.Date(c("2005-01-01", "2004-01-01"))
   )
   attr(df, "file_key") <- "TX_KP"
@@ -313,5 +371,34 @@ test_that("the infinite-date error counts rows, not values", {
   expect_error(
     srtr_time_to_event(df, event, start, censor, prefix = "X"),
     "infinite dates in 1 row"
+  )
+})
+
+test_that("live: deaths are ascertained up to TFL_ENDTXFU on a real transplant file", {
+  skip_if_no_srtr_file(c("TX_LI", "TXF_LI"))
+  tx <- load_live("TX_LI")
+  expect_s3_class(tx$TFL_ENDTXFU, "Date")
+  quiet <- function(expr) {
+    withCallingHandlers(
+      expr,
+      sRtr_warning_unknown_codes = function(cnd) rlang::cnd_muffle(cnd),
+      sRtr_warning_undated_admission_rejection = function(cnd) rlang::cnd_muffle(cnd),
+      sRtr_warning_undated_follow_up_report = function(cnd) rlang::cnd_muffle(cnd),
+      sRtr_warning_ascertainment_date_missing = function(cnd) rlang::cnd_muffle(cnd)
+    )
+  }
+  out <- quiet(add_time_to_event_outcomes(tx))
+  died <- out$REC_DEATH_DT_COMPOSITE_BINARY %in% 1L
+  censor <- out$REC_DEATH_DT_COMPOSITE_CENSOR
+  expect_equal(sum(censor[died] > out$TFL_ENDTXFU[died], na.rm = TRUE), 0)
+  expect_equal(sum(censor[!died] != out$TFL_ENDTXFU[!died], na.rm = TRUE), 0)
+
+  # A death counted only under "follow_up" falls after TFL_ENDTXFU.
+  fu <- quiet(add_time_to_event_outcomes(tx, death_window = "follow_up"))
+  only_fu <- fu$REC_DEATH_DT_COMPOSITE_BINARY %in% 1L & !died &
+    !is.na(out$TFL_ENDTXFU)
+  expect_equal(
+    sum(only_fu),
+    sum(only_fu & fu$REC_DEATH_DT_COMPOSITE > out$TFL_ENDTXFU, na.rm = TRUE)
   )
 })

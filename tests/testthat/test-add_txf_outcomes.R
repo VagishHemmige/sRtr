@@ -117,6 +117,7 @@ test_that("add_time_to_event_outcomes() builds rejection dates without dplyr att
       "3: No"
     ),
     TFL_LAFUDATE = as.Date(c("2006-01-01", "2006-01-01")),
+    TFL_ENDTXFU = as.Date("2010-01-01"),
     TFL_GRAFT_DT = as.Date(NA)
   )
   attr(df, "file_key") <- "TX_KI"
@@ -182,7 +183,8 @@ fake_cohort <- function(file_key) {
     REC_ACUTE_REJ_EPISODE = "3: No",
     PERS_OPTN_DEATH_DT = as.Date(c(NA, "2004-01-01")),
     PERS_SSA_DEATH_DT = as.Date(NA),
-    TFL_DEATH_DT = as.Date(NA)
+    TFL_DEATH_DT = as.Date(NA),
+    TFL_ENDTXFU = as.Date("2010-01-01")
   )
   if (file_key == "TX_KP") {
     df$REC_ACUTE_REJ_EPISODE_PA <- "3: No"
@@ -210,10 +212,11 @@ fake_cohort_txf <- function(org_ty) {
 
 test_that("add_time_to_event_outcomes() runs on a TX_KP cohort", {
   local_mocked_bindings(load_srtr_file = function(...) fake_cohort_txf("KI"))
-  out <- add_time_to_event_outcomes(fake_cohort("TX_KP"))
+  out <- add_time_to_event_outcomes(fake_cohort("TX_KP"), death_window = "follow_up")
 
-  # Death is patient-level: censored at the later of the kidney and pancreas
-  # follow-up dates (900001: 2005-01-01), or at death (900002: 2004-01-01).
+  # Death is patient-level: under "follow_up", censored at the later of the
+  # kidney and pancreas follow-up dates (900001: 2005-01-01), or at death
+  # (900002: 2004-01-01).
   expect_equal(out$REC_DEATH_DT_COMPOSITE_BINARY, c(0L, 1L))
   expect_equal(
     out$REC_DEATH_DT_COMPOSITE_CENSOR,
@@ -297,7 +300,8 @@ admission_rejection_cohort <- function() {
     PERS_SSA_DEATH_DT = as.Date(NA),
     TFL_DEATH_DT = as.Date(NA),
     TFL_GRAFT_DT = as.Date(NA),
-    TFL_LAFUDATE = as.Date("2005-01-01")
+    TFL_LAFUDATE = as.Date("2005-01-01"),
+    TFL_ENDTXFU = as.Date("2010-01-01")
   )
   attr(df, "file_key") <- "TX_KI"
   df
@@ -589,7 +593,8 @@ window_cohort <- function() {
     PERS_SSA_DEATH_DT = as.Date(NA),
     TFL_DEATH_DT = as.Date(NA),
     TFL_GRAFT_DT = as.Date(NA),
-    TFL_LAFUDATE = as.Date(c(rep("2005-01-01", 5), NA))
+    TFL_LAFUDATE = as.Date(c(rep("2005-01-01", 5), NA)),
+    TFL_ENDTXFU = as.Date("2010-01-01")
   )
   attr(df, "file_key") <- "TX_KI"
   df
