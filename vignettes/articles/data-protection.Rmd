@@ -170,12 +170,14 @@ flags in sRtr's summary functions
 A chat with an AI assistant, a GitHub issue, a forum post and an email to a
 colleague outside your agreement are all disclosures. When you ask for help:
 
-- share your code, column names, sRtr's error and warning messages, and
-  masked counts;
+- share your code, column names and masked counts;
 - do not paste rows, printed data frames, or the output of `head()`,
   `str()` or `View()` on SAF data, and do not attach files made from SAFs;
-- read any output before you paste it: test failures and some messages
-  include exact counts from your files.
+- treat sRtr's error and warning messages, and test failures, as output from
+  your files: they can include exact counts, and some quote values from a
+  column (for example, codes that no format lists). Before you share one,
+  replace every count, value and identifier it contains, or reproduce the
+  message on a few made-up rows and share that instead.
 
 An assistant that can read your files or run commands on your computer can
 read the SAF folder too. Do not give it access to that folder unless your
