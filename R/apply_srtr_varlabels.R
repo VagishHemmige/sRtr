@@ -12,6 +12,8 @@
 #' no object name, as when `df` is an expression), gives a warning. A known key
 #' whose columns are not in `df` is not a problem: nothing is changed.
 #'
+#' @seealso Guides:
+#' * [Labels and codes](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#labels-and-codes)
 #' @param df A data frame loaded from an SRTR SAF file.
 #' @param file_key Optional. The dataset name (e.g., "CAND_KIPA", "TX_KI").
 #' If the file was loaded via the `load_srtr_file` function, this argument

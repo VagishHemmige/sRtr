@@ -17,6 +17,9 @@
 #' multiple times. To compare candidate areas one at a time, see
 #' [rank_individual_coverage_gains()].
 #'
+#' @seealso Guides:
+#' * [Estimating additional coverage gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#estimating-additional-coverage-gain)
+#' * [Starting from a null base](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#starting-from-a-null-base)
 #' @param existing_areas An `sf` object containing polygon geometries for the
 #'   currently existing catchment areas.
 #' @param added_areas An `sf` object containing polygon geometries for the

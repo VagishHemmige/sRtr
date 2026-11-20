@@ -14,6 +14,11 @@
 #' - `source_path`: the full path to the file on disk
 #' - `file_key`: the canonical dataset key used to load it
 #'
+#' @seealso Guides:
+#' * [Load a file](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#load-a-file)
+#' * [Missing columns](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#missing-columns)
+#' * [Codes in no format](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#codes-in-no-format)
+#' * [Load less](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html#load-less)
 #' @param file_key Character. Canonical dataset key (e.g., "TX_LI", "CAND_KIPA").
 #' @param trr_id_filter Optional vector of `TRR_ID` values. If not `NULL`, only
 #'   rows whose `TRR_ID` is in this vector are kept.

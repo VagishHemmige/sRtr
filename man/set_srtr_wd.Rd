@@ -33,3 +33,10 @@ set_srtr_wd("C:/Data/SRTR", TRUE)    # Persistent across sessions
 set_srtr_wd("C:/Data/SRTR", release = "2609")  # Files are release 2609
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/getting-started.html#point-srtr-at-your-safs}{Point sRtr at your SAFs}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#telling-srtr-your-release}{Telling sRtr your release}
+}
+}

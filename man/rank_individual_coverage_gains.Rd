@@ -60,3 +60,9 @@ The function assumes that \code{candidate_areas} and \code{existing_areas} alrea
 contain the catchment geometries to evaluate. It does not create buffers,
 travel-time isochrones, or other catchment areas internally.
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#ranking-centers-by-incremental-gain}{Ranking centers by incremental gain}
+}
+}

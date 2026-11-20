@@ -147,3 +147,12 @@ events. Such reports count as events by default when follow-up covers the
 day of death. The status columns from \code{\link[=add_txf_outcomes]{add_txf_outcomes()}} say what the
 forms report, before the window is applied.
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#events-count-only-while-someone-is-watching}{Events count only while someone is watching}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#whose-follow-up}{Whose follow-up?}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#graft-failure-and-death-on-the-same-day}{Graft failure and death on the same day}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#rejection-after-the-graft-has-failed}{Rejection after the graft has failed}
+}
+}

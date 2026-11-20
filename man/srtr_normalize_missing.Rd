@@ -154,5 +154,11 @@ srtr_normalize_missing(
 )
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/missing-data.html#choosing-what-becomes-na}{Choosing what becomes NA}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/missing-data.html#adjusting-a-policy}{Adjusting a policy}
+}
+
 \code{\link[=srtr_missing_report]{srtr_missing_report()}}, \link{missing_codes}
 }

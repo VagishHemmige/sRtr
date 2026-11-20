@@ -11,6 +11,8 @@
 #' release and a revision number (`"2609-1"`), since SRTR can revise a page
 #' without changing its release.
 #'
+#' @seealso Guides:
+#' * [What a release between two copies can and cannot know](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#what-a-release-between-two-copies-can-and-cannot-know)
 #' @format A list of three tibbles:
 #' \describe{
 #'   \item{releases}{One row per stored snapshot: `snapshot`, `release`,

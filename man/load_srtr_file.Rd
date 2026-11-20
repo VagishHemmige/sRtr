@@ -117,3 +117,12 @@ The returned tibble includes two attributes:
 df <- load_srtr_file("TX_LI", factor_labels = TRUE, var_labels = TRUE)
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/getting-started.html#load-a-file}{Load a file}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#missing-columns}{Missing columns}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#codes-in-no-format}{Codes in no format}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html#load-less}{Load less}
+}
+}

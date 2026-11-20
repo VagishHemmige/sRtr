@@ -116,3 +116,10 @@ attr(gain, "covered_ids")$newly
 }
 
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#estimating-additional-coverage-gain}{Estimating additional coverage gain}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#starting-from-a-null-base}{Starting from a null base}
+}
+}

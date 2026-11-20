@@ -65,3 +65,9 @@ TX_KI <- read_sas("TX_KI.sas7bdat")
 TX_KI <- apply_srtr_varlabels(TX_KI)
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/getting-started.html#labels-and-codes}{Labels and codes}
+}
+}

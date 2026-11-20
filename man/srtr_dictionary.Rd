@@ -69,5 +69,11 @@ attr(current, "snapshot")
 head(srtr_dictionary("2609", table = "formats"))
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#releases}{Releases}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#corrections-to-srtrs-dictionary}{Corrections to SRTR's dictionary}
+}
+
 \code{\link[=load_srtr_file]{load_srtr_file()}} and \code{\link[=set_srtr_wd]{set_srtr_wd()}}, which take a \code{release}.
 }

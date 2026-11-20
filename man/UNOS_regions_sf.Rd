@@ -65,4 +65,10 @@ if (requireNamespace("sf", quietly = TRUE)) {
   plot(sf::st_geometry(unos_regions_poly))
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#built-in-spatial-datasets}{Built-in spatial datasets}
+}
+}
 \keyword{datasets}

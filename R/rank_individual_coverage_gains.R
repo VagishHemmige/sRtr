@@ -12,6 +12,8 @@
 #' contain the catchment geometries to evaluate. It does not create buffers,
 #' travel-time isochrones, or other catchment areas internally.
 #'
+#' @seealso Guides:
+#' * [Ranking centers by incremental gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#ranking-centers-by-incremental-gain)
 #' @param candidate_areas An `sf` object containing candidate catchment
 #'   geometries to evaluate one at a time.
 #' @param existing_areas An `sf` object containing the existing catchment

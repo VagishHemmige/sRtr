@@ -18,6 +18,10 @@
 #' `mean_impute = TRUE`, whatever the encoding. Continuous inputs (age,
 #' creatinine, height, weight, BMI and cold ischemia time) must be numeric.
 #'
+#' @seealso Guides:
+#' * [The scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores)
+#' * [Missing and unknown inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
+#' * [Codes or labels](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#codes-or-labels)
 #' @param df A data frame (may be a dplyr grouped data frame).
 #' @param variant NULL (default; auto-detect), or "PA" (pancreas-alone), or "KP" (kidney-pancreas).
 #' @param mean_impute Logical. If TRUE, mean-impute missing numeric inputs within the

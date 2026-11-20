@@ -60,3 +60,10 @@ diagnosis and treatment of pulmonary hypertension. \emph{Eur Heart J}
 2022;43:3618-3731. \doi{10.1093/eurheartj/ehac237} (Section 5.1.12.1 and
 Table 11.)
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores}{The scores}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs}{Missing and unknown inputs}
+}
+}

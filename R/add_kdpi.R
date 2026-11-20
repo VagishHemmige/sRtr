@@ -34,6 +34,9 @@
 #' and KDPI. A multiracial donor (a `DON_RACE` code that is a sum of single
 #' codes) is not counted as Black by the `DON_RACE` fallback.
 #'
+#' @seealso Guides:
+#' * [Which mapping table: KDPI and EPTS](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts)
+#' * [Missing and unknown inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
 #' @param df A data frame of deceased donors or transplants, one row each.
 #' @param version KDRI formula: `"refit2024"` (default) or `"rao2009"`.
 #' @param table Which mapping table to use: `"latest"` (default), the newest

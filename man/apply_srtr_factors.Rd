@@ -103,3 +103,10 @@ TX_KI <- read_sas("TX_KI.sas7bdat")
 TX_KI <- apply_srtr_factors(TX_KI)
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/getting-started.html#labels-and-codes}{Labels and codes}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#codes-in-no-format}{Codes in no format}
+}
+}

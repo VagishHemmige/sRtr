@@ -14,6 +14,9 @@
 #' A deceased donor's creatinine is often not at a steady state, so this
 #' value describes the creatinine more than the kidney's filtration rate.
 #'
+#' @seealso Guides:
+#' * [The scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores)
+#' * [Missing and unknown inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
 #' @param df A data frame of donors or transplants, one row each.
 #' @param equation `"ckd_epi_2021"` (default), refit without race, or
 #'   `"ckd_epi_2009"`, the earlier equation with a race coefficient, for

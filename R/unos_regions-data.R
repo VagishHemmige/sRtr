@@ -10,6 +10,8 @@
 #' obtain region polygons, dissolve by \code{Region} (see Examples), or use
 #' [get_hrsa_optn_regions()].
 #'
+#' @seealso Guides:
+#' * [Built-in spatial datasets](https://vagishhemmige.github.io/sRtr/articles/mapping.html#built-in-spatial-datasets)
 #' @format An \code{sf} object with one row per state and the following columns:
 #' \describe{
 #'   \item{Region}{UNOS region label (character)}

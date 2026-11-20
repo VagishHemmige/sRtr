@@ -3,6 +3,9 @@
 #' Sets the SRTR working directory for the current session, or optionally saves it permanently
 #' in the user's `.Renviron` file as the environment variable `SRTR_WD`.
 #'
+#' @seealso Guides:
+#' * [Point sRtr at your SAFs](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#point-srtr-at-your-safs)
+#' * [Telling sRtr your release](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#telling-srtr-your-release)
 #' @param path Path to the SRTR data folder
 #' @param permanent Logical; if TRUE, appends the setting to `.Renviron` for persistence
 #' @param release Optional. The SAF release the folder holds, as year and

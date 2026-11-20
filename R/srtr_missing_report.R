@@ -18,6 +18,8 @@
 #' still be small cells; treat them as you would any other table made from
 #' the data.
 #'
+#' @seealso Guides:
+#' * [What is in the data](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#what-is-in-the-data)
 #' @param df A data frame from an SRTR SAF file.
 #' @param cols Names of the columns to report. `NULL` (the default) reports
 #'   every column that [missing_codes] covers.

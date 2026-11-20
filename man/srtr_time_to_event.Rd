@@ -55,3 +55,9 @@ Units suffix mapping: \code{years -> "_yrs"}, \code{months -> "_months"}, \code{
 Negative times (e.g., when \code{start_date > censor/event}) trigger a warning,
 and the numeric time is set to \code{NA}.#'
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#events-count-only-while-someone-is-watching}{Events count only while someone is watching}
+}
+}

@@ -52,6 +52,11 @@ plot(opo_areas["OPO_PROVIDER_NM"])
 
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-opo-service-areas}{Plotting OPO service areas}
+}
+
 \code{\link[sf:st_read]{sf::st_read()}}, \code{\link[labelled:var_label]{labelled::var_label()}},
 \code{\link[=get_hrsa_transplant_centers]{get_hrsa_transplant_centers()}}
 }

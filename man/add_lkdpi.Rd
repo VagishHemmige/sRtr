@@ -87,3 +87,10 @@ Massie AB, Leanza J, Fahmy LM, et al. A risk index for living donor kidney
 transplantation. \emph{Am J Transplant} 2016;16:2077-2084.
 \doi{10.1111/ajt.13709} (Results, "Calculation of the LKDPI".)
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores}{The scores}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs}{Missing and unknown inputs}
+}
+}

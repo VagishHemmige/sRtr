@@ -321,6 +321,9 @@
 #' page it has seen (see [dictionary_versions]); a release between two stored
 #' versions uses the entries that are the same in both.
 #'
+#' @seealso Guides:
+#' * [Releases](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#releases)
+#' * [Corrections to SRTR's dictionary](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#corrections-to-srtrs-dictionary)
 #' @param release The SAF release, as year and month (`"2609"` for September
 #'   2026). If `NULL` (the default), the bundled [dictionary] or [formats].
 #' @param table `"dictionary"` (the default) for variables, or `"formats"` for

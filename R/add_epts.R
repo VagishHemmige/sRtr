@@ -33,6 +33,9 @@
 #' Years on dialysis is the days from dialysis start to the date scored,
 #' divided by 365.25, and 0 if dialysis starts later.
 #'
+#' @seealso Guides:
+#' * [Which mapping table: KDPI and EPTS](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts)
+#' * [Missing and unknown inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
 #' @param df A data frame of candidates or recipients, one row each.
 #' @param at Score the candidate at `"listing"` (default) or at
 #'   `"transplant"`.

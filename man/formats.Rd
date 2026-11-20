@@ -21,4 +21,10 @@ formats
 \description{
 Lookup table used to convert coded values in SRTR datasets to human-readable factor labels.
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#codes-in-no-format}{Codes in no format}
+}
+}
 \keyword{datasets}

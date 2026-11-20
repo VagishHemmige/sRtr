@@ -47,4 +47,10 @@ if (requireNamespace("sf", quietly = TRUE)) {
 }
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-transplant-centers}{Plotting transplant centers}
+}
+}
 \keyword{datasets}

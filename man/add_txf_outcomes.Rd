@@ -98,6 +98,14 @@ table(tx$FIRST_FU_REJ_STATUS)
 
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#rejection-has-more-than-one-meaning}{"Rejection" has more than one meaning}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#rejection-during-the-transplant-admission-is-not-on-the-follow-up-forms}{Rejection during the transplant admission is not on the follow-up forms}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#a-form-date-is-not-an-onset-date}{A form date is not an onset date}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#which-section-answers-your-question}{Which section answers your question}
+}
+
 \code{\link[=add_time_to_event_outcomes]{add_time_to_event_outcomes()}}, \code{\link[=srtr_time_to_event]{srtr_time_to_event()}},
 \code{\link[=load_srtr_file]{load_srtr_file()}}
 }

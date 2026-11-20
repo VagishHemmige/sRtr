@@ -78,6 +78,12 @@ regions_shifted <- get_hrsa_optn_regions(noncontiguous = "shift")
 
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-unosoptn-regions}{Plotting UNOS/OPTN regions}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#national-maps-with-alaska-hawaii-and-puerto-rico}{National maps with Alaska, Hawaii and Puerto Rico}
+}
+
 \code{\link[sf:st_make_valid]{sf::st_make_valid()}}, \code{\link[dplyr:summarise]{dplyr::summarise()}},
 \code{\link[=get_hrsa_transplant_centers]{get_hrsa_transplant_centers()}}, \code{\link[=shift_noncontiguous]{shift_noncontiguous()}}
 }

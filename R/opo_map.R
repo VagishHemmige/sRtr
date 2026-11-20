@@ -7,6 +7,8 @@
 #' The data are served directly from the HRSA ArcGIS REST MapServer and
 #' include all attributes provided by HRSA at the time of download.
 #'
+#' @seealso Guides:
+#' * [Plotting OPO service areas](https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-opo-service-areas)
 #' @details
 #' This function queries the HRSA ArcGIS REST MapServer layer:
 #'

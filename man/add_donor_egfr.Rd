@@ -65,3 +65,10 @@ Levey AS, Stevens LA, Schmid CH, et al. A new equation to estimate
 glomerular filtration rate. \emph{Ann Intern Med} 2009;150:604-612.
 \doi{10.7326/0003-4819-150-9-200905050-00006}
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores}{The scores}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs}{Missing and unknown inputs}
+}
+}

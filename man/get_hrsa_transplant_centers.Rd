@@ -48,5 +48,11 @@ plot(centers["REGION_NM"])
 
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#downloading-current-hrsa-transplant-center-locations}{Downloading current HRSA transplant center locations}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#filtering-by-organ-or-service-list}{Filtering by organ or service list}
+}
+
 \code{\link[sf:st_read]{sf::st_read()}}, \code{\link[labelled:var_label]{labelled::var_label()}}
 }

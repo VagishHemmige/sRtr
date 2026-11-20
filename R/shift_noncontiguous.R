@@ -5,6 +5,8 @@
 #' size. Features elsewhere are only transformed to NAD83 / Conus Albers
 #' (EPSG:5070).
 #'
+#' @seealso Guides:
+#' * [National maps with Alaska, Hawaii and Puerto Rico](https://vagishhemmige.github.io/sRtr/articles/mapping.html#national-maps-with-alaska-hawaii-and-puerto-rico)
 #' @details
 #' Each feature that falls in or within 100 km of Alaska, Hawaii or Puerto
 #' Rico (as drawn in [UNOS_regions_sf]) is projected to a coordinate reference
