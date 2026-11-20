@@ -15,10 +15,11 @@ by an event date and a censor date:
 ``` r
 add_time_to_event_outcomes(
   df,
-  death_window = c("follow_up", "ascertainment"),
-  ascertainment_date = NULL,
+  death_window = c("ascertainment", "follow_up"),
+  ascertainment_date = "TFL_ENDTXFU",
   graft_death_same_day = c("censor", "event"),
-  rejection_after_graft_failure = c("exclude", "keep")
+  rejection_after_graft_failure = c("exclude", "keep"),
+  retransplant = c("graft_failure", "ignore")
 )
 ```
 
@@ -36,18 +37,26 @@ add_time_to_event_outcomes(
   Which deaths count as events, and where recipients without one are
   censored:
 
-  - `"follow_up"` (default): deaths on or before the recipient's last
-    follow-up date count; everyone else is censored at last follow-up.
-
-  - `"ascertainment"`: the SRTR program-specific report method for
-    patient survival. Deaths from any source on or before
+  - `"ascertainment"` (default): the SRTR program-specific report method
+    for patient survival. Deaths from any source on or before
     `ascertainment_date` count; everyone else is assumed alive and
-    censored at that date.
+    censored at that date, even if their last follow-up form is earlier.
+
+  - `"follow_up"`: deaths on or before the recipient's last follow-up
+    date count; everyone else is censored at last follow-up.
+
+  sRtr's defaults follow SRTR's published definitions where SRTR gives
+  one; other practice is available as an option.
 
 - ascertainment_date:
 
-  One date up to which deaths are ascertained in your SAF release, from
-  its release notes. Required when `death_window = "ascertainment"`.
+  Where death ascertainment ends, used when
+  `death_window = "ascertainment"`. Either the name of a date column
+  with one date per recipient, or one date for everyone (a `Date` or
+  text such as `"2023-06-30"`). The default, `"TFL_ENDTXFU"`, is the
+  column SRTR describes as the last possible follow-up date for each
+  transplant, with a built-in lag of 3 months. A recipient whose date is
+  missing gets no death event and a missing time, with a warning.
 
 - graft_death_same_day:
 
@@ -95,6 +104,22 @@ add_time_to_event_outcomes(
   (`FIRST_FU_REJ_DATE`, `FIRST_FU_REJ_STATUS`) describe every form
   either way.
 
+- retransplant:
+
+  Whether a retransplant ends the graft in the all-cause graft failure
+  outcome (`GRAFT_FAIL_ALL_CAUSE_DT`):
+
+  - `"graft_failure"` (default): the retransplant date (`PERS_RETX`, or
+    `PERS_RETXKI` and `PERS_RETXPA` for `TX_KP`) counts as graft
+    failure, as in the SRTR program-specific reports. It never counts
+    for lung and heart-lung (`TX_LU`, `TX_HL`), which SRTR also leaves
+    it out for.
+
+  - `"ignore"`: retransplant is not used.
+
+  The death-censored graft failure columns (`TFL_GRAFT_DT_*`) do not use
+  retransplant either way.
+
 ## Details
 
 `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only
@@ -103,14 +128,38 @@ the event and censoring columns (`REC_DEATH_DT_COMPOSITE_BINARY`,
 after last follow-up while censoring survivors at last follow-up would
 overstate mortality (#18).
 
-Graft failure (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI` and
-`TFL_GRAFT_DT_PA` for `TX_KP`) is death-censored, whatever
-`death_window` is: a graft failure dated after the recipient's death
-from any source (`REC_DEATH_DT_COMPOSITE`) is not counted, and a graft
-without a failure is censored at the earlier of its last follow-up date
-and death. Death with a functioning graft is a censoring time, not a
-graft failure. A graft failure dated after the last follow-up date but
-before death is still counted, at its own date.
+Two graft failure outcomes are added. **All-cause graft failure**
+(`GRAFT_FAIL_ALL_CAUSE_DT`, or `GRAFT_FAIL_ALL_CAUSE_DT_KI` and
+`GRAFT_FAIL_ALL_CAUSE_DT_PA` for `TX_KP`) follows the SRTR
+program-specific reports: the graft fails at the first of its graft
+failure date, retransplant (see `retransplant`) and death from any
+source (`REC_DEATH_DT_COMPOSITE`). The graft is censored at its last
+follow-up date, and an event after that date is not counted. Heart
+grafts (`TX_HR`) follow SRTR's heart rule instead: only death and
+retransplant count, the graft failure date is not used, and follow-up is
+not censored at the last follow-up date but ends where death
+ascertainment ends (see `death_window`). The date column holds the first
+event even when it is not counted, and `_SOURCE` says which it was
+(`"graft_failure"`, `"retransplant"` or `"death"`; on the same day, in
+that order).
+
+As in the SRTR reports, a graft is censored on the day of transplant,
+with no event, when any of its graft failure, retransplant or death
+dates falls before the transplant date (`_SOURCE` is then
+`"before_transplant"`, and a later event is not used in its place), or
+when its last follow-up date is missing or before the transplant date.
+Its time is then the one-day offset that
+[`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)
+adds.
+
+**Death-censored graft failure** (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI`
+and `TFL_GRAFT_DT_PA` for `TX_KP`) is not an SRTR report definition, and
+does not depend on `death_window`: a graft failure dated after the
+recipient's death from any source (`REC_DEATH_DT_COMPOSITE`) is not
+counted, and a graft without a failure is censored at the earlier of its
+last follow-up date and death. Death with a functioning graft is a
+censoring time, not a graft failure. A graft failure dated after the
+last follow-up date but before death is still counted, at its own date.
 
 First rejection (`FIRST_REJ_DATE`, and `FIRST_REJ_DATE_PA` for `TX_KP`)
 counts a treated rejection (code 1 of format `ACREJEP`, raw or labelled)
@@ -168,6 +217,18 @@ events by default when follow-up covers the day of death. The status
 columns from
 [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
 say what the forms report, before the window is applied.
+
+## References
+
+Scientific Registry of Transplant Recipients. Technical Methods for the
+Program-Specific Reports, section C, patient survival and graft
+survival.
+<https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/>
+
+Kim SJ, Snyder JJ. OPTN/SRTR registry analysis: the devil is in the
+details. Slides, American Transplant Congress; 2012. Slide 25
+(`TFL_ENDTXFU`).
+<https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf>
 
 ## See also
 

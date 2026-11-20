@@ -91,10 +91,11 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_time_to_event_outcomes</span><span class="op">(</span></span>
 <span>  <span class="va">df</span>,</span>
-<span>  death_window <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"follow_up"</span>, <span class="st">"ascertainment"</span><span class="op">)</span>,</span>
-<span>  ascertainment_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  death_window <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ascertainment"</span>, <span class="st">"follow_up"</span><span class="op">)</span>,</span>
+<span>  ascertainment_date <span class="op">=</span> <span class="st">"TFL_ENDTXFU"</span>,</span>
 <span>  graft_death_same_day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"censor"</span>, <span class="st">"event"</span><span class="op">)</span>,</span>
-<span>  rejection_after_graft_failure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exclude"</span>, <span class="st">"keep"</span><span class="op">)</span></span>
+<span>  rejection_after_graft_failure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exclude"</span>, <span class="st">"keep"</span><span class="op">)</span>,</span>
+<span>  retransplant <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"graft_failure"</span>, <span class="st">"ignore"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -109,18 +110,24 @@ attribute decides which follow-up file and outcome columns are used.</p></dd>
 
 <dt id="arg-death-window">death_window<a class="anchor" aria-label="anchor" href="#arg-death-window"></a></dt>
 <dd><p>Which deaths count as events, and where recipients
-without one are censored:</p><ul><li><p><code>"follow_up"</code> (default): deaths on or before the recipient's last
-follow-up date count; everyone else is censored at last follow-up.</p></li>
-<li><p><code>"ascertainment"</code>: the SRTR program-specific report method for patient
-survival. Deaths from any source on or before <code>ascertainment_date</code>
-count; everyone else is assumed alive and censored at that date.</p></li>
-</ul></dd>
+without one are censored:</p><ul><li><p><code>"ascertainment"</code> (default): the SRTR program-specific report method
+for patient survival. Deaths from any source on or before
+<code>ascertainment_date</code> count; everyone else is assumed alive and censored
+at that date, even if their last follow-up form is earlier.</p></li>
+<li><p><code>"follow_up"</code>: deaths on or before the recipient's last follow-up date
+count; everyone else is censored at last follow-up.</p></li>
+</ul><p>sRtr's defaults follow SRTR's published definitions where SRTR gives
+one; other practice is available as an option.</p></dd>
 
 
 <dt id="arg-ascertainment-date">ascertainment_date<a class="anchor" aria-label="anchor" href="#arg-ascertainment-date"></a></dt>
-<dd><p>One date up to which deaths are ascertained in
-your SAF release, from its release notes. Required when
-<code>death_window = "ascertainment"</code>.</p></dd>
+<dd><p>Where death ascertainment ends, used when
+<code>death_window = "ascertainment"</code>. Either the name of a date column with
+one date per recipient, or one date for everyone (a <code>Date</code> or text such
+as <code>"2023-06-30"</code>). The default, <code>"TFL_ENDTXFU"</code>, is the column SRTR
+describes as the last possible follow-up date for each transplant, with
+a built-in lag of 3 months. A recipient whose date is missing gets no
+death event and a missing time, with a warning.</p></dd>
 
 
 <dt id="arg-graft-death-same-day">graft_death_same_day<a class="anchor" aria-label="anchor" href="#arg-graft-death-same-day"></a></dt>
@@ -158,6 +165,17 @@ discharge-date proxy). Censoring still ends at the failure date.</p>
 <code><a href="add_txf_outcomes.html">add_txf_outcomes()</a></code> (<code>FIRST_FU_REJ_DATE</code>, <code>FIRST_FU_REJ_STATUS</code>) describe
 every form either way.</p></dd>
 
+
+<dt id="arg-retransplant">retransplant<a class="anchor" aria-label="anchor" href="#arg-retransplant"></a></dt>
+<dd><p>Whether a retransplant ends the graft in the all-cause
+graft failure outcome (<code>GRAFT_FAIL_ALL_CAUSE_DT</code>):</p><ul><li><p><code>"graft_failure"</code> (default): the retransplant date (<code>PERS_RETX</code>, or
+<code>PERS_RETXKI</code> and <code>PERS_RETXPA</code> for <code>TX_KP</code>) counts as graft failure,
+as in the SRTR program-specific reports. It never counts for lung and
+heart-lung (<code>TX_LU</code>, <code>TX_HL</code>), which SRTR also leaves it out for.</p></li>
+<li><p><code>"ignore"</code>: retransplant is not used.</p></li>
+</ul><p>The death-censored graft failure columns (<code>TFL_GRAFT_DT_*</code>) do not use
+retransplant either way.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -166,9 +184,28 @@ event and censoring columns (<code>REC_DEATH_DT_COMPOSITE_BINARY</code>, <code>_
 <code>_days</code>) depend on <code>death_window</code>. Counting deaths found after last
 follow-up while censoring survivors at last follow-up would overstate
 mortality (#18).</p>
-<p>Graft failure (<code>TFL_GRAFT_DT</code>, or <code>TFL_GRAFT_DT_KI</code> and <code>TFL_GRAFT_DT_PA</code>
-for <code>TX_KP</code>) is death-censored, whatever <code>death_window</code> is: a graft failure
-dated after the recipient's death from any source (<code>REC_DEATH_DT_COMPOSITE</code>)
+<p>Two graft failure outcomes are added. <strong>All-cause graft failure</strong>
+(<code>GRAFT_FAIL_ALL_CAUSE_DT</code>, or <code>GRAFT_FAIL_ALL_CAUSE_DT_KI</code> and
+<code>GRAFT_FAIL_ALL_CAUSE_DT_PA</code> for <code>TX_KP</code>) follows the SRTR
+program-specific reports: the graft fails at the first of its graft
+failure date, retransplant (see <code>retransplant</code>) and death from any source
+(<code>REC_DEATH_DT_COMPOSITE</code>). The graft is censored at its last follow-up
+date, and an event after that date is not counted. Heart grafts
+(<code>TX_HR</code>) follow SRTR's heart rule instead: only death and retransplant
+count, the graft failure date is not used, and follow-up is not censored
+at the last follow-up date but ends where death ascertainment ends (see
+<code>death_window</code>). The date column holds the first event even when it is
+not counted, and <code>_SOURCE</code> says which it was (<code>"graft_failure"</code>,
+<code>"retransplant"</code> or <code>"death"</code>; on the same day, in that order).</p>
+<p>As in the SRTR reports, a graft is censored on the day of transplant,
+with no event, when any of its graft failure, retransplant or death
+dates falls before the transplant date (<code>_SOURCE</code> is then
+<code>"before_transplant"</code>, and a later event is not used in its place), or
+when its last follow-up date is missing or before the transplant date.
+Its time is then the one-day offset that <code><a href="srtr_time_to_event.html">srtr_time_to_event()</a></code> adds.</p>
+<p><strong>Death-censored graft failure</strong> (<code>TFL_GRAFT_DT</code>, or <code>TFL_GRAFT_DT_KI</code> and
+<code>TFL_GRAFT_DT_PA</code> for <code>TX_KP</code>) is not an SRTR report definition, and
+does not depend on <code>death_window</code>: a graft failure dated after the recipient's death from any source (<code>REC_DEATH_DT_COMPOSITE</code>)
 is not counted, and a graft without a failure is censored at the earlier of
 its last follow-up date and death. Death with a functioning graft is a
 censoring time, not a graft failure. A graft failure dated after the last
@@ -221,6 +258,15 @@ when the date is the day of death, <code>FALSE</code> when it is another day, an
 events. Such reports count as events by default when follow-up covers the
 day of death. The status columns from <code><a href="add_txf_outcomes.html">add_txf_outcomes()</a></code> say what the
 forms report, before the window is applied.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Scientific Registry of Transplant Recipients. Technical Methods for the
+Program-Specific Reports, section C, patient survival and graft survival.
+<a href="https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/" class="external-link">https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/</a></p>
+<p>Kim SJ, Snyder JJ. OPTN/SRTR registry analysis: the devil is in the
+details. Slides, American Transplant Congress; 2012. Slide 25
+(<code>TFL_ENDTXFU</code>). <a href="https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf" class="external-link">https://www.srtr.org/media/1106/atc2012_snyder_kim.pdf</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

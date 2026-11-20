@@ -56,10 +56,14 @@ SAFs also hold `TFL_ENDTXFU` (labeled “Cohort date” in the data
 dictionary), which SRTR staff describe as “the variable to use to
 identify the last possible follow-up date” for each recipient, with a
 three-month lag to allow forms to be completed ([Kim and Snyder
-2012](#ref-kim2012), slide 25). sRtr does not use it yet. Check it
-before you rely on it: in one liver release, it varied between
-registrations, and the last follow-up date was later than it for about a
-fifth of them. Compare the two in your files:
+2012](#ref-kim2012), slide 25). By default, sRtr uses it only to end
+death ascertainment for patient survival (see [Deaths found after
+follow-up ends](#deaths-found-after-follow-up-ends)) and heart graft
+failure; malignancy, rejection and other graft failure still end at the
+last follow-up date. Check it before you rely on it: in one liver
+release, it varied between registrations, and the last follow-up date
+was later than it for about a fifth of them. Compare the two in your
+files:
 
 ``` r
 
@@ -256,16 +260,21 @@ mask_n(sum(d$REC_DEATH_DT_COMPOSITE > d$TFL_LAFUDATE, na.rm = TRUE))
 
 [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
 offers two consistent choices through `death_window`. The default,
-`"follow_up"`, counts deaths on or before the last follow-up date and
-censors everyone else there. `"ascertainment"` shares the principle of
-the SRTR program-specific reports: deaths from any source count up to an
-ascertainment date, and everyone else is assumed alive and censored at
-that date. In SRTR’s words, patients “not reported to have died in any
-source are assumed to be alive” ([SRTR Technical Methods](#ref-psr)).
-Take the date from your SAF release notes.
+`"ascertainment"`, follows the SRTR program-specific reports: deaths
+from any source count up to where death ascertainment ends, and everyone
+else is assumed alive and censored there. In SRTR’s words, patients “not
+reported to have died in any source are assumed to be alive” ([SRTR
+Technical Methods](#ref-psr)). Ascertainment ends at each transplant’s
+`TFL_ENDTXFU`, which SRTR describes as “the variable to use to identify
+the last possible follow-up date”, with a “Built in lag of 3 months to
+allow for form completion” ([Kim and Snyder 2012](#ref-kim2012), slide
+25). `"follow_up"` instead counts deaths on or before the last follow-up
+date and censors everyone else there.
 
-It does not reproduce the published patient survival estimates. Those
-draw on death sources that
+sRtr’s defaults follow SRTR’s published definitions where SRTR gives
+one, and offer other practice as options. The default does not reproduce
+the published patient survival estimates. Those draw on death sources
+that
 [`srtr_composite_death()`](https://vagishhemmige.github.io/sRtr/reference/srtr_composite_death.md)
 does not combine, and report survival at fixed times after transplant;
 see [SRTR Technical Methods for the Program-Specific Reports, Section
@@ -273,10 +282,16 @@ C](https://srtr.hrsa.gov/transplant-professionals/program-specific-report/techni
 
 ``` r
 
-out_ascertainment <- sRtr:::add_time_to_event_outcomes(
+# Default: deaths from any source up to each transplant's TFL_ENDTXFU
+out <- sRtr:::add_time_to_event_outcomes(tx)
+
+# Censor everyone at their last follow-up form instead
+out_follow_up <- sRtr:::add_time_to_event_outcomes(tx, death_window = "follow_up")
+
+# Or one ascertainment date for everyone, from the release notes
+out_one_date <- sRtr:::add_time_to_event_outcomes(
   tx,
-  death_window = "ascertainment",
-  ascertainment_date = "YYYY-MM-DD" # from the release notes
+  ascertainment_date = "YYYY-MM-DD"
 )
 ```
 
@@ -291,24 +306,28 @@ SRTR’s reports count death as graft failure (“for all organs, deaths are
 considered to be graft failures”). They also count retransplant as graft
 failure for every organ except heart-lung and lung ([SRTR Technical
 Methods](#ref-psr); [Kim and Snyder 2012](#ref-kim2012), slide 27). sRtr
-dates graft failure from `TFL_GRAFT_DT` alone, and does not yet use the
-retransplant date (`PERS_RETX`). The earlier of `TFL_GRAFT_DT` and death
-is therefore a narrower end point than SRTR’s graft failure: it misses a
-retransplant that came first, or dates it too late. To follow SRTR’s
-definition, take the earliest of the recorded failure, the retransplant
-date and death, inside the observation window. Lung and heart-lung leave
-out retransplant, and heart uses only death and retransplant. For heart,
-SRTR also does not stop at the last OPTN follow-up date: deaths and
-retransplants after it still count, up to the reporting time point
-([SRTR Technical Methods](#ref-psr)). Combining events this way is a
-modeling choice: a composite end point disregards the possibility that
-the exposure affects its parts differently ([Sapir-Pichhadze et
-al. 2016](#ref-sapir)).
+follows this by default in its all-cause graft failure columns
+(`GRAFT_FAIL_ALL_CAUSE_DT`, with `_BINARY`, `_CENSOR`, `_days` and
+`_SOURCE`): the graft fails at the first of `TFL_GRAFT_DT`, the
+retransplant date (`PERS_RETX`) and death from any source, and is
+censored at its last follow-up date. Heart follows SRTR’s heart rule:
+only death and retransplant count, and follow-up does not stop at the
+last OPTN follow-up date but runs to where death ascertainment ends
+([SRTR Technical Methods](#ref-psr)). `retransplant = "ignore"` leaves
+retransplant out. Combining events this way is a modeling choice: a
+composite end point disregards the possibility that the exposure affects
+its parts differently ([Sapir-Pichhadze et al. 2016](#ref-sapir)).
 
-sRtr treats graft failure as death-censored: a failure dated after death
-does not count, and a graft without a failure is censored at the earlier
-of its last follow-up date and death. By default, a failure on the day
-of death counts as death with a working graft
+``` r
+
+mask(out$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE[out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY == 1])
+```
+
+The `TFL_GRAFT_DT` columns hold a second, narrower end point,
+death-censored graft failure: a failure dated after death does not
+count, and a graft without a failure is censored at the earlier of its
+last follow-up date and death. By default, a failure on the day of death
+counts as death with a working graft
 (`graft_death_same_day = "censor"`). That is a package assumption, not
 an SRTR rule, so run both:
 
