@@ -325,6 +325,15 @@ desirability:
 - If the commit fixes an issue, include `Fixes #num.` on its own line.
 - Push only as your permissions allow (see “Permissions are not set
   here”).
+- Issues opened through the GitHub API skip the forms in
+  `.github/ISSUE_TEMPLATE/`, so give them the same parts. A task says
+  what “done” looks like, is linked to its project as a sub-issue (a
+  project number in the text is only a reference), and carries its
+  organ, role, complexity and data-access labels. A project states its
+  type, aim, deliverables and who is working on what. The fields are
+  defined once, in the contribution article’s “What the labels mean”
+  section (`vignettes/articles/development.Rmd`). The no-patient-data
+  rule above applies to every issue and comment.
 
 ## Writing
 

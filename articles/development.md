@@ -82,6 +82,12 @@ Each of these has a defined finish, and none needs SRTR data.
     options or a short note is a complete contribution, even if it never
     becomes a code change.
 
+To suggest work that is not listed, open a [new
+issue](https://github.com/VagishHemmige/sRtr/issues/new/choose) with the
+**Task** form. It asks for what “done” looks like and a few of the
+labels below; leave anything you are unsure of, and a maintainer fills
+it in. There are also forms for a **Decision** and a **Bug**.
+
 Pull requests are reviewed by an automated ChatGPT review and merged by
 the maintainer. A pull request into the main branch (`master`) cannot be
 merged until that review has run. If you are a trainee working with the
