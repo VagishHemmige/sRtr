@@ -82,6 +82,13 @@ meaning is not documented.
 
 ## See also
 
+Guides:
+
+- [Releases](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#releases)
+
+- [Corrections to SRTR's
+  dictionary](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#corrections-to-srtrs-dictionary)
+
 [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
 and
 [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md),

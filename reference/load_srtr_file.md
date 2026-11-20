@@ -152,6 +152,22 @@ returned tibble includes two attributes:
 
 - `file_key`: the canonical dataset key used to load it
 
+## See also
+
+Guides:
+
+- [Load a
+  file](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#load-a-file)
+
+- [Missing
+  columns](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#missing-columns)
+
+- [Codes in no
+  format](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#codes-in-no-format)
+
+- [Load
+  less](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.html#load-less)
+
 ## Examples
 
 ``` r

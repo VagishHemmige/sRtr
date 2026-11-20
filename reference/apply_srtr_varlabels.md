@@ -68,6 +68,13 @@ or a key that cannot be worked out (no attribute and no object name, as
 when `df` is an expression), gives a warning. A known key whose columns
 are not in `df` is not a problem: nothing is changed.
 
+## See also
+
+Guides:
+
+- [Labels and
+  codes](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#labels-and-codes)
+
 ## Examples
 
 ``` r

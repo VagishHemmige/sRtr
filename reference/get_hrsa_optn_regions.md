@@ -73,6 +73,14 @@ Region 9 and all of Ohio in Region 10.
 
 ## See also
 
+Guides:
+
+- [Plotting UNOS/OPTN
+  regions](https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-unosoptn-regions)
+
+- [National maps with Alaska, Hawaii and Puerto
+  Rico](https://vagishhemmige.github.io/sRtr/articles/mapping.html#national-maps-with-alaska-hawaii-and-puerto-rico)
+
 [`sf::st_make_valid()`](https://r-spatial.github.io/sf/reference/valid.html),
 [`dplyr::summarise()`](https://dplyr.tidyverse.org/reference/summarise.html),
 [`get_hrsa_transplant_centers()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_transplant_centers.md),

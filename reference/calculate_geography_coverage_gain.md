@@ -118,6 +118,16 @@ the union of `existing_areas` and summarizes the portion of the added
 union that was not already covered. This avoids double-counting when
 added geographies overlap with each other or with existing ones.
 
+## See also
+
+Guides:
+
+- [Estimating additional coverage
+  gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#estimating-additional-coverage-gain)
+
+- [Starting from a null
+  base](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#starting-from-a-null-base)
+
 ## Examples
 
 ``` r

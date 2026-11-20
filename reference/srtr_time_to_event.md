@@ -77,3 +77,10 @@ Units suffix mapping: `years -> "_yrs"`, `months -> "_months"`,
 `days -> "_days"`. Negative times (e.g., when
 `start_date > censor/event`) trigger a warning, and the numeric time is
 set to `NA`.#'
+
+## See also
+
+Guides:
+
+- [Events count only while someone is
+  watching](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#events-count-only-while-someone-is-watching)

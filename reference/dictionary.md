@@ -43,3 +43,9 @@ A data frame with 6 columns:
 
 Extracted from SRTR data dictionary HTML snapshot
 (`data-raw/dataDictionary.html`).
+
+## See also
+
+Guides:
+
+- [Releases](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#releases)

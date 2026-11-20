@@ -37,6 +37,16 @@ set_srtr_wd(path, permanent = FALSE, release = NULL)
 
 The normalized path, invisibly
 
+## See also
+
+Guides:
+
+- [Point sRtr at your
+  SAFs](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#point-srtr-at-your-safs)
+
+- [Telling sRtr your
+  release](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#telling-srtr-your-release)
+
 ## Examples
 
 ``` r

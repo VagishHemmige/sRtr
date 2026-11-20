@@ -107,6 +107,16 @@ In the 2303 liver transplant file (TX_LI):
 
 Other releases and organs may differ.
 
+## See also
+
+Guides:
+
+- [Which death
+  date?](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#which-death-date)
+
+- [Deaths found after follow-up
+  ends](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#deaths-found-after-follow-up-ends)
+
 ## Examples
 
 ``` r

@@ -108,3 +108,10 @@ SRTR classification:
   a format labels "Missing"; for text it is a blank.
 
 - `"none"`: an ordinary value.
+
+## See also
+
+Guides:
+
+- [What the codes
+  mean](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#what-the-codes-mean)

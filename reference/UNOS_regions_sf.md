@@ -58,6 +58,13 @@ OPTN splits three states between regions: Northern Virginia is in Region
 object assigns whole states, so all of Virginia is in Region 11, all of
 Vermont in Region 9 and all of Ohio in Region 10.
 
+## See also
+
+Guides:
+
+- [Built-in spatial
+  datasets](https://vagishhemmige.github.io/sRtr/articles/mapping.html#built-in-spatial-datasets)
+
 ## Examples
 
 ``` r

@@ -38,3 +38,10 @@ Versions are added by a monthly check of
 <https://www.srtr.org/docs/datadictionary.html>. A snapshot is named by
 the release and a revision number (`"2609-1"`), since SRTR can revise a
 page without changing its release.
+
+## See also
+
+Guides:
+
+- [What a release between two copies can and cannot
+  know](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#what-a-release-between-two-copies-can-and-cannot-know)

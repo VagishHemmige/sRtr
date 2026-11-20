@@ -171,6 +171,14 @@ default, because a wide file can gain hundreds of them.
 
 ## See also
 
+Guides:
+
+- [Choosing what becomes
+  NA](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#choosing-what-becomes-na)
+
+- [Adjusting a
+  policy](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#adjusting-a-policy)
+
 [`srtr_missing_report()`](https://vagishhemmige.github.io/sRtr/reference/srtr_missing_report.md),
 [missing_codes](https://vagishhemmige.github.io/sRtr/reference/missing_codes.md)
 

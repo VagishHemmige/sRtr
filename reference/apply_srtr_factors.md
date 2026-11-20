@@ -112,6 +112,16 @@ level, the original code.
 [`srtr_missing_report()`](https://vagishhemmige.github.io/sRtr/reference/srtr_missing_report.md)
 uses it to recognise those codes after labelling.
 
+## See also
+
+Guides:
+
+- [Labels and
+  codes](https://vagishhemmige.github.io/sRtr/articles/getting-started.html#labels-and-codes)
+
+- [Codes in no
+  format](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#codes-in-no-format)
+
 ## Examples
 
 ``` r

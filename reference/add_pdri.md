@@ -68,6 +68,19 @@ the same way in each. A missing race (`NA`, or the format's missing code
 `mean_impute = TRUE`, whatever the encoding. Continuous inputs (age,
 creatinine, height, weight, BMI and cold ischemia time) must be numeric.
 
+## See also
+
+Guides:
+
+- [The
+  scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores)
+
+- [Missing and unknown
+  inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
+
+- [Codes or
+  labels](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#codes-or-labels)
+
 ## Examples
 
 ``` r

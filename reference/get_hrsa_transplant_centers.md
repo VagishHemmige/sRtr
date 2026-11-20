@@ -43,6 +43,14 @@ suppressed.
 
 ## See also
 
+Guides:
+
+- [Downloading current HRSA transplant center
+  locations](https://vagishhemmige.github.io/sRtr/articles/mapping.html#downloading-current-hrsa-transplant-center-locations)
+
+- [Filtering by organ or service
+  list](https://vagishhemmige.github.io/sRtr/articles/mapping.html#filtering-by-organ-or-service-list)
+
 [`sf::st_read()`](https://r-spatial.github.io/sf/reference/st_read.html),
 [`labelled::var_label()`](https://larmarange.github.io/labelled/reference/var_label.html)
 

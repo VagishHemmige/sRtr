@@ -38,6 +38,13 @@ Coordinates are consumed by
 stored in the `geometry` column; the original numeric longitude/latitude
 columns are not retained.
 
+## See also
+
+Guides:
+
+- [Plotting transplant
+  centers](https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-transplant-centers)
+
 ## Examples
 
 ``` r

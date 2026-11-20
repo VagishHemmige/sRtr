@@ -64,6 +64,16 @@ diagnosis and treatment of pulmonary hypertension. *Eur Heart J*
 [doi:10.1093/eurheartj/ehac237](https://doi.org/10.1093/eurheartj/ehac237)
 (Section 5.1.12.1 and Table 11.)
 
+## See also
+
+Guides:
+
+- [The
+  scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores)
+
+- [Missing and unknown
+  inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
+
 ## Examples
 
 ``` r

@@ -59,3 +59,10 @@ it as an inference. The table built from 2024 donors (scaling factor
 and is not stored. An EPTS table's label is the year of its December 31
 waiting-list snapshot. The newest table of each kind is labelled
 `"current"`.
+
+## See also
+
+Guides:
+
+- [Which mapping table: KDPI and
+  EPTS](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts)

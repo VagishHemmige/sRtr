@@ -119,6 +119,16 @@ OPTN. *A Guide to Calculating and Interpreting the Kidney Donor Profile
 Index (KDPI).* Updated 2020-03-23 (Table 1, Rao 2009 coefficients) and
 2026-04-23 (Table 1, refit coefficients).
 
+## See also
+
+Guides:
+
+- [Which mapping table: KDPI and
+  EPTS](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts)
+
+- [Missing and unknown
+  inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
+
 ## Examples
 
 ``` r

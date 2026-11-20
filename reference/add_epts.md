@@ -114,6 +114,16 @@ OPTN. *A Guide to Calculating and Interpreting the Estimated
 Post-Transplant Survival (EPTS) Score Used in the Kidney Allocation
 System.* Updated 2026-04-07 (formula and worked examples).
 
+## See also
+
+Guides:
+
+- [Which mapping table: KDPI and
+  EPTS](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts)
+
+- [Missing and unknown
+  inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
+
 ## Examples
 
 ``` r

@@ -49,6 +49,11 @@ bundled with sRtr and works offline.
 
 ## See also
 
+Guides:
+
+- [National maps with Alaska, Hawaii and Puerto
+  Rico](https://vagishhemmige.github.io/sRtr/articles/mapping.html#national-maps-with-alaska-hawaii-and-puerto-rico)
+
 [`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md)
 with `noncontiguous = "shift"`.
 

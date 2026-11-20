@@ -94,6 +94,16 @@ kidney transplantation. *Am J Transplant* 2016;16:2077-2084.
 [doi:10.1111/ajt.13709](https://doi.org/10.1111/ajt.13709) (Results,
 "Calculation of the LKDPI".)
 
+## See also
+
+Guides:
+
+- [The
+  scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores)
+
+- [Missing and unknown
+  inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
+
 ## Examples
 
 ``` r

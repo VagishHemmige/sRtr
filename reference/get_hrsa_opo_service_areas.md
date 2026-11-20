@@ -47,6 +47,11 @@ suppressed.
 
 ## See also
 
+Guides:
+
+- [Plotting OPO service
+  areas](https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-opo-service-areas)
+
 [`sf::st_read()`](https://r-spatial.github.io/sf/reference/st_read.html),
 [`labelled::var_label()`](https://larmarange.github.io/labelled/reference/var_label.html),
 [`get_hrsa_transplant_centers()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_transplant_centers.md)

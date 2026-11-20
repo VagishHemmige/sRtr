@@ -79,3 +79,10 @@ accounting for overlap with an existing network.
 The function assumes that `candidate_areas` and `existing_areas` already
 contain the catchment geometries to evaluate. It does not create
 buffers, travel-time isochrones, or other catchment areas internally.
+
+## See also
+
+Guides:
+
+- [Ranking centers by incremental
+  gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.html#ranking-centers-by-incremental-gain)

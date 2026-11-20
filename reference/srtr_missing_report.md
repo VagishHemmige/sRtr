@@ -120,6 +120,11 @@ the data.
 
 ## See also
 
+Guides:
+
+- [What is in the
+  data](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#what-is-in-the-data)
+
 [missing_codes](https://vagishhemmige.github.io/sRtr/reference/missing_codes.md),
 [`srtr_normalize_missing()`](https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.md)
 

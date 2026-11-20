@@ -131,6 +131,20 @@ cannot be assigned to one graft, and give a warning.
 
 ## See also
 
+Guides:
+
+- ["Rejection" has more than one
+  meaning](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#rejection-has-more-than-one-meaning)
+
+- [Rejection during the transplant admission is not on the follow-up
+  forms](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#rejection-during-the-transplant-admission-is-not-on-the-follow-up-forms)
+
+- [A form date is not an onset
+  date](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#a-form-date-is-not-an-onset-date)
+
+- [Which section answers your
+  question](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#which-section-answers-your-question)
+
 [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md),
 [`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md),
 [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)

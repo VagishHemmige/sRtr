@@ -168,3 +168,19 @@ events by default when follow-up covers the day of death. The status
 columns from
 [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
 say what the forms report, before the window is applied.
+
+## See also
+
+Guides:
+
+- [Events count only while someone is
+  watching](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#events-count-only-while-someone-is-watching)
+
+- [Whose
+  follow-up?](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#whose-follow-up)
+
+- [Graft failure and death on the same
+  day](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#graft-failure-and-death-on-the-same-day)
+
+- [Rejection after the graft has
+  failed](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#rejection-after-the-graft-has-failed)
