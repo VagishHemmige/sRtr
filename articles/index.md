@@ -2,11 +2,14 @@
 
 ### Start here
 
-Install sRtr, point it at your SAF folder and load a first file. Then
-check that sRtr reads your own release correctly.
+Install sRtr, point it at your SAF folder and load a first file, keeping
+the files protected. Then check that sRtr reads your own release
+correctly.
 
 - [Getting started with
   sRtr](https://vagishhemmige.github.io/sRtr/articles/getting-started.md):
+- [Data protection and
+  security](https://vagishhemmige.github.io/sRtr/articles/data-protection.md):
 - [Checking sRtr on your own
   SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md):
 - [Releases, the data dictionary and
