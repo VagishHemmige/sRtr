@@ -61,7 +61,8 @@ test_that("live: TRR_ID is unique in TX_LI and every TXF_LI form links to it", {
 
   expect_equal(sum(is.na(tx$TRR_ID)), 0)
   expect_equal(anyDuplicated(tx$TRR_ID), 0)
-  expect_equal(sum(!stats::na.omit(unique(txf$TRR_ID)) %in% tx$TRR_ID), 0)
+  expect_equal(sum(is.na(txf$TRR_ID)), 0)
+  expect_equal(sum(!unique(txf$TRR_ID) %in% tx$TRR_ID), 0)
 })
 
 test_that("live: TX_LI has no blank text and no blank factor level", {

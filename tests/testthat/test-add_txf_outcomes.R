@@ -722,7 +722,8 @@ test_that("live: merging TXF_LI keeps one row per TX_LI row, in order", {
   )
 
   expect_equal(nrow(out), nrow(tx))
-  expect_equal(out$TRR_ID, tx$TRR_ID)
+  # Compared as one TRUE/FALSE so a failure prints no identifiers.
+  expect_identical(identical(out$TRR_ID, tx$TRR_ID), TRUE)
 })
 
 test_that("live: excluding rejection after graft failure removes only dated events", {
