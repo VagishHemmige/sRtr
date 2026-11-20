@@ -394,6 +394,24 @@ test_that("an extra code whose label another code shares must cover both", {
   expect_equal(found$type, c("unknown", NA))
 })
 
+test_that("live: normalizing TX_LI sets to NA exactly what the report counts", {
+  skip_if_no_srtr_file("TX_LI")
+  tx <- load_live("TX_LI")
+  release <- srtr_live_release()
+
+  report <- srtr_missing_report(tx, file_key = "TX_LI", release = release)
+  out <- srtr_normalize_missing(tx, file_key = "TX_LI", release = release)
+
+  # Under "analysis", these types become NA; values already missing in SAS
+  # are NA before and after, so they add nothing.
+  policy <- .srtr_missing_policies$analysis
+  to_na <- setdiff(names(policy)[policy == "na"], "sas_missing")
+  expected <- sum(report$n[report$missing_type %in% to_na])
+  n_na <- function(df) sum(vapply(df, \(x) sum(is.na(x)), numeric(1)))
+  gained <- n_na(out) - n_na(tx)
+  expect_equal(gained, expected)
+})
+
 test_that("live: normalizing TX_LI leaves no 998 Unknown REC_FUNCTN_STAT level", {
   skip_if_no_srtr_file("TX_LI")
   tx <- load_live("TX_LI", col_select = c("TRR_ID", "REC_FUNCTN_STAT"))

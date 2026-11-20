@@ -713,6 +713,19 @@ test_that("live: follow-up status, bounds and window hold on real liver files", 
   }
 })
 
+test_that("live: merging TXF_LI keeps one row per TX_LI row, in order", {
+  skip_if_no_srtr_file(c("TX_LI", "TXF_LI"))
+  tx <- load_live("TX_LI")
+  out <- withCallingHandlers(
+    add_txf_outcomes(tx),
+    sRtr_warning_unknown_codes = function(cnd) rlang::cnd_muffle(cnd)
+  )
+
+  expect_equal(nrow(out), nrow(tx))
+  # Compared as one TRUE/FALSE so a failure prints no identifiers.
+  expect_identical(identical(out$TRR_ID, tx$TRR_ID), TRUE)
+})
+
 test_that("live: excluding rejection after graft failure removes only dated events", {
   skip_if_no_srtr_file(c("TX_LI", "TXF_LI"))
   quiet <- function(expr) {

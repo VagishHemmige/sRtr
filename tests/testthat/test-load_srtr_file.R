@@ -44,6 +44,27 @@ test_that("live: the liver SAFs load with their key columns", {
   }
 })
 
+test_that("live: the liver SAFs have every column the bundled dictionary lists", {
+  keys <- srtr_live_keys_present(c("TX_LI", "TXF_LI", "CAND_LIIN", "DONOR_DECEASED"))
+
+  for (key in keys) {
+    expect_no_error(
+      load_live(key, column_check = "error", factor_labels = FALSE, var_labels = FALSE)
+    )
+  }
+})
+
+test_that("live: TRR_ID is unique in TX_LI and every TXF_LI form links to it", {
+  skip_if_no_srtr_file(c("TX_LI", "TXF_LI"))
+  tx <- load_live("TX_LI", col_select = "TRR_ID")
+  txf <- load_live("TXF_LI", col_select = "TRR_ID")
+
+  expect_equal(sum(is.na(tx$TRR_ID)), 0)
+  expect_equal(anyDuplicated(tx$TRR_ID), 0)
+  expect_equal(sum(is.na(txf$TRR_ID)), 0)
+  expect_equal(sum(!unique(txf$TRR_ID) %in% tx$TRR_ID), 0)
+})
+
 test_that("live: TX_LI has no blank text and no blank factor level", {
   skip_if_no_srtr_file("TX_LI")
 
