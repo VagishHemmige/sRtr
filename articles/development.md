@@ -190,6 +190,11 @@ working on what.
   ([\#284](https://github.com/VagishHemmige/sRtr/issues/284)).
   *Infrastructure; Not organ-specific.* Prepare the package and
   repository for a first CRAN release and for more contributors.
+- **Data protection and security**
+  ([\#303](https://github.com/VagishHemmige/sRtr/issues/303)). *Data
+  protection; Not organ-specific.* Keep SAFs out of version control,
+  check outputs for small cells, and grow the data protection guide as
+  each protection lands.
 
 ## What the labels mean
 
