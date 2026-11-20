@@ -123,6 +123,13 @@ at the last follow-up date but ends where death ascertainment ends (see
 not counted, and \verb{_SOURCE} says which it was (\code{"graft_failure"},
 \code{"retransplant"} or \code{"death"}; on the same day, in that order).
 
+As in the SRTR reports, a graft is censored on the day of transplant,
+with no event, when any of its graft failure, retransplant or death
+dates falls before the transplant date (\verb{_SOURCE} is then
+\code{"before_transplant"}, and a later event is not used in its place), or
+when its last follow-up date is missing or before the transplant date.
+Its time is then the one-day offset that \code{\link[=srtr_time_to_event]{srtr_time_to_event()}} adds.
+
 \strong{Death-censored graft failure} (\code{TFL_GRAFT_DT}, or \code{TFL_GRAFT_DT_KI} and
 \code{TFL_GRAFT_DT_PA} for \code{TX_KP}) is not an SRTR report definition, and
 does not depend on \code{death_window}: a graft failure dated after the recipient's death from any source (\code{REC_DEATH_DT_COMPOSITE})

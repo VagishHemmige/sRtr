@@ -347,6 +347,43 @@ test_that("all-cause graft failure is the first of failure, retransplant and dea
   expect_equal(out$TFL_GRAFT_DT_BINARY, c(0L, 1L, 0L, 0L, 0L, 1L))
 })
 
+test_that("all-cause graft failure censors invalid records on the day of transplant", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- graft_cohort()[c(4, 4, 4, 2), ]
+  df$TRR_ID <- 900031:900034
+  # 900031: retransplant the day before the transplant, nothing else.
+  df$PERS_RETX[1] <- as.Date("1999-12-31")
+  # 900032: graft failure before the transplant, then a death after it.
+  df$TFL_GRAFT_DT[2] <- as.Date("1999-06-01")
+  df$PERS_OPTN_DEATH_DT[2] <- as.Date("2002-01-01")
+  # 900033: no last follow-up date. 900034: last follow-up before transplant.
+  df$TFL_LAFUDATE[3] <- as.Date(NA)
+  df$TFL_LAFUDATE[4] <- as.Date("1999-01-01")
+  # Only the death-censored columns warn about 900032's negative time.
+  warnings <- character()
+  out <- withCallingHandlers(
+    add_time_to_event_outcomes(df, rejection_after_graft_failure = "keep"),
+    warning = function(cnd) {
+      warnings <<- c(warnings, conditionMessage(cnd))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_equal(sum(grepl("GRAFT_FAIL_ALL_CAUSE", warnings)), 0)
+
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY, c(0L, 0L, 0L, 0L))
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_CENSOR, rep(as.Date("2000-01-01"), 4))
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_days, rep(1, 4))
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE,
+    c("before_transplant", "before_transplant", NA, "graft_failure")
+  )
+  # The raw first date is kept for auditing.
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT[1:2],
+    as.Date(c("1999-12-31", "1999-06-01"))
+  )
+})
+
 test_that("retransplant = 'ignore' leaves retransplant out", {
   local_mocked_bindings(load_srtr_file = no_follow_up_forms)
   df <- graft_cohort()

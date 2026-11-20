@@ -504,6 +504,13 @@ add_txf_outcomes <- function(df) {
 #' not counted, and `_SOURCE` says which it was (`"graft_failure"`,
 #' `"retransplant"` or `"death"`; on the same day, in that order).
 #'
+#' As in the SRTR reports, a graft is censored on the day of transplant,
+#' with no event, when any of its graft failure, retransplant or death
+#' dates falls before the transplant date (`_SOURCE` is then
+#' `"before_transplant"`, and a later event is not used in its place), or
+#' when its last follow-up date is missing or before the transplant date.
+#' Its time is then the one-day offset that [srtr_time_to_event()] adds.
+#'
 #' **Death-censored graft failure** (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI` and
 #' `TFL_GRAFT_DT_PA` for `TX_KP`) is not an SRTR report definition, and
 #' does not depend on `death_window`: a graft failure dated after the recipient's death from any source (`REC_DEATH_DT_COMPOSITE`)
@@ -696,7 +703,22 @@ add_time_to_event_outcomes <- function(
     }
     censor <- if (organ == "heart") df$.death_censor else df[[graft$lafu]]
     first <- .srtr_first_failure(failure, retx, death)
-    counted <- !is.na(first$date) & !is.na(censor) & first$date <= censor
+    #PSR: a graft failure recorded before the transplant date, no follow-up,
+    #a missing last follow-up date or one before the transplant date are
+    #"analyzed as censored (lost to follow-up) on the day of transplant".
+    #Any event dated before the transplant marks the record invalid; a later
+    #event is not used in its place.
+    tx <- df$REC_TX_DT
+    before_tx <- Reduce(`|`, lapply(list(failure, retx, death), function(d) {
+      !is.na(d) & !is.na(tx) & d < tx
+    }))
+    lafu <- df[[graft$lafu]]
+    no_follow_up <- !is.na(tx) & (is.na(lafu) | lafu < tx)
+    invalid <- before_tx | no_follow_up
+    first$source[before_tx] <- "before_transplant"
+    censor[invalid] <- tx[invalid]
+    counted <- !invalid & !is.na(first$date) & !is.na(censor) &
+      first$date <= censor
     df[[graft$prefix]] <- first$date
     df[[paste0(graft$prefix, "_SOURCE")]] <- first$source
     df$.graft_event <- dplyr::if_else(counted, first$date, as.Date(NA))
