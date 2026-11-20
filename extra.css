@@ -1,0 +1,95 @@
+/* Site styles added on top of pkgdown's Bootstrap 5 theme (#287).
+   Only spacing, help-page argument layout, the page-type label and the
+   index cards change here; colors and fonts stay pkgdown's. */
+
+/* Reading comfort: more line height, and prose capped near 72 characters
+   so lines stay easy to follow on wide screens. Tables and code keep the
+   full column width. */
+main {
+  line-height: 1.6;
+}
+
+main p,
+main li,
+main dd,
+main blockquote {
+  max-width: 72ch;
+}
+
+/* More space above section headings, so sections read as separate. */
+main h2 {
+  margin-top: 2.5rem;
+}
+
+main h3 {
+  margin-top: 2rem;
+}
+
+/* Room around code, so code and prose do not run together. */
+main div.sourceCode,
+main pre {
+  margin-top: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Help pages: each argument as a separate row, with its name in code type
+   and its description beneath it. pkgdown gives argument names
+   ids that start with "arg-", so this needs no script. */
+main dt[id^="arg-"] {
+  font-family: var(--bs-font-monospace);
+  font-weight: 600;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+main dl > dt[id^="arg-"]:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* pkgdown already indents the description; keep its indent. */
+main dt[id^="arg-"] + dd {
+  margin-bottom: 0;
+}
+
+main dt[id^="arg-"] + dd > p:last-child {
+  margin-bottom: 0.25rem;
+}
+
+/* Page-type label above the title ("Guide · Define outcomes", "Function
+   reference"), added by extra.js. Plain text, not a heading. */
+.srtr-page-type {
+  margin: 0 0 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+}
+
+/* Index pages: each group of guides or functions as a card, with its
+   description, so groups read as units on a long page. */
+main .section:has(> .section-desc) {
+  clear: both; /* start below the floated logo in the page header */
+  margin-top: 0.75rem;
+  padding: 1rem 1.25rem 0.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+main .section:has(> .section-desc) > h2,
+main .section:has(> .section-desc) > h3 {
+  margin-top: 0;
+}
+
+main .section:has(> .section-desc) .section-desc {
+  color: var(--bs-secondary-color);
+}
+
+@media (max-width: 575.98px) {
+  main .section:has(> .section-desc) {
+    padding: 0.75rem 0.875rem 0.125rem;
+  }
+}
