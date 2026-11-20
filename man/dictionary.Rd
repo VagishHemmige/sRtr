@@ -25,4 +25,10 @@ dictionary
 A lookup table of variable metadata extracted from the Scientific Registry of Transplant Recipients (SRTR) data dictionary.
 This dataset describes the variable name, type, length, label, and associated format for each variable in each dataset.
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#releases}{Releases}
+}
+}
 \keyword{datasets}

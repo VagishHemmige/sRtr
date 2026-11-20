@@ -51,5 +51,10 @@ if (requireNamespace("sf", quietly = TRUE)) {
 
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/mapping.html#national-maps-with-alaska-hawaii-and-puerto-rico}{National maps with Alaska, Hawaii and Puerto Rico}
+}
+
 \code{\link[=get_hrsa_optn_regions]{get_hrsa_optn_regions()}} with \code{noncontiguous = "shift"}.
 }

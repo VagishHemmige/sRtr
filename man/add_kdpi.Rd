@@ -109,3 +109,10 @@ OPTN. \emph{A Guide to Calculating and Interpreting the Kidney Donor Profile
 Index (KDPI).} Updated 2020-03-23 (Table 1, Rao 2009 coefficients) and
 2026-04-23 (Table 1, refit coefficients).
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts}{Which mapping table: KDPI and EPTS}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs}{Missing and unknown inputs}
+}
+}

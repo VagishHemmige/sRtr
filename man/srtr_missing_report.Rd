@@ -85,5 +85,10 @@ srtr_missing_report(df, file_key = "TX_KI")
 srtr_missing_report(df, file_key = "TX_KI", detail = "code")
 }
 \seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/missing-data.html#what-is-in-the-data}{What is in the data}
+}
+
 \link{missing_codes}, \code{\link[=srtr_normalize_missing]{srtr_normalize_missing()}}
 }

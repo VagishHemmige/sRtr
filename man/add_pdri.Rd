@@ -85,3 +85,11 @@ pa |> add_pdri(variant = "PA")
 }
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores}{The scores}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs}{Missing and unknown inputs}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#codes-or-labels}{Codes or labels}
+}
+}

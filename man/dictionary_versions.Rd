@@ -34,4 +34,10 @@ Versions are added by a monthly check of
 release and a revision number (\code{"2609-1"}), since SRTR can revise a page
 without changing its release.
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#what-a-release-between-two-copies-can-and-cannot-know}{What a release between two copies can and cannot know}
+}
+}
 \keyword{datasets}

@@ -52,4 +52,10 @@ in the OPTN KDPI guide) is not in OPTN's archive and is not stored. An
 EPTS table's label is the year of its December 31 waiting-list snapshot.
 The newest table of each kind is labelled \code{"current"}.
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts}{Which mapping table: KDPI and EPTS}
+}
+}
 \keyword{datasets}

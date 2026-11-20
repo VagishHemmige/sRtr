@@ -89,3 +89,10 @@ Other releases and organs may differ.
 df <- srtr_composite_death(df)
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#which-death-date}{Which death date?}
+\item \href{https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#deaths-found-after-follow-up-ends}{Deaths found after follow-up ends}
+}
+}

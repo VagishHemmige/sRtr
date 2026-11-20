@@ -80,4 +80,10 @@ a format labels "Missing"; for text it is a blank.
 \item \code{"none"}: an ordinary value.
 }
 }
+\seealso{
+Guides:
+\itemize{
+\item \href{https://vagishhemmige.github.io/sRtr/articles/missing-data.html#what-the-codes-mean}{What the codes mean}
+}
+}
 \keyword{datasets}
