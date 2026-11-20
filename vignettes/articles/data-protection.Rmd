@@ -10,7 +10,9 @@ SRTR standard analysis files (SAFs) are restricted data. This page says what
 sRtr does to help keep them protected, what it does not do, and what is
 planned. It is a first version: sRtr's protections are still being built, and
 each one is added here when it arrives. Planned items link to their GitHub
-issue, where the design is discussed.
+issue, where the design is discussed; the
+[data protection project](https://github.com/VagishHemmige/sRtr/issues/303)
+gathers them.
 
 Nothing here replaces your data use agreement (DUA) or your data security
 plan. They decide what you may do; sRtr can only make the safe path easier.

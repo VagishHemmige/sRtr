@@ -13,3 +13,4 @@ issue,project,type,organs,summary
 282,Validation against published numbers,validation,all,"Check sRtr's results against numbers SRTR and published papers report."
 283,Documentation and site,documentation,none,"Help a new reader go from a first load to a defined outcome, and see where to contribute."
 284,Package infrastructure and CRAN,infrastructure,none,"Prepare the package and repository for a first CRAN release and for more contributors."
+303,Data protection and security,data protection,none,"Keep SAFs out of version control, check outputs for small cells, and grow the data protection guide as each protection lands."
