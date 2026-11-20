@@ -63,9 +63,9 @@ use to identify the last possible follow-up date" for each recipient, with a
 three-month lag to allow forms to be completed
 ([Kim and Snyder 2012](#ref-kim2012), slide 25). By default, sRtr uses it
 only to end death ascertainment for patient survival (see
-[Deaths found after follow-up ends](#deaths-found-after-follow-up-ends));
-malignancy, rejection and graft failure still end at the last follow-up
-date. Check it before you rely on it: in one liver release, it varied between
+[Deaths found after follow-up ends](#deaths-found-after-follow-up-ends)) and
+heart graft failure; malignancy, rejection and other graft failure still
+end at the last follow-up date. Check it before you rely on it: in one liver release, it varied between
 registrations, and the last follow-up date was later than it for about a
 fifth of them. Compare the two in your files:
 
@@ -356,22 +356,25 @@ SRTR's reports count death as graft failure ("for all organs, deaths are
 considered to be graft failures"). They also count retransplant as graft
 failure for every organ except heart-lung and lung
 ([SRTR Technical Methods](#ref-psr);
-[Kim and Snyder 2012](#ref-kim2012), slide 27). sRtr dates graft failure
-from `TFL_GRAFT_DT` alone, and does not yet use the retransplant date
-(`PERS_RETX`). The earlier of `TFL_GRAFT_DT` and death is therefore a
-narrower end point than SRTR's graft failure: it misses a retransplant
-that came first, or dates it too late. To follow SRTR's definition, take
-the earliest of the recorded failure, the retransplant date and death,
-inside the observation window. Lung and heart-lung leave out retransplant,
-and heart uses only death and retransplant. For heart, SRTR also does not
-stop at the last OPTN follow-up date: deaths and retransplants after it
-still count, up to the reporting time point
-([SRTR Technical Methods](#ref-psr)). Combining events this way is a
-modeling choice: a composite end point disregards the possibility that the
-exposure affects its parts differently
+[Kim and Snyder 2012](#ref-kim2012), slide 27). sRtr follows this by
+default in its all-cause graft failure columns (`GRAFT_FAIL_ALL_CAUSE_DT`,
+with `_BINARY`, `_CENSOR`, `_days` and `_SOURCE`): the graft fails at the
+first of `TFL_GRAFT_DT`, the retransplant date (`PERS_RETX`) and death from
+any source, and is censored at its last follow-up date. Heart follows
+SRTR's heart rule: only death and retransplant count, and follow-up does
+not stop at the last OPTN follow-up date but runs to where death
+ascertainment ends ([SRTR Technical Methods](#ref-psr)).
+`retransplant = "ignore"` leaves retransplant out. Combining events this
+way is a modeling choice: a composite end point disregards the possibility
+that the exposure affects its parts differently
 ([Sapir-Pichhadze et al. 2016](#ref-sapir)).
 
-sRtr treats graft failure as death-censored: a failure dated after death
+```{r}
+mask(out$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE[out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY == 1])
+```
+
+The `TFL_GRAFT_DT` columns hold a second, narrower end point,
+death-censored graft failure: a failure dated after death
 does not count, and a graft without a failure is censored at the earlier of
 its last follow-up date and death. By default, a failure on the day of
 death counts as death with a working graft (`graft_death_same_day =

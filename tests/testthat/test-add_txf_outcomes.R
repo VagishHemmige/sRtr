@@ -118,6 +118,7 @@ test_that("add_time_to_event_outcomes() builds rejection dates without dplyr att
     ),
     TFL_LAFUDATE = as.Date(c("2006-01-01", "2006-01-01")),
     TFL_ENDTXFU = as.Date("2010-01-01"),
+    PERS_RETX = as.Date(NA),
     TFL_GRAFT_DT = as.Date(NA)
   )
   attr(df, "file_key") <- "TX_KI"
@@ -184,12 +185,15 @@ fake_cohort <- function(file_key) {
     PERS_OPTN_DEATH_DT = as.Date(c(NA, "2004-01-01")),
     PERS_SSA_DEATH_DT = as.Date(NA),
     TFL_DEATH_DT = as.Date(NA),
-    TFL_ENDTXFU = as.Date("2010-01-01")
+    TFL_ENDTXFU = as.Date("2010-01-01"),
+    PERS_RETX = as.Date(NA)
   )
   if (file_key == "TX_KP") {
     df$REC_ACUTE_REJ_EPISODE_PA <- "3: No"
     df$TFL_GRAFT_DT_KI <- as.Date(NA)
     df$TFL_GRAFT_DT_PA <- as.Date(NA)
+    df$PERS_RETXKI <- as.Date(NA)
+    df$PERS_RETXPA <- as.Date(NA)
     df$TFL_LAFUDATEKI <- as.Date(c("2003-01-01", "2004-01-01"))
     df$TFL_LAFUDATEPA <- as.Date(c("2005-01-01", "2002-01-01"))
   } else {
@@ -301,7 +305,8 @@ admission_rejection_cohort <- function() {
     TFL_DEATH_DT = as.Date(NA),
     TFL_GRAFT_DT = as.Date(NA),
     TFL_LAFUDATE = as.Date("2005-01-01"),
-    TFL_ENDTXFU = as.Date("2010-01-01")
+    TFL_ENDTXFU = as.Date("2010-01-01"),
+    PERS_RETX = as.Date(NA)
   )
   attr(df, "file_key") <- "TX_KI"
   df
@@ -594,7 +599,8 @@ window_cohort <- function() {
     TFL_DEATH_DT = as.Date(NA),
     TFL_GRAFT_DT = as.Date(NA),
     TFL_LAFUDATE = as.Date(c(rep("2005-01-01", 5), NA)),
-    TFL_ENDTXFU = as.Date("2010-01-01")
+    TFL_ENDTXFU = as.Date("2010-01-01"),
+    PERS_RETX = as.Date(NA)
   )
   attr(df, "file_key") <- "TX_KI"
   df
@@ -1080,9 +1086,11 @@ test_that("excluding rejection after graft failure needs the graft failure date"
   local_mocked_bindings(load_srtr_file = function(...) gf_forms())
 
   expect_error(add_time_to_event_outcomes(df), class = "sRtr_error_missing_columns")
-  # With "keep", the column is not needed.
-  out <- add_time_to_event_outcomes(df, rejection_after_graft_failure = "keep")
-  expect_equal(out$FIRST_REJ_DATE_BINARY, rep(1L, 5))
+  # All-cause graft failure needs it too, so "keep" does not drop it.
+  expect_error(
+    add_time_to_event_outcomes(df, rejection_after_graft_failure = "keep"),
+    class = "sRtr_error_missing_columns"
+  )
   # A present column with unknown dates is fine: no failure, no bound. The
   # ordinary form (900002) counts; the 801 forms are still left out.
   df$TFL_GRAFT_DT <- as.Date(NA)

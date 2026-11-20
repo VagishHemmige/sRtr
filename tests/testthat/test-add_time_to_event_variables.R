@@ -14,7 +14,8 @@ death_cohort <- function() {
     TFL_DEATH_DT = as.Date(NA),
     TFL_GRAFT_DT = as.Date(NA),
     TFL_LAFUDATE = as.Date("2004-01-01"),
-    TFL_ENDTXFU = as.Date("2007-01-01")
+    TFL_ENDTXFU = as.Date("2007-01-01"),
+    PERS_RETX = as.Date(NA)
   )
   attr(df, "file_key") <- "TX_KI"
   df
@@ -211,7 +212,8 @@ graft_cohort <- function() {
       c(NA, "2001-06-01", "2003-01-01", NA, NA, "2002-06-01")
     ),
     TFL_LAFUDATE = as.Date("2004-01-01"),
-    TFL_ENDTXFU = as.Date("2010-01-01")
+    TFL_ENDTXFU = as.Date("2010-01-01"),
+    PERS_RETX = as.Date(NA)
   )
   attr(df, "file_key") <- "TX_KI"
   df
@@ -301,6 +303,8 @@ test_that("TX_KP kidney and pancreas graft failure are each censored at death", 
     TFL_GRAFT_DT_PA = as.Date(c(NA, "2003-01-01")),
     TFL_LAFUDATEKI = as.Date(c("2003-01-01", "2004-01-01")),
     TFL_ENDTXFU = as.Date("2010-01-01"),
+    PERS_RETXKI = as.Date(NA),
+    PERS_RETXPA = as.Date(NA),
     TFL_LAFUDATEPA = as.Date(c("2005-01-01", "2004-01-01"))
   )
   attr(df, "file_key") <- "TX_KP"
@@ -314,6 +318,158 @@ test_that("TX_KP kidney and pancreas graft failure are each censored at death", 
   expect_equal(out$TFL_GRAFT_DT_PA_BINARY, c(0L, 1L))
   expect_equal(
     out$TFL_GRAFT_DT_PA_CENSOR,
+    as.Date(c("2002-01-01", "2003-01-01"))
+  )
+})
+
+test_that("all-cause graft failure is the first of failure, retransplant and death", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- graft_cohort()
+  df$PERS_RETX[4] <- as.Date("2003-01-01")
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE,
+    c("death", "graft_failure", "death", "retransplant", "death", "graft_failure")
+  )
+  # 900015's death after last follow-up is kept in the date column but not
+  # counted; the graft is censored at last follow-up.
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY, c(1L, 1L, 1L, 1L, 0L, 1L))
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT_CENSOR,
+    as.Date(c(
+      "2002-01-01", "2001-06-01", "2002-01-01", "2003-01-01", "2004-01-01",
+      "2002-06-01"
+    ))
+  )
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT[5], as.Date("2006-01-01"))
+  # The death-censored columns are unchanged.
+  expect_equal(out$TFL_GRAFT_DT_BINARY, c(0L, 1L, 0L, 0L, 0L, 1L))
+})
+
+test_that("all-cause graft failure censors invalid records on the day of transplant", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- graft_cohort()[c(4, 4, 4, 2), ]
+  df$TRR_ID <- 900031:900034
+  # 900031: retransplant the day before the transplant, nothing else.
+  df$PERS_RETX[1] <- as.Date("1999-12-31")
+  # 900032: graft failure before the transplant, then a death after it.
+  df$TFL_GRAFT_DT[2] <- as.Date("1999-06-01")
+  df$PERS_OPTN_DEATH_DT[2] <- as.Date("2002-01-01")
+  # 900033: no last follow-up date. 900034: last follow-up before transplant.
+  df$TFL_LAFUDATE[3] <- as.Date(NA)
+  df$TFL_LAFUDATE[4] <- as.Date("1999-01-01")
+  # Only the death-censored columns warn about 900032's negative time.
+  warnings <- character()
+  out <- withCallingHandlers(
+    add_time_to_event_outcomes(df, rejection_after_graft_failure = "keep"),
+    warning = function(cnd) {
+      warnings <<- c(warnings, conditionMessage(cnd))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_equal(sum(grepl("GRAFT_FAIL_ALL_CAUSE", warnings)), 0)
+
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY, c(0L, 0L, 0L, 0L))
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_CENSOR, rep(as.Date("2000-01-01"), 4))
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_days, rep(1, 4))
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE,
+    c("before_transplant", "before_transplant", NA, "graft_failure")
+  )
+  # The raw first date is kept for auditing.
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT[1:2],
+    as.Date(c("1999-12-31", "1999-06-01"))
+  )
+})
+
+test_that("retransplant = 'ignore' leaves retransplant out", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- graft_cohort()
+  df$PERS_RETX[4] <- as.Date("2003-01-01")
+  out <- add_time_to_event_outcomes(df, retransplant = "ignore")
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY[4], 0L)
+
+  df$PERS_RETX <- NULL
+  expect_error(
+    add_time_to_event_outcomes(df),
+    class = "sRtr_error_missing_columns"
+  )
+  expect_snapshot(error = TRUE, add_time_to_event_outcomes(df))
+  out <- add_time_to_event_outcomes(df, retransplant = "ignore")
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY[4], 0L)
+})
+
+test_that("lung and heart-lung never count retransplant", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  for (key in c("TX_LU", "TX_HL")) {
+    df <- graft_cohort()
+    df$PERS_RETX[4] <- as.Date("2003-01-01")
+    attr(df, "file_key") <- key
+    out <- add_time_to_event_outcomes(df)
+    expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY[4], 0L)
+    expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE[4], NA_character_)
+
+    df$PERS_RETX <- NULL
+    expect_no_error(add_time_to_event_outcomes(df))
+  }
+})
+
+test_that("heart grafts fail only at death or retransplant, followed past last follow-up", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- graft_cohort()
+  df$PERS_RETX[4] <- as.Date("2003-01-01")
+  attr(df, "file_key") <- "TX_HR"
+  out <- add_time_to_event_outcomes(df)
+
+  # The graft failure dates of 900012 and 900016 are not used; 900015's death
+  # after last follow-up counts, because heart follow-up runs to TFL_ENDTXFU.
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE,
+    c("death", "death", "death", "retransplant", "death", NA)
+  )
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_BINARY, c(1L, 1L, 1L, 1L, 1L, 0L))
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_CENSOR[6], as.Date("2010-01-01"))
+
+  # Under death_window = "follow_up", heart follow-up ends at last follow-up.
+  fu <- add_time_to_event_outcomes(df, death_window = "follow_up")
+  expect_equal(fu$GRAFT_FAIL_ALL_CAUSE_DT_BINARY[5], 0L)
+
+  # The graft failure date is not needed for heart.
+  df$TFL_GRAFT_DT <- NULL
+  expect_no_error(
+    add_time_to_event_outcomes(df, rejection_after_graft_failure = "keep")
+  )
+})
+
+test_that("TX_KP has all-cause graft failure for each graft", {
+  local_mocked_bindings(load_srtr_file = no_follow_up_forms)
+  df <- tibble::tibble(
+    TRR_ID = c(900021, 900022),
+    REC_TX_DT = as.Date("2000-01-01"),
+    REC_POSTX_LOS = 10,
+    REC_ACUTE_REJ_EPISODE = "3: No",
+    REC_ACUTE_REJ_EPISODE_PA = "3: No",
+    PERS_OPTN_DEATH_DT = as.Date(c("2002-01-01", NA)),
+    PERS_SSA_DEATH_DT = as.Date(NA),
+    TFL_DEATH_DT = as.Date(NA),
+    TFL_GRAFT_DT_KI = as.Date(c("2001-01-01", NA)),
+    TFL_GRAFT_DT_PA = as.Date(c(NA, "2003-01-01")),
+    TFL_LAFUDATEKI = as.Date(c("2003-01-01", "2004-01-01")),
+    TFL_LAFUDATEPA = as.Date(c("2005-01-01", "2004-01-01")),
+    TFL_ENDTXFU = as.Date("2010-01-01"),
+    PERS_RETXKI = as.Date(c(NA, "2003-06-01")),
+    PERS_RETXPA = as.Date(NA)
+  )
+  attr(df, "file_key") <- "TX_KP"
+  out <- add_time_to_event_outcomes(df)
+
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_KI_SOURCE, c("graft_failure", "retransplant"))
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_KI_BINARY, c(1L, 1L))
+  expect_equal(out$GRAFT_FAIL_ALL_CAUSE_DT_PA_SOURCE, c("death", "graft_failure"))
+  expect_equal(
+    out$GRAFT_FAIL_ALL_CAUSE_DT_PA_CENSOR,
     as.Date(c("2002-01-01", "2003-01-01"))
   )
 })
