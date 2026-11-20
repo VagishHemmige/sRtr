@@ -1,0 +1,47 @@
+name: Decision
+description: A question for the maintainer, with the options and a suggestion.
+title: "[Decision]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One decision per issue. Lay out the options so the maintainer can answer on the issue.
+  - type: textarea
+    id: question
+    attributes:
+      label: The question
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options and trade-offs
+      description: A table works well, one row per option.
+      value: |
+        | Option | Trade-offs |
+        |---|---|
+        |  |  |
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggestion
+      description: Which option you would choose, and why.
+    validations:
+      required: false
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources and related issues
+      description: The SRTR document, paper or issue that bears on the decision.
+    validations:
+      required: false
+  - type: checkboxes
+    id: no-patient-data
+    attributes:
+      label: Data safety
+      options:
+        - label: This issue contains no patient-level or real-looking SRTR data. Real counts are aggregates with no cell from 1 to 10, and none can be recovered by subtracting one shared number from another. Clearly made-up small examples and zero counts are fine.
+          required: true

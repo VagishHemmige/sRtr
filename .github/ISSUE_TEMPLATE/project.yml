@@ -1,0 +1,78 @@
+name: Project
+description: A group of related tasks with one aim (maintainers, usually).
+title: "Project: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A project groups tasks toward one aim. Its tasks are linked to it as sub-issues, and it says who is working on what. Field definitions are in [What the labels mean](https://vagishhemmige.github.io/sRtr/articles/development.html#what-the-labels-mean).
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: Project type is recorded here and on the development page, not as a label.
+      options:
+        - data handling
+        - data quality
+        - derived variables
+        - outcomes
+        - waitlist
+        - new organ support
+        - validation
+        - geography
+        - documentation
+        - infrastructure
+        - other (say which below)
+    validations:
+      required: true
+  - type: textarea
+    id: aim
+    attributes:
+      label: Aim
+      description: What the project makes possible, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Deliverables
+      description: A list of the things the project produces.
+      value: |
+        - 
+    validations:
+      required: true
+  - type: checkboxes
+    id: organs
+    attributes:
+      label: Organs
+      options:
+        - label: Kidney
+        - label: Liver
+        - label: Pancreas
+        - label: Kidney-pancreas
+        - label: Heart
+        - label: Lung
+        - label: Heart-lung
+        - label: All organs (a method for every organ's data)
+        - label: Not about any organ's data (geography, the website, the package's setup)
+  - type: textarea
+    id: who
+    attributes:
+      label: Who is working on what
+      value: Nobody yet.
+    validations:
+      required: true
+  - type: textarea
+    id: how-to-start
+    attributes:
+      label: How to start
+      description: One example sentence a newcomer could post on a sub-issue.
+    validations:
+      required: false
+  - type: checkboxes
+    id: no-patient-data
+    attributes:
+      label: Data safety
+      options:
+        - label: This issue contains no patient-level or real-looking SRTR data. Real counts are aggregates with no cell from 1 to 10, and none can be recovered by subtracting one shared number from another. Clearly made-up small examples and zero counts are fine.
+          required: true

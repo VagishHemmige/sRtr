@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Find a task to take on
+    url: https://vagishhemmige.github.io/sRtr/articles/development.html#start-with-one-of-these
+    about: Starter tasks and every open project, on the development page.
+  - name: How to share SRTR results safely
+    url: https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#share-counts-only
+    about: Read this before posting any real-data counts.

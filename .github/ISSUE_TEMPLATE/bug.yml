@@ -1,0 +1,51 @@
+name: Bug
+description: Something sRtr does wrong.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Show the problem on made-up data if you can. Never paste rows from real SRTR files; [Checking sRtr on your own SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#share-counts-only) shows how to share counts safely.
+  - type: textarea
+    id: code
+    attributes:
+      label: What you ran
+      description: The smallest code that shows the problem, on made-up data.
+      render: r
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: The output, error or warning, copied as text.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: sRtr version
+      description: The output of `packageVersion("sRtr")`.
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: R version and operating system
+      description: For example "R 4.4.1 on Windows 11".
+    validations:
+      required: false
+  - type: checkboxes
+    id: no-patient-data
+    attributes:
+      label: Data safety
+      options:
+        - label: This issue contains no patient-level or real-looking SRTR data. Real counts are aggregates with no cell from 1 to 10, and none can be recovered by subtracting one shared number from another. Clearly made-up small examples and zero counts are fine.
+          required: true

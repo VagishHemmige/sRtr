@@ -1,0 +1,89 @@
+name: Task
+description: One piece of work with a clear finish, usually part of a project.
+title: "[Task]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A task is something one person can finish: check a calculation against its paper, decide a definition, write a section. The labels and roles are explained in [What the labels mean](https://vagishhemmige.github.io/sRtr/articles/development.html#what-the-labels-mean). Leave anything you are unsure of; a maintainer fills it in when sorting the issue.
+  - type: textarea
+    id: deliverable
+    attributes:
+      label: What "done" looks like
+      description: The concrete thing that finishes this task, for example "a table comparing each PDRI coefficient with the paper, with page numbers".
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question or background
+      description: What the task answers or why it matters. Link related issues with `#123`.
+    validations:
+      required: false
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: The project issue this belongs to, such as `#270`, if you know it. All projects are listed on the [development page](https://vagishhemmige.github.io/sRtr/articles/development.html#all-projects).
+    validations:
+      required: false
+  - type: checkboxes
+    id: organs
+    attributes:
+      label: Organs
+      description: Whose data does this concern? Choose all that apply.
+      options:
+        - label: Kidney
+        - label: Liver
+        - label: Pancreas
+        - label: Kidney-pancreas
+        - label: Heart
+        - label: Lung
+        - label: Heart-lung
+        - label: All organs (a method for every organ's data)
+        - label: Not about any organ's data (geography, the website, the package's setup)
+  - type: dropdown
+    id: role
+    attributes:
+      label: Role
+      options:
+        - Verify existing work against a known answer
+        - Supervise something new (decide what to build, or judge a design or definition)
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Complexity
+      options:
+        - Leave for the maintainer
+        - Low (one function or table with a known right answer)
+        - Medium (several pieces, or a choice between defensible options)
+        - High (shared machinery or a definition many analyses depend on)
+    validations:
+      required: false
+  - type: dropdown
+    id: data-access
+    attributes:
+      label: SRTR data needed to finish
+      options:
+        - No SAF needed
+        - Needs SAF access (under your own data use agreement)
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: reviewer
+    attributes:
+      label: Suggested reviewer
+      description: Who could check the result, if you know. Otherwise leave blank.
+    validations:
+      required: false
+  - type: checkboxes
+    id: no-patient-data
+    attributes:
+      label: Data safety
+      options:
+        - label: This issue contains no patient-level or real-looking SRTR data. Real counts are aggregates with no cell from 1 to 10, and none can be recovered by subtracting one shared number from another. Clearly made-up small examples and zero counts are fine.
+          required: true
