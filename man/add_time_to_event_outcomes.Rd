@@ -2,8 +2,7 @@
 % Please edit documentation in R/add_time_to_event_variables.R
 \name{add_time_to_event_outcomes}
 \alias{add_time_to_event_outcomes}
-\title{Add appropriate time-to-event outcome variables to a data frame based on the df attributes, if the file was
-loaded using a load function.}
+\title{Add death, graft failure, rejection and malignancy outcomes}
 \usage{
 add_time_to_event_outcomes(
   df,
@@ -94,15 +93,50 @@ heart-lung (\code{TX_LU}, \code{TX_HL}), which SRTR also leaves it out for.
 The death-censored graft failure columns (\verb{TFL_GRAFT_DT_*}) do not use
 retransplant either way.}
 }
-\description{
-Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:
+\value{
+\code{df} with these columns added. For each outcome, \verb{_CENSOR} is the
+event date if the event counts, else the censoring date; \verb{_BINARY} is
+\code{1} for a counted event, else \code{0}; \verb{_days} is the time from \code{REC_TX_DT}
+to \verb{_CENSOR} (see \code{\link[=srtr_time_to_event]{srtr_time_to_event()}}).
 \itemize{
-\item \verb{\{prefix\}_CENSOR}: event date if present, otherwise censor date
-\item \verb{\{prefix\}_BINARY}: 1 if event date present, else 0
-\item \verb{\{prefix\}_\{unit\}}: numeric time from start_date to \verb{\{prefix\}_CENSOR} in chosen units
+\item Death: \code{REC_DEATH_DT_COMPOSITE} with \verb{_source} and \verb{_conflict} (see
+\code{\link[=srtr_composite_death]{srtr_composite_death()}}), then \verb{_CENSOR}, \verb{_BINARY}, \verb{_days}.
+\item All-cause graft failure: \code{GRAFT_FAIL_ALL_CAUSE_DT}, \verb{_SOURCE},
+\verb{_CENSOR}, \verb{_BINARY}, \verb{_days}.
+\item Death-censored graft failure: \code{TFL_GRAFT_DT_CENSOR}, \verb{_BINARY},
+\verb{_days}.
+\item Malignancy: \code{FIRST_FU_MALIG_DATE}, \code{FIRST_FU_MALIG_STATUS},
+\code{FIRST_FU_MALIG_LAST_NEG_DATE} (see \code{\link[=add_txf_outcomes]{add_txf_outcomes()}}), then
+\code{FIRST_FU_MALIG_DATE_CENSOR}, \verb{_BINARY}, \verb{_days} and \verb{_DEATH_DAY}.
+\item Rejection: \code{FIRST_FU_REJ_DATE}, \code{FIRST_FU_REJ_STATUS},
+\code{FIRST_FU_REJ_LAST_NEG_DATE}, \code{FIRST_REJ_DATE} (the date used) and
+\code{FIRST_REJ_DATE_SOURCE}, then \code{FIRST_REJ_DATE_CENSOR}, \verb{_BINARY},
+\verb{_days} and \verb{_DEATH_DAY}.
 }
+
+For \code{TX_KP}, graft columns come once per graft with \verb{_KI} and \verb{_PA}
+(\code{GRAFT_FAIL_ALL_CAUSE_DT_KI}, \code{TFL_GRAFT_DT_PA_CENSOR},
+\code{FIRST_FU_REJ_DATE_KI}, ...); kidney rejection keeps the name
+\code{FIRST_REJ_DATE}, and pancreas rejection is \code{FIRST_REJ_DATE_PA}. The
+\code{txf_report} attribute from \code{\link[=add_txf_outcomes]{add_txf_outcomes()}} is kept.
+}
+\description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+Adds an event date, an event indicator, a censoring date and a time for
+each post-transplant outcome: patient death, all-cause and death-censored
+graft failure, malignancy and acute rejection. The follow-up forms are
+read from the matching follow-up file (\code{TX_KI} to \code{TXF_KI}, and so on)
+with \code{\link[=load_srtr_file]{load_srtr_file()}}, for the cohort's \code{TRR_ID}s only. Defaults follow
+the SRTR program-specific report methods where SRTR gives a rule; the
+arguments switch to other common choices.
 }
 \details{
+It accepts all eight transplant files (\code{TX_KI}, \code{TX_LI}, \code{TX_PA},
+\code{TX_KP}, \code{TX_HR}, \code{TX_LU}, \code{TX_HL} and \code{TX_IN}), whose columns the SRTR
+data dictionary lists. So far only \code{TX_LI} has been checked on a real
+release; check the others on your own files (see the \emph{Checking sRtr on
+your own SAFs} guide).
+
 \code{REC_DEATH_DT_COMPOSITE} keeps every death date from every source. Only the
 event and censoring columns (\code{REC_DEATH_DT_COMPOSITE_BINARY}, \verb{_CENSOR},
 \verb{_days}) depend on \code{death_window}. Counting deaths found after last
@@ -189,6 +223,17 @@ when the date is the day of death, \code{FALSE} when it is another day, and
 events. Such reports count as events by default when follow-up covers the
 day of death. The status columns from \code{\link[=add_txf_outcomes]{add_txf_outcomes()}} say what the
 forms report, before the window is applied.
+}
+\examples{
+\dontrun{
+tx <- load_srtr_file("TX_LI")
+tx <- add_time_to_event_outcomes(tx)
+table(tx$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE, tx$GRAFT_FAIL_ALL_CAUSE_DT_BINARY)
+
+# Censor deaths at the last follow-up form instead
+tx <- add_time_to_event_outcomes(load_srtr_file("TX_LI"), death_window = "follow_up")
+}
+
 }
 \references{
 Scientific Registry of Transplant Recipients. Technical Methods for the

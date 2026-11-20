@@ -558,3 +558,16 @@ test_that("live: deaths are ascertained up to TFL_ENDTXFU on a real transplant f
     sum(only_fu & fu$REC_DEATH_DT_COMPOSITE > out$TFL_ENDTXFU, na.rm = TRUE)
   )
 })
+
+test_that("add_time_to_event_outcomes() is exported", {
+  expect_contains(getNamespaceExports("sRtr"), "add_time_to_event_outcomes")
+})
+
+test_that("the TX_KP last follow-up date is the later graft date, ignoring a missing one", {
+  ki <- as.Date(c("2003-01-01", NA, "2003-01-01", NA))
+  pa <- as.Date(c("2004-01-01", "2004-01-01", NA, NA))
+  expect_equal(
+    .srtr_kp_last_follow_up(ki, pa),
+    as.Date(c("2004-01-01", "2004-01-01", "2003-01-01", NA))
+  )
+})
