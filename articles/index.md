@@ -11,6 +11,7 @@ check that sRtr reads your own release correctly.
   SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md):
 - [Releases, the data dictionary and
   warnings](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.md):
+- [Glossary](https://vagishhemmige.github.io/sRtr/articles/glossary.md):
 
 ### Prepare an analysis cohort
 

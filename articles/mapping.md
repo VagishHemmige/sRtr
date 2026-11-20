@@ -394,39 +394,50 @@ centers |>
 #> Bounding box:  xmin: -157.8552 ymin: 18.41789 xmax: -66.0577 ymax: 47.66421
 #> Geodetic CRS:  WGS 84
 #> First 10 features:
-#>                            OTC_NM   OTC_CITY STATE_ABBR      OPO_PROVIDER_NM
-#> 1           Children's of Alabama Birmingham         AL Alabama Organ Center
-#> 2           Children's of Alabama Birmingham         AL Alabama Organ Center
-#> 3           Children's of Alabama Birmingham         AL Alabama Organ Center
-#> 4  University of Alabama Hospital Birmingham         AL Alabama Organ Center
-#> 5  University of Alabama Hospital Birmingham         AL Alabama Organ Center
-#> 6  University of Alabama Hospital Birmingham         AL Alabama Organ Center
-#> 7  University of Alabama Hospital Birmingham         AL Alabama Organ Center
-#> 8  University of Alabama Hospital Birmingham         AL Alabama Organ Center
-#> 9  University of Alabama Hospital Birmingham         AL Alabama Organ Center
-#> 10   Birmingham VA Medical Center Birmingham         AL Alabama Organ Center
+#>                            OTC_NM    OTC_CITY STATE_ABBR
+#> 1  University of Alabama Hospital  Birmingham         AL
+#> 2  University of Alabama Hospital  Birmingham         AL
+#> 3  University of Alabama Hospital  Birmingham         AL
+#> 4  University of Alabama Hospital  Birmingham         AL
+#> 5  University of Alabama Hospital  Birmingham         AL
+#> 6    Birmingham VA Medical Center  Birmingham         AL
+#> 7          Baptist Medical Center Little Rock         AR
+#> 8    Arkansas Children's Hospital Little Rock         AR
+#> 9    Arkansas Children's Hospital Little Rock         AR
+#> 10            UAMS Medical Center Little Rock         AR
+#>                            OPO_PROVIDER_NM
+#> 1                     Alabama Organ Center
+#> 2                     Alabama Organ Center
+#> 3                     Alabama Organ Center
+#> 4                     Alabama Organ Center
+#> 5                     Alabama Organ Center
+#> 6                     Alabama Organ Center
+#> 7  Arkansas Regional Organ Recovery Agency
+#> 8  Arkansas Regional Organ Recovery Agency
+#> 9  Arkansas Regional Organ Recovery Agency
+#> 10 Arkansas Regional Organ Recovery Agency
 #>                                                         Service_Lst
-#> 1                                              Heart, Kidney, Liver
-#> 2                                              Heart, Kidney, Liver
-#> 3                                              Heart, Kidney, Liver
+#> 1   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 2   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
+#> 3   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
 #> 4   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
 #> 5   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
-#> 6   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
-#> 7   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
-#> 8   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
-#> 9   Heart, Intestine, Kidney, Liver, Lung, Pancreas, Pancreas Islet
-#> 10                                                           Kidney
+#> 6                                                            Kidney
+#> 7                                                             Heart
+#> 8                                                     Heart, Kidney
+#> 9                                                     Heart, Kidney
+#> 10                                                    Kidney, Liver
 #>                      geometry
-#> 1  POINT (-86.80482 33.50352)
-#> 2  POINT (-86.80482 33.50352)
-#> 3  POINT (-86.80482 33.50352)
+#> 1  POINT (-86.81464 33.48393)
+#> 2  POINT (-86.81464 33.48393)
+#> 3  POINT (-86.81464 33.48393)
 #> 4  POINT (-86.81464 33.48393)
 #> 5  POINT (-86.81464 33.48393)
-#> 6  POINT (-86.81464 33.48393)
-#> 7  POINT (-86.81464 33.48393)
-#> 8  POINT (-86.81464 33.48393)
-#> 9  POINT (-86.81464 33.48393)
-#> 10 POINT (-86.80125 33.50508)
+#> 6  POINT (-86.80125 33.50508)
+#> 7  POINT (-92.34248 34.74498)
+#> 8  POINT (-92.29153 34.74346)
+#> 9  POINT (-92.29153 34.74346)
+#> 10 POINT (-92.32074 34.75149)
 ```
 
 A simple map:

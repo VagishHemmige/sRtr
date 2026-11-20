@@ -11,10 +11,11 @@ articles:
   articles/follow-up-windows: follow-up-windows.html
   articles/geographic-coverage-gain: geographic-coverage-gain.html
   getting-started: getting-started.html
+  articles/glossary: glossary.html
   mapping: mapping.html
   missing-data: missing-data.html
   articles/releases-and-warnings: releases-and-warnings.html
-last_built: 2026-11-20T02:37Z
+last_built: 2026-11-20T12:09Z
 urls:
   reference: https://vagishhemmige.github.io/sRtr/reference
   article: https://vagishhemmige.github.io/sRtr/articles

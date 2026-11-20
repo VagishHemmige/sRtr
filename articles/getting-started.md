@@ -3,7 +3,9 @@
 sRtr loads and labels the Scientific Registry of Transplant Recipients
 (SRTR) standard analysis files (SAFs) in R. This article takes you from
 installing the package to one checked load of a transplant file. Most of
-the code needs your own SAFs, so it is shown here but not run.
+the code needs your own SAFs, so it is shown here but not run. Terms
+such as `TRR_ID`, SAF and release are defined in the
+[glossary](https://vagishhemmige.github.io/sRtr/articles/glossary.html).
 
 ## Install and load
 
