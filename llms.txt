@@ -135,9 +135,8 @@ censoring](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.md).
 - [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
   : Add time-to-event follow-up outcomes to a transplant cohort
 - [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
-  : Add appropriate time-to-event outcome variables to a data frame
-  based on the df attributes, if the file was loaded using a load
-  function.
+  **\[experimental\]** : Add death, graft failure, rejection and
+  malignancy outcomes
 - [`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)
   : Helper function to add a time-to-event outcome from a date function
 

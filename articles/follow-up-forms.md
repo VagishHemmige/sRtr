@@ -250,7 +250,7 @@ rule applied:
 
 ``` r
 
-out <- sRtr:::add_time_to_event_outcomes(tx)
+out <- add_time_to_event_outcomes(tx)
 mask(out$FIRST_REJ_DATE_SOURCE)
 ```
 

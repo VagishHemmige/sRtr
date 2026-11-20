@@ -1,14 +1,14 @@
-# Add appropriate time-to-event outcome variables to a data frame based on the df attributes, if the file was loaded using a load function.
+# Add death, graft failure, rejection and malignancy outcomes
 
-Uses the helper functions to create three columns for an outcome defined
-by an event date and a censor date:
-
-- `{prefix}_CENSOR`: event date if present, otherwise censor date
-
-- `{prefix}_BINARY`: 1 if event date present, else 0
-
-- `{prefix}_{unit}`: numeric time from start_date to `{prefix}_CENSOR`
-  in chosen units
+**\[experimental\]** Adds an event date, an event indicator, a censoring
+date and a time for each post-transplant outcome: patient death,
+all-cause and death-censored graft failure, malignancy and acute
+rejection. The follow-up forms are read from the matching follow-up file
+(`TX_KI` to `TXF_KI`, and so on) with
+[`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md),
+for the cohort's `TRR_ID`s only. Defaults follow the SRTR
+program-specific report methods where SRTR gives a rule; the arguments
+switch to other common choices.
 
 ## Usage
 
@@ -120,7 +120,50 @@ add_time_to_event_outcomes(
   The death-censored graft failure columns (`TFL_GRAFT_DT_*`) do not use
   retransplant either way.
 
+## Value
+
+`df` with these columns added. For each outcome, `_CENSOR` is the event
+date if the event counts, else the censoring date; `_BINARY` is `1` for
+a counted event, else `0`; `_days` is the time from `REC_TX_DT` to
+`_CENSOR` (see
+[`srtr_time_to_event()`](https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.md)).
+
+- Death: `REC_DEATH_DT_COMPOSITE` with `_source` and `_conflict` (see
+  [`srtr_composite_death()`](https://vagishhemmige.github.io/sRtr/reference/srtr_composite_death.md)),
+  then `_CENSOR`, `_BINARY`, `_days`.
+
+- All-cause graft failure: `GRAFT_FAIL_ALL_CAUSE_DT`, `_SOURCE`,
+  `_CENSOR`, `_BINARY`, `_days`.
+
+- Death-censored graft failure: `TFL_GRAFT_DT_CENSOR`, `_BINARY`,
+  `_days`.
+
+- Malignancy: `FIRST_FU_MALIG_DATE`, `FIRST_FU_MALIG_STATUS`,
+  `FIRST_FU_MALIG_LAST_NEG_DATE` (see
+  [`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)),
+  then `FIRST_FU_MALIG_DATE_CENSOR`, `_BINARY`, `_days` and
+  `_DEATH_DAY`.
+
+- Rejection: `FIRST_FU_REJ_DATE`, `FIRST_FU_REJ_STATUS`,
+  `FIRST_FU_REJ_LAST_NEG_DATE`, `FIRST_REJ_DATE` (the date used) and
+  `FIRST_REJ_DATE_SOURCE`, then `FIRST_REJ_DATE_CENSOR`, `_BINARY`,
+  `_days` and `_DEATH_DAY`.
+
+For `TX_KP`, graft columns come once per graft with `_KI` and `_PA`
+(`GRAFT_FAIL_ALL_CAUSE_DT_KI`, `TFL_GRAFT_DT_PA_CENSOR`,
+`FIRST_FU_REJ_DATE_KI`, ...); kidney rejection keeps the name
+`FIRST_REJ_DATE`, and pancreas rejection is `FIRST_REJ_DATE_PA`. The
+`txf_report` attribute from
+[`add_txf_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_txf_outcomes.md)
+is kept.
+
 ## Details
+
+It accepts all eight transplant files (`TX_KI`, `TX_LI`, `TX_PA`,
+`TX_KP`, `TX_HR`, `TX_LU`, `TX_HL` and `TX_IN`), whose columns the SRTR
+data dictionary lists. So far only `TX_LI` has been checked on a real
+release; check the others on your own files (see the *Checking sRtr on
+your own SAFs* guide).
 
 `REC_DEATH_DT_COMPOSITE` keeps every death date from every source. Only
 the event and censoring columns (`REC_DEATH_DT_COMPOSITE_BINARY`,
@@ -245,3 +288,16 @@ Guides:
 
 - [Rejection after the graft has
   failed](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#rejection-after-the-graft-has-failed)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+tx <- load_srtr_file("TX_LI")
+tx <- add_time_to_event_outcomes(tx)
+table(tx$GRAFT_FAIL_ALL_CAUSE_DT_SOURCE, tx$GRAFT_FAIL_ALL_CAUSE_DT_BINARY)
+
+# Censor deaths at the last follow-up form instead
+tx <- add_time_to_event_outcomes(load_srtr_file("TX_LI"), death_window = "follow_up")
+} # }
+```

@@ -191,6 +191,21 @@
   ([\#179](https://github.com/VagishHemmige/sRtr/issues/179)).
 
 - [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
+  is now exported, as experimental. It accepts all eight transplant
+  files; only `TX_LI` has been checked on a real release. Its defaults
+  now follow the SRTR program-specific report methods: deaths from any
+  source count up to each transplant’s `TFL_ENDTXFU`
+  (`death_window = "ascertainment"`, `ascertainment_date` takes a column
+  name or one date; `"follow_up"` gives the old behaviour), and a new
+  all-cause graft failure outcome (`GRAFT_FAIL_ALL_CAUSE_DT`) counts
+  graft failure, retransplant and death, with SRTR’s heart and lung
+  rules and the new `retransplant` argument. `TFL_GRAFT_DT` (except for
+  heart) and `PERS_RETX` are now required
+  ([\#24](https://github.com/VagishHemmige/sRtr/issues/24),
+  [\#236](https://github.com/VagishHemmige/sRtr/issues/236),
+  [\#238](https://github.com/VagishHemmige/sRtr/issues/238)).
+
+- [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md)
   gains `rejection_after_graft_failure`. By default (`"exclude"`), a
   rejection reported after the graft failed no longer counts: forms
   filed in the years after graft failure (follow-up codes 801-850) are

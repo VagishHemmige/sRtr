@@ -223,12 +223,11 @@ report$registrations == report$registrations_with_forms + no_follow_up
 This should be `TRUE`.
 
 The time-to-event outcomes come from
-[`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md),
-which is not yet exported, so it is called with `sRtr:::`:
+[`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md):
 
 ``` r
 
-out <- collect(sRtr:::add_time_to_event_outcomes(tx))
+out <- collect(add_time_to_event_outcomes(tx))
 
 # The date a counted event is timed at is the _CENSOR column, not
 # FIRST_FU_MALIG_DATE, which keeps the first report of all for auditing.

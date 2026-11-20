@@ -10,7 +10,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/VagishHemmige/sRtr/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/VagishHemmige/sRtr/blob/claude/export-tte/inst/CITATION)
 
 Hemmige V, Czeresnia J (2026). *sRtr: Work with Scientific Registry of
 Transplant Recipients Data*. R package version 0.0.0.9000,

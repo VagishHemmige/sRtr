@@ -37,9 +37,8 @@ mask <- function(x) mask_n(table(x, useNA = "ifany"))
 **A note on
 [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md).**
 It builds the death, graft failure, malignancy and rejection outcomes
-described here. It is not yet exported, so this article calls it as
-`sRtr:::add_time_to_event_outcomes()`; its name and columns may change
-before it is. The other functions used here are exported.
+described here. It is experimental: its arguments and columns may still
+change.
 
 ## Events count only while someone is watching
 
@@ -132,7 +131,7 @@ so you can see what was left out:
 
 ``` r
 
-out <- sRtr:::add_time_to_event_outcomes(tx)
+out <- add_time_to_event_outcomes(tx)
 
 left_out <- !is.na(out$FIRST_FU_MALIG_DATE) & out$FIRST_FU_MALIG_DATE_BINARY == 0
 mask_n(sum(left_out))
@@ -283,13 +282,13 @@ C](https://srtr.hrsa.gov/transplant-professionals/program-specific-report/techni
 ``` r
 
 # Default: deaths from any source up to each transplant's TFL_ENDTXFU
-out <- sRtr:::add_time_to_event_outcomes(tx)
+out <- add_time_to_event_outcomes(tx)
 
 # Censor everyone at their last follow-up form instead
-out_follow_up <- sRtr:::add_time_to_event_outcomes(tx, death_window = "follow_up")
+out_follow_up <- add_time_to_event_outcomes(tx, death_window = "follow_up")
 
 # Or one ascertainment date for everyone, from the release notes
-out_one_date <- sRtr:::add_time_to_event_outcomes(
+out_one_date <- add_time_to_event_outcomes(
   tx,
   ascertainment_date = "YYYY-MM-DD"
 )
@@ -333,7 +332,7 @@ an SRTR rule, so run both:
 
 ``` r
 
-as_event <- sRtr:::add_time_to_event_outcomes(tx, graft_death_same_day = "event")
+as_event <- add_time_to_event_outcomes(tx, graft_death_same_day = "event")
 ```
 
 ## Rejection after the graft has failed
@@ -361,7 +360,7 @@ Compare with every form counted:
 
 ``` r
 
-keep <- sRtr:::add_time_to_event_outcomes(tx, rejection_after_graft_failure = "keep")
+keep <- add_time_to_event_outcomes(tx, rejection_after_graft_failure = "keep")
 mask_n(sum(keep$FIRST_REJ_DATE_BINARY %in% 1L & !out$FIRST_REJ_DATE_BINARY %in% 1L))
 ```
 

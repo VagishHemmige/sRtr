@@ -107,7 +107,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Checking sRtr on your own SAFs</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/master/vignettes/articles/checking-your-safs.Rmd" class="external-link"><code>vignettes/articles/checking-your-safs.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/claude/export-tte/vignettes/articles/checking-your-safs.Rmd" class="external-link"><code>vignettes/articles/checking-your-safs.Rmd</code></a></small>
       <div class="d-none name"><code>checking-your-safs.Rmd</code></div>
     </div>
 
@@ -330,10 +330,9 @@ on the other side too, and print only whether they agree:</p>
 <span><span class="va">report</span><span class="op">$</span><span class="va">registrations</span> <span class="op">==</span> <span class="va">report</span><span class="op">$</span><span class="va">registrations_with_forms</span> <span class="op">+</span> <span class="va">no_follow_up</span></span></code></pre></div>
 <p>This should be <code>TRUE</code>.</p>
 <p>The time-to-event outcomes come from
-<code><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes()</a></code>, which is not yet exported, so
-it is called with <code>sRtr:::</code>:</p>
+<code><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes()</a></code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The date a counted event is timed at is the _CENSOR column, not</span></span>
 <span><span class="co"># FIRST_FU_MALIG_DATE, which keeps the first report of all for auditing.</span></span>

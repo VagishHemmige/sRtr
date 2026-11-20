@@ -107,7 +107,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Follow-up forms are reports, not events</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/master/vignettes/articles/follow-up-forms.Rmd" class="external-link"><code>vignettes/articles/follow-up-forms.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/claude/export-tte/vignettes/articles/follow-up-forms.Rmd" class="external-link"><code>vignettes/articles/follow-up-forms.Rmd</code></a></small>
       <div class="d-none name"><code>follow-up-forms.Rmd</code></div>
     </div>
 
@@ -371,7 +371,7 @@ a proxy: the transplant date plus the length of stay
 (<code>REC_DISCHRG_DT</code>). <code>FIRST_REJ_DATE_SOURCE</code>
 records which rule applied:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span></span>
 <span><span class="fu">mask</span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">FIRST_REJ_DATE_SOURCE</span><span class="op">)</span></span></code></pre></div>
 <p>When neither date is usable, the rejection still counts: its status
 is 1 and its time is missing, so it drops out of a survival model rather

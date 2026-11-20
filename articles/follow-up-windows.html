@@ -107,7 +107,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Follow-up windows and death</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/master/vignettes/articles/follow-up-windows.Rmd" class="external-link"><code>vignettes/articles/follow-up-windows.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/VagishHemmige/sRtr/blob/claude/export-tte/vignettes/articles/follow-up-windows.Rmd" class="external-link"><code>vignettes/articles/follow-up-windows.Rmd</code></a></small>
       <div class="d-none name"><code>follow-up-windows.Rmd</code></div>
     </div>
 
@@ -142,9 +142,8 @@ explains the rules.</p>
 <span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">x</span>, useNA <span class="op">=</span> <span class="st">"ifany"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><strong>A note on <code><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes()</a></code>.</strong>
 It builds the death, graft failure, malignancy and rejection outcomes
-described here. It is not yet exported, so this article calls it as
-<code>sRtr:::add_time_to_event_outcomes()</code>; its name and columns
-may change before it is. The other functions used here are exported.</p>
+described here. It is experimental: its arguments and columns may still
+change.</p>
 <div class="section level2">
 <h2 id="events-count-only-while-someone-is-watching">Events count only while someone is watching<a class="anchor" aria-label="anchor" href="#events-count-only-while-someone-is-watching"></a>
 </h2>
@@ -211,7 +210,7 @@ from any source, both inclusive. A recipient without a counted event is
 censored at the end of that window. A report outside it stays in its
 date column, so you can see what was left out:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">left_out</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">FIRST_FU_MALIG_DATE</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">out</span><span class="op">$</span><span class="va">FIRST_FU_MALIG_DATE_BINARY</span> <span class="op">==</span> <span class="fl">0</span></span>
 <span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">left_out</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -338,13 +337,13 @@ survival at fixed times after transplant; see <a href="https://srtr.hrsa.gov/tra
 Technical Methods for the Program-Specific Reports, Section C</a>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Default: deaths from any source up to each transplant's TFL_ENDTXFU</span></span>
-<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span></span>
+<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Censor everyone at their last follow-up form instead</span></span>
-<span><span class="va">out_follow_up</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, death_window <span class="op">=</span> <span class="st">"follow_up"</span><span class="op">)</span></span>
+<span><span class="va">out_follow_up</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, death_window <span class="op">=</span> <span class="st">"follow_up"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Or one ascertainment date for everyone, from the release notes</span></span>
-<span><span class="va">out_one_date</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span></span>
+<span><span class="va">out_one_date</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span></span>
 <span>  <span class="va">tx</span>,</span>
 <span>  ascertainment_date <span class="op">=</span> <span class="st">"YYYY-MM-DD"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -381,7 +380,7 @@ death counts as death with a working graft
 (<code>graft_death_same_day = "censor"</code>). That is a package
 assumption, not an SRTR rule, so run both:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">as_event</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, graft_death_same_day <span class="op">=</span> <span class="st">"event"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">as_event</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, graft_death_same_day <span class="op">=</span> <span class="st">"event"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="rejection-after-the-graft-has-failed">Rejection after the graft has failed<a class="anchor" aria-label="anchor" href="#rejection-after-the-graft-has-failed"></a>
@@ -405,7 +404,7 @@ graft failure date, by default. The form filed at failure (code 800)
 still counts, since it may report the rejection that caused the failure.
 Compare with every form counted:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu">sRtr</span><span class="fu">:::</span><span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, rejection_after_graft_failure <span class="op">=</span> <span class="st">"keep"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_time_to_event_outcomes.html">add_time_to_event_outcomes</a></span><span class="op">(</span><span class="va">tx</span>, rejection_after_graft_failure <span class="op">=</span> <span class="st">"keep"</span><span class="op">)</span></span>
 <span><span class="fu">mask_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">keep</span><span class="op">$</span><span class="va">FIRST_REJ_DATE_BINARY</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1L</span> <span class="op">&amp;</span> <span class="op">!</span><span class="va">out</span><span class="op">$</span><span class="va">FIRST_REJ_DATE_BINARY</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
