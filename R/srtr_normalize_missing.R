@@ -11,6 +11,9 @@
 #' `overrides` adjust it by kind of missing value and by variable. Run
 #' [srtr_missing_report()] first to see what the data hold.
 #'
+#' @seealso Guides:
+#' * [Choosing what becomes NA](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#choosing-what-becomes-na)
+#' * [Adjusting a policy](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#adjusting-a-policy)
 #' @details
 #' # Policies
 #'

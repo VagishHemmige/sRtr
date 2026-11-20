@@ -17,6 +17,8 @@
 #' EPTS table's label is the year of its December 31 waiting-list snapshot.
 #' The newest table of each kind is labelled `"current"`.
 #'
+#' @seealso Guides:
+#' * [Which mapping table: KDPI and EPTS](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#which-mapping-table-kdpi-and-epts)
 #' @format A list of three tibbles:
 #' \describe{
 #'   \item{tables}{One row per table: `score` (`"kdpi"` or `"epts"`),

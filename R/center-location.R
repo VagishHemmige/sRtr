@@ -7,6 +7,9 @@
 #' The data are served directly from the HRSA ArcGIS REST MapServer and
 #' include all attributes provided by HRSA at the time of download.
 #'
+#' @seealso Guides:
+#' * [Downloading current HRSA transplant center locations](https://vagishhemmige.github.io/sRtr/articles/mapping.html#downloading-current-hrsa-transplant-center-locations)
+#' * [Filtering by organ or service list](https://vagishhemmige.github.io/sRtr/articles/mapping.html#filtering-by-organ-or-service-list)
 #' @details
 #' This function queries the HRSA ArcGIS REST MapServer layer:
 #'

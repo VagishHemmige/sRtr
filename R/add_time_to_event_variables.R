@@ -5,6 +5,8 @@
 #' - `{prefix}_BINARY`: 1 if event date present, else 0
 #' - `{prefix}_{unit}`: numeric time from start_date to `{prefix}_CENSOR` in chosen units
 #'
+#' @seealso Guides:
+#' * [Events count only while someone is watching](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#events-count-only-while-someone-is-watching)
 #' @param df A data frame.
 #' @param event_date Event date column (unquoted).
 #' @param start_date Start date column (unquoted), e.g., `REC_TX_DT`.
@@ -129,6 +131,11 @@ srtr_time_to_event <- function(
 #' to the cohort's `TRR_ID`s and to the columns used here, and adds what the
 #' follow-up forms say about malignancy and acute rejection.
 #'
+#' @seealso Guides:
+#' * ["Rejection" has more than one meaning](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#rejection-has-more-than-one-meaning)
+#' * [Rejection during the transplant admission is not on the follow-up forms](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#rejection-during-the-transplant-admission-is-not-on-the-follow-up-forms)
+#' * [A form date is not an onset date](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#a-form-date-is-not-an-onset-date)
+#' * [Which section answers your question](https://vagishhemmige.github.io/sRtr/articles/follow-up-forms.html#which-section-answers-your-question)
 #' @param df A transplant data frame from [load_srtr_file()], with a `TRR_ID`
 #'   column and a `file_key` attribute.
 #'
@@ -396,6 +403,11 @@ add_txf_outcomes <- function(df) {
 #' - `{prefix}_BINARY`: 1 if event date present, else 0
 #' - `{prefix}_{unit}`: numeric time from start_date to `{prefix}_CENSOR` in chosen units
 #'
+#' @seealso Guides:
+#' * [Events count only while someone is watching](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#events-count-only-while-someone-is-watching)
+#' * [Whose follow-up?](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#whose-follow-up)
+#' * [Graft failure and death on the same day](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#graft-failure-and-death-on-the-same-day)
+#' * [Rejection after the graft has failed](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#rejection-after-the-graft-has-failed)
 #' @param df A transplant data frame from [load_srtr_file()]. Its `file_key`
 #'   attribute decides which follow-up file and outcome columns are used.
 #' @param death_window Which deaths count as events, and where recipients

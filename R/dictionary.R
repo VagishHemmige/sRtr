@@ -3,6 +3,8 @@
 #' A lookup table of variable metadata extracted from the Scientific Registry of Transplant Recipients (SRTR) data dictionary.
 #' This dataset describes the variable name, type, length, label, and associated format for each variable in each dataset.
 #'
+#' @seealso Guides:
+#' * [Releases](https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#releases)
 #' @format A data frame with 6 columns:
 #' \describe{
 #'   \item{Dataset}{The abbreviated SRTR dataset name (e.g., \code{kp_diab}, \code{txfu})}

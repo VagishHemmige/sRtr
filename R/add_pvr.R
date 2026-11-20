@@ -18,6 +18,9 @@
 #' `*_MEDS` columns); this function does not use them, so filter on them
 #' first if that matters.
 #'
+#' @seealso Guides:
+#' * [The scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores)
+#' * [Missing and unknown inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
 #' @param df A data frame of candidates or recipients, one row each.
 #' @param at Use the values recorded at `"listing"` (default) or at
 #'   `"transplant"`.

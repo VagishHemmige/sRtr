@@ -9,6 +9,9 @@
 #' returns SAS date columns. You can also keep a "which source won" indicator
 #' and a conflict flag when multiple sources disagree.
 #'
+#' @seealso Guides:
+#' * [Which death date?](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#which-death-date)
+#' * [Deaths found after follow-up ends](https://vagishhemmige.github.io/sRtr/articles/follow-up-windows.html#deaths-found-after-follow-up-ends)
 #' @section How the sources compare in real data:
 #' In the 2303 liver transplant file (TX_LI):
 #'

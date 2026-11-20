@@ -30,6 +30,9 @@
 #' * Unrelated means a non-biological relationship: codes 7 to 12, 15 and
 #'   999 of format `LVDNRL`.
 #'
+#' @seealso Guides:
+#' * [The scores](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#the-scores)
+#' * [Missing and unknown inputs](https://vagishhemmige.github.io/sRtr/articles/adding-columns.html#missing-and-unknown-inputs)
 #' @param df A data frame of living donor kidney transplants, one row each.
 #' @param creatinine Name of the donor creatinine column used for eGFR.
 #'   Defaults to `"DON_KI_CREAT_PREOP"` (pre-donation creatinine), a

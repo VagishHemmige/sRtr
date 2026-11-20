@@ -8,6 +8,8 @@
 #' and stored in the \code{geometry} column; the original numeric longitude/latitude
 #' columns are not retained.
 #'
+#' @seealso Guides:
+#' * [Plotting transplant centers](https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-transplant-centers)
 #' @format An \code{sf} object with the following columns:
 #' \describe{
 #'   \item{OTCName}{Transplant center name (character)}

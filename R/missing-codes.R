@@ -10,6 +10,8 @@
 #' The classification describes what a code means. It does not say what an
 #' analysis should do with it.
 #'
+#' @seealso Guides:
+#' * [What the codes mean](https://vagishhemmige.github.io/sRtr/articles/missing-data.html#what-the-codes-mean)
 #' @details
 #' A code is listed when its meaning matches a broad screen (words such as
 #' "unknown", "not done", "N/A" or "pending"), when it is the SAS missing

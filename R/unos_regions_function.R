@@ -3,6 +3,9 @@
 #' Returns OPTN/UNOS region boundaries from the package's internal
 #' state-level UNOS region spatial dataset.
 #'
+#' @seealso Guides:
+#' * [Plotting UNOS/OPTN regions](https://vagishhemmige.github.io/sRtr/articles/mapping.html#plotting-unosoptn-regions)
+#' * [National maps with Alaska, Hawaii and Puerto Rico](https://vagishhemmige.github.io/sRtr/articles/mapping.html#national-maps-with-alaska-hawaii-and-puerto-rico)
 #' @details
 #' This function uses the package's internal `UNOS_regions_sf` object, which
 #' contains state-level geometries assigned to OPTN/UNOS regions. The function
