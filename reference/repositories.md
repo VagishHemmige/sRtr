@@ -108,6 +108,18 @@ outputs without established safe provenance; public availability is insufficient
 - **Useful comparison:** explicit retransplant component and fixed censor date.
   It uses TFL_DEATH_DT only; the graft-years <= 1 disjunction can classify
   censored first-year follow-up as failure. Do not adopt it as a validated endpoint.
+- **Rechecked 2026-11-20** (same commit, lines [74-137](https://github.com/lgragert/srtr-impute-pubsaf2306/blob/7a1a8747b8b753f07cba83ba1de072fadc954b83/construct_outcomes_vars_9loc.py#L74-L137)):
+  - The script is a port of a SAS program: the SAS statements are kept as
+    comments, and one credits 2006 guidance on which death date to use.
+  - Follow-up ends at the earliest of `TFL_ENDTXFU`, `PERS_RETX`, death and the
+    fixed censor date. A comment says `TFL_LAFUDATE` is left out on purpose,
+    because outside death sources (ESRD and SSDMF) extend follow-up past the
+    last form. This is the clearest public example of `TFL_ENDTXFU` used as the
+    end of ascertainment.
+  - `PERS_RETX` counts as graft failure, and it also ends patient follow-up,
+    so death after a retransplant is not counted for the first graft's
+    registration.
+  - No license file: cite, do not copy.
 - **Access limit:** the README example's provenance is unresolved. No example
   values are reproduced here; associated data and outputs were not accessed.
 
@@ -299,6 +311,10 @@ calls, not a complete environment specification.
 - **Data and operational rules:** The macro accepts donor age/BMI/warm ischemia, recipient age/MELD/prior transplant and cold ischemia; it returns a weighted score only when every input is nonmissing.
 - **What to learn:** A small, isolated implementation with explicit strict thresholds and a cited derivation paper is useful for boundary-by-boundary comparison.
 - **Pitfalls / limits:** The cold-ischemia documentation says minutes, but its threshold is 6 and its published-example inputs use values on that scale: resolve units against the cited article before use. Score coefficients were not independently checked; missing-input output behavior needs caller initialization. Other macros were not reviewed.
+- **Rechecked 2026-11-20** (same commit; headers and parameter documentation only):
+  - [kdpi.sas, lines 1–170](https://github.com/CU-Anschutz-DOS-CORP/sas-macros/blob/29f5e021a74c9ae02dee10a63d325fba905dfb95/kdpi.sas#L1-L170): KDRI and KDPI with a `version` switch between the 2024 refit (no race, no HCV) and the earlier formula. Unknown hypertension or diabetes history is filled with the reference population's share, taken from the OPTN mapping table the user loads; the scaling factor comes from the same table. Creatinine outside 0.01–40 is set to missing.
+  - [meld.sas, lines 1–80](https://github.com/CU-Anschutz-DOS-CORP/sas-macros/blob/29f5e021a74c9ae02dee10a63d325fba905dfb95/meld.sas#L1-L80): MELD, MELD-Na and MELD 3.0, optional capping at 6–40, missing dialysis treated as no dialysis, and the OPTN policy periods for each score (the MELD-Na start date is left unresolved in the source).
+  - Both are useful for comparing outputs on made-up donors and candidates. GPL-3: compare results, do not copy code. Coefficients were not checked against the defining papers.
 
 ### akhan390/KDRI
 
@@ -323,6 +339,12 @@ calls, not a complete environment specification.
 - **Data and operational rules:** The source fragment refers to death, retransplant and several release-specific graft-failure dates, with administrative censoring.
 - **What to learn:** Useful as a checklist of endpoint components and the explicit rule that failure tied with death may count in death-censored analysis.
 - **Pitfalls / limits:** The published fragment is incomplete: acgf_dt is labeled without being generated, and the dcgf_dt expression is cut off. Administrative dates differ between sections. It is not directly runnable or a validated endpoint; companion files and the referenced older SAF fields remain unchecked.
+- **Rechecked 2026-11-20** (same commit; Stata; no license file, so cite, do not copy). The folder is a set of Johns Hopkins teaching recipes for kidney SAFs. Files read in full:
+  - [1.patient.survival.do](https://github.com/pairs-jh/beta/blob/5e1c66fd90406797c2f678c66dcd2836157b8f13/act_0/act_0_2/act_0_2_1/1.patient.survival.do#L1-L31): death is the earliest of `PERS_SSA_DEATH_DT`, `PERS_OPTN_DEATH_DT`, `PERS_RESTRICT_DEATH_DT` and `TFL_DEATH_DT`. For waitlist mortality, removal codes 8 (died), 13 (too sick) and 5 (medically unsuitable) count as death, and transplant removals are censored.
+  - [2.graft.survival.do](https://github.com/pairs-jh/beta/blob/5e1c66fd90406797c2f678c66dcd2836157b8f13/act_0/act_0_2/act_0_2_1/2.graft.survival.do#L1-L28) and [15.duration.of.dialysis.do, lines 39–58](https://github.com/pairs-jh/beta/blob/5e1c66fd90406797c2f678c66dcd2836157b8f13/act_0/act_0_2/act_0_2_1/15.duration.of.dialysis.do#L39-L58): death-censored graft failure is the earliest of `TFL_GRAFT_DT`, two ESRD-linked failure dates, `PERS_RETX`, `REC_FAIL_DT` and a resumed-dialysis date; a failure on the day of death counts. The dialysis file fills kidney-pancreas grafts from `TFL_GRAFT_DT_KI` and `PERS_RETXKI`, moves a failure date before transplant to the transplant date, and caps each graft's failure date at the same person's next transplant date (by `PERS_ID`).
+  - [5.acute.rejection.do](https://github.com/pairs-jh/beta/blob/5e1c66fd90406797c2f678c66dcd2836157b8f13/act_0/act_0_2/act_0_2_1/5.acute.rejection.do#L1-L148): rejection on a follow-up form is `TFL_ACUTE_REJ_EPISODE` codes 1 or 2 (treated or untreated); 998 is missing. The file has two window rules. The first ("simple version", line 7) keeps the scheduled 6-month and 1-year forms (`TFL_FOL_CD` 3, 6, 10) and the death, graft failure and lost-to-follow-up forms (800, 801, 998, 999) only when dated within 365 days. The later 6-month, 1-year and 2-year windows (lines 31–34) apply the day limit only to the exceptional forms: a scheduled form enters its window whatever its date, so a 1-year form dated after day 365 still counts. The 6-month exceptional list leaves out 801. Biopsy confirmation and treatment are separate indicators, combined by taking the maximum per `TRR_ID`.
+  - [28.transplant.date.do](https://github.com/pairs-jh/beta/blob/5e1c66fd90406797c2f678c66dcd2836157b8f13/act_0/act_0_2/act_0_2_1/28.transplant.date.do#L1-L13): from candidate files, deceased-donor transplant is removal codes 4, 18, 19, 21 and 22; 14 (transplant elsewhere) and 15 (living donor) are not.
+  - Pitfalls: the waitlist censoring line compares `can_rem_cd` with `death_dt` (a code with a date), so it does not do what its comment says; the two rejection window rules give different cohorts for the same window; the ESRD-linked dates exist only in some releases; removal code meanings were not checked against the release's format.
 
 ### adi2809/A-Data-Driven-Approach-towards-Improving-Deceased-Donor-Kidney-Utilization
 
@@ -407,3 +429,60 @@ calls, not a complete environment specification.
 - **What to learn:** Contrasts never-treated and always-treated risks; shows that validation under an intervention needs its own weighting, beyond fitting a prediction model.
 - **Pitfalls / limits:** The simulation assumes treatment continues once begun; its always-treated weights therefore need not vary over time. This assumption cannot be transferred silently to other interventions. Chronological order is required for cumulative products. README identifies this as simulation-study code and recommends ipeval for applications; ipeval itself was not inspected.
 
+
+## SAS, Stata, SPSS and Python search — 2026-11-20
+
+GitHub code search (repositories in any language) was run for SAF variable
+names, including `REC_TX_DT`, `TFL_DEATH_DT`, `TFL_GRAFT_DT`,
+`PERS_OPTN_DEATH_DT`, `PERS_SSA_DEATH_DT`, `TFL_LAFUDATE`, `TFL_ENDTXFU`,
+`PERS_RETX`, `CAN_LISTING_DT`, `CAN_REM_CD`, `CAN_REM_DT`, `REC_CTR_CD` and
+`TFL_PX_STAT_DT`, restricted to SAS, Stata (`.do`), SPSS (`.sps`), Python,
+Jupyter, SQL and Julia. Web searches covered SRTR and OPTN pages, journal
+supplements, SAS conference papers and data repositories. Results:
+
+- Public SAS written against SRTR SAFs is rare: one heart cohort program and
+  one macro library (below and above). SRTR's SAF pages describe the files and
+  the dictionary and offer no sample programs.
+- No SPSS syntax was found. Stata hits were `pairs-jh/beta` (above) and one
+  teaching file (below). SQL and Julia hits matched only generic strings.
+- GitHub code search indexes default branches only and returns at most 100
+  results per query, so this is not exhaustive.
+
+Only code was read. Data files, outputs and notebooks' saved results were not
+opened.
+
+### bnallamo/Golbus-Circulation-2020-Mechanical-Devices-Transplant
+
+- **Source / scope:** [Circulation_Change in Mechanical Circulatory Support_Final Code.sas, lines 1–330](https://github.com/bnallamo/Golbus-Circulation-2020-Mechanical-Devices-Transplant/blob/12809004cfa1740af32d7111019ce5d32c838b4a/Circulation_Change%20in%20Mechanical%20Circulatory%20Support_Final%20Code.sas#L1-L330); commit `12809004cfa1740af32d7111019ce5d32c838b4a`. CC0.
+- **Context:** Adult heart transplants before and after the October 2018 heart allocation change (Golbus et al., *Circulation* 2020); SAS on `TX_HR` plus the institution file.
+- **Data and operational rules:** Adults by `CAN_AGE_AT_LISTING`; transplants in October 2018 dropped as a transition month; candidates transplanted after the change under an old status removed; Puerto Rico centers dropped; device type from `REC_VAD_TY`, `REC_VAD1`, `REC_VAD2`, `REC_ECMO` and `REC_IABP`; centers joined on `REC_CTR_ID`.
+- **What to learn:** A worked example of setting policy eras by transplant date and of excluding the transition month.
+- **Pitfalls / limits:** No outcomes are built. The center join checks only that the copied merge key equals its source column before merging; the merge keeps every transplant (`if A`) without checking that each found an institution row or that institution keys are unique. Era dates are written as literals; verify against the OPTN policy notice. Device code meanings were not checked against the release's formats.
+
+### Vince-Jin/nyu
+
+- **Source / scope:** [Visit 1/donor_st.do, lines 1–100](https://github.com/Vince-Jin/nyu/blob/4591bc016caabb35908422d7deae65459c8358e6/Visit%201/donor_st.do#L1-L100); commit `4591bc016caabb35908422d7deae65459c8358e6`. No license file.
+- **Context:** Teaching exercise on living-donor mortality; Stata on `DONOR_LIVE`.
+- **Data and operational rules:** Death from `PERS_SSA_DEATH_DT` only, administratively censored at the end of 2011; 90-day mortality set up with `stset`.
+- **What to learn:** A minimal survival setup from the donor file.
+- **Pitfalls / limits:** One death source only, so deaths missed by the Social Security file count as survival; the 2011 cut-off reflects when that linkage changed and must be reset for later releases.
+
+### Olukhunlay-hub/kidney-transplant-immunosuppression-survival
+
+- **Source / scope:** [survival_analysis_revision.ipynb](https://github.com/Olukhunlay-hub/kidney-transplant-immunosuppression-survival/blob/662381315eca75ed60d934cb040430093a6820f7/survival_analysis_revision.ipynb), code cells only; commit `662381315eca75ed60d934cb040430093a6820f7`. MIT. Code for a *PLOS ONE* paper (article e0339109).
+- **Context:** Kidney immunosuppression regimens and survival; Python on an OPTN STAR extract, not SAFs.
+- **Data and operational rules:** Graft time from `GTIME_KI`, patient time from `PTIME`; rows with nonpositive times dropped.
+- **What to learn:** STAR files ship precomputed times and status flags, unlike SAFs, where they are built from dates.
+- **Pitfalls / limits:** The graft event is taken from `PSTATUS` (patient status) rather than the graft status flag, so graft failure is likely mislabeled; the paper's text says graft failure is return to dialysis or retransplant with death censored.
+
+### acmilannesta/dialysis_facility_kidney_tx
+
+- **Source / scope:** [Cohort development/](https://github.com/acmilannesta/dialysis_facility_kidney_tx/tree/da97ccb20689f40a5948fd7f8a310bc01dd79603/Cohort%20development), SAS programs, variable and data step lines only; commit `da97ccb20689f40a5948fd7f8a310bc01dd79603`.
+- **Context:** Dialysis facility profit status and waitlisting; SAS on USRDS core files and the USRDS copy of UNOS transplant data, not SRTR SAFs.
+- **What to learn:** Competing first events (waitlisting, living- and deceased-donor transplant, death) as the earliest of their dates with a fixed study end.
+- **Pitfalls / limits:** USRDS variable names differ from SAF names. The same author's `Adult_readmission` repository holds data files; they were not opened.
+
+### Code outside GitHub
+
+- **Stanford Digital Repository, `wp663jb5042`:** SAS/SQL and Stata programs for a UNOS STAR heart preservation-solution study (2023, CC BY), https://purl.stanford.edu/wp663jb5042. The file list loads only in a browser; not read.
+- **NIDDK Central Repository, A2ALL retrospective dataset integrity check:** Appendix B has the coordinating center's SAS for constructed variables, https://repository.niddk.nih.gov/media/studies/a2all1/A2ALL_DSIC_Retrospective.pdf. It uses study variable names, not SAF names, and defines no graft failure or follow-up end.
