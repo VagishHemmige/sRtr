@@ -10,7 +10,8 @@ add_time_to_event_outcomes(
   death_window = c("ascertainment", "follow_up"),
   ascertainment_date = "TFL_ENDTXFU",
   graft_death_same_day = c("censor", "event"),
-  rejection_after_graft_failure = c("exclude", "keep")
+  rejection_after_graft_failure = c("exclude", "keep"),
+  retransplant = c("graft_failure", "ignore")
 )
 }
 \arguments{
@@ -79,6 +80,19 @@ discharge-date proxy). Censoring still ends at the failure date.
 Malignancy is patient-level and always uses every form. The columns from
 \code{\link[=add_txf_outcomes]{add_txf_outcomes()}} (\code{FIRST_FU_REJ_DATE}, \code{FIRST_FU_REJ_STATUS}) describe
 every form either way.}
+
+\item{retransplant}{Whether a retransplant ends the graft in the all-cause
+graft failure outcome (\code{GRAFT_FAIL_ALL_CAUSE_DT}):
+\itemize{
+\item \code{"graft_failure"} (default): the retransplant date (\code{PERS_RETX}, or
+\code{PERS_RETXKI} and \code{PERS_RETXPA} for \code{TX_KP}) counts as graft failure,
+as in the SRTR program-specific reports. It never counts for lung and
+heart-lung (\code{TX_LU}, \code{TX_HL}), which SRTR also leaves it out for.
+\item \code{"ignore"}: retransplant is not used.
+}
+
+The death-censored graft failure columns (\verb{TFL_GRAFT_DT_*}) do not use
+retransplant either way.}
 }
 \description{
 Uses the helper functions to create three columns for an outcome defined by an event date and a censor date:
@@ -95,9 +109,23 @@ event and censoring columns (\code{REC_DEATH_DT_COMPOSITE_BINARY}, \verb{_CENSOR
 follow-up while censoring survivors at last follow-up would overstate
 mortality (#18).
 
-Graft failure (\code{TFL_GRAFT_DT}, or \code{TFL_GRAFT_DT_KI} and \code{TFL_GRAFT_DT_PA}
-for \code{TX_KP}) is death-censored, whatever \code{death_window} is: a graft failure
-dated after the recipient's death from any source (\code{REC_DEATH_DT_COMPOSITE})
+Two graft failure outcomes are added. \strong{All-cause graft failure}
+(\code{GRAFT_FAIL_ALL_CAUSE_DT}, or \code{GRAFT_FAIL_ALL_CAUSE_DT_KI} and
+\code{GRAFT_FAIL_ALL_CAUSE_DT_PA} for \code{TX_KP}) follows the SRTR
+program-specific reports: the graft fails at the first of its graft
+failure date, retransplant (see \code{retransplant}) and death from any source
+(\code{REC_DEATH_DT_COMPOSITE}). The graft is censored at its last follow-up
+date, and an event after that date is not counted. Heart grafts
+(\code{TX_HR}) follow SRTR's heart rule instead: only death and retransplant
+count, the graft failure date is not used, and follow-up is not censored
+at the last follow-up date but ends where death ascertainment ends (see
+\code{death_window}). The date column holds the first event even when it is
+not counted, and \verb{_SOURCE} says which it was (\code{"graft_failure"},
+\code{"retransplant"} or \code{"death"}; on the same day, in that order).
+
+\strong{Death-censored graft failure} (\code{TFL_GRAFT_DT}, or \code{TFL_GRAFT_DT_KI} and
+\code{TFL_GRAFT_DT_PA} for \code{TX_KP}) is not an SRTR report definition, and
+does not depend on \code{death_window}: a graft failure dated after the recipient's death from any source (\code{REC_DEATH_DT_COMPOSITE})
 is not counted, and a graft without a failure is censored at the earlier of
 its last follow-up date and death. Death with a functioning graft is a
 censoring time, not a graft failure. A graft failure dated after the last
@@ -157,7 +185,7 @@ forms report, before the window is applied.
 }
 \references{
 Scientific Registry of Transplant Recipients. Technical Methods for the
-Program-Specific Reports, section C, patient survival.
+Program-Specific Reports, section C, patient survival and graft survival.
 \url{https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/}
 
 Kim SJ, Snyder JJ. OPTN/SRTR registry analysis: the devil is in the

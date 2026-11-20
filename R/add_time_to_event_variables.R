@@ -463,10 +463,20 @@ add_txf_outcomes <- function(df) {
 #'   Malignancy is patient-level and always uses every form. The columns from
 #'   [add_txf_outcomes()] (`FIRST_FU_REJ_DATE`, `FIRST_FU_REJ_STATUS`) describe
 #'   every form either way.
+#' @param retransplant Whether a retransplant ends the graft in the all-cause
+#'   graft failure outcome (`GRAFT_FAIL_ALL_CAUSE_DT`):
+#'   * `"graft_failure"` (default): the retransplant date (`PERS_RETX`, or
+#'     `PERS_RETXKI` and `PERS_RETXPA` for `TX_KP`) counts as graft failure,
+#'     as in the SRTR program-specific reports. It never counts for lung and
+#'     heart-lung (`TX_LU`, `TX_HL`), which SRTR also leaves it out for.
+#'   * `"ignore"`: retransplant is not used.
+#'
+#'   The death-censored graft failure columns (`TFL_GRAFT_DT_*`) do not use
+#'   retransplant either way.
 #'
 #' @references
 #' Scientific Registry of Transplant Recipients. Technical Methods for the
-#' Program-Specific Reports, section C, patient survival.
+#' Program-Specific Reports, section C, patient survival and graft survival.
 #' <https://srtr.hrsa.gov/transplant-professionals/program-specific-report/technical-methods-for-the-program-specific-reports/>
 #'
 #' Kim SJ, Snyder JJ. OPTN/SRTR registry analysis: the devil is in the
@@ -480,9 +490,23 @@ add_txf_outcomes <- function(df) {
 #' follow-up while censoring survivors at last follow-up would overstate
 #' mortality (#18).
 #'
-#' Graft failure (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI` and `TFL_GRAFT_DT_PA`
-#' for `TX_KP`) is death-censored, whatever `death_window` is: a graft failure
-#' dated after the recipient's death from any source (`REC_DEATH_DT_COMPOSITE`)
+#' Two graft failure outcomes are added. **All-cause graft failure**
+#' (`GRAFT_FAIL_ALL_CAUSE_DT`, or `GRAFT_FAIL_ALL_CAUSE_DT_KI` and
+#' `GRAFT_FAIL_ALL_CAUSE_DT_PA` for `TX_KP`) follows the SRTR
+#' program-specific reports: the graft fails at the first of its graft
+#' failure date, retransplant (see `retransplant`) and death from any source
+#' (`REC_DEATH_DT_COMPOSITE`). The graft is censored at its last follow-up
+#' date, and an event after that date is not counted. Heart grafts
+#' (`TX_HR`) follow SRTR's heart rule instead: only death and retransplant
+#' count, the graft failure date is not used, and follow-up is not censored
+#' at the last follow-up date but ends where death ascertainment ends (see
+#' `death_window`). The date column holds the first event even when it is
+#' not counted, and `_SOURCE` says which it was (`"graft_failure"`,
+#' `"retransplant"` or `"death"`; on the same day, in that order).
+#'
+#' **Death-censored graft failure** (`TFL_GRAFT_DT`, or `TFL_GRAFT_DT_KI` and
+#' `TFL_GRAFT_DT_PA` for `TX_KP`) is not an SRTR report definition, and
+#' does not depend on `death_window`: a graft failure dated after the recipient's death from any source (`REC_DEATH_DT_COMPOSITE`)
 #' is not counted, and a graft without a failure is censored at the earlier of
 #' its last follow-up date and death. Death with a functioning graft is a
 #' censoring time, not a graft failure. A graft failure dated after the last
@@ -545,9 +569,11 @@ add_time_to_event_outcomes <- function(
   death_window = c("ascertainment", "follow_up"),
   ascertainment_date = "TFL_ENDTXFU",
   graft_death_same_day = c("censor", "event"),
-  rejection_after_graft_failure = c("exclude", "keep")
+  rejection_after_graft_failure = c("exclude", "keep"),
+  retransplant = c("graft_failure", "ignore")
 ) {
   death_window <- match.arg(death_window)
+  retransplant <- rlang::arg_match(retransplant)
   graft_death_same_day <- match.arg(graft_death_same_day)
   rejection_after_graft_failure <- rlang::arg_match(rejection_after_graft_failure)
   if (death_window == "ascertainment") {
@@ -565,6 +591,20 @@ add_time_to_event_outcomes <- function(
       why = "Graft failure dates end the rejection window; use {.code rejection_after_graft_failure = \"keep\"} to count every form."
     )
   }
+
+  #Columns for all-cause graft failure (PSR rules; see below).
+  organ <- .srtr_graft_organ(attr(df, "file_key"))
+  grafts <- .srtr_all_cause_grafts(is_kp)
+  check_columns(
+    df,
+    c(
+      if (organ != "heart") vapply(grafts, `[[`, "", "failure"),
+      if (retransplant == "graft_failure" && organ != "lung") {
+        vapply(grafts, `[[`, "", "retx")
+      }
+    ),
+    why = "All-cause graft failure counts graft failure and retransplant; use {.code retransplant = \"ignore\"} to leave retransplant out."
+  )
 
   #Patient-level outcomes (death, malignancy) are censored at the patient's
   #last follow-up. TX_KP has no TFL_LAFUDATE, only one date per graft, so use
@@ -633,6 +673,40 @@ add_time_to_event_outcomes <- function(
         start_date = .data$REC_TX_DT,
         censor_date = .data$.graft_censor,
         prefix = graft_col,
+        units = "days",
+      )
+  }
+  #All-cause graft failure, as in the SRTR program-specific reports (PSR
+  #Technical Methods, section C, graft survival): the first of graft failure,
+  #retransplant and death from any source. Retransplant does not count for
+  #lung and heart-lung. Grafts are censored at their last follow-up date and
+  #a later event is not counted, except heart: no OPTN graft failure date,
+  #follow-up not censored at last follow-up (it ends where death
+  #ascertainment ends), and only death and retransplant count.
+  for (graft in grafts) {
+    failure <- if (organ == "heart") {
+      rep(as.Date(NA), nrow(df))
+    } else {
+      df[[graft$failure]]
+    }
+    retx <- if (retransplant == "graft_failure" && organ != "lung") {
+      df[[graft$retx]]
+    } else {
+      rep(as.Date(NA), nrow(df))
+    }
+    censor <- if (organ == "heart") df$.death_censor else df[[graft$lafu]]
+    first <- .srtr_first_failure(failure, retx, death)
+    counted <- !is.na(first$date) & !is.na(censor) & first$date <= censor
+    df[[graft$prefix]] <- first$date
+    df[[paste0(graft$prefix, "_SOURCE")]] <- first$source
+    df$.graft_event <- dplyr::if_else(counted, first$date, as.Date(NA))
+    df$.graft_censor <- censor
+    df <- df |>
+      srtr_time_to_event(
+        event_date = .data$.graft_event,
+        start_date = .data$REC_TX_DT,
+        censor_date = .data$.graft_censor,
+        prefix = graft$prefix,
         units = "days",
       )
   }
@@ -832,6 +906,56 @@ add_time_to_event_outcomes <- function(
   df$.death_event <- NULL
   df$.death_censor <- NULL
   df
+}
+
+#' Which SRTR graft rule a transplant file follows
+#'
+#' Heart, lung (lung and heart-lung) or abdominal (every other organ), from
+#' the file key. A cohort without a known key is treated as abdominal.
+#' @noRd
+.srtr_graft_organ <- function(file_key) {
+  if (identical(file_key, "TX_HR")) {
+    "heart"
+  } else if (identical(file_key, "TX_LU") || identical(file_key, "TX_HL")) {
+    "lung"
+  } else {
+    "abdominal"
+  }
+}
+
+#' Columns for the all-cause graft failure outcome of each graft
+#' @noRd
+.srtr_all_cause_grafts <- function(is_kp) {
+  if (is_kp) {
+    list(
+      list(prefix = "GRAFT_FAIL_ALL_CAUSE_DT_KI", failure = "TFL_GRAFT_DT_KI",
+           retx = "PERS_RETXKI", lafu = "TFL_LAFUDATEKI"),
+      list(prefix = "GRAFT_FAIL_ALL_CAUSE_DT_PA", failure = "TFL_GRAFT_DT_PA",
+           retx = "PERS_RETXPA", lafu = "TFL_LAFUDATEPA")
+    )
+  } else {
+    list(list(prefix = "GRAFT_FAIL_ALL_CAUSE_DT", failure = "TFL_GRAFT_DT",
+              retx = "PERS_RETX", lafu = "TFL_LAFUDATE"))
+  }
+}
+
+#' The first of graft failure, retransplant and death, and which it was
+#'
+#' On a tie, graft failure is named before retransplant, and both before
+#' death.
+#' @param failure,retx,death `Date` vectors of the same length.
+#' @return A list with `date` and `source` (`"graft_failure"`,
+#'   `"retransplant"`, `"death"` or `NA`).
+#' @noRd
+.srtr_first_failure <- function(failure, retx, death) {
+  dates <- list(graft_failure = failure, retransplant = retx, death = death)
+  first <- do.call(pmin, c(unname(dates), na.rm = TRUE))
+  source <- rep(NA_character_, length(first))
+  for (nm in rev(names(dates))) {
+    hit <- !is.na(first) & !is.na(dates[[nm]]) & dates[[nm]] == first
+    source[hit] <- nm
+  }
+  list(date = first, source = source)
 }
 
 #' Where death ascertainment ends, one date per row

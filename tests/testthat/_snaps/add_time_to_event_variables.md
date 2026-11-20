@@ -44,6 +44,15 @@
       ! `death_window = "ascertainment"` needs `ascertainment_date`.
       i Give a date column such as "TFL_ENDTXFU", or one date up to which deaths are ascertained in the SAF release.
 
+# retransplant = 'ignore' leaves retransplant out
+
+    Code
+      add_time_to_event_outcomes(df)
+    Condition
+      Error in `add_time_to_event_outcomes()`:
+      ! `df` is missing 1 required column: PERS_RETX.
+      i All-cause graft failure counts graft failure and retransplant; use `retransplant = "ignore"` to leave retransplant out.
+
 # srtr_time_to_event() warns about negative times and sets them to NA
 
     Code
