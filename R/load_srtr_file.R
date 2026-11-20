@@ -258,12 +258,9 @@ load_srtr_file <- function(
     .srtr_check_kp_dates(names(df), kp_dates)
     df <- df |>
       dplyr::mutate(
-        TFL_LAFUDATE = dplyr::if_else(
-          is.na(.data$TFL_LAFUDATEPA) |
-            (!is.na(.data$TFL_LAFUDATEKI) &
-              .data$TFL_LAFUDATEKI >= .data$TFL_LAFUDATEPA),
-          .data$TFL_LAFUDATEKI, # pick date1 when it's >= date2 (or date2 is NA)
-          .data$TFL_LAFUDATEPA # otherwise pick date2
+        TFL_LAFUDATE = .srtr_kp_last_follow_up(
+          .data$TFL_LAFUDATEKI,
+          .data$TFL_LAFUDATEPA
         )
       )
   }
@@ -440,4 +437,15 @@ load_srtr_file <- function(
     missing = "TRR_ID",
     call = call
   )
+}
+
+#' The TX_KP patient's last follow-up date
+#'
+#' The later of the kidney and pancreas graft follow-up dates, ignoring a
+#' missing one. Used by [load_srtr_file()] to derive `TFL_LAFUDATE` and by
+#' [add_time_to_event_outcomes()], which takes the two graft dates so that a
+#' cohort without the derived column still works.
+#' @noRd
+.srtr_kp_last_follow_up <- function(ki, pa) {
+  dplyr::if_else(is.na(pa) | (!is.na(ki) & ki >= pa), ki, pa)
 }
