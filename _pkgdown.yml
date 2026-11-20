@@ -26,6 +26,8 @@ navbar:
       menu:
         - text: Getting started
           href: articles/getting-started.html
+        - text: Data protection and security
+          href: articles/data-protection.html
         - text: Checking sRtr on your own SAFs
           href: articles/checking-your-safs.html
         - text: Releases, the data dictionary and warnings
@@ -154,10 +156,12 @@ articles:
   - title: Start here
     navbar: Start here
     desc: >
-      Install sRtr, point it at your SAF folder and load a first file. Then
-      check that sRtr reads your own release correctly.
+      Install sRtr, point it at your SAF folder and load a first file, keeping
+      the files protected. Then check that sRtr reads your own release
+      correctly.
     contents:
       - getting-started
+      - articles/data-protection
       - articles/checking-your-safs
       - articles/releases-and-warnings
       - articles/glossary
