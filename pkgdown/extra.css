@@ -88,8 +88,34 @@ main .section:has(> .section-desc) .section-desc {
   color: var(--bs-secondary-color);
 }
 
+/* On the reference index, pkgdown puts each group's functions in a separate
+   section with no heading, right after the heading and description (whose
+   own list is empty). Join the two into one card: the heading section
+   becomes the top of the card, and the unheaded section after it the
+   bottom. (One :has() cannot sit inside another, hence dl:empty.) */
+main .section:has(> .section-desc):has(> dl:empty) {
+  display: flow-root; /* keep the description's margin inside the card */
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+main .section:has(> .section-desc) + .section:not(:has(> h2, > h3)) {
+  padding: 0.25rem 1.25rem 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-top: 0;
+  border-radius: 0 0 var(--bs-border-radius-lg) var(--bs-border-radius-lg);
+}
+
 @media (max-width: 575.98px) {
   main .section:has(> .section-desc) {
     padding: 0.75rem 0.875rem 0.125rem;
+  }
+
+  main .section:has(> .section-desc) + .section:not(:has(> h2, > h3)) {
+    padding: 0.125rem 0.875rem 0.375rem;
   }
 }
