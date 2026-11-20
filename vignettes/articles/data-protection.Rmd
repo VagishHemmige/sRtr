@@ -1,0 +1,224 @@
+---
+title: "Data protection and security"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+SRTR standard analysis files (SAFs) are restricted data. This page says what
+sRtr does to help keep them protected, what it does not do, and what is
+planned. It is a first version: sRtr's protections are still being built, and
+each one is added here when it arrives. Planned items link to their GitHub
+issue, where the design is discussed.
+
+Nothing here replaces your data use agreement (DUA) or your data security
+plan. They decide what you may do; sRtr can only make the safe path easier.
+
+# At a glance
+
+```{r protections, echo = FALSE}
+repo <- "https://github.com/VagishHemmige/sRtr"
+sections <- c(
+  "reads-and-writes" = "Where sRtr reads and writes",
+  "version-control" = "Keep SAFs out of version control",
+  "sharing-results" = "Share results, not records",
+  "contributing" = "Contributing without SRTR data"
+)
+statuses <- c("in place", "planned")
+
+# The table is hand-edited, so check it before drawing anything from it. Any
+# problem stops the site build with a message naming the row.
+protections <- utils::read.csv(
+  "data/protections.csv", stringsAsFactors = FALSE, colClasses = "character"
+)
+problems <- character()
+absent <- setdiff(c("section", "protection", "status", "issue"), names(protections))
+if (length(absent) > 0) {
+  problems <- paste0("protections.csv: missing column ", absent)
+} else {
+  row <- seq_len(nrow(protections))
+  bad <- function(test, what) {
+    if (any(test)) sprintf("protections.csv: %s in row %s", what, row[test]) else character()
+  }
+  issue <- trimws(protections$issue)
+  problems <- c(
+    bad(!protections$section %in% names(sections), "unknown section"),
+    bad(!nzchar(trimws(protections$protection)), "blank protection"),
+    bad(!protections$status %in% statuses, "status must be \"in place\" or \"planned\""),
+    bad(nzchar(issue) & !grepl("^[0-9]+$", issue), "issue is not a number"),
+    bad(protections$status == "planned" & !nzchar(issue), "planned protection without an issue")
+  )
+}
+if (length(problems) > 0) stop(paste(problems, collapse = "\n"), call. = FALSE)
+
+protections$section <- factor(protections$section, levels = names(sections))
+protections <- protections[order(protections$section), ]
+shown <- data.frame(
+  Topic = sprintf("[%s](#%s)", sections[as.character(protections$section)], protections$section),
+  Protection = protections$protection,
+  Status = ifelse(
+    nzchar(trimws(protections$issue)),
+    sprintf("%s ([#%s](%s/issues/%s))", protections$status,
+            protections$issue, repo, protections$issue),
+    protections$status
+  )
+)
+# Name each topic once, on its first row.
+shown$Topic[duplicated(protections$section)] <- ""
+knitr::kable(shown, row.names = FALSE)
+```
+
+# Your agreement sets the rules {#your-agreement}
+
+SRTR releases SAFs only under a signed DUA, and every request that needs a DUA
+must also have a data security plan and a research plan ([SRTR
+2026](#ref-srtr-requests)). Those documents decide where the files may be
+stored, who may see them, and what may be reported from them. sRtr cannot
+check any of this.
+
+SRTR's public pages state no rule on the smallest count you may report. The
+signed DUA is not public, so read yours for a reporting clause. For data
+linked to Medicare records, the CMS cell size suppression policy applies: no
+count from 1 to 10, and no number from which such a count can be worked out
+([CMS 2020](#ref-cms)). For SRTR data alone, masking counts below 11 is
+common practice rather than a published SRTR rule. sRtr's articles follow it.
+
+Nothing on this page is legal advice. A protection marked "in place" lowers
+a risk; it does not show that an analysis meets your agreement.
+
+# Where sRtr reads and writes {#reads-and-writes}
+
+- **Reading.** `load_srtr_file()` reads SAFs only from the folder you set
+  with `set_srtr_wd()` (the `SRTR_WD` environment variable), on your own
+  computer.
+- **The network.** sRtr sends nothing from your files anywhere. Only two
+  functions use the network, and both download public map layers from HRSA
+  without sending anything about your data:
+  `get_hrsa_transplant_centers()` and `get_hrsa_opo_service_areas()`. The
+  [Coverage gain](geographic-coverage-gain.html) article also downloads
+  public Census data, with your own API key.
+- **Writing.** sRtr's functions write nothing outside R's temporary folder
+  (`tempdir()`) unless you give them a path. One function writes outside it
+  when you ask: `set_srtr_wd(path, permanent = TRUE)` saves the folder's
+  path, not any data, to your `~/.Renviron` file.
+
+Keep the SAF folder where your security plan says. In particular, keep it out
+of any folder tracked by git, and out of folders that a cloud service
+synchronizes, unless your plan covers that service.
+
+**Planned:** `set_srtr_wd()` will warn when the folder is inside a git
+repository and not ignored
+([#294](https://github.com/VagishHemmige/sRtr/issues/294)).
+
+# Keep SAFs out of version control {#version-control}
+
+A SAF, or any file made from one, that is committed to git is copied to
+every clone and stays in the history after it is deleted. Pushing it to a
+private repository is still a disclosure.
+
+sRtr's own repository has two guards. Its `.gitignore` file keeps SAF
+formats out of commits, and a check on GitHub fails on SAF formats, on
+text files whose headers have SRTR identifier columns, and on files over 5 MB.
+You can add the same patterns to the `.gitignore` of your own analysis
+project:
+
+```
+# SRTR data: never commit
+*.[sS][aA][sS]7[bB][dD][aA][tT]
+*.[sS][aA][sS]7[bB][cC][aA][tT]
+*.[xX][pP][tT]
+*.[pP][aA][rR][qQ][uU][eE][tT]
+*.[fF][eE][aA][tT][hH][eE][rR]
+*.[aA][rR][rR][oO][wW]
+*.[dD][tT][aA]
+*.[sS][aA][vV]
+```
+
+These patterns catch the usual file formats only. They do not catch
+`.rds`, `.RData` or `.csv` files you write from a SAF, and `git add -f`
+overrides them. Keep files made from SAFs in the same protected folder as
+the SAFs, not in the project.
+
+**Planned** ([#294](https://github.com/VagishHemmige/sRtr/issues/294);
+function names are provisional):
+
+- a function that scans a project folder for files that look like SRTR
+  data;
+- a check when sRtr is attached, which warns, naming paths only, about such
+  files that git does not ignore (on by default, with an option to turn it
+  off);
+- helpers that add the patterns above to your project's `.gitignore` and
+  install a commit hook that runs the scan on staged files.
+
+# Share results, not records {#sharing-results}
+
+Share aggregate results only, never rows. Mask any count from 1 to 10, and do
+not share a total beside masked parts, or two counts that differ by a little,
+because a reader can work out the small count by subtraction. [Checking
+sRtr on your own SAFs](checking-your-safs.html#share-counts-only) explains
+each rule with code.
+
+**Planned:** a function that checks tables, model output and figures for
+small cells, with the threshold set by an option
+([#295](https://github.com/VagishHemmige/sRtr/issues/295)), and small-cell
+flags in sRtr's summary functions
+([#11](https://github.com/VagishHemmige/sRtr/issues/11)).
+
+# AI assistants and help requests {#assistants}
+
+A chat with an AI assistant, a GitHub issue, a forum post and an email to a
+colleague outside your agreement are all disclosures. When you ask for help:
+
+- share your code, column names, sRtr's error and warning messages, and
+  masked counts;
+- do not paste rows, printed data frames, or the output of `head()`,
+  `str()` or `View()` on SAF data, and do not attach files made from SAFs;
+- read any output before you paste it: test failures and some messages
+  include exact counts from your files.
+
+An assistant that can read your files or run commands on your computer can
+read the SAF folder too. Do not give it access to that folder unless your
+security plan covers the tool.
+
+# Contributing without SRTR data {#contributing}
+
+sRtr is developed without SRTR data. Its tests run on small, made-up data;
+the tests that need real SAFs skip unless `SRTR_LIVE_TESTS` and `SRTR_WD`
+are set, and are run only by people whose own DUA covers the files, on
+their own computers. Results from those runs are shared as masked aggregate
+counts. [Development and how to contribute](development.html) lists work
+that needs no SAFs.
+
+**Planned:** a contributor guide to keeping SRTR data out of the repository
+([#94](https://github.com/VagishHemmige/sRtr/issues/94)), a synthetic SAF
+generator for tests and examples
+([#1](https://github.com/VagishHemmige/sRtr/issues/1)), and public
+center-level tables for examples that need no DUA
+([#13](https://github.com/VagishHemmige/sRtr/issues/13)).
+
+# What sRtr does not do {#limits}
+
+- sRtr is not a secure computing environment. It does not encrypt files,
+  control who can open them or keep an audit log; your institution's
+  environment provides those.
+- Its checks, now and planned, look for common patterns. A clean check does
+  not show that a folder or a repository holds no patient data.
+- It does not decide what your DUA allows.
+
+# Next steps
+
+- [Checking sRtr on your own SAFs](checking-your-safs.html): check a release,
+  sharing only masked counts.
+- [Getting started](getting-started.html): point sRtr at your SAFs and load a
+  first file.
+
+# References
+
+<a id="ref-cms"></a>Centers for Medicare & Medicaid Services. CMS cell size
+suppression policy. 2020.
+<https://www.hhs.gov/guidance/document/cms-cell-suppression-policy>
+
+<a id="ref-srtr-requests"></a>Scientific Registry of Transplant Recipients.
+Data requests. Accessed 2026-11-20.
+<https://srtr.hrsa.gov/requesting-data/data-requests/>

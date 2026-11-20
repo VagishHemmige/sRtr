@@ -181,6 +181,8 @@ Masking each number is not enough: a total shared beside masked parts lets
 a reader work out the small count by subtraction.
 [Checking sRtr on your own SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html#share-counts-only)
 explains this in full.
+[Data protection and security](https://vagishhemmige.github.io/sRtr/articles/data-protection.html)
+covers where to keep the files and what sRtr does to protect them.
 
 # If something goes wrong
 
