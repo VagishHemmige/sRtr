@@ -235,6 +235,12 @@
   * All inputs are transformed to `crs` first.
   * It no longer fails unless dplyr and sf are attached (#55).
 
+* `check_repo_for_srtr_data()` is a new, experimental function that scans a
+  project folder for files that look like SRTR data and could be committed:
+  SAF formats, text files whose header names an SRTR identifier column, and
+  files over 5 MB. In a git repository it checks the files git would commit;
+  elsewhere, every file. It only reads, and reports paths only (#294).
+
 * `get_hrsa_optn_regions()` gains `crs`. The default, `4326`, keeps the
   longitude/latitude result it already returned; `crs = 5070` keeps the
   NAD83 / Conus Albers projection of `UNOS_regions_sf`. Its documentation
