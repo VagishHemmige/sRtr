@@ -25,3 +25,13 @@
       ! `release` must be one SAF release written as year and month, like "2609".
       x Got "26".
 
+# column-check messages name the dictionary the load used
+
+    Code
+      out <- load_tx_ki("9904")
+    Condition
+      Warning:
+      The "TX_KI" file is missing 1 column that the SRTR data dictionary snapshot 9904-1 lists: REC_FAKE_CHANGED.
+      i The file may come from a different SAF release than the dictionary. Code that needs these columns will not work with this file.
+      i Set `column_check = "none"` to skip this check.
+

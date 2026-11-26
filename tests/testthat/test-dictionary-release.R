@@ -177,6 +177,50 @@ test_that("load_srtr_file() records the release and dictionary it used", {
   expect_equal(.srtr_current_release()$release, "9904")
 })
 
+test_that("column-check messages name the dictionary the load used", {
+  skip_if_not_installed("xml2")
+  skip_if_not_installed("digest")
+  versions <- local_versions(fake_two_releases())
+  local_mocked_bindings(.srtr_bundled_versions = function() versions)
+  withr::local_envvar(SRTR_WD = NA)
+  dir <- withr::local_tempdir()
+  withr::local_options(lifecycle_verbosity = "quiet")
+  haven::write_sas(
+    data.frame(REC_FAKE_NEW = "x", REC_FAKE_SAME = "y"),
+    file.path(dir, "TX_KI.sas7bdat")
+  )
+  set_srtr_wd(dir)
+  load_tx_ki <- function(release) {
+    load_srtr_file(
+      "TX_KI",
+      release = release,
+      gaps = "nearest",
+      factor_labels = FALSE,
+      var_labels = FALSE
+    )
+  }
+
+  snapshot <- expect_warning(
+    load_tx_ki("9904"),
+    class = "sRtr_warning_missing_columns"
+  )
+  expect_match(
+    conditionMessage(snapshot),
+    "the SRTR data dictionary snapshot 9904-1 lists",
+    fixed = TRUE
+  )
+  interpolated <- expect_warning(
+    load_tx_ki("9902"),
+    class = "sRtr_warning_missing_columns"
+  )
+  expect_match(
+    conditionMessage(interpolated),
+    "built for release 9902 from the stored snapshots on either side lists",
+    fixed = TRUE
+  )
+  expect_snapshot(out <- load_tx_ki("9904"))
+})
+
 test_that("variable labels use the release given to them", {
   skip_if_not_installed("xml2")
   skip_if_not_installed("digest")
