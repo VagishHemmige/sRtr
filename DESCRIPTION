@@ -55,6 +55,7 @@ Suggests:
     xml2,
     digest,
     kidney.epi,
+    survival,
     tmap (>= 4.2)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
