@@ -34,11 +34,32 @@
 #' SRTR data. See the
 #' [data protection guide](https://vagishhemmige.github.io/sRtr/articles/data-protection.html).
 #'
+#' @section Check when sRtr is attached:
+#' When you call `library(sRtr)` from inside a git repository, sRtr runs the
+#' same scan on that repository and shows a short message, naming paths only,
+#' if it finds files git would commit that look like SRTR data. The message
+#' also says when the repository's ignore rules do not cover every SAF format
+#' ([use_srtr_gitignore()] adds them) and when no commit check is installed
+#' ([use_srtr_commit_check()]). Nothing is shown when there is nothing to
+#' report. [set_srtr_wd()] warns when the SAF folder itself is inside a git
+#' repository and not ignored.
+#'
+#' Turn both checks off with `options(sRtr.safety_check = FALSE)`, for
+#' example in your `.Rprofile`. The attach message is a package startup
+#' message, so `suppressPackageStartupMessages()` hides it too. Both are
+#' skipped during `R CMD check`, and the attach check is skipped while a
+#' document is being knitted, so its message never appears in a report.
+#'
 #' @param path The project folder to scan. Defaults to the working
 #'   directory.
 #' @param files Optional. Paths of files to check, relative to `path`,
 #'   instead of the file list described under "Which files are scanned".
 #'   Files that do not exist are skipped.
+#' @param staged If `TRUE`, check the files staged for the next commit in
+#'   the git repository that holds `path`, as they are staged rather than as
+#'   they are in the folder. Paths in the result are then relative to the
+#'   top of the repository. This is what [use_srtr_commit_check()]'s hook
+#'   runs. Cannot be used with `files`.
 #'
 #' @return A tibble with one row per finding, returned invisibly: `path`
 #'   (relative to the folder scanned), `problem` (`"data format"`,
@@ -62,7 +83,7 @@
 #' findings
 #'
 #' unlink(project, recursive = TRUE)
-check_repo_for_srtr_data <- function(path = ".", files = NULL) {
+check_repo_for_srtr_data <- function(path = ".", files = NULL, staged = FALSE) {
   if (!rlang::is_string(path) || !dir.exists(path)) {
     srtr_abort(
       c(
@@ -80,13 +101,27 @@ check_repo_for_srtr_data <- function(path = ".", files = NULL) {
     )
   }
 
-  scan <- if (is.null(files)) {
-    .srtr_project_files(path)
-  } else {
-    list(files = files, method = "the files given")
+  if (!rlang::is_bool(staged)) {
+    srtr_abort("{.arg staged} must be `TRUE` or `FALSE`.", class = "invalid_staged")
   }
-  candidates <- scan$files[file.exists(file.path(path, scan$files))]
-  findings <- .srtr_scan_for_data(path, candidates)
+  if (staged && !is.null(files)) {
+    srtr_abort("Give {.arg files} or {.code staged = TRUE}, not both.", class = "invalid_staged")
+  }
+
+  if (staged) {
+    scan <- .srtr_staged_copy(path)
+    on.exit(unlink(scan$copy, recursive = TRUE), add = TRUE)
+    path <- scan$root
+    findings <- .srtr_scan_for_data(scan$copy, scan$files)
+  } else {
+    scan <- if (is.null(files)) {
+      .srtr_project_files(path)
+    } else {
+      list(files = files, method = "the files given")
+    }
+    candidates <- scan$files[file.exists(file.path(path, scan$files))]
+    findings <- .srtr_scan_for_data(path, candidates)
+  }
 
   if (nrow(findings) == 0) {
     srtr_inform(
@@ -129,33 +164,80 @@ check_repo_for_srtr_data <- function(path = ".", files = NULL) {
 
 # NULL when git is not installed or `path` is not inside a work tree.
 .srtr_git_files <- function(path) {
+  if (!identical(.srtr_git(path, c("rev-parse", "--is-inside-work-tree")), "true")) {
+    return(NULL)
+  }
+  files <- .srtr_git_z(path, c("ls-files", "-z", "--cached", "--others", "--exclude-standard"))
+  if (is.null(files)) NULL else unique(files)
+}
+
+# The files staged for the next commit (added, copied, modified or renamed),
+# written as staged into a temporary folder under their repository paths.
+# Returns list(root, copy, files, method); the caller deletes the copy.
+# Errors when git cannot list or copy them, so a
+# commit check never passes without having looked.
+.srtr_staged_copy <- function(path, call = rlang::caller_env()) {
+  root <- .srtr_git_root(path)
+  if (is.null(root)) {
+    srtr_abort(
+      c(
+        "{.code staged = TRUE} needs {.arg path} inside a git repository, and git installed.",
+        "x" = "No git repository found for:",
+        " " = "{.path {path}}"
+      ),
+      class = "not_a_git_repository",
+      call = call
+    )
+  }
+  fail <- function() {
+    srtr_abort(
+      "git could not list or copy the staged files, so they were not checked.",
+      class = "staged_files_unavailable",
+      call = call
+    )
+  }
+  files <- .srtr_git_z(root, c("diff", "--cached", "--name-only", "-z", "--diff-filter=ACMR"))
+  if (is.null(files)) {
+    fail()
+  }
+  copy <- tempfile("srtr-staged-")
+  dir.create(copy)
+  copy <- normalizePath(copy, winslash = "/")
+  if (length(files) > 0) {
+    # Paths go to git on stdin, NUL-separated, so no name is ever quoted or
+    # split by a shell.
+    list_file <- tempfile("srtr-staged-list-")
+    on.exit(unlink(list_file), add = TRUE)
+    writeBin(unlist(lapply(files, \(f) c(charToRaw(f), as.raw(0)))), list_file)
+    status <- suppressWarnings(tryCatch(
+      system2(
+        Sys.which("git"),
+        c("-C", shQuote(root), "checkout-index", "-z", "--stdin",
+          shQuote(paste0("--prefix=", copy, "/"))),
+        stdin = list_file, stdout = FALSE, stderr = FALSE
+      ),
+      error = function(e) 1L
+    ))
+    if (!identical(as.integer(status), 0L) || !all(file.exists(file.path(copy, files)))) {
+      unlink(copy, recursive = TRUE)
+      fail()
+    }
+  }
+  list(root = root, copy = copy, files = files, method = "staged files, as staged")
+}
+
+# Output of a git command run with -z, split on NUL as raw bytes (R strings
+# cannot hold NUL, so the output goes through a temporary file). NULL when
+# git is missing or the command fails.
+.srtr_git_z <- function(path, args) {
   git <- Sys.which("git")
   if (!nzchar(git)) {
     return(NULL)
   }
-  run <- function(args) {
-    out <- suppressWarnings(tryCatch(
-      system2(git, c("-C", shQuote(path), args), stdout = TRUE, stderr = FALSE),
-      error = function(e) NULL
-    ))
-    status <- attr(out, "status")
-    if (is.null(out) || (!is.null(status) && status != 0)) NULL else out
-  }
-  inside <- run(c("rev-parse", "--is-inside-work-tree"))
-  if (!identical(inside, "true")) {
-    return(NULL)
-  }
-  # -z keeps unusual file names intact. R strings cannot hold NUL, so the
-  # list goes to a temporary file and is split as raw bytes.
-  listing <- tempfile("srtr-git-files-")
+  listing <- tempfile("srtr-git-")
   on.exit(unlink(listing), add = TRUE)
   status <- suppressWarnings(tryCatch(
-    system2(
-      git,
-      c("-C", shQuote(path), "ls-files", "-z", "--cached", "--others",
-        "--exclude-standard"),
-      stdout = listing, stderr = FALSE
-    ),
+    system2(git, c("-C", shQuote(path), args), stdout = listing, stderr = FALSE),
     error = function(e) 1L
   ))
   if (!identical(as.integer(status), 0L) || !file.exists(listing)) {
@@ -170,7 +252,7 @@ check_repo_for_srtr_data <- function(path = ".", files = NULL) {
     character(1)
   )
   Encoding(files) <- "UTF-8"
-  unique(files[nzchar(files)])
+  files[nzchar(files)]
 }
 
 .srtr_saf_extensions <- c(

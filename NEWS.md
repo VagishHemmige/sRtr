@@ -107,6 +107,15 @@
   shortened `MPEXCEPT_ORIG_TUMO`, so loading and labeling that file find its
   dictionary entries.
 
+* Attaching sRtr with `library(sRtr)` inside a git repository now runs a
+  data safety check: it names, by path only, files git would commit that
+  look like SRTR data, and says when the repository's ignore rules miss a
+  SAF format or no commit check is installed. It is silent when there is
+  nothing to report, skipped while knitting and during `R CMD check`, and
+  turned off with `options(sRtr.safety_check = FALSE)`. `set_srtr_wd()`
+  now warns when the SAF folder is inside a git repository and not ignored
+  (#294).
+
 * `add_donor_egfr()` is a new function that adds a donor's eGFR from the
   CKD-EPI 2021 equation, or the 2009 equation for comparison with older work
   (#173).
@@ -280,6 +289,13 @@
   Before, a blank in a formatted column became a factor level such as
   `": not in format"`, and a blank in any other text column stayed as `""`.
   The new `blank_text` argument keeps blanks with `"keep"`.
+
+* `use_srtr_gitignore()` and `use_srtr_commit_check()` are new,
+  experimental helpers for your own analysis project. The first adds the SAF
+  file patterns to its `.gitignore`; the second installs a git pre-commit
+  hook that runs `check_repo_for_srtr_data(staged = TRUE)`, which checks
+  the staged files as staged, and stops a commit that includes any that
+  look like SRTR data. Both write only in the folder you name (#294).
 
 * `rank_individual_coverage_gains()` now defaults to `method = "areal"`,
   like `calculate_geography_coverage_gain()` (#58).

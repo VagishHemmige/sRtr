@@ -46,6 +46,17 @@ srtr_inform <- function(message, class = NULL, ..., .envir = parent.frame()) {
   )
 }
 
+# A message shown when sRtr is attached. It also has the class
+# "packageStartupMessage", so suppressPackageStartupMessages() silences it.
+srtr_startup_inform <- function(message, class = NULL, ..., .envir = parent.frame()) {
+  cli::cli_inform(
+    message,
+    class = c(.srtr_condition_class("message", class), "packageStartupMessage"),
+    ...,
+    .envir = .envir
+  )
+}
+
 .srtr_condition_class <- function(type, class) {
   general <- paste0("sRtr_", type)
   if (is.null(class)) {

@@ -119,3 +119,56 @@ test_that("a text file that cannot be read is reported, not passed as clean", {
   expect_equal(found$path, "locked.csv")
   expect_equal(found$problem, "unreadable file")
 })
+
+test_that("staged = TRUE checks files as staged, not as they are in the folder", {
+  skip_if_not(nzchar(Sys.which("git")), "git is not installed")
+  dir <- local_project_folder()
+  git <- function(...) system2("git", c("-C", shQuote(dir), ...))
+  git("init", "-q")
+  writeLines("TRR_ID,AGE", file.path(dir, "edited.csv"))
+  writeLines("TRR_ID,AGE", file.path(dir, "deleted.csv"))
+  writeLines("made up", file.path(dir, "not staged.sas7bdat"))
+  writeLines("x <- 1", file.path(dir, "clean.R"))
+  dir.create(file.path(dir, "sub"))
+  writeLines("PX_ID", file.path(dir, "sub", "nested.txt"))
+  git("add", "edited.csv", "deleted.csv", "clean.R", "sub/nested.txt")
+  writeLines("AGE", file.path(dir, "edited.csv"))
+  file.remove(file.path(dir, "deleted.csv"))
+
+  expect_warning(
+    found <- check_repo_for_srtr_data(file.path(dir, "sub"), staged = TRUE),
+    "staged files, as staged",
+    class = "sRtr_warning_srtr_data_in_project"
+  )
+  expect_equal(found$path, c("deleted.csv", "edited.csv", "sub/nested.txt"))
+})
+
+test_that("staged = TRUE handles names git would quote, and an empty index", {
+  skip_if_not(nzchar(Sys.which("git")), "git is not installed")
+  skip_on_os("windows")
+  dir <- local_project_folder()
+  git <- function(...) system2("git", c("-C", shQuote(dir), ...))
+  git("init", "-q")
+  withr::local_options(rlib_message_verbosity = "verbose")
+  expect_message(
+    found <- check_repo_for_srtr_data(dir, staged = TRUE),
+    class = "sRtr_message_no_srtr_data_found"
+  )
+  expect_equal(nrow(found), 0)
+
+  names <- c("quote\"d.csv", "back\\slash.csv", "tab\there.csv")
+  for (f in names) writeLines("TRR_ID", file.path(dir, f))
+  git("add", "-A")
+  expect_warning(
+    found <- check_repo_for_srtr_data(dir, staged = TRUE),
+    class = "sRtr_warning_srtr_data_in_project"
+  )
+  expect_setequal(found$path, names)
+})
+
+test_that("staged = TRUE needs a repository and no files", {
+  dir <- local_project_folder()
+  expect_error(check_repo_for_srtr_data(dir, staged = TRUE), class = "sRtr_error_not_a_git_repository")
+  expect_error(check_repo_for_srtr_data(dir, files = "a", staged = TRUE), class = "sRtr_error_invalid_staged")
+  expect_error(check_repo_for_srtr_data(dir, staged = NA), class = "sRtr_error_invalid_staged")
+})

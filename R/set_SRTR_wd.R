@@ -15,6 +15,11 @@
 #'   parent); if there is none, files use the bundled [dictionary] and
 #'   [formats]. A `release` that differs from the folder name wins, with a
 #'   warning. Only the folder is saved by `permanent = TRUE`, not the release.
+#' @section Data safety check:
+#' If the folder is inside a git repository and git does not ignore it,
+#' `set_srtr_wd()` warns, naming the folder and the repository, because a
+#' SAF there could be committed. Turn the check off with
+#' `options(sRtr.safety_check = FALSE)`. See [check_repo_for_srtr_data()].
 #' @return The normalized path, invisibly
 #' @export
 #'
@@ -39,6 +44,7 @@ set_srtr_wd <- function(path, permanent = FALSE, release = NULL) {
   # Set for current session
   Sys.setenv(SRTR_WD = normalized)
   .srtr_set_release_state(normalized, release)
+  .srtr_check_saf_folder(normalized)
 
   if (permanent) {
     renv_path <- path.expand("~/.Renviron")
