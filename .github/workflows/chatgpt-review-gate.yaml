@@ -16,8 +16,14 @@
 #
 # The marker's second sha (the revision the review was read against) is not
 # required to be master's current head, so merging another PR does not force
-# a new review. The gate cannot prove who wrote a comment: the review
-# automation and Claude post as the same account.
+# a new review.
+#
+# Only comments from accounts with write access count: the comment's
+# author_association must be OWNER, MEMBER or COLLABORATOR. sRtr is public,
+# so anyone can comment on a pull request; a copied heading and marker from
+# any other account leave the status pending. Among trusted accounts the gate
+# still cannot tell who wrote a comment: the review automation and Claude
+# post as the same account.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, edited]
@@ -93,7 +99,10 @@ jobs:
               .map(e => Date.parse(e.created_at));
             const since = retargets.length ? Math.max(...retargets) : 0;
 
+            // Only accounts with write access can post a review that counts.
+            const trusted = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
             const reviewed = comments.some(c =>
+              trusted.has(c.author_association) &&
               isReview(c.body || "") && Date.parse(c.created_at) > since
             );
 
