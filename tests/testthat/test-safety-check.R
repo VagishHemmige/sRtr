@@ -47,7 +47,33 @@ test_that("uncovered formats and a pasted commit check are detected", {
   expect_equal(.srtr_commit_check_installed(dir), FALSE)
   hook <- file.path(dir, ".git", "hooks", "pre-commit")
   writeLines(c("#!/bin/sh", "echo mine", .srtr_hook_command), hook)
+  Sys.chmod(hook, "0755")
   expect_equal(.srtr_commit_check_installed(dir), TRUE)
+
+  writeLines(c("#!/bin/sh", paste("#", .srtr_hook_command)), hook)
+  expect_equal(.srtr_commit_check_installed(dir), FALSE)
+})
+
+test_that("a hook git will not run does not count as installed", {
+  skip_on_os("windows")
+  dir <- local_git_project()
+  suppressMessages(use_srtr_commit_check(dir))
+  hook <- file.path(dir, ".git", "hooks", "pre-commit")
+  expect_equal(.srtr_commit_check_installed(dir), TRUE)
+  Sys.chmod(hook, "0644")
+  expect_equal(.srtr_commit_check_installed(dir), FALSE)
+})
+
+test_that("a part of the check that fails is reported, and findings still shown", {
+  dir <- local_git_project()
+  writeLines("made up", file.path(dir, "tx.sas7bdat"))
+  local_mocked_bindings(.srtr_commit_check_installed = function(root) stop("unreadable hook"))
+
+  cnd <- expect_message(.srtr_attach_check(dir), class = "sRtr_message_safety_check")
+  expect_equal(cnd$incomplete, TRUE)
+  expect_equal(cnd$findings$path, "tx.sas7bdat")
+  expect_match(conditionMessage(cnd), "could not run")
+  expect_no_match(conditionMessage(cnd), "unreadable hook")
 })
 
 test_that("the option and R CMD check turn the checks off", {

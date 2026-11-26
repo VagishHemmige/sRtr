@@ -17,12 +17,31 @@
   if (is.null(root)) {
     return(invisible())
   }
-  files <- .srtr_git_files(root)
-  findings <- if (is.null(files)) NULL else .srtr_scan_for_data(root, files)
-  uncovered <- .srtr_uncovered_formats(root)
-  hook <- .srtr_commit_check_installed(root)
+  # Each part runs on its own, so one that fails does not hide what the
+  # others found; a failure is reported without its error text.
+  incomplete <- FALSE
+  attempt <- function(expr, fallback) {
+    tryCatch(expr, error = function(e) {
+      incomplete <<- TRUE
+      fallback
+    })
+  }
+  findings <- attempt(
+    {
+      files <- .srtr_git_files(root)
+      if (is.null(files)) {
+        incomplete <- TRUE
+        NULL
+      } else {
+        .srtr_scan_for_data(root, files)
+      }
+    },
+    NULL
+  )
+  uncovered <- attempt(.srtr_uncovered_formats(root), character())
+  hook <- attempt(.srtr_commit_check_installed(root), NA)
 
-  if (NROW(findings) == 0 && length(uncovered) == 0 && !isFALSE(hook)) {
+  if (NROW(findings) == 0 && length(uncovered) == 0 && !isFALSE(hook) && !incomplete) {
     return(invisible())
   }
 
@@ -56,11 +75,22 @@
       "i" = "No commit check is installed. Add one with {.code {add_hook}}."
     )
   }
+  if (incomplete) {
+    lines <- c(
+      lines,
+      "!" = "Part of this check could not run, so the report may be incomplete. Run {.code sRtr::check_repo_for_srtr_data()} from the repository to scan it."
+    )
+  }
   lines <- c(
     lines,
     "i" = "Turn this check off with {.code options(sRtr.safety_check = FALSE)}."
   )
-  srtr_startup_inform(lines, class = "safety_check", findings = findings)
+  srtr_startup_inform(
+    lines,
+    class = "safety_check",
+    findings = findings,
+    incomplete = incomplete
+  )
   invisible()
 }
 
@@ -107,8 +137,11 @@
   .srtr_saf_extensions[!ignored]
 }
 
-# TRUE when the repository's pre-commit hook runs sRtr's check, FALSE when it
-# does not, NA when git cannot say.
+# TRUE when the repository's pre-commit hook would run sRtr's check: git
+# can run it (executable, except on Windows, where Git for Windows runs hooks
+# whatever their mode) and a line that is not a comment calls
+# sRtr::check_repo_for_srtr_data(). FALSE otherwise, including for a hook
+# sRtr cannot recognize. NA when git cannot say where the hook is.
 .srtr_commit_check_installed <- function(root) {
   hook <- .srtr_git(root, c("rev-parse", "--git-path", "hooks/pre-commit"))
   if (is.null(hook) || length(hook) != 1) {
@@ -120,6 +153,10 @@
   if (!file.exists(hook)) {
     return(FALSE)
   }
-  lines <- readLines(hook, warn = FALSE)
-  any(grepl("check_repo_for_srtr_data", lines, fixed = TRUE))
+  if (.Platform$OS.type != "windows" && file.access(hook, mode = 1) != 0) {
+    return(FALSE)
+  }
+  lines <- trimws(readLines(hook, warn = FALSE))
+  active <- lines[!startsWith(lines, "#")]
+  any(grepl("sRtr::check_repo_for_srtr_data(", active, fixed = TRUE))
 }
