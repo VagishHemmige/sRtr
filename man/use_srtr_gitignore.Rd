@@ -42,8 +42,8 @@ The \code{.gitignore} patterns catch the usual SAF formats only: not \code{.rds}
 The commit hook lives in the project's own \code{.git} folder, so it is not
 copied when someone clones the project; each person runs
 \code{use_srtr_commit_check()} in their own copy. \verb{git commit --no-verify}
-skips it. It checks each staged file as it is in the folder, which can
-differ from what was staged. It needs \code{Rscript} on the path that git uses
+skips it. It checks each staged file as it was staged, even when the
+copy in the folder has changed since. It needs \code{Rscript} on the path that git uses
 and sRtr installed in that R; if either is missing, it stops the commit
 and says so. On Windows, Git for Windows runs the hook with its own shell,
 so check once that a commit with a made-up \code{.sas7bdat} file is stopped.

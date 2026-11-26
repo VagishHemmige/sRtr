@@ -22,8 +22,8 @@
 #' The commit hook lives in the project's own `.git` folder, so it is not
 #' copied when someone clones the project; each person runs
 #' `use_srtr_commit_check()` in their own copy. `git commit --no-verify`
-#' skips it. It checks each staged file as it is in the folder, which can
-#' differ from what was staged. It needs `Rscript` on the path that git uses
+#' skips it. It checks each staged file as it was staged, even when the
+#' copy in the folder has changed since. It needs `Rscript` on the path that git uses
 #' and sRtr installed in that R; if either is missing, it stops the commit
 #' and says so. On Windows, Git for Windows runs the hook with its own shell,
 #' so check once that a commit with a made-up `.sas7bdat` file is stopped.
@@ -171,8 +171,7 @@ use_srtr_commit_check <- function(path) {
 .srtr_hook_command <- paste0(
   "Rscript -e 'if (!requireNamespace(\"sRtr\", quietly = TRUE)) ",
   "{ message(\"sRtr commit check: sRtr is not installed in this R.\"); quit(status = 1) }; ",
-  "f <- system2(\"git\", c(\"-c\", \"core.quotepath=off\", \"diff\", \"--cached\", \"--name-only\", \"--diff-filter=ACMR\"), stdout = TRUE); ",
-  "x <- suppressMessages(sRtr::check_repo_for_srtr_data(\".\", files = f)); ",
+  "x <- suppressMessages(sRtr::check_repo_for_srtr_data(\".\", staged = TRUE)); ",
   "if (nrow(x) > 0) quit(status = 1)' || exit 1"
 )
 
