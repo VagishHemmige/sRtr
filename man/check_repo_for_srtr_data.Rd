@@ -17,7 +17,9 @@ Files that do not exist are skipped.}
 \value{
 A tibble with one row per finding, returned invisibly: \code{path}
 (relative to the folder scanned), \code{problem} (\code{"data format"},
-\code{"identifier column"} or \code{"large file"}) and \code{detail}. A file can appear
+\code{"identifier column"}, \code{"unreadable file"} or \code{"large file"}) and
+\code{detail}. A text file whose first line cannot be read is reported as
+unreadable rather than passed as clean. A file can appear
 more than once. The scan warns, naming the paths only, when it finds
 anything, and gives a message when it finds nothing.
 }

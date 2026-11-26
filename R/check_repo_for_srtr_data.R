@@ -42,7 +42,9 @@
 #'
 #' @return A tibble with one row per finding, returned invisibly: `path`
 #'   (relative to the folder scanned), `problem` (`"data format"`,
-#'   `"identifier column"` or `"large file"`) and `detail`. A file can appear
+#'   `"identifier column"`, `"unreadable file"` or `"large file"`) and
+#'   `detail`. A text file whose first line cannot be read is reported as
+#'   unreadable rather than passed as clean. A file can appear
 #'   more than once. The scan warns, naming the paths only, when it finds
 #'   anything, and gives a message when it finds nothing.
 #'
@@ -189,11 +191,17 @@ check_repo_for_srtr_data <- function(path = ".", files = NULL) {
   synthetic <- grepl("^tests/testthat/fixtures/synthetic-", files)
   text <- ext %in% c("csv", "tsv", "txt") & !synthetic
   id_cols <- lapply(full[text], .srtr_header_ids)
-  has_ids <- lengths(id_cols) > 0
+  unreadable <- vapply(id_cols, \(x) anyNA(x), logical(1))
+  has_ids <- lengths(id_cols) > 0 & !unreadable
   ids <- tibble::tibble(
     path = files[text][has_ids],
     problem = rep("identifier column", sum(has_ids)),
     detail = vapply(id_cols[has_ids], paste, "", collapse = ", ")
+  )
+  failed <- tibble::tibble(
+    path = files[text][unreadable],
+    problem = rep("unreadable file", sum(unreadable)),
+    detail = rep("its first line could not be read, so it was not checked", sum(unreadable))
   )
 
   size <- file.size(full)
@@ -204,23 +212,32 @@ check_repo_for_srtr_data <- function(path = ".", files = NULL) {
     detail = sprintf("%.1f MB", size[big] / 1024^2)
   )
 
-  out <- dplyr::bind_rows(empty, formats, ids, large)
+  out <- dplyr::bind_rows(empty, formats, ids, failed, large)
   out[order(out$path, out$problem), ]
 }
 
 # The SRTR identifier columns named in a text file's first line, matched as
-# whole fields in any letter case.
+# whole fields in any letter case. NA when the line cannot be read, so a
+# failed read is reported instead of passing as a clean file.
 .srtr_header_ids <- function(file) {
   header <- tryCatch(
-    suppressWarnings(readLines(file, n = 1, warn = FALSE, encoding = "bytes")),
-    error = function(e) character()
+    suppressWarnings(.srtr_read_first_line(file)),
+    error = function(e) NULL
   )
+  if (is.null(header)) {
+    return(NA_character_)
+  }
   if (length(header) == 0) {
     return(character())
   }
   fields <- strsplit(header, "[,;\t]", useBytes = TRUE)[[1]]
   fields <- toupper(trimws(gsub("\"", "", fields, useBytes = TRUE)))
   intersect(.srtr_id_columns, fields)
+}
+
+# Separate so tests can make a read fail.
+.srtr_read_first_line <- function(file) {
+  readLines(file, n = 1, warn = FALSE, encoding = "bytes")
 }
 
 # cli interpolates braces, so literal braces in file names are doubled.
