@@ -65,7 +65,7 @@ use_srtr_gitignore(project)
 unlink(project, recursive = TRUE)
 }
 \seealso{
-Other data protection: 
-\code{\link{check_repo_for_srtr_data}()}
+Other data protection:
+\code{\link[=check_repo_for_srtr_data]{check_repo_for_srtr_data()}}
 }
 \concept{data protection}
