@@ -34,7 +34,8 @@
 #'   `TFL_LAFUDATEPA`. Renaming (`c(new = OLD)`) is not
 #'   supported; rename after loading.
 #' @param column_check What to do when the file's columns differ from the
-#'   columns the bundled data dictionary ([dictionary]) lists for `file_key`.
+#'   columns the data dictionary for the file's release lists for `file_key`
+#'   (see `release`; the bundled [dictionary] when no release is known).
 #'   `"warn"` (the default) warns about columns the file is missing; `"error"`
 #'   makes that an error; `"none"` skips the comparison. Either way, columns
 #'   the dictionary does not list are named in a message, once per file key
@@ -232,6 +233,7 @@ load_srtr_file <- function(
     columns = all_columns,
     view = view
   )
+  dictionary_used <- .srtr_dictionary_used(tables)
 
   # ---- Compare columns with the data dictionary ----
   # Only when every column is read: with col_select, a selected column the
@@ -241,7 +243,11 @@ load_srtr_file <- function(
       names(df),
       file_key_input,
       column_check,
-      dictionary = tables$dictionary
+      dictionary = tables$dictionary,
+      dictionary_name = .srtr_dictionary_phrase(
+        dictionary_used,
+        release_info$release
+      )
     )
   }
 
@@ -310,13 +316,7 @@ load_srtr_file <- function(
   attr(df, "file_key") <- file_key_input
   attr(df, "srtr_release") <- list(
     release = release_info$release,
-    dictionary = if (!is.na(tables$snapshot)) {
-      tables$snapshot
-    } else if (tables$basis == "default") {
-      "bundled"
-    } else {
-      "interpolated"
-    },
+    dictionary = dictionary_used,
     basis = release_info$basis,
     view = tables$view,
     corrections = tables$corrections
@@ -361,15 +361,42 @@ load_srtr_file <- function(
   }
 }
 
-# Compares a file's columns with those the bundled data dictionary lists for
-# its file key. Missing columns warn or error (`column_check`); columns the
-# dictionary does not list get a message once per file key per session. File
-# keys the dictionary does not list are not compared.
+# The dictionary a load used, as recorded in `srtr_release$dictionary`: the
+# stored snapshot's ID, "interpolated" (built from the snapshots on either
+# side of the release) or "bundled".
+.srtr_dictionary_used <- function(tables) {
+  if (!is.na(tables$snapshot)) {
+    tables$snapshot
+  } else if (tables$basis == "default") {
+    "bundled"
+  } else {
+    "interpolated"
+  }
+}
+
+# How messages name that dictionary.
+.srtr_dictionary_phrase <- function(dictionary_used, release) {
+  switch(dictionary_used,
+    bundled = "the bundled SRTR data dictionary",
+    interpolated = paste(
+      "the SRTR data dictionary sRtr built for release", release,
+      "from the stored snapshots on either side"
+    ),
+    paste("the SRTR data dictionary snapshot", dictionary_used)
+  )
+}
+
+# Compares a file's columns with those the data dictionary for its release
+# lists for its file key. Missing columns warn or error (`column_check`);
+# columns the dictionary does not list get a message once per file key per
+# session. File keys the dictionary does not list are not compared.
+# `dictionary_name` is how the messages name the dictionary used.
 .srtr_check_dictionary_columns <- function(
   file_names,
   file_key,
   column_check,
   dictionary = sRtr::dictionary,
+  dictionary_name = "the bundled SRTR data dictionary",
   call = rlang::caller_env()
 ) {
   if (column_check == "none") {
@@ -383,7 +410,7 @@ load_srtr_file <- function(
   missing <- setdiff(expected, file_names)
   if (length(missing) > 0) {
     text <- c(
-      "The {.val {file_key}} file is missing {length(missing)} column{?s} that the bundled SRTR data dictionary lists: {.field {missing}}.",
+      "The {.val {file_key}} file is missing {length(missing)} column{?s} that {dictionary_name} lists: {.field {missing}}.",
       "i" = "The file may come from a different SAF release than the dictionary. Code that needs these columns will not work with this file.",
       "i" = "Set {.code column_check = \"none\"} to skip this check."
     )
@@ -397,7 +424,7 @@ load_srtr_file <- function(
   if (length(extra) > 0) {
     srtr_inform(
       c(
-        "The {.val {file_key}} file has {length(extra)} column{?s} that the bundled SRTR data dictionary does not list: {.field {extra}}.",
+        "The {.val {file_key}} file has {length(extra)} column{?s} that {dictionary_name} does not list: {.field {extra}}.",
         "i" = "They are loaded as they are; labels and factor levels from the dictionary are not applied to them."
       ),
       class = "extra_columns",
