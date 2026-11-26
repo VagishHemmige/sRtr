@@ -79,7 +79,7 @@ findings
 unlink(project, recursive = TRUE)
 }
 \seealso{
-Other data protection: 
-\code{\link{use_srtr_gitignore}()}
+Other data protection:
+\code{\link[=use_srtr_gitignore]{use_srtr_gitignore()}}
 }
 \concept{data protection}
