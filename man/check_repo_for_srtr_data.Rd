@@ -4,7 +4,7 @@
 \alias{check_repo_for_srtr_data}
 \title{Find files in a project that look like SRTR data}
 \usage{
-check_repo_for_srtr_data(path = ".", files = NULL)
+check_repo_for_srtr_data(path = ".", files = NULL, staged = FALSE)
 }
 \arguments{
 \item{path}{The project folder to scan. Defaults to the working
@@ -13,6 +13,12 @@ directory.}
 \item{files}{Optional. Paths of files to check, relative to \code{path},
 instead of the file list described under "Which files are scanned".
 Files that do not exist are skipped.}
+
+\item{staged}{If \code{TRUE}, check the files staged for the next commit in
+the git repository that holds \code{path}, as they are staged rather than as
+they are in the folder. Paths in the result are then relative to the
+top of the repository. This is what \code{\link[=use_srtr_commit_check]{use_srtr_commit_check()}}'s hook
+runs. Cannot be used with \code{files}.}
 }
 \value{
 A tibble with one row per finding, returned invisibly: \code{path}
