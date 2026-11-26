@@ -102,3 +102,20 @@ test_that("bad arguments are errors", {
   )
   expect_snapshot(error = TRUE, check_repo_for_srtr_data(tempdir(), files = 1))
 })
+
+test_that("a text file that cannot be read is reported, not passed as clean", {
+  dir <- local_project_folder()
+  writeLines("TRR_ID,AGE", file.path(dir, "locked.csv"))
+  file.create(file.path(dir, "empty.csv"))
+  local_mocked_bindings(.srtr_read_first_line = function(file) {
+    if (basename(file) == "locked.csv") stop("permission denied")
+    readLines(file, n = 1, warn = FALSE)
+  })
+
+  expect_warning(
+    found <- check_repo_for_srtr_data(dir),
+    class = "sRtr_warning_srtr_data_in_project"
+  )
+  expect_equal(found$path, "locked.csv")
+  expect_equal(found$problem, "unreadable file")
+})
