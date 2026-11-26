@@ -171,13 +171,15 @@ gain](https://vagishhemmige.github.io/sRtr/articles/geographic-coverage-gain.md)
 ### Start here
 
 Install sRtr, point it at your SAF folder and load a first file, keeping
-the files protected. Then check that sRtr reads your own release
-correctly.
+the files protected. Follow one analysis from start to finish on made-up
+data. Then check that sRtr reads your own release correctly.
 
 - [Getting started with
   sRtr](https://vagishhemmige.github.io/sRtr/articles/getting-started.md):
 - [Data protection and
   security](https://vagishhemmige.github.io/sRtr/articles/data-protection.md):
+- [A worked example: from SAFs to survival
+  curves](https://vagishhemmige.github.io/sRtr/articles/walkthrough.md):
 - [Checking sRtr on your own
   SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.md):
 - [Releases, the data dictionary and

@@ -2,6 +2,14 @@
 
 ## sRtr (development version)
 
+- A new article, *A worked example: from SAFs to survival curves*, takes
+  one analysis from loading `TX_KI` through cohort selection with a
+  record of exclusions,
+  [`add_time_to_event_outcomes()`](https://vagishhemmige.github.io/sRtr/reference/add_time_to_event_outcomes.md),
+  checks of the outcomes, Kaplan-Meier curves and a Cox model, on
+  made-up files that run on the website
+  ([\#127](https://github.com/VagishHemmige/sRtr/issues/127)).
+
 - A new article, *Checking sRtr on your own SAFs*, shows how to run the
   package’s live tests on your release, collect sRtr’s warnings by
   class, and check keys, labels and derived outcomes, with output safe

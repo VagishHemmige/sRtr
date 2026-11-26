@@ -229,6 +229,9 @@ explains each warning and how to collect warnings in a script.
 
 ## Next steps
 
+- [A worked example: from SAFs to survival
+  curves](https://vagishhemmige.github.io/sRtr/articles/walkthrough.html):
+  one analysis from loading a file to a Cox model, on made-up data.
 - [Checking sRtr on your own
   SAFs](https://vagishhemmige.github.io/sRtr/articles/checking-your-safs.html):
   confirm that sRtr reads your release correctly.
