@@ -163,11 +163,19 @@ unit and shows how to check a join before trusting it.
 # Choose the cohort, and record every exclusion
 
 This example uses one teaching cohort for both models: each recipient's
-first transplant, of a kidney alone. That is the cohort SRTR's
-program-specific reports use for patient survival. Their graft survival
-analyses keep repeat transplants of the same organ, so a real analysis
-builds the cohort each outcome needs
-([SRTR Technical Methods](#ref-psr), section C). Each step keeps a count,
+first transplant, of a kidney alone. It is close to, but not the same as,
+the cohorts of SRTR's program-specific reports
+([SRTR Technical Methods](#ref-psr), section C):
+
+- their kidney patient survival analyses need a first *kidney*
+  transplant, so an earlier transplant of another organ does not exclude
+  anyone. Check that the prior-transplant column counts kidney transplants
+  before using it to match them;
+- their graft survival analyses keep repeat transplants of the same organ.
+
+A real analysis builds the cohort each outcome needs.
+
+In the code below, each step keeps a count,
 and a criterion whose value is missing gets its own step, so a reader can
 tell exclusion from missing data
 ([Building cohorts](building-cohort-with-flowchart.html) draws
