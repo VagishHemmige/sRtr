@@ -26,6 +26,14 @@ The normalized path, invisibly
 Sets the SRTR working directory for the current session, or optionally saves it permanently
 in the user's \code{.Renviron} file as the environment variable \code{SRTR_WD}.
 }
+\section{Data safety check}{
+
+If the folder is inside a git repository and git does not ignore it,
+\code{set_srtr_wd()} warns, naming the folder and the repository, because a
+SAF there could be committed. Turn the check off with
+\code{options(sRtr.safety_check = FALSE)}. See \code{\link[=check_repo_for_srtr_data]{check_repo_for_srtr_data()}}.
+}
+
 \examples{
 \dontrun{
 set_srtr_wd("C:/Data/SRTR")          # Session only

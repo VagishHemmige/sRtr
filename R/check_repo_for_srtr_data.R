@@ -34,6 +34,22 @@
 #' SRTR data. See the
 #' [data protection guide](https://vagishhemmige.github.io/sRtr/articles/data-protection.html).
 #'
+#' @section Check when sRtr is attached:
+#' When you call `library(sRtr)` from inside a git repository, sRtr runs the
+#' same scan on that repository and shows a short message, naming paths only,
+#' if it finds files git would commit that look like SRTR data. The message
+#' also says when the repository's ignore rules do not cover every SAF format
+#' ([use_srtr_gitignore()] adds them) and when no commit check is installed
+#' ([use_srtr_commit_check()]). Nothing is shown when there is nothing to
+#' report. [set_srtr_wd()] warns when the SAF folder itself is inside a git
+#' repository and not ignored.
+#'
+#' Turn both checks off with `options(sRtr.safety_check = FALSE)`, for
+#' example in your `.Rprofile`. The attach message is a package startup
+#' message, so `suppressPackageStartupMessages()` hides it too. Both are
+#' skipped during `R CMD check`, and the attach check is skipped while a
+#' document is being knitted, so its message never appears in a report.
+#'
 #' @param path The project folder to scan. Defaults to the working
 #'   directory.
 #' @param files Optional. Paths of files to check, relative to `path`,

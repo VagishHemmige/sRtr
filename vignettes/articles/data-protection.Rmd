@@ -109,9 +109,8 @@ Keep the SAF folder where your security plan says. In particular, keep it out
 of any folder tracked by git, and out of folders that a cloud service
 synchronizes, unless your plan covers that service.
 
-**Planned:** `set_srtr_wd()` will warn when the folder is inside a git
-repository and not ignored
-([#294](https://github.com/VagishHemmige/sRtr/issues/294)).
+`set_srtr_wd()` warns when the folder is inside a git repository and git
+does not ignore it, naming the folder and the repository.
 
 # Keep SAFs out of version control {#version-control}
 
@@ -164,10 +163,15 @@ it is not copied when someone clones it, `git commit --no-verify` skips it,
 and it needs R and sRtr on the path git uses. On Windows, try one commit
 with a made-up `.sas7bdat` file to see that it is stopped.
 
-**Planned** ([#294](https://github.com/VagishHemmige/sRtr/issues/294)):
-a check when sRtr is attached, which warns, naming paths only, about such
-files that git does not ignore (on by default, with an option to turn it
-off).
+When you attach sRtr with `library(sRtr)` from inside a git repository, it
+runs the same scan there. If git would commit files that look like SRTR
+data, or the repository does not ignore every SAF format, or no commit
+check is installed, it shows a short message naming paths only and the
+function that fixes each gap. It shows nothing when there is nothing to
+report, and nothing while a document is being knitted.
+
+Turn off both this check and the one in `set_srtr_wd()` with
+`options(sRtr.safety_check = FALSE)`, for example in your `.Rprofile`.
 
 # Share results, not records {#sharing-results}
 
