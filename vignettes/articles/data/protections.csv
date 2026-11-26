@@ -2,11 +2,11 @@ section,protection,status,issue
 reads-and-writes,Reads SAFs only from the folder you set with set_srtr_wd(),in place,
 reads-and-writes,Sends nothing from your files over the network,in place,
 reads-and-writes,Writes nothing outside tempdir() unless you give a path,in place,
-reads-and-writes,Warns when your SAF folder is inside a git repository and not ignored,planned,294
+reads-and-writes,Warns when your SAF folder is inside a git repository and not ignored,in place,294
 version-control,.gitignore patterns for SAF formats (in sRtr's own repository),in place,
 version-control,CI check that fails on SAF formats and identifier columns (in sRtr's own repository),in place,
 version-control,Scan a project folder for files that look like SRTR data,in place,294
-version-control,Check your project when sRtr is attached,planned,294
+version-control,Check your project when sRtr is attached,in place,294
 version-control,Add SAF patterns to your project's .gitignore,in place,294
 version-control,Commit hook that stops SRTR data being committed,in place,294
 sharing-results,Rules for sharing counts safely,in place,

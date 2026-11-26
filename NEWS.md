@@ -107,6 +107,15 @@
   shortened `MPEXCEPT_ORIG_TUMO`, so loading and labeling that file find its
   dictionary entries.
 
+* Attaching sRtr with `library(sRtr)` inside a git repository now runs a
+  data safety check: it names, by path only, files git would commit that
+  look like SRTR data, and says when the repository's ignore rules miss a
+  SAF format or no commit check is installed. It is silent when there is
+  nothing to report, skipped while knitting and during `R CMD check`, and
+  turned off with `options(sRtr.safety_check = FALSE)`. `set_srtr_wd()`
+  now warns when the SAF folder is inside a git repository and not ignored
+  (#294).
+
 * `add_donor_egfr()` is a new function that adds a donor's eGFR from the
   CKD-EPI 2021 equation, or the 2009 equation for comparison with older work
   (#173).
