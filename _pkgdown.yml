@@ -98,6 +98,7 @@ reference:
       [Data protection and security](../articles/data-protection.html).
     contents:
       - check_repo_for_srtr_data
+      - use_srtr_gitignore
 
   - title: Labels and the data dictionary
     desc: >

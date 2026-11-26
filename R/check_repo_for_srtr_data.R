@@ -127,20 +127,7 @@ check_repo_for_srtr_data <- function(path = ".", files = NULL) {
 
 # NULL when git is not installed or `path` is not inside a work tree.
 .srtr_git_files <- function(path) {
-  git <- Sys.which("git")
-  if (!nzchar(git)) {
-    return(NULL)
-  }
-  run <- function(args) {
-    out <- suppressWarnings(tryCatch(
-      system2(git, c("-C", shQuote(path), args), stdout = TRUE, stderr = FALSE),
-      error = function(e) NULL
-    ))
-    status <- attr(out, "status")
-    if (is.null(out) || (!is.null(status) && status != 0)) NULL else out
-  }
-  inside <- run(c("rev-parse", "--is-inside-work-tree"))
-  if (!identical(inside, "true")) {
+  if (!identical(.srtr_git(path, c("rev-parse", "--is-inside-work-tree")), "true")) {
     return(NULL)
   }
   # -z keeps unusual file names intact. R strings cannot hold NUL, so the
@@ -149,7 +136,7 @@ check_repo_for_srtr_data <- function(path = ".", files = NULL) {
   on.exit(unlink(listing), add = TRUE)
   status <- suppressWarnings(tryCatch(
     system2(
-      git,
+      Sys.which("git"),
       c("-C", shQuote(path), "ls-files", "-z", "--cached", "--others",
         "--exclude-standard"),
       stdout = listing, stderr = FALSE

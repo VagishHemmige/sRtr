@@ -281,6 +281,13 @@
   `": not in format"`, and a blank in any other text column stayed as `""`.
   The new `blank_text` argument keeps blanks with `"keep"`.
 
+* `use_srtr_gitignore()` and `use_srtr_commit_check()` are new,
+  experimental helpers for your own analysis project. The first adds the SAF
+  file patterns to its `.gitignore`; the second installs a git pre-commit
+  hook that runs `check_repo_for_srtr_data()` on staged files and stops a
+  commit that includes any that look like SRTR data. Both write only in the
+  folder you name (#294).
+
 * `rank_individual_coverage_gains()` now defaults to `method = "areal"`,
   like `calculate_geography_coverage_gain()` (#58).
 

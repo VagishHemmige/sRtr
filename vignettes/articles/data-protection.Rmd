@@ -123,7 +123,8 @@ sRtr's own repository has two guards. Its `.gitignore` file keeps SAF
 formats out of commits, and a check on GitHub fails on SAF formats, on
 text files whose headers have SRTR identifier columns, and on files over 5 MB.
 You can add the same patterns to the `.gitignore` of your own analysis
-project:
+project, by hand or with `sRtr::use_srtr_gitignore("<your project folder>")`,
+which adds only the lines that are missing:
 
 ```
 # SRTR data: never commit
@@ -155,14 +156,18 @@ is not proof that the project holds no SRTR data.
 sRtr::check_repo_for_srtr_data()
 ```
 
-**Planned** ([#294](https://github.com/VagishHemmige/sRtr/issues/294);
-function names are provisional):
+To stop such files being committed at all, install a commit check in your
+project with `sRtr::use_srtr_commit_check("<your project folder>")`. Before
+each commit, git runs the scan on the staged files and stops the commit if
+any look like SRTR data. The check lives in your own copy of the project:
+it is not copied when someone clones it, `git commit --no-verify` skips it,
+and it needs R and sRtr on the path git uses. On Windows, try one commit
+with a made-up `.sas7bdat` file to see that it is stopped.
 
-- a check when sRtr is attached, which warns, naming paths only, about such
-  files that git does not ignore (on by default, with an option to turn it
-  off);
-- helpers that add the patterns above to your project's `.gitignore` and
-  install a commit hook that runs the scan on staged files.
+**Planned** ([#294](https://github.com/VagishHemmige/sRtr/issues/294)):
+a check when sRtr is attached, which warns, naming paths only, about such
+files that git does not ignore (on by default, with an option to turn it
+off).
 
 # Share results, not records {#sharing-results}
 

@@ -24,6 +24,8 @@ export(srtr_dictionary)
 export(srtr_missing_report)
 export(srtr_normalize_missing)
 export(srtr_time_to_event)
+export(use_srtr_commit_check)
+export(use_srtr_gitignore)
 importFrom(rlang,
   ":=",
   .data
