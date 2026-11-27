@@ -111,6 +111,15 @@ warning. Only the folder is saved by <code>permanent = TRUE</code>, not the rele
     <p>The normalized path, invisibly</p>
     </div>
     <div class="section level2">
+    <h2 id="data-safety-check">Data safety check<a class="anchor" aria-label="anchor" href="#data-safety-check"></a></h2>
+
+
+<p>If the folder is inside a git repository and git does not ignore it,
+<code>set_srtr_wd()</code> warns, naming the folder and the repository, because a
+SAF there could be committed. Turn the check off with
+<code>options(sRtr.safety_check = FALSE)</code>. See <code><a href="check_repo_for_srtr_data.html">check_repo_for_srtr_data()</a></code>.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Guides:</p><ul><li><p><a href="https://vagishhemmige.github.io/sRtr/articles/getting-started.html#point-srtr-at-your-safs">Point sRtr at your SAFs</a></p></li>
 <li><p><a href="https://vagishhemmige.github.io/sRtr/articles/releases-and-warnings.html#telling-srtr-your-release">Telling sRtr your release</a></p></li>

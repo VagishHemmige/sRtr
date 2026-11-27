@@ -160,7 +160,7 @@ path</td>
 <td align="left"></td>
 <td align="left">Warns when your SAF folder is inside a git repository
 and not ignored</td>
-<td align="left">planned (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
+<td align="left">in place (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="#version-control">Keep SAFs out of version
@@ -179,22 +179,22 @@ columns (in sRtr’s own repository)</td>
 <td align="left"></td>
 <td align="left">Scan a project folder for files that look like SRTR
 data</td>
-<td align="left">planned (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
+<td align="left">in place (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">Check your project when sRtr is attached</td>
-<td align="left">planned (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
+<td align="left">in place (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">Add SAF patterns to your project’s .gitignore</td>
-<td align="left">planned (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
+<td align="left">in place (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">Commit hook that stops SRTR data being committed</td>
-<td align="left">planned (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
+<td align="left">in place (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>)</td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="#sharing-results">Share results, not
@@ -282,8 +282,9 @@ path, not any data, to your <code>~/.Renviron</code> file.</li>
 <p>Keep the SAF folder where your security plan says. In particular,
 keep it out of any folder tracked by git, and out of folders that a
 cloud service synchronizes, unless your plan covers that service.</p>
-<p><strong>Planned:</strong> <code><a href="../reference/set_srtr_wd.html">set_srtr_wd()</a></code> will warn when
-the folder is inside a git repository and not ignored (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>).</p>
+<p><code><a href="../reference/set_srtr_wd.html">set_srtr_wd()</a></code> warns when the folder is inside a git
+repository and git does not ignore it, naming the folder and the
+repository.</p>
 </div>
 <div class="section level2">
 <h2 id="version-control">Keep SAFs out of version control<a class="anchor" aria-label="anchor" href="#version-control"></a>
@@ -295,7 +296,9 @@ to a private repository is still a disclosure.</p>
 file keeps SAF formats out of commits, and a check on GitHub fails on
 SAF formats, on text files whose headers have SRTR identifier columns,
 and on files over 5 MB. You can add the same patterns to the
-<code>.gitignore</code> of your own analysis project:</p>
+<code>.gitignore</code> of your own analysis project, by hand or with
+<code>sRtr::use_srtr_gitignore("&lt;your project folder&gt;")</code>,
+which adds only the lines that are missing:</p>
 <pre><code># SRTR data: never commit
 *.[sS][aA][sS]7[bB][dD][aA][tT]
 *.[sS][aA][sS]7[bB][cC][aA][tT]
@@ -310,18 +313,37 @@ and on files over 5 MB. You can add the same patterns to the
 write from a SAF, and <code>git add -f</code> overrides them. Keep files
 made from SAFs in the same protected folder as the SAFs, not in the
 project.</p>
-<p><strong>Planned</strong> (<a href="https://github.com/VagishHemmige/sRtr/issues/294" class="external-link">#294</a>;
-function names are provisional):</p>
-<ul>
-<li>a function that scans a project folder for files that look like SRTR
-data;</li>
-<li>a check when sRtr is attached, which warns, naming paths only, about
-such files that git does not ignore (on by default, with an option to
-turn it off);</li>
-<li>helpers that add the patterns above to your project’s
-<code>.gitignore</code> and install a commit hook that runs the scan on
-staged files.</li>
-</ul>
+<p>To look for such files in a project, run
+<code><a href="../reference/check_repo_for_srtr_data.html">check_repo_for_srtr_data()</a></code> from the project folder. It
+applies the same rules as the check on sRtr’s GitHub repository: SAF
+formats, text files whose header names an SRTR identifier column, and
+files over 5 MB. In a git repository it checks the files git would
+commit, so a SAF that <code>.gitignore</code> excludes is not reported;
+elsewhere it checks every file. It only reads, and names paths, never
+values. It cannot find data saved as <code>.rds</code> or
+<code>.RData</code>, so an empty result is not proof that the project
+holds no SRTR data.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sRtr</span><span class="fu">::</span><span class="fu"><a href="../reference/check_repo_for_srtr_data.html">check_repo_for_srtr_data</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>To stop such files being committed at all, install a commit check in
+your project with
+<code>sRtr::use_srtr_commit_check("&lt;your project folder&gt;")</code>.
+Before each commit, git runs the scan on the staged files and stops the
+commit if any look like SRTR data. The check lives in your own copy of
+the project: it is not copied when someone clones it,
+<code>git commit --no-verify</code> skips it, and it needs R and sRtr on
+the path git uses. On Windows, try one commit with a made-up
+<code>.sas7bdat</code> file to see that it is stopped.</p>
+<p>When you attach sRtr with <code><a href="https://github.com/VagishHemmige/sRtr" class="external-link">library(sRtr)</a></code> from inside a
+git repository, it runs the same scan there. If git would commit files
+that look like SRTR data, or the repository does not ignore every SAF
+format, or no commit check is installed, it shows a short message naming
+paths only and the function that fixes each gap. It shows nothing when
+there is nothing to report, and nothing while a document is being
+knitted.</p>
+<p>Turn off both this check and the one in <code><a href="../reference/set_srtr_wd.html">set_srtr_wd()</a></code>
+with <code>options(sRtr.safety_check = FALSE)</code>, for example in
+your <code>.Rprofile</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="sharing-results">Share results, not records<a class="anchor" aria-label="anchor" href="#sharing-results"></a>

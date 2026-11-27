@@ -146,6 +146,18 @@
   of the shortened `MPEXCEPT_ORIG_TUMO`, so loading and labeling that
   file find its dictionary entries.
 
+- Attaching sRtr with
+  [`library(sRtr)`](https://github.com/VagishHemmige/sRtr) inside a git
+  repository now runs a data safety check: it names, by path only, files
+  git would commit that look like SRTR data, and says when the
+  repository’s ignore rules miss a SAF format or no commit check is
+  installed. It is silent when there is nothing to report, skipped while
+  knitting and during `R CMD check`, and turned off with
+  `options(sRtr.safety_check = FALSE)`.
+  [`set_srtr_wd()`](https://vagishhemmige.github.io/sRtr/reference/set_srtr_wd.md)
+  now warns when the SAF folder is inside a git repository and not
+  ignored ([\#294](https://github.com/VagishHemmige/sRtr/issues/294)).
+
 - [`add_donor_egfr()`](https://vagishhemmige.github.io/sRtr/reference/add_donor_egfr.md)
   is a new function that adds a donor’s eGFR from the CKD-EPI 2021
   equation, or the 2009 equation for comparison with older work
@@ -329,6 +341,14 @@
   - It no longer fails unless dplyr and sf are attached
     ([\#55](https://github.com/VagishHemmige/sRtr/issues/55)).
 
+- [`check_repo_for_srtr_data()`](https://vagishhemmige.github.io/sRtr/reference/check_repo_for_srtr_data.md)
+  is a new, experimental function that scans a project folder for files
+  that look like SRTR data and could be committed: SAF formats, text
+  files whose header names an SRTR identifier column, and files over 5
+  MB. In a git repository it checks the files git would commit;
+  elsewhere, every file. It only reads, and reports paths only
+  ([\#294](https://github.com/VagishHemmige/sRtr/issues/294)).
+
 - [`get_hrsa_optn_regions()`](https://vagishhemmige.github.io/sRtr/reference/get_hrsa_optn_regions.md)
   gains `crs`. The default, `4326`, keeps the longitude/latitude result
   it already returned; `crs = 5070` keeps the NAD83 / Conus Albers
@@ -380,6 +400,17 @@
   in a formatted column became a factor level such as
   `": not in format"`, and a blank in any other text column stayed as
   `""`. The new `blank_text` argument keeps blanks with `"keep"`.
+
+- [`use_srtr_gitignore()`](https://vagishhemmige.github.io/sRtr/reference/use_srtr_gitignore.md)
+  and
+  [`use_srtr_commit_check()`](https://vagishhemmige.github.io/sRtr/reference/use_srtr_gitignore.md)
+  are new, experimental helpers for your own analysis project. The first
+  adds the SAF file patterns to its `.gitignore`; the second installs a
+  git pre-commit hook that runs
+  `check_repo_for_srtr_data(staged = TRUE)`, which checks the staged
+  files as staged, and stops a commit that includes any that look like
+  SRTR data. Both write only in the folder you name
+  ([\#294](https://github.com/VagishHemmige/sRtr/issues/294)).
 
 - [`rank_individual_coverage_gains()`](https://vagishhemmige.github.io/sRtr/reference/rank_individual_coverage_gains.md)
   now defaults to `method = "areal"`, like

@@ -36,6 +36,7 @@
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/apply_srtr_factors.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/apply_srtr_varlabels.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/calculate_geography_coverage_gain.html</loc></url>
+<url><loc>https://vagishhemmige.github.io/sRtr/reference/check_repo_for_srtr_data.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/dictionary.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/dictionary_versions.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/dot-map_srtr_files.html</loc></url>
@@ -57,5 +58,6 @@
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/srtr_normalize_missing.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/srtr_time_to_event.html</loc></url>
 <url><loc>https://vagishhemmige.github.io/sRtr/reference/transplant_centers_sf.html</loc></url>
+<url><loc>https://vagishhemmige.github.io/sRtr/reference/use_srtr_gitignore.html</loc></url>
 </urlset>
 

@@ -37,6 +37,14 @@ set_srtr_wd(path, permanent = FALSE, release = NULL)
 
 The normalized path, invisibly
 
+## Data safety check
+
+If the folder is inside a git repository and git does not ignore it,
+`set_srtr_wd()` warns, naming the folder and the repository, because a
+SAF there could be committed. Turn the check off with
+`options(sRtr.safety_check = FALSE)`. See
+[`check_repo_for_srtr_data()`](https://vagishhemmige.github.io/sRtr/reference/check_repo_for_srtr_data.md).
+
 ## See also
 
 Guides:

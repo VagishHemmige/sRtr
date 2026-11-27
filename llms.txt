@@ -71,6 +71,19 @@ joins](https://vagishhemmige.github.io/sRtr/articles/files-and-keys.md).
 - [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
   : Load an SRTR file and optionally apply labels
 
+## Data protection
+
+Keep SAFs and files made from them out of version control. See [Data
+protection and
+security](https://vagishhemmige.github.io/sRtr/articles/data-protection.md).
+
+- [`check_repo_for_srtr_data()`](https://vagishhemmige.github.io/sRtr/reference/check_repo_for_srtr_data.md)
+  **\[experimental\]** : Find files in a project that look like SRTR
+  data
+- [`use_srtr_gitignore()`](https://vagishhemmige.github.io/sRtr/reference/use_srtr_gitignore.md)
+  [`use_srtr_commit_check()`](https://vagishhemmige.github.io/sRtr/reference/use_srtr_gitignore.md)
+  **\[experimental\]** : Keep SAF files out of a project's git commits
+
 ## Labels and the data dictionary
 
 Factor and variable labels, and the SRTR dictionary they come from. See
