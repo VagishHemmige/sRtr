@@ -94,6 +94,14 @@ reference:
       - set_srtr_wd
       - load_srtr_file
 
+  - title: Data protection
+    desc: >
+      Keep SAFs and files made from them out of version control. See
+      [Data protection and security](../articles/data-protection.html).
+    contents:
+      - check_repo_for_srtr_data
+      - use_srtr_gitignore
+
   - title: Labels and the data dictionary
     desc: >
       Factor and variable labels, and the SRTR dictionary they come from. See

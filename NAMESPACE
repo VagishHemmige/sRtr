@@ -11,6 +11,7 @@ export(add_txf_outcomes)
 export(apply_srtr_factors)
 export(apply_srtr_varlabels)
 export(calculate_geography_coverage_gain)
+export(check_repo_for_srtr_data)
 export(get_hrsa_opo_service_areas)
 export(get_hrsa_optn_regions)
 export(get_hrsa_transplant_centers)
@@ -23,6 +24,8 @@ export(srtr_dictionary)
 export(srtr_missing_report)
 export(srtr_normalize_missing)
 export(srtr_time_to_event)
+export(use_srtr_commit_check)
+export(use_srtr_gitignore)
 importFrom(rlang,
   ":=",
   .data
