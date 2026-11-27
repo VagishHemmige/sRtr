@@ -57,11 +57,12 @@ load_srtr_file(
 
 - column_check:
 
-  What to do when the file's columns differ from the columns the bundled
-  data dictionary
-  ([dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md))
-  lists for `file_key`. `"warn"` (the default) warns about columns the
-  file is missing; `"error"` makes that an error; `"none"` skips the
+  What to do when the file's columns differ from the columns the data
+  dictionary for the file's release lists for `file_key` (see `release`;
+  the bundled
+  [dictionary](https://vagishhemmige.github.io/sRtr/reference/dictionary.md)
+  when no release is known). `"warn"` (the default) warns about columns
+  the file is missing; `"error"` makes that an error; `"none"` skips the
   comparison. Either way, columns the dictionary does not list are named
   in a message, once per file key per session, and loaded as they are.
   The comparison runs only when every column is read

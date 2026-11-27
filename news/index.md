@@ -395,6 +395,11 @@
   error (`"error"`) or skips the comparison (`"none"`)
   ([\#4](https://github.com/VagishHemmige/sRtr/issues/4)).
 
+- [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)’s
+  messages about missing and extra columns now name the dictionary the
+  comparison used (a release’s stored snapshot, one interpolated between
+  snapshots, or the bundled one) instead of always saying “bundled”.
+
 - [`load_srtr_file()`](https://vagishhemmige.github.io/sRtr/reference/load_srtr_file.md)
   now loads blank text (empty or only spaces) as `NA`. Before, a blank
   in a formatted column became a factor level such as

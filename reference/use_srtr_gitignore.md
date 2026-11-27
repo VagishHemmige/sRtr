@@ -69,7 +69,7 @@ project <- file.path(tempdir(), "made-up-project")
 dir.create(project, showWarnings = FALSE)
 use_srtr_gitignore(project)
 #> ✔ Added 8 SAF patterns to .gitignore:
-#>   /tmp/RtmprydEfS/made-up-project/.gitignore
+#>   /tmp/RtmphCsXcr/made-up-project/.gitignore
 #> ℹ Files git already tracks stay tracked; remove them with `git rm --cached
 #>   <file>`.
 readLines(file.path(project, ".gitignore"))
@@ -86,7 +86,7 @@ readLines(file.path(project, ".gitignore"))
 # A second call adds nothing.
 use_srtr_gitignore(project)
 #> ✔ .gitignore already has sRtr's SAF patterns:
-#>   /tmp/RtmprydEfS/made-up-project/.gitignore
+#>   /tmp/RtmphCsXcr/made-up-project/.gitignore
 
 unlink(project, recursive = TRUE)
 ```

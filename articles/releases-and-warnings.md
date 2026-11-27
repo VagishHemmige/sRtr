@@ -148,13 +148,13 @@ in_example <- function(expr) withr::with_envvar(c(SRTR_WD = dir), expr)
 ``` r
 
 cand_kipa <- in_example(load_srtr_file("CAND_KIPA"))
-#> Warning: The "CAND_KIPA" file is missing 189 columns that the bundled SRTR data
-#> dictionary lists: CAN_ACADEMIC_LEVEL, CAN_ACADEMIC_PROGRESS,
-#> CAN_ACCEPT_HIV_ORG, CAN_ACPT_HBC_POS, CAN_ACPT_HCV_POS,
-#> CAN_ACPT_ORG_OTHER_TEAM, CAN_ACTIVATE_DT, CAN_AGE_AT_LISTING, CAN_AGE_DIAB,
-#> CAN_AGE_IN_MONTHS_AT_LISTING, CAN_ANASTOMOSIS, CAN_ANESTH_PRIOR_DEATH,
-#> CAN_ANGINA, CAN_ANGINA_CAD, CAN_AVN, CAN_BMI, CAN_CEREB_VASC, CAN_CITIZENSHIP,
-#> …, REC_TX_PROCEDURE_TY, and WL_ORG.
+#> Warning: The "CAND_KIPA" file is missing 189 columns that the SRTR data dictionary sRtr
+#> built for release 2303 from the stored snapshots on either side lists:
+#> CAN_ACADEMIC_LEVEL, CAN_ACADEMIC_PROGRESS, CAN_ACCEPT_HIV_ORG,
+#> CAN_ACPT_HBC_POS, CAN_ACPT_HCV_POS, CAN_ACPT_ORG_OTHER_TEAM, CAN_ACTIVATE_DT,
+#> CAN_AGE_AT_LISTING, CAN_AGE_DIAB, CAN_AGE_IN_MONTHS_AT_LISTING,
+#> CAN_ANASTOMOSIS, CAN_ANESTH_PRIOR_DEATH, CAN_ANGINA, CAN_ANGINA_CAD, CAN_AVN,
+#> CAN_BMI, CAN_CEREB_VASC, CAN_CITIZENSHIP, …, REC_TX_PROCEDURE_TY, and WL_ORG.
 #> ℹ The file may come from a different SAF release than the dictionary. Code that
 #>   needs these columns will not work with this file.
 #> ℹ Set `column_check = "none"` to skip this check.
@@ -315,13 +315,13 @@ quiet_codes <- function(expr) {
   )
 }
 cand_kipa <- quiet_codes(in_example(load_srtr_file("CAND_KIPA")))
-#> Warning: The "CAND_KIPA" file is missing 189 columns that the bundled SRTR data
-#> dictionary lists: CAN_ACADEMIC_LEVEL, CAN_ACADEMIC_PROGRESS,
-#> CAN_ACCEPT_HIV_ORG, CAN_ACPT_HBC_POS, CAN_ACPT_HCV_POS,
-#> CAN_ACPT_ORG_OTHER_TEAM, CAN_ACTIVATE_DT, CAN_AGE_AT_LISTING, CAN_AGE_DIAB,
-#> CAN_AGE_IN_MONTHS_AT_LISTING, CAN_ANASTOMOSIS, CAN_ANESTH_PRIOR_DEATH,
-#> CAN_ANGINA, CAN_ANGINA_CAD, CAN_AVN, CAN_BMI, CAN_CEREB_VASC, CAN_CITIZENSHIP,
-#> …, REC_TX_PROCEDURE_TY, and WL_ORG.
+#> Warning: The "CAND_KIPA" file is missing 189 columns that the SRTR data dictionary sRtr
+#> built for release 2303 from the stored snapshots on either side lists:
+#> CAN_ACADEMIC_LEVEL, CAN_ACADEMIC_PROGRESS, CAN_ACCEPT_HIV_ORG,
+#> CAN_ACPT_HBC_POS, CAN_ACPT_HCV_POS, CAN_ACPT_ORG_OTHER_TEAM, CAN_ACTIVATE_DT,
+#> CAN_AGE_AT_LISTING, CAN_AGE_DIAB, CAN_AGE_IN_MONTHS_AT_LISTING,
+#> CAN_ANASTOMOSIS, CAN_ANESTH_PRIOR_DEATH, CAN_ANGINA, CAN_ANGINA_CAD, CAN_AVN,
+#> CAN_BMI, CAN_CEREB_VASC, CAN_CITIZENSHIP, …, REC_TX_PROCEDURE_TY, and WL_ORG.
 #> ℹ The file may come from a different SAF release than the dictionary. Code that
 #>   needs these columns will not work with this file.
 #> ℹ Set `column_check = "none"` to skip this check.

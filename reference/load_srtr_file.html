@@ -137,7 +137,8 @@ supported; rename after loading.</p></dd>
 
 <dt id="arg-column-check">column_check<a class="anchor" aria-label="anchor" href="#arg-column-check"></a></dt>
 <dd><p>What to do when the file's columns differ from the
-columns the bundled data dictionary (<a href="dictionary.html">dictionary</a>) lists for <code>file_key</code>.
+columns the data dictionary for the file's release lists for <code>file_key</code>
+(see <code>release</code>; the bundled <a href="dictionary.html">dictionary</a> when no release is known).
 <code>"warn"</code> (the default) warns about columns the file is missing; <code>"error"</code>
 makes that an error; <code>"none"</code> skips the comparison. Either way, columns
 the dictionary does not list are named in a message, once per file key

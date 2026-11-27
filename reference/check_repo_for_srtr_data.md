@@ -112,7 +112,7 @@ writeLines("x <- 1", file.path(project, "analysis.R"))
 
 findings <- check_repo_for_srtr_data(project)
 #> Warning: 1 file looks like SRTR data and could be committed from
-#> /tmp/RtmprydEfS/made-up-project (folder scan; not a git repository):
+#> /tmp/RtmphCsXcr/made-up-project (folder scan; not a git repository):
 #> • cohort.csv (identifier column)
 #> ℹ Move SAFs and files made from them out of the project, or add them to
 #>   .gitignore.
