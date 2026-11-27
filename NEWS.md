@@ -291,6 +291,11 @@
   session). The new `column_check` argument turns the warning into an error
   (`"error"`) or skips the comparison (`"none"`) (#4).
 
+* `load_srtr_file()`'s messages about missing and extra columns now name
+  the dictionary the comparison used (a release's stored snapshot, one
+  interpolated between snapshots, or the bundled one) instead of always
+  saying "bundled".
+
 * `load_srtr_file()` now loads blank text (empty or only spaces) as `NA`.
   Before, a blank in a formatted column became a factor level such as
   `": not in format"`, and a blank in any other text column stayed as `""`.

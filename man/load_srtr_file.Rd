@@ -39,7 +39,8 @@ loading) can be selected like any other column; it is derived when
 supported; rename after loading.}
 
 \item{column_check}{What to do when the file's columns differ from the
-columns the bundled data dictionary (\link{dictionary}) lists for \code{file_key}.
+columns the data dictionary for the file's release lists for \code{file_key}
+(see \code{release}; the bundled \link{dictionary} when no release is known).
 \code{"warn"} (the default) warns about columns the file is missing; \code{"error"}
 makes that an error; \code{"none"} skips the comparison. Either way, columns
 the dictionary does not list are named in a message, once per file key
